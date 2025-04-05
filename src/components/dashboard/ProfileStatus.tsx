@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const ProfileStatus = () => {
   return (
@@ -29,9 +30,11 @@ const ProfileStatus = () => {
             <span className="text-sm">Dane kontaktowe</span>
             <span className="text-xs text-green-500 font-medium">Kompletne</span>
           </div>
-          <Button size="sm" className="mt-2">
-            Edytuj profil
-          </Button>
+          <Link to="/profile/edit">
+            <Button size="sm" className="mt-2 w-full">
+              Edytuj profil
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>
