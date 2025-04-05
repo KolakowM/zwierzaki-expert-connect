@@ -2,6 +2,7 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import PetFormDialog from "./PetFormDialog";
 import PetFormDrawer from "./PetFormDrawer";
+import { Pet } from "@/types";
 
 interface ResponsivePetFormProps {
   clientId: string;
@@ -9,8 +10,10 @@ interface ResponsivePetFormProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   title?: string;
-  defaultValues?: any;
-  onPetSaved?: (pet: any) => void;
+  defaultValues?: Partial<Pet>;
+  onPetSaved?: (pet: Pet) => void;
+  className?: string;
+  isEditing?: boolean;
 }
 
 const ResponsivePetForm = (props: ResponsivePetFormProps) => {

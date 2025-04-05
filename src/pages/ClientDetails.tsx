@@ -29,6 +29,8 @@ import {
   FileText,
   Clipboard,
 } from "lucide-react";
+import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
+import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
 
 const ClientDetails = () => {
   const { toast } = useToast();
@@ -73,6 +75,22 @@ const ClientDetails = () => {
     setVisits(clientVisits);
   }, [id, isAuthenticated, navigate, toast]);
 
+  const handlePetSaved = (newPet: Pet) => {
+    setPets(prevPets => [newPet, ...prevPets]);
+    toast({
+      title: "Zwierzak dodany pomyślnie",
+      description: `${newPet.name} został dodany do klientów ${client?.firstName} ${client?.lastName}`
+    });
+  };
+
+  const handleClientUpdated = (updatedClient: Client) => {
+    setClient(updatedClient);
+    toast({
+      title: "Dane klienta zaktualizowane",
+      description: "Zmiany zostały zapisane pomyślnie"
+    });
+  };
+
   if (!client) {
     return null; // Could add a loading skeleton here
   }
@@ -85,10 +103,14 @@ const ClientDetails = () => {
             <User className="h-6 w-6 mr-2" />
             <h1 className="text-2xl font-bold">{client.firstName} {client.lastName}</h1>
           </div>
-          <Button>
-            <Edit className="mr-2 h-4 w-4" />
-            Edytuj klienta
-          </Button>
+          <ResponsiveClientForm 
+            buttonText="Edytuj klienta" 
+            buttonVariant="outline" 
+            buttonSize="default"
+            title={`Edytuj dane: ${client.firstName} ${client.lastName}`}
+            defaultValues={client}
+            onClientSaved={handleClientUpdated}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -194,10 +216,14 @@ const ClientDetails = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj zwierzę
-                  </Button>
+                  {client.id && (
+                    <ResponsivePetForm 
+                      clientId={client.id}
+                      buttonText="Dodaj zwierzę"
+                      buttonSize="sm"
+                      onPetSaved={handlePetSaved}
+                    />
+                  )}
                 </CardFooter>
               </Card>
               
@@ -256,10 +282,13 @@ const ClientDetails = () => {
                     Wszystkie zwierzęta należące do tego klienta
                   </CardDescription>
                 </div>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Dodaj zwierzę
-                </Button>
+                {client.id && (
+                  <ResponsivePetForm 
+                    clientId={client.id}
+                    buttonText="Dodaj zwierzę"
+                    onPetSaved={handlePetSaved}
+                  />
+                )}
               </CardHeader>
               <CardContent>
                 {pets.length > 0 ? (
@@ -302,10 +331,14 @@ const ClientDetails = () => {
                     <p className="text-muted-foreground mt-1">
                       Ten klient nie ma jeszcze zarejestrowanych zwierząt
                     </p>
-                    <Button className="mt-4">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Dodaj pierwsze zwierzę
-                    </Button>
+                    {client.id && (
+                      <ResponsivePetForm 
+                        clientId={client.id}
+                        buttonText="Dodaj pierwsze zwierzę"
+                        className="mt-4"
+                        onPetSaved={handlePetSaved}
+                      />
+                    )}
                   </div>
                 )}
               </CardContent>
