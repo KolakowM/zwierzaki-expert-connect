@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarIcon, Users, FileText, ChevronDown, PieChart, Settings, LogOut } from "lucide-react";
+import { CalendarIcon, Users, FileText, ChevronDown, PieChart, Settings, LogOut, PawPrint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { mockClients, mockPets, mockVisits } from "@/data/mockData";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -46,33 +48,42 @@ const Dashboard = () => {
   const stats = [
     {
       title: "Klienci",
-      value: "0",
+      value: mockClients.length.toString(),
       description: "Zarejestrowanych klientów",
-      icon: <Users className="h-4 w-4 text-muted-foreground" />
+      icon: <Users className="h-4 w-4 text-muted-foreground" />,
+      link: "/clients"
     },
     {
       title: "Zwierzęta",
-      value: "0",
+      value: mockPets.length.toString(),
       description: "Zarejestrowanych zwierząt",
-      icon: <FileText className="h-4 w-4 text-muted-foreground" />
+      icon: <PawPrint className="h-4 w-4 text-muted-foreground" />,
+      link: "/clients"
     },
     {
       title: "Wizyty",
-      value: "0",
+      value: mockVisits.length.toString(),
       description: "Zaplanowane wizyty",
-      icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+      icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+      link: "/dashboard"
     },
     {
       title: "Plan",
       value: "Podstawowy",
       description: "Aktualny plan subskrypcji",
-      icon: <PieChart className="h-4 w-4 text-muted-foreground" />
+      icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
+      link: "/dashboard"
     }
   ];
 
   if (!isAuthenticated) {
     return <div />;
   }
+
+  // Get recent visits
+  const recentVisits = [...mockVisits].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  ).slice(0, 3);
 
   return (
     <MainLayout>
@@ -123,7 +134,9 @@ const Dashboard = () => {
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4 md:w-auto md:grid-cols-4">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
-            <TabsTrigger value="clients">Klienci</TabsTrigger>
+            <TabsTrigger value="clients">
+              <Link to="/clients" className="flex items-center">Klienci</Link>
+            </TabsTrigger>
             <TabsTrigger value="animals">Zwierzęta</TabsTrigger>
             <TabsTrigger value="calendar">Kalendarz</TabsTrigger>
           </TabsList>
@@ -131,17 +144,19 @@ const Dashboard = () => {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {stats.map((stat, index) => (
-                <Card key={index}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {stat.title}
-                    </CardTitle>
-                    {stat.icon}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground">{stat.description}</p>
-                  </CardContent>
+                <Card key={index} className="hover:shadow-md transition-shadow">
+                  <Link to={stat.link}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {stat.title}
+                      </CardTitle>
+                      {stat.icon}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stat.value}</div>
+                      <p className="text-xs text-muted-foreground">{stat.description}</p>
+                    </CardContent>
+                  </Link>
                 </Card>
               ))}
             </div>
@@ -151,16 +166,36 @@ const Dashboard = () => {
                 <CardHeader>
                   <CardTitle>Nadchodzące wizyty</CardTitle>
                   <CardDescription>
-                    Nie masz zaplanowanych wizyt na ten tydzień.
+                    {recentVisits.length > 0 
+                      ? 'Twoje najbliższe zaplanowane wizyty' 
+                      : 'Nie masz zaplanowanych wizyt na ten tydzień'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-center h-40 rounded-md border border-dashed">
-                    <div className="flex flex-col items-center justify-center text-center p-4">
-                      <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">Kliknij "Kalendarz", aby zaplanować nową wizytę</p>
+                  {recentVisits.length > 0 ? (
+                    <div className="space-y-4">
+                      {recentVisits.map(visit => {
+                        const pet = mockPets.find(p => p.id === visit.petId);
+                        const client = mockClients.find(c => c.id === visit.clientId);
+                        return (
+                          <div key={visit.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+                            <div>
+                              <p className="font-medium">{new Date(visit.date).toLocaleDateString('pl-PL')}, {new Date(visit.date).toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'})}</p>
+                              <p className="text-sm text-muted-foreground">{visit.type} - {pet?.name} ({client?.firstName} {client?.lastName})</p>
+                            </div>
+                            <Button variant="outline" size="sm">Szczegóły</Button>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-40 rounded-md border border-dashed">
+                      <div className="flex flex-col items-center justify-center text-center p-4">
+                        <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Kliknij "Kalendarz", aby zaplanować nową wizytę</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
               
@@ -206,14 +241,16 @@ const Dashboard = () => {
                   Zarządzaj swoimi klientami
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center h-40 rounded-md border border-dashed">
-                  <div className="flex flex-col items-center justify-center text-center p-4">
-                    <Users className="h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnych klientów</p>
-                    <Button size="sm" className="mt-4">Dodaj klienta</Button>
-                  </div>
-                </div>
+              <CardContent className="flex flex-col items-center justify-center text-center p-4">
+                <Users className="h-10 w-10 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium mb-2">Przejdź do bazy klientów</p>
+                <p className="text-sm text-muted-foreground mb-4">Przeglądaj, dodawaj i zarządzaj klientami oraz ich zwierzętami</p>
+                <Button asChild>
+                  <Link to="/clients">
+                    <Users className="mr-2 h-4 w-4" />
+                    Zarządzaj klientami
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -227,13 +264,52 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-center h-40 rounded-md border border-dashed">
-                  <div className="flex flex-col items-center justify-center text-center p-4">
-                    <FileText className="h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnych zarejestrowanych zwierząt</p>
-                    <Button size="sm" className="mt-4">Dodaj zwierzę</Button>
+                {mockPets.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <p className="font-medium">Ostatnio dodane zwierzęta</p>
+                      <Link to="/clients" className="text-sm text-primary hover:underline">
+                        Zobacz wszystkie
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {mockPets.slice(0, 6).map(pet => {
+                        const owner = mockClients.find(c => c.id === pet.clientId);
+                        return (
+                          <Card key={pet.id}>
+                            <CardContent className="pt-6">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center">
+                                  <PawPrint className="h-4 w-4 mr-2 text-muted-foreground" />
+                                  <h3 className="font-medium">{pet.name}</h3>
+                                </div>
+                                <span className="text-xs text-muted-foreground">{pet.species}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-4">
+                                Właściciel: {owner?.firstName} {owner?.lastName}
+                              </p>
+                              <Button variant="outline" size="sm" asChild className="w-full">
+                                <Link to={`/pets/${pet.id}`}>
+                                  Zobacz profil
+                                </Link>
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-center h-40 rounded-md border border-dashed">
+                    <div className="flex flex-col items-center justify-center text-center p-4">
+                      <FileText className="h-10 w-10 text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnych zarejestrowanych zwierząt</p>
+                      <Link to="/clients">
+                        <Button size="sm" className="mt-4">Dodaj zwierzę</Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
