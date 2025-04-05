@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -12,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
 import { UserPlus } from "lucide-react";
-import { useMobile } from "@/hooks/use-mobile";
 
 interface ClientFormDrawerProps {
   buttonText?: string;
@@ -38,29 +36,23 @@ const ClientFormDrawer = ({
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
-      // Here you'd normally submit to an API
-      // For now, we'll simulate a successful save
       console.log("Saving client:", formData);
       
-      // Add an ID and timestamp to mock what a database would do
       const newClient = {
         ...formData,
         id: `client-${Date.now()}`,
         createdAt: new Date().toISOString(),
       };
 
-      // Success notification
       toast({
         title: "Klient dodany pomyślnie",
         description: `Dodano klienta ${formData.firstName} ${formData.lastName}`,
       });
 
-      // Call the callback if provided
       if (onClientSaved) {
         onClientSaved(newClient);
       }
 
-      // Close the drawer
       setOpen(false);
     } catch (error) {
       console.error("Error saving client:", error);

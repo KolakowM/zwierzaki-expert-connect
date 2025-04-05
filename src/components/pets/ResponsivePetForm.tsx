@@ -1,5 +1,5 @@
 
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PetFormDialog from "./PetFormDialog";
 import PetFormDrawer from "./PetFormDrawer";
 
@@ -14,7 +14,7 @@ interface ResponsivePetFormProps {
 }
 
 const ResponsivePetForm = (props: ResponsivePetFormProps) => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   
   return isMobile 
     ? <PetFormDrawer {...props} /> 

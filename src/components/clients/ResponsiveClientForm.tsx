@@ -1,5 +1,5 @@
 
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import ClientFormDialog from "./ClientFormDialog";
 import ClientFormDrawer from "./ClientFormDrawer";
 
@@ -13,7 +13,7 @@ interface ResponsiveClientFormProps {
 }
 
 const ResponsiveClientForm = (props: ResponsiveClientFormProps) => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   
   return isMobile 
     ? <ClientFormDrawer {...props} /> 
