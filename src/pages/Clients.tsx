@@ -17,7 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, UserPlus, Users, Filter } from "lucide-react";
+import { Search, Users, Filter } from "lucide-react";
+import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
 
 const Clients = () => {
   const { toast } = useToast();
@@ -41,6 +42,10 @@ const Clients = () => {
     setClients(mockClients);
   }, [isAuthenticated, navigate, toast]);
 
+  const handleClientSaved = (newClient: Client) => {
+    setClients(prevClients => [newClient, ...prevClients]);
+  };
+
   const filteredClients = clients.filter(client => 
     `${client.firstName} ${client.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,10 +60,7 @@ const Clients = () => {
             <Users className="h-6 w-6 mr-2" />
             <h1 className="text-2xl font-bold">Klienci</h1>
           </div>
-          <Button>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Dodaj klienta
-          </Button>
+          <ResponsiveClientForm onClientSaved={handleClientSaved} />
         </div>
 
         <Card className="mb-6">
