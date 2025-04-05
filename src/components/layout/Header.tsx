@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { UserCircle } from "lucide-react";
 
 export default function Header() {
   const { isAuthenticated, logout } = useAuth();
@@ -63,6 +64,12 @@ export default function Header() {
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>
+              <Link to="/account" className="flex items-center gap-1">
+                <Button variant="outline" size="sm">
+                  <UserCircle className="mr-1 h-4 w-4" />
+                  Konto
+                </Button>
+              </Link>
               <Link to="/dashboard">
                 <Button variant="outline">Panel Specjalisty</Button>
               </Link>

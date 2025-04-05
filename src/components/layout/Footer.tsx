@@ -47,7 +47,7 @@ export default function Footer() {
                 <Link to="/catalog" className="hover:text-primary">Katalog Specjalistów</Link>
               </li>
               <li>
-                <Link to="/register" className="hover:text-primary">Zostań Specjalistą</Link>
+                <Link to="/become-specialist" className="hover:text-primary">Zostań Specjalistą</Link>
               </li>
             </ul>
           </div>
@@ -65,6 +65,9 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/terms" className="hover:text-primary">Warunki Korzystania</Link>
+              </li>
+              <li>
+                <Link to="/regulamin" className="hover:text-primary">Regulamin</Link>
               </li>
             </ul>
           </div>

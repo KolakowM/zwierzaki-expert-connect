@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -28,6 +28,20 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[200px] gap-2 p-4">
+              <li>
+                <Link to="/account">
+                  <NavigationMenuLink
+                    className={cn(
+                      "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <UserCircle className="h-4 w-4" />
+                      <div className="text-sm font-medium leading-none">Edytuj profil</div>
+                    </div>
+                  </NavigationMenuLink>
+                </Link>
+              </li>
               <li>
                 <Link to="/dashboard/profile">
                   <NavigationMenuLink

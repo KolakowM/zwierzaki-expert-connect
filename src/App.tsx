@@ -15,6 +15,15 @@ import Clients from "./pages/Clients";
 import ClientDetails from "./pages/ClientDetails";
 import PetProfile from "./pages/PetProfile";
 import { AuthProvider } from "./contexts/AuthContext";
+import About from "./pages/About";
+import Pricing from "./pages/Pricing";
+import Contact from "./pages/Contact";
+import BecomeSpecialist from "./pages/BecomeSpecialist";
+import FAQ from "./pages/FAQ";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Terms2 from "./pages/Terms2";
+import AccountSettings from "./pages/AccountSettings";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +44,15 @@ const App = () => (
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
             <Route path="/pets/:id" element={<PetProfile />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/become-specialist" element={<BecomeSpecialist />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/regulamin" element={<Terms2 />} />
+            <Route path="/account" element={<AccountSettings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
