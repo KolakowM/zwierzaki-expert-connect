@@ -1,8 +1,24 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
+  const { isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Wylogowano pomyślnie",
+      description: "Do zobaczenia wkrótce!",
+    });
+    navigate("/");
+  };
+  
   return (
     <header className="w-full border-b">
       <div className="container flex items-center justify-between py-4">
@@ -45,12 +61,25 @@ export default function Header() {
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          <Link to="/login">
-            <Button variant="ghost">Logowanie</Button>
-          </Link>
-          <Link to="/register">
-            <Button>Zarejestruj się</Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="outline">Panel Specjalisty</Button>
+              </Link>
+              <Button variant="ghost" onClick={handleLogout}>
+                Wyloguj
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost">Logowanie</Button>
+              </Link>
+              <Link to="/register">
+                <Button>Zarejestruj się</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

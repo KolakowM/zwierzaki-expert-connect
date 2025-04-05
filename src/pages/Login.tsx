@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,26 +14,28 @@ import {
 } from "@/components/ui/card";
 import MainLayout from "@/components/layout/MainLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock login - in real implementation would connect to authentication service
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       // For demo purposes, just validate that fields aren't empty
       if (!email || !password) {
         throw new Error("Wszystkie pola są wymagane");
       }
+      
+      // Use the login function from auth context
+      await login(email, password);
       
       // Success toast
       toast({
@@ -41,10 +43,8 @@ const Login = () => {
         description: "Przekierowujemy do panelu specjalisty...",
       });
       
-      // In a real app, would save auth token and redirect
-      // For now, just reset form
-      setEmail("");
-      setPassword("");
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Błąd logowania",
