@@ -5,6 +5,8 @@ export interface AuthUser {
   id: string;
   email: string;
   role?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface SignInCredentials {
@@ -73,6 +75,8 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     id: user.id,
     email: user.email || '',
     role: user.user_metadata?.role || 'user',
+    firstName: user.user_metadata?.first_name,
+    lastName: user.user_metadata?.last_name,
   };
 };
 

@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (credentials: SignInCredentials) => Promise<void>;
   register: (credentials: SignUpCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  isAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +45,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: session.user.id,
             email: session.user.email || '',
             role: session.user.user_metadata?.role || 'user',
+            firstName: session.user.user_metadata?.first_name,
+            lastName: session.user.user_metadata?.last_name,
           };
           setUser(updatedUser);
         } else if (event === 'SIGNED_OUT') {
@@ -129,6 +132,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
   const value = {
     user,
     isLoading,
@@ -136,6 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     register,
     logout,
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
