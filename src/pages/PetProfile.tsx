@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { mockPets, mockClients, mockVisits, mockCarePrograms } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthProvider";
 import { Pet, Client, Visit, CareProgram } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -30,18 +29,24 @@ import {
   Download,
   Clipboard,
 } from "lucide-react";
+import { getPetById } from "@/services/petService";
+import { getClientById } from "@/services/clientService";
+import { getVisitsByPetId } from "@/services/visitService";
+import { getCareProgramsByPetId } from "@/services/careProgramService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
+import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
+import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
 
 const PetProfile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const { id } = useParams();
-  const [pet, setPet] = useState<Pet | null>(null);
-  const [owner, setOwner] = useState<Client | null>(null);
-  const [visits, setVisits] = useState<Visit[]>([]);
-  const [carePrograms, setCarePrograms] = useState<CareProgram[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
@@ -50,39 +55,120 @@ const PetProfile = () => {
         variant: "destructive"
       });
       navigate("/login");
-      return;
     }
+  }, [isAuthenticated, navigate, toast]);
 
-    // Fetch pet details
-    const foundPet = mockPets.find(p => p.id === id);
-    if (!foundPet) {
+  // Fetch pet details using React Query
+  const { 
+    data: pet, 
+    isLoading: isLoadingPet,
+    isError: isPetError,
+  } = useQuery({
+    queryKey: ['pet', id],
+    queryFn: () => id ? getPetById(id) : null,
+    enabled: !!id && isAuthenticated,
+  });
+
+  // Fetch owner details
+  const { 
+    data: owner, 
+    isLoading: isLoadingOwner 
+  } = useQuery({
+    queryKey: ['client', pet?.clientId],
+    queryFn: () => pet?.clientId ? getClientById(pet.clientId) : null,
+    enabled: !!pet?.clientId && isAuthenticated,
+  });
+
+  // Fetch visits for this pet
+  const { 
+    data: visits = [], 
+    isLoading: isLoadingVisits 
+  } = useQuery({
+    queryKey: ['visits', id],
+    queryFn: () => id ? getVisitsByPetId(id) : Promise.resolve([]),
+    enabled: !!id && isAuthenticated,
+  });
+
+  // Fetch care programs for this pet
+  const { 
+    data: carePrograms = [], 
+    isLoading: isLoadingCarePrograms 
+  } = useQuery({
+    queryKey: ['carePrograms', id],
+    queryFn: () => id ? getCareProgramsByPetId(id) : Promise.resolve([]),
+    enabled: !!id && isAuthenticated,
+  });
+
+  const isLoading = isLoadingPet || isLoadingOwner || isLoadingVisits || isLoadingCarePrograms;
+
+  // Show error if pet not found
+  useEffect(() => {
+    if (isPetError) {
       toast({
-        title: "Nie znaleziono profilu",
-        description: "Profil zwierzęcia o podanym identyfikatorze nie istnieje",
+        title: "Nie znaleziono zwierzęcia",
+        description: "Profil zwierzęcia o podanym identyfikatorze nie istnieje lub wystąpił błąd",
         variant: "destructive"
       });
       navigate("/clients");
-      return;
     }
-    setPet(foundPet);
+  }, [isPetError, navigate, toast]);
 
-    // Fetch owner details
-    const foundOwner = mockClients.find(c => c.id === foundPet.clientId);
-    if (foundOwner) {
-      setOwner(foundOwner);
-    }
+  const handlePetUpdated = (updatedPet: Pet) => {
+    // React Query will automatically refetch the pet data
+    toast({
+      title: "Dane zwierzęcia zaktualizowane",
+      description: "Zmiany zostały zapisane pomyślnie"
+    });
+  };
 
-    // Fetch visits for this pet
-    const petVisits = mockVisits.filter(v => v.petId === id);
-    setVisits(petVisits);
+  const handleVisitAdded = () => {
+    // React Query will automatically refetch the visits data
+    queryClient.invalidateQueries({ queryKey: ['visits', id] });
+    toast({
+      title: "Wizyta dodana pomyślnie",
+      description: "Nowa wizyta została zapisana"
+    });
+  };
 
-    // Fetch care programs for this pet
-    const petCarePrograms = mockCarePrograms.filter(cp => cp.petId === id);
-    setCarePrograms(petCarePrograms);
-  }, [id, isAuthenticated, navigate, toast]);
+  const handleCareProgramAdded = () => {
+    // React Query will automatically refetch the care programs data
+    queryClient.invalidateQueries({ queryKey: ['carePrograms', id] });
+    toast({
+      title: "Plan opieki utworzony pomyślnie",
+      description: "Nowy plan opieki został zapisany"
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <div className="flex items-center space-x-2">
+            <div className="h-6 w-6 rounded-full bg-muted/50 animate-pulse"></div>
+            <div className="h-8 w-48 bg-muted/50 animate-pulse rounded"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-5 w-32 bg-muted/50 rounded"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="h-4 w-full bg-muted/50 rounded"></div>
+                    <div className="h-4 w-3/4 bg-muted/50 rounded"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (!pet) {
-    return null; // Could add a loading skeleton here
+    return null;
   }
 
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
@@ -96,10 +182,16 @@ const PetProfile = () => {
             <PawPrint className="h-6 w-6 mr-2" />
             <h1 className="text-2xl font-bold">{pet.name}</h1>
           </div>
-          <Button>
-            <Edit className="mr-2 h-4 w-4" />
-            Edytuj profil
-          </Button>
+          {pet.id && pet.clientId && (
+            <ResponsivePetForm
+              clientId={pet.clientId}
+              buttonText="Edytuj profil"
+              buttonVariant="outline"
+              defaultValues={pet}
+              isEditing={true}
+              onPetSaved={handlePetUpdated}
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -224,10 +316,17 @@ const PetProfile = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edytuj informacje
-                  </Button>
+                  {pet.id && pet.clientId && (
+                    <ResponsivePetForm
+                      clientId={pet.clientId}
+                      buttonText="Edytuj informacje"
+                      buttonVariant="outline"
+                      buttonSize="sm"
+                      defaultValues={pet}
+                      isEditing={true}
+                      onPetSaved={handlePetUpdated}
+                    />
+                  )}
                 </CardFooter>
               </Card>
               
@@ -264,10 +363,14 @@ const PetProfile = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj plan opieki
-                  </Button>
+                  {pet.id && pet.clientId && (
+                    <ResponsiveCareProgramForm
+                      petId={pet.id}
+                      buttonText="Dodaj plan opieki"
+                      buttonSize="sm"
+                      onCareProgramSaved={handleCareProgramAdded}
+                    />
+                  )}
                 </CardFooter>
               </Card>
             </div>
@@ -315,7 +418,7 @@ const PetProfile = () => {
               </CardContent>
               {visits.length > 0 && (
                 <CardFooter>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => setActiveTab("visits")}>
                     Zobacz wszystkie wizyty
                   </Button>
                 </CardFooter>
@@ -332,10 +435,14 @@ const PetProfile = () => {
                     Wszystkie wizyty i konsultacje dla {pet.name}
                   </CardDescription>
                 </div>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Dodaj wizytę
-                </Button>
+                {pet.id && pet.clientId && (
+                  <ResponsiveVisitForm
+                    petId={pet.id}
+                    clientId={pet.clientId}
+                    buttonText="Dodaj wizytę"
+                    onVisitSaved={handleVisitAdded}
+                  />
+                )}
               </CardHeader>
               <CardContent>
                 {visits.length > 0 ? (
@@ -382,10 +489,15 @@ const PetProfile = () => {
                     <p className="text-muted-foreground mt-1">
                       Dla tego zwierzęcia nie ma jeszcze zarejestrowanych wizyt
                     </p>
-                    <Button className="mt-4">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Zaplanuj pierwszą wizytę
-                    </Button>
+                    {pet.id && pet.clientId && (
+                      <ResponsiveVisitForm
+                        petId={pet.id}
+                        clientId={pet.clientId}
+                        buttonText="Zaplanuj pierwszą wizytę"
+                        className="mt-4"
+                        onVisitSaved={handleVisitAdded}
+                      />
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -401,10 +513,13 @@ const PetProfile = () => {
                     Wszystkie plany opieki dla {pet.name}
                   </CardDescription>
                 </div>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nowy plan opieki
-                </Button>
+                {pet.id && (
+                  <ResponsiveCareProgramForm
+                    petId={pet.id}
+                    buttonText="Nowy plan opieki"
+                    onCareProgramSaved={handleCareProgramAdded}
+                  />
+                )}
               </CardHeader>
               <CardContent>
                 {carePrograms.length > 0 ? (
@@ -460,10 +575,14 @@ const PetProfile = () => {
                     <p className="text-muted-foreground mt-1">
                       Dla tego zwierzęcia nie utworzono jeszcze planów opieki
                     </p>
-                    <Button className="mt-4">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Utwórz pierwszy plan opieki
-                    </Button>
+                    {pet.id && (
+                      <ResponsiveCareProgramForm
+                        petId={pet.id}
+                        buttonText="Utwórz pierwszy plan opieki"
+                        className="mt-4"
+                        onCareProgramSaved={handleCareProgramAdded}
+                      />
+                    )}
                   </div>
                 )}
               </CardContent>
