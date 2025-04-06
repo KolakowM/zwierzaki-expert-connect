@@ -52,7 +52,7 @@ const DashboardOverview = () => {
       value: "Podstawowy",
       description: "Aktualny plan subskrypcji",
       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-      link: "/dashboard"
+      link: "/pricing"  // Changed from "/dashboard" to "/pricing"
     }
   ];
 
