@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import PetForm from "./PetForm";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
+import { createPet, updatePet } from "@/services/petService";
 
 interface PetFormDialogProps {
   clientId: string;
@@ -42,27 +43,35 @@ const PetFormDialog = ({
       setIsSubmitting(true);
       console.log("Saving pet:", formData);
       
-      // If editing, maintain the original ID, otherwise generate a new one
-      const petData = isEditing 
-        ? { ...defaultValues, ...formData }
-        : {
-            ...formData,
-            id: `pet-${Date.now()}`,
-            clientId,
-            createdAt: new Date().toISOString(),
-          };
-
-      // Success notification
-      toast({
-        title: isEditing ? "Dane zwierzaka zaktualizowane" : "Zwierzak dodany pomyślnie",
-        description: isEditing 
-          ? `Dane zwierzaka ${formData.name} zostały zaktualizowane` 
-          : `Dodano zwierzaka ${formData.name}`,
-      });
+      let petData: Pet;
+      
+      if (isEditing && defaultValues?.id) {
+        // Update existing pet
+        petData = await updatePet(defaultValues.id, {
+          ...formData,
+          clientId
+        });
+        
+        toast({
+          title: "Dane zwierzaka zaktualizowane",
+          description: `Dane zwierzaka ${formData.name} zostały zaktualizowane`
+        });
+      } else {
+        // Create new pet
+        petData = await createPet({
+          ...formData,
+          clientId
+        });
+        
+        toast({
+          title: "Zwierzak dodany pomyślnie",
+          description: `Dodano zwierzaka ${formData.name}`,
+        });
+      }
 
       // Call the callback if provided
       if (onPetSaved) {
-        onPetSaved(petData as Pet);
+        onPetSaved(petData);
       }
 
       // Close the dialog

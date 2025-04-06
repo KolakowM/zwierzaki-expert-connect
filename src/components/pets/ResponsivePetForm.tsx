@@ -3,6 +3,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import PetFormDialog from "./PetFormDialog";
 import PetFormDrawer from "./PetFormDrawer";
 import { Pet } from "@/types";
+import { ReactNode } from "react";
 
 interface ResponsivePetFormProps {
   clientId: string;
@@ -14,6 +15,7 @@ interface ResponsivePetFormProps {
   onPetSaved?: (pet: Pet) => void;
   className?: string;
   isEditing?: boolean;
+  children?: ReactNode;
 }
 
 const ResponsivePetForm = (props: ResponsivePetFormProps) => {

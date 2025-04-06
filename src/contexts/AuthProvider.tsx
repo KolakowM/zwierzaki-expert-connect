@@ -1,0 +1,152 @@
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser, signIn, signOut, signUp, AuthUser, SignInCredentials, SignUpCredentials } from "@/services/authService";
+import { supabase } from "@/integrations/supabase/client";
+
+interface AuthContextType {
+  user: AuthUser | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (credentials: SignInCredentials) => Promise<void>;
+  register: (credentials: SignUpCredentials) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Error loading user:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUser();
+
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const updatedUser: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            role: session.user.user_metadata?.role || 'user',
+          };
+          setUser(updatedUser);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+      }
+    );
+
+    return () => {
+      // Clean up the subscription
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
+    };
+  }, []);
+
+  const login = async (credentials: SignInCredentials) => {
+    try {
+      setIsLoading(true);
+      await signIn(credentials);
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      toast({
+        title: "Zalogowano pomyślnie",
+        description: "Witamy z powrotem w systemie!"
+      });
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast({
+        title: "Błąd logowania",
+        description: error.message || "Sprawdź swoje dane i spróbuj ponownie.",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (credentials: SignUpCredentials) => {
+    try {
+      setIsLoading(true);
+      await signUp(credentials);
+      toast({
+        title: "Rejestracja udana",
+        description: "Możesz teraz zalogować się na swoje konto."
+      });
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Błąd rejestracji",
+        description: error.message || "Spróbuj ponownie z innym adresem email.",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      await signOut();
+      setUser(null);
+      toast({
+        title: "Wylogowano pomyślnie",
+        description: "Dziękujemy za korzystanie z systemu."
+      });
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Błąd wylogowania",
+        description: error.message || "Spróbuj ponownie później.",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const value = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login,
+    register,
+    logout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+export default AuthProvider;

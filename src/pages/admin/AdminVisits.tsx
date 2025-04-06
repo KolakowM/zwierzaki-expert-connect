@@ -20,18 +20,21 @@ import {
   ArrowUpDown,
   Calendar,
   CalendarPlus,
-  CheckCircle,
-  Bookmark
+  CheckCircle
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getVisits } from "@/services/visitService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getVisits, deleteVisit } from "@/services/visitService";
 import { getClients } from "@/services/clientService";
 import { getPets } from "@/services/petService";
+import { useToast } from "@/hooks/use-toast";
+import { Visit } from "@/types";
 
 const AdminVisits = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string | null>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: visits = [], isLoading: visitsLoading } = useQuery({
     queryKey: ['visits'],
@@ -56,6 +59,27 @@ const AdminVisits = () => {
     } else {
       setSortBy(column);
       setSortOrder("asc");
+    }
+  };
+
+  const handleDeleteVisit = async (id: string, type: string) => {
+    if (confirm(`Czy na pewno chcesz usunąć wizytę "${type}"?`)) {
+      try {
+        await deleteVisit(id);
+        queryClient.invalidateQueries({ queryKey: ['visits'] });
+        
+        toast({
+          title: "Wizyta usunięta",
+          description: `Wizyta została pomyślnie usunięta`
+        });
+      } catch (error) {
+        console.error("Error deleting visit:", error);
+        toast({
+          title: "Błąd podczas usuwania",
+          description: "Nie udało się usunąć wizyty. Spróbuj ponownie.",
+          variant: "destructive"
+        });
+      }
     }
   };
   
@@ -235,7 +259,12 @@ const AdminVisits = () => {
                         <Button variant="ghost" size="icon">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteVisit(visit.id, visit.type)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

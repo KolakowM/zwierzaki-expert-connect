@@ -21,15 +21,20 @@ import {
   Eye,
   PlusCircle
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getPets } from "@/services/petService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPets, deletePet } from "@/services/petService";
 import { getClients } from "@/services/clientService";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Pet } from "@/types";
+import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 
 const AdminPets = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: pets = [], isLoading: petsLoading } = useQuery({
     queryKey: ['pets'],
@@ -52,6 +57,35 @@ const AdminPets = () => {
     }
   };
   
+  const handleDeletePet = async (id: string, name: string) => {
+    if (confirm(`Czy na pewno chcesz usunąć zwierzę ${name}?`)) {
+      try {
+        await deletePet(id);
+        queryClient.invalidateQueries({ queryKey: ['pets'] });
+        
+        toast({
+          title: "Zwierzę usunięte",
+          description: `Zwierzę ${name} zostało pomyślnie usunięte`
+        });
+      } catch (error) {
+        console.error("Error deleting pet:", error);
+        toast({
+          title: "Błąd podczas usuwania",
+          description: "Nie udało się usunąć zwierzęcia. Spróbuj ponownie.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  const handlePetSaved = (pet: Pet) => {
+    queryClient.invalidateQueries({ queryKey: ['pets'] });
+    toast({
+      title: "Zwierzę zapisane",
+      description: `Zwierzę ${pet.name} zostało pomyślnie zapisane`
+    });
+  };
+
   // Helper function to get client name from clientId
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
@@ -98,6 +132,9 @@ const AdminPets = () => {
       return 0;
     });
 
+  // Find a client to use for new pet creation (default to first client if available)
+  const defaultClientForNewPet = clients.length > 0 ? clients[0].id : undefined;
+
   return (
     <>
       <AdminHeader 
@@ -116,9 +153,16 @@ const AdminPets = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" /> Dodaj Zwierzę
-          </Button>
+          {defaultClientForNewPet && (
+            <ResponsivePetForm 
+              clientId={defaultClientForNewPet}
+              buttonText="Dodaj Zwierzę"
+              buttonVariant="default"
+              onPetSaved={handlePetSaved}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" /> Dodaj Zwierzę
+            </ResponsivePetForm>
+          )}
         </div>
         
         <div className="overflow-x-auto">
@@ -203,10 +247,23 @@ const AdminPets = () => {
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <ResponsivePetForm
+                          clientId={pet.clientId}
+                          buttonText=""
+                          buttonVariant="ghost"
+                          buttonSize="icon"
+                          defaultValues={pet}
+                          isEditing={true}
+                          onPetSaved={handlePetSaved}
+                        >
                           <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700">
+                        </ResponsivePetForm>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeletePet(pet.id, pet.name)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
