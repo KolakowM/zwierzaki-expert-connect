@@ -13,7 +13,7 @@ export const getCarePrograms = async (): Promise<CareProgram[]> => {
     throw error;
   }
   
-  return data as unknown as CareProgram[];
+  return data || [];
 };
 
 export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram[]> => {
@@ -28,7 +28,7 @@ export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram
     throw error;
   }
   
-  return data as unknown as CareProgram[];
+  return data || [];
 };
 
 export const getCareProgramById = async (id: string): Promise<CareProgram | null> => {
@@ -43,7 +43,7 @@ export const getCareProgramById = async (id: string): Promise<CareProgram | null
     return null;
   }
   
-  return data as unknown as CareProgram;
+  return data;
 };
 
 export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
@@ -58,7 +58,7 @@ export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'creat
     throw error;
   }
   
-  return data as unknown as CareProgram;
+  return data;
 };
 
 export const updateCareProgram = async (id: string, program: Partial<CareProgram>): Promise<CareProgram> => {
@@ -74,7 +74,7 @@ export const updateCareProgram = async (id: string, program: Partial<CareProgram
     throw error;
   }
   
-  return data as unknown as CareProgram;
+  return data;
 };
 
 export const deleteCareProgram = async (id: string): Promise<void> => {

@@ -2,8 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Catalog from "./pages/Catalog";
@@ -25,41 +24,35 @@ import Terms from "./pages/Terms";
 import Terms2 from "./pages/Terms2";
 import AccountSettings from "./pages/AccountSettings";
 
-const queryClient = new QueryClient();
-
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/catalog" element={<Catalog />} />
-            <Route path="/catalog/:id" element={<SpecialistProfile />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/clients/:id" element={<ClientDetails />} />
-            <Route path="/pets/:id" element={<PetProfile />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/become-specialist" element={<BecomeSpecialist />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/regulamin" element={<Terms2 />} />
-            <Route path="/account" element={<AccountSettings />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <TooltipProvider>
+    <AuthProvider>
+      <Toaster />
+      <Sonner />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/catalog" element={<Catalog />} />
+        <Route path="/catalog/:id" element={<SpecialistProfile />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/clients/:id" element={<ClientDetails />} />
+        <Route path="/pets/:id" element={<PetProfile />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/become-specialist" element={<BecomeSpecialist />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/regulamin" element={<Terms2 />} />
+        <Route path="/account" element={<AccountSettings />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AuthProvider>
+  </TooltipProvider>
 );
 
 export default App;

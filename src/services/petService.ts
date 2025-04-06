@@ -13,7 +13,7 @@ export const getPets = async (): Promise<Pet[]> => {
     throw error;
   }
   
-  return data as unknown as Pet[];
+  return data || [];
 };
 
 export const getPetsByClientId = async (clientId: string): Promise<Pet[]> => {
@@ -28,7 +28,7 @@ export const getPetsByClientId = async (clientId: string): Promise<Pet[]> => {
     throw error;
   }
   
-  return data as unknown as Pet[];
+  return data || [];
 };
 
 export const getPetById = async (id: string): Promise<Pet | null> => {
@@ -43,7 +43,7 @@ export const getPetById = async (id: string): Promise<Pet | null> => {
     return null;
   }
   
-  return data as unknown as Pet;
+  return data;
 };
 
 export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet> => {
@@ -58,7 +58,7 @@ export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet
     throw error;
   }
   
-  return data as unknown as Pet;
+  return data;
 };
 
 export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => {
@@ -74,7 +74,7 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
     throw error;
   }
   
-  return data as unknown as Pet;
+  return data;
 };
 
 export const deletePet = async (id: string): Promise<void> => {

@@ -13,7 +13,7 @@ export const getClients = async (): Promise<Client[]> => {
     throw error;
   }
   
-  return data as unknown as Client[];
+  return data || [];
 };
 
 export const getClientById = async (id: string): Promise<Client | null> => {
@@ -28,7 +28,7 @@ export const getClientById = async (id: string): Promise<Client | null> => {
     return null;
   }
   
-  return data as unknown as Client;
+  return data;
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> => {
@@ -43,7 +43,7 @@ export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Pr
     throw error;
   }
   
-  return data as unknown as Client;
+  return data;
 };
 
 export const updateClient = async (id: string, client: Partial<Client>): Promise<Client> => {
@@ -59,7 +59,7 @@ export const updateClient = async (id: string, client: Partial<Client>): Promise
     throw error;
   }
   
-  return data as unknown as Client;
+  return data;
 };
 
 export const deleteClient = async (id: string): Promise<void> => {

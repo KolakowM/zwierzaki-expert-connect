@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { PawPrint, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Pet, Client } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { getPets } from "@/services/petService";
 import { getClients } from "@/services/clientService";

@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
-import { mockClients, mockPets, mockVisits } from "@/data/mockData";
 
 // Import dashboard components
 import UserMenu from "@/components/dashboard/UserMenu";
@@ -70,11 +69,7 @@ const Dashboard = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
-            <DashboardOverview
-              clients={mockClients}
-              pets={mockPets}
-              visits={mockVisits}
-            />
+            <DashboardOverview />
           </TabsContent>
           
           <TabsContent value="clients" className="space-y-4">
@@ -82,7 +77,7 @@ const Dashboard = () => {
           </TabsContent>
           
           <TabsContent value="animals" className="space-y-4">
-            <AnimalsTab pets={mockPets} clients={mockClients} />
+            <AnimalsTab />
           </TabsContent>
           
           <TabsContent value="calendar" className="space-y-4">

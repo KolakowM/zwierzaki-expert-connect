@@ -4,12 +4,12 @@ export interface Client {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  postCode?: string;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postCode?: string | null;
   createdAt: string;
-  notes?: string;
+  notes?: string | null;
 }
 
 export interface Pet {
@@ -17,15 +17,15 @@ export interface Pet {
   clientId: string;
   name: string;
   species: "pies" | "kot" | "królik" | "chomik" | "świnka morska" | "inne";
-  breed?: string;
-  age?: number;
-  weight?: number;
-  sex?: "samiec" | "samica";
-  neutered?: boolean;
-  medicalHistory?: string;
-  allergies?: string;
-  dietaryRestrictions?: string;
-  behavioralNotes?: string;
+  breed?: string | null;
+  age?: number | null;
+  weight?: number | null;
+  sex?: "samiec" | "samica" | null;
+  neutered?: boolean | null;
+  medicalHistory?: string | null;
+  allergies?: string | null;
+  dietaryRestrictions?: string | null;
+  behavioralNotes?: string | null;
   createdAt: string;
 }
 
@@ -35,10 +35,10 @@ export interface Visit {
   clientId: string;
   date: string;
   type: string;
-  notes?: string;
-  recommendations?: string;
-  followUpNeeded?: boolean;
-  followUpDate?: string;
+  notes?: string | null;
+  recommendations?: string | null;
+  followUpNeeded?: boolean | null;
+  followUpDate?: string | null;
 }
 
 export interface CareProgram {
@@ -46,11 +46,18 @@ export interface CareProgram {
   petId: string;
   name: string;
   goal: string;
-  description?: string;
+  description?: string | null;
   startDate: string;
-  endDate?: string;
+  endDate?: string | null;
   status: "aktywny" | "zakończony" | "anulowany";
-  instructions?: string;
-  recommendations?: string;
+  instructions?: string | null;
+  recommendations?: string | null;
   createdAt: string;
 }
+
+export type Tables = {
+  clients: Client;
+  pets: Pet;
+  visits: Visit;
+  care_programs: CareProgram;
+};

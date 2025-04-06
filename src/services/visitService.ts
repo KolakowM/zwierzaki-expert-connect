@@ -13,7 +13,7 @@ export const getVisits = async (): Promise<Visit[]> => {
     throw error;
   }
   
-  return data as unknown as Visit[];
+  return data || [];
 };
 
 export const getVisitsByClientId = async (clientId: string): Promise<Visit[]> => {
@@ -28,7 +28,7 @@ export const getVisitsByClientId = async (clientId: string): Promise<Visit[]> =>
     throw error;
   }
   
-  return data as unknown as Visit[];
+  return data || [];
 };
 
 export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
@@ -43,7 +43,7 @@ export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
     throw error;
   }
   
-  return data as unknown as Visit[];
+  return data || [];
 };
 
 export const getVisitById = async (id: string): Promise<Visit | null> => {
@@ -58,7 +58,7 @@ export const getVisitById = async (id: string): Promise<Visit | null> => {
     return null;
   }
   
-  return data as unknown as Visit;
+  return data;
 };
 
 export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
@@ -73,7 +73,7 @@ export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
     throw error;
   }
   
-  return data as unknown as Visit;
+  return data;
 };
 
 export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Visit> => {
@@ -89,7 +89,7 @@ export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Vi
     throw error;
   }
   
-  return data as unknown as Visit;
+  return data;
 };
 
 export const deleteVisit = async (id: string): Promise<void> => {
