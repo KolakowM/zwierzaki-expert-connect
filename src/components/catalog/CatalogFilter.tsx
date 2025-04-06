@@ -20,6 +20,7 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
     { id: "trener", label: "Trener" },
     { id: "groomer", label: "Groomer" },
     { id: "weterynarz", label: "Weterynarz" }
+    { id: "inny", label: "Inny" }
   ];
 
   const handleSpecializationChange = (id: string) => {
