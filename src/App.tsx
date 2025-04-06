@@ -23,6 +23,14 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Terms2 from "./pages/Terms2";
 import AccountSettings from "./pages/AccountSettings";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminClients from "./pages/admin/AdminClients";
+import AdminPets from "./pages/admin/AdminPets";
+import AdminVisits from "./pages/admin/AdminVisits";
+import AdminCarePrograms from "./pages/admin/AdminCarePrograms";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const App = () => (
   <TooltipProvider>
@@ -48,6 +56,18 @@ const App = () => (
         <Route path="/terms" element={<Terms />} />
         <Route path="/regulamin" element={<Terms2 />} />
         <Route path="/account" element={<AccountSettings />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="clients" element={<AdminClients />} />
+          <Route path="pets" element={<AdminPets />} />
+          <Route path="visits" element={<AdminVisits />} />
+          <Route path="care-programs" element={<AdminCarePrograms />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -15,6 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  isAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,13 +51,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // This is a mock implementation - in a real app, this would be an API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // For demo purposes, create a mock user
+      // For demo purposes, create a mock user with admin role if email contains "admin"
+      const role = email.includes("admin") ? "admin" : "specialist";
       const mockUser: User = {
         id: "1",
         email,
         firstName: "Jan",
         lastName: "Kowalski",
-        role: "specialist"
+        role: role
       };
       
       // Store user in localStorage (would be a token in a real app)
@@ -74,12 +76,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(null);
   };
 
+  const isAdmin = () => {
+    return user?.role === "admin";
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
     login,
-    logout
+    logout,
+    isAdmin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
