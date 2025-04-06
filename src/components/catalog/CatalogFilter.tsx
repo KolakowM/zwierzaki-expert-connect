@@ -19,8 +19,9 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
     { id: "fizjoterapeuta", label: "Fizjoterapeuta" },
     { id: "trener", label: "Trener" },
     { id: "groomer", label: "Groomer" },
-    { id: "weterynarz", label: "Weterynarz" }
-    { id: "inny", label: "Inny" }
+    { id: "weterynarz", label: "Weterynarz" },
+    { id: "psycholog", label: "Psycholog" },
+    { id: "hodowca", label: "Hodowca" },
   ];
 
   const handleSpecializationChange = (id: string) => {
