@@ -22,9 +22,21 @@ interface ResponsiveVisitFormProps {
 const ResponsiveVisitForm = (props: ResponsiveVisitFormProps) => {
   const isMobile = useIsMobile();
   
+  // Convert string dates to Date objects if they exist
+  const convertedDefaultValues = props.defaultValues ? {
+    ...props.defaultValues,
+    date: props.defaultValues.date ? new Date(props.defaultValues.date) : undefined,
+    followUpDate: props.defaultValues.followUpDate ? new Date(props.defaultValues.followUpDate) : undefined
+  } : undefined;
+  
+  const updatedProps = {
+    ...props,
+    defaultValues: convertedDefaultValues
+  };
+  
   return isMobile 
-    ? <VisitFormDrawer {...props} /> 
-    : <VisitFormDialog {...props} />;
+    ? <VisitFormDrawer {...updatedProps} /> 
+    : <VisitFormDialog {...updatedProps} />;
 };
 
 export default ResponsiveVisitForm;

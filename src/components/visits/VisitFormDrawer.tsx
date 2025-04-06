@@ -47,6 +47,13 @@ const VisitFormDrawer = ({
   // Set default title based on whether we're editing or creating
   const drawerTitle = title || (isEditing ? "Edytuj wizytę" : "Dodaj nową wizytę");
 
+  // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
+  const formDefaultValues = defaultValues ? {
+    ...defaultValues,
+    date: defaultValues.date ? new Date(defaultValues.date) : undefined,
+    followUpDate: defaultValues.followUpDate ? new Date(defaultValues.followUpDate) : undefined
+  } : undefined;
+
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
@@ -115,7 +122,7 @@ const VisitFormDrawer = ({
           <VisitForm 
             petId={petId}
             clientId={clientId}
-            defaultValues={defaultValues} 
+            defaultValues={formDefaultValues} 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
           />

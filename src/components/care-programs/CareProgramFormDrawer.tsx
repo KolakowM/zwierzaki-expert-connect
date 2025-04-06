@@ -45,6 +45,13 @@ const CareProgramFormDrawer = ({
   // Set default title based on whether we're editing or creating
   const drawerTitle = title || (isEditing ? "Edytuj plan opieki" : "Utwórz nowy plan opieki");
 
+  // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
+  const formDefaultValues = defaultValues ? {
+    ...defaultValues,
+    startDate: defaultValues.startDate ? new Date(defaultValues.startDate) : undefined,
+    endDate: defaultValues.endDate ? new Date(defaultValues.endDate) : undefined
+  } : undefined;
+
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
@@ -110,7 +117,7 @@ const CareProgramFormDrawer = ({
         <div className="px-4 pb-4 overflow-y-auto">
           <CareProgramForm 
             petId={petId}
-            defaultValues={defaultValues} 
+            defaultValues={formDefaultValues} 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
           />

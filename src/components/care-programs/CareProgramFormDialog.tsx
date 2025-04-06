@@ -38,6 +38,13 @@ const CareProgramFormDialog = ({
   // Set default title based on whether we're editing or creating
   const dialogTitle = title || (isEditing ? "Edytuj plan opieki" : "Utwórz nowy plan opieki");
 
+  // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
+  const formDefaultValues = defaultValues ? {
+    ...defaultValues,
+    startDate: defaultValues.startDate ? new Date(defaultValues.startDate) : undefined,
+    endDate: defaultValues.endDate ? new Date(defaultValues.endDate) : undefined
+  } : undefined;
+
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
@@ -102,7 +109,7 @@ const CareProgramFormDialog = ({
         </DialogHeader>
         <CareProgramForm 
           petId={petId}
-          defaultValues={defaultValues} 
+          defaultValues={formDefaultValues} 
           onSubmit={handleSubmit} 
           isSubmitting={isSubmitting} 
         />
