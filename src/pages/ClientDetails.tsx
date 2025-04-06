@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider"; // Updated import path
 import { Client, Pet, Visit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";

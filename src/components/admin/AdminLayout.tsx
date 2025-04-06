@@ -1,8 +1,7 @@
-
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 import AdminSidebar from "./AdminSidebar";
 
 const AdminLayout = () => {
@@ -11,7 +10,6 @@ const AdminLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is authenticated and has admin role
     if (!isLoading && (!isAuthenticated || !isAdmin())) {
       toast({
         title: "Brak dostępu",

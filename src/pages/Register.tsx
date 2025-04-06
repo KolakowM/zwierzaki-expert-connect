@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Link, Navigate } from "react-router-dom";
@@ -54,7 +53,6 @@ const Register = () => {
     }
   };
   
-  // If already logged in, redirect to dashboard
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }

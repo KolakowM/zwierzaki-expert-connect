@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider"; // Updated import path
 import { Button } from "@/components/ui/button";
 import { BellIcon } from "lucide-react";
 
