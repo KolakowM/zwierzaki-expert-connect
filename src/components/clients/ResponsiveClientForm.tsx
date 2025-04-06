@@ -2,6 +2,7 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import ClientFormDialog from "./ClientFormDialog";
 import ClientFormDrawer from "./ClientFormDrawer";
+import { ReactNode } from "react";
 
 interface ResponsiveClientFormProps {
   buttonText?: string;
@@ -10,6 +11,7 @@ interface ResponsiveClientFormProps {
   title?: string;
   defaultValues?: any;
   onClientSaved?: (client: any) => void;
+  children?: ReactNode;
 }
 
 const ResponsiveClientForm = (props: ResponsiveClientFormProps) => {

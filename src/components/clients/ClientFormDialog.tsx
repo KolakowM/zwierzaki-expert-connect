@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
 import { UserPlus } from "lucide-react";
 import { createClient } from "@/services/clientService";
+import { ReactNode } from "react";
 
 interface ClientFormDialogProps {
   buttonText?: string;
@@ -14,6 +15,7 @@ interface ClientFormDialogProps {
   title?: string;
   defaultValues?: any;
   onClientSaved?: (client: any) => void;
+  children?: ReactNode;
 }
 
 const ClientFormDialog = ({
@@ -23,6 +25,7 @@ const ClientFormDialog = ({
   title = "Dodaj nowego klienta",
   defaultValues,
   onClientSaved,
+  children,
 }: ClientFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,8 +73,12 @@ const ClientFormDialog = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={buttonVariant} size={buttonSize}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          {buttonText}
+          {children || (
+            <>
+              <UserPlus className="mr-2 h-4 w-4" />
+              {buttonText}
+            </>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">

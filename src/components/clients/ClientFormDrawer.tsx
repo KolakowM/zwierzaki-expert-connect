@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
 import { UserPlus } from "lucide-react";
 import { createClient } from "@/services/clientService";
+import { ReactNode } from "react";
 
 interface ClientFormDrawerProps {
   buttonText?: string;
@@ -21,6 +22,7 @@ interface ClientFormDrawerProps {
   title?: string;
   defaultValues?: any;
   onClientSaved?: (client: any) => void;
+  children?: ReactNode;
 }
 
 const ClientFormDrawer = ({
@@ -30,6 +32,7 @@ const ClientFormDrawer = ({
   title = "Dodaj nowego klienta",
   defaultValues,
   onClientSaved,
+  children,
 }: ClientFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,8 +77,12 @@ const ClientFormDrawer = ({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant={buttonVariant} size={buttonSize}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          {buttonText}
+          {children || (
+            <>
+              <UserPlus className="mr-2 h-4 w-4" />
+              {buttonText}
+            </>
+          )}
         </Button>
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
