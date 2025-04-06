@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Visit } from "@/types";
+import { Visit, DbVisit, mapDbVisitToVisit, mapVisitToDbVisit } from "@/types";
 
 export const getVisits = async (): Promise<Visit[]> => {
   const { data, error } = await supabase
@@ -13,14 +13,14 @@ export const getVisits = async (): Promise<Visit[]> => {
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(mapDbVisitToVisit);
 };
 
 export const getVisitsByClientId = async (clientId: string): Promise<Visit[]> => {
   const { data, error } = await supabase
     .from('visits')
     .select('*')
-    .eq('clientId', clientId)
+    .eq('clientid', clientId)
     .order('date', { ascending: false });
   
   if (error) {
@@ -28,14 +28,14 @@ export const getVisitsByClientId = async (clientId: string): Promise<Visit[]> =>
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(mapDbVisitToVisit);
 };
 
 export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
   const { data, error } = await supabase
     .from('visits')
     .select('*')
-    .eq('petId', petId)
+    .eq('petid', petId)
     .order('date', { ascending: false });
   
   if (error) {
@@ -43,7 +43,7 @@ export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(mapDbVisitToVisit);
 };
 
 export const getVisitById = async (id: string): Promise<Visit | null> => {
@@ -58,13 +58,13 @@ export const getVisitById = async (id: string): Promise<Visit | null> => {
     return null;
   }
   
-  return data;
+  return data ? mapDbVisitToVisit(data as DbVisit) : null;
 };
 
 export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
   const { data, error } = await supabase
     .from('visits')
-    .insert([visit])
+    .insert([mapVisitToDbVisit(visit)])
     .select()
     .single();
   
@@ -73,13 +73,24 @@ export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
     throw error;
   }
   
-  return data;
+  return mapDbVisitToVisit(data as DbVisit);
 };
 
 export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Visit> => {
+  // Convert camelCase visit properties to snake_case for the database
+  const dbVisitUpdate: Partial<DbVisit> = {};
+  if (visit.petId !== undefined) dbVisitUpdate.petid = visit.petId;
+  if (visit.clientId !== undefined) dbVisitUpdate.clientid = visit.clientId;
+  if (visit.date !== undefined) dbVisitUpdate.date = visit.date;
+  if (visit.type !== undefined) dbVisitUpdate.type = visit.type;
+  if (visit.notes !== undefined) dbVisitUpdate.notes = visit.notes;
+  if (visit.recommendations !== undefined) dbVisitUpdate.recommendations = visit.recommendations;
+  if (visit.followUpNeeded !== undefined) dbVisitUpdate.followupneeded = visit.followUpNeeded;
+  if (visit.followUpDate !== undefined) dbVisitUpdate.followupdate = visit.followUpDate;
+
   const { data, error } = await supabase
     .from('visits')
-    .update(visit)
+    .update(dbVisitUpdate)
     .eq('id', id)
     .select()
     .single();
@@ -89,7 +100,7 @@ export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Vi
     throw error;
   }
   
-  return data;
+  return mapDbVisitToVisit(data as DbVisit);
 };
 
 export const deleteVisit = async (id: string): Promise<void> => {
