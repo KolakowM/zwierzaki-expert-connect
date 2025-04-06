@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
 import { UserPlus } from "lucide-react";
+import { createClient } from "@/services/clientService";
 
 interface ClientFormDialogProps {
   buttonText?: string;
@@ -30,21 +31,20 @@ const ClientFormDialog = ({
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
-      // Here you'd normally submit to an API
-      // For now, we'll simulate a successful save
-      console.log("Saving client:", formData);
       
-      // Add an ID and timestamp to mock what a database would do
-      const newClient = {
-        ...formData,
-        id: `client-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      };
+      let newClient;
+      if (defaultValues && defaultValues.id) {
+        // Update existing client logic would go here
+        newClient = { ...formData, id: defaultValues.id };
+      } else {
+        // Create new client
+        newClient = await createClient(formData);
+      }
 
       // Success notification
       toast({
-        title: "Klient dodany pomyślnie",
-        description: `Dodano klienta ${formData.firstName} ${formData.lastName}`,
+        title: defaultValues?.id ? "Klient zaktualizowany" : "Klient dodany pomyślnie",
+        description: `${formData.firstName} ${formData.lastName}`,
       });
 
       // Call the callback if provided
@@ -54,11 +54,11 @@ const ClientFormDialog = ({
 
       // Close the dialog
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving client:", error);
       toast({
-        title: "Błąd podczas dodawania klienta",
-        description: "Spróbuj ponownie później",
+        title: "Błąd podczas zapisywania klienta",
+        description: error.message || "Spróbuj ponownie później",
         variant: "destructive",
       });
     } finally {

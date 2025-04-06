@@ -9,7 +9,205 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      care_programs: {
+        Row: {
+          createdat: string
+          description: string | null
+          enddate: string | null
+          goal: string
+          id: string
+          instructions: string | null
+          name: string
+          petid: string
+          recommendations: string | null
+          startdate: string
+          status: string
+        }
+        Insert: {
+          createdat?: string
+          description?: string | null
+          enddate?: string | null
+          goal: string
+          id?: string
+          instructions?: string | null
+          name: string
+          petid: string
+          recommendations?: string | null
+          startdate: string
+          status: string
+        }
+        Update: {
+          createdat?: string
+          description?: string | null
+          enddate?: string | null
+          goal?: string
+          id?: string
+          instructions?: string | null
+          name?: string
+          petid?: string
+          recommendations?: string | null
+          startdate?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_programs_petid_fkey"
+            columns: ["petid"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          address: string | null
+          city: string | null
+          createdat: string
+          email: string
+          firstname: string
+          id: string
+          lastname: string
+          notes: string | null
+          phone: string | null
+          postcode: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          createdat?: string
+          email: string
+          firstname: string
+          id?: string
+          lastname: string
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          createdat?: string
+          email?: string
+          firstname?: string
+          id?: string
+          lastname?: string
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+        }
+        Relationships: []
+      }
+      pets: {
+        Row: {
+          age: number | null
+          allergies: string | null
+          behavioralnotes: string | null
+          breed: string | null
+          clientid: string
+          createdat: string
+          dietaryrestrictions: string | null
+          id: string
+          medicalhistory: string | null
+          name: string
+          neutered: boolean | null
+          sex: string | null
+          species: string
+          weight: number | null
+        }
+        Insert: {
+          age?: number | null
+          allergies?: string | null
+          behavioralnotes?: string | null
+          breed?: string | null
+          clientid: string
+          createdat?: string
+          dietaryrestrictions?: string | null
+          id?: string
+          medicalhistory?: string | null
+          name: string
+          neutered?: boolean | null
+          sex?: string | null
+          species: string
+          weight?: number | null
+        }
+        Update: {
+          age?: number | null
+          allergies?: string | null
+          behavioralnotes?: string | null
+          breed?: string | null
+          clientid?: string
+          createdat?: string
+          dietaryrestrictions?: string | null
+          id?: string
+          medicalhistory?: string | null
+          name?: string
+          neutered?: boolean | null
+          sex?: string | null
+          species?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pets_clientid_fkey"
+            columns: ["clientid"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visits: {
+        Row: {
+          clientid: string
+          date: string
+          followupdate: string | null
+          followupneeded: boolean | null
+          id: string
+          notes: string | null
+          petid: string
+          recommendations: string | null
+          type: string
+        }
+        Insert: {
+          clientid: string
+          date: string
+          followupdate?: string | null
+          followupneeded?: boolean | null
+          id?: string
+          notes?: string | null
+          petid: string
+          recommendations?: string | null
+          type: string
+        }
+        Update: {
+          clientid?: string
+          date?: string
+          followupdate?: string | null
+          followupneeded?: boolean | null
+          id?: string
+          notes?: string | null
+          petid?: string
+          recommendations?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_clientid_fkey"
+            columns: ["clientid"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_petid_fkey"
+            columns: ["petid"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

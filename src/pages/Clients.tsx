@@ -4,7 +4,6 @@ import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { mockClients } from "@/data/mockData";
 import { Client } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,13 +18,20 @@ import {
 } from "@/components/ui/table";
 import { Search, Users, Filter } from "lucide-react";
 import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
+import { getClients } from "@/services/clientService";
+import { useQuery } from "@tanstack/react-query";
 
 const Clients = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch clients using React Query
+  const { data: clients = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['clients'],
+    queryFn: getClients,
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,15 +41,26 @@ const Clients = () => {
         variant: "destructive"
       });
       navigate("/login");
-      return;
     }
-
-    // Load mock clients data
-    setClients(mockClients);
   }, [isAuthenticated, navigate, toast]);
 
+  // Handle errors in fetching clients
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Błąd podczas pobierania klientów",
+        description: "Nie udało się pobrać listy klientów",
+        variant: "destructive"
+      });
+    }
+  }, [error, toast]);
+
   const handleClientSaved = (newClient: Client) => {
-    setClients(prevClients => [newClient, ...prevClients]);
+    refetch(); // Refresh the client list after adding a new client
+    toast({
+      title: "Klient zapisany",
+      description: `Klient ${newClient.firstName} ${newClient.lastName} został zapisany`,
+    });
   };
 
   const filteredClients = clients.filter(client => 
@@ -95,7 +112,11 @@ const Clients = () => {
             <CardTitle>Lista klientów ({filteredClients.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            {filteredClients.length > 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredClients.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -133,8 +154,18 @@ const Clients = () => {
                 <Users className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
                 <h3 className="mt-2 text-lg font-medium">Brak klientów</h3>
                 <p className="text-muted-foreground mt-1">
-                  Nie znaleziono klientów spełniających kryteria wyszukiwania
+                  {searchTerm 
+                    ? "Nie znaleziono klientów spełniających kryteria wyszukiwania" 
+                    : "Nie masz jeszcze żadnych klientów. Dodaj pierwszego klienta."}
                 </p>
+                {!searchTerm && (
+                  <div className="mt-4">
+                    <ResponsiveClientForm 
+                      buttonText="Dodaj pierwszego klienta"
+                      onClientSaved={handleClientSaved}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

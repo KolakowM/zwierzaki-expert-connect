@@ -4,13 +4,23 @@ import { Button } from "@/components/ui/button";
 import { PawPrint, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Pet, Client } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { getPets } from "@/services/petService";
+import { getClients } from "@/services/clientService";
 
-interface AnimalsTabProps {
-  pets: Pet[];
-  clients: Client[];
-}
+const AnimalsTab = () => {
+  const { data: pets = [], isLoading: petsLoading } = useQuery({
+    queryKey: ['pets'],
+    queryFn: getPets,
+  });
 
-const AnimalsTab = ({ pets, clients }: AnimalsTabProps) => {
+  const { data: clients = [], isLoading: clientsLoading } = useQuery({
+    queryKey: ['clients'],
+    queryFn: getClients,
+  });
+
+  const isLoading = petsLoading || clientsLoading;
+
   return (
     <Card>
       <CardHeader>
@@ -20,7 +30,11 @@ const AnimalsTab = ({ pets, clients }: AnimalsTabProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {pets.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : pets.length > 0 ? (
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <p className="font-medium">Ostatnio dodane zwierzęta</p>

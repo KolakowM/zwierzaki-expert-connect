@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -11,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
 import { UserPlus } from "lucide-react";
+import { createClient } from "@/services/clientService";
 
 interface ClientFormDrawerProps {
   buttonText?: string;
@@ -36,17 +38,19 @@ const ClientFormDrawer = ({
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
-      console.log("Saving client:", formData);
       
-      const newClient = {
-        ...formData,
-        id: `client-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      };
+      let newClient;
+      if (defaultValues && defaultValues.id) {
+        // Update existing client logic would go here
+        newClient = { ...formData, id: defaultValues.id };
+      } else {
+        // Create new client
+        newClient = await createClient(formData);
+      }
 
       toast({
-        title: "Klient dodany pomyślnie",
-        description: `Dodano klienta ${formData.firstName} ${formData.lastName}`,
+        title: defaultValues?.id ? "Klient zaktualizowany" : "Klient dodany pomyślnie",
+        description: `${formData.firstName} ${formData.lastName}`,
       });
 
       if (onClientSaved) {
@@ -54,11 +58,11 @@ const ClientFormDrawer = ({
       }
 
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving client:", error);
       toast({
-        title: "Błąd podczas dodawania klienta",
-        description: "Spróbuj ponownie później",
+        title: "Błąd podczas zapisywania klienta",
+        description: error.message || "Spróbuj ponownie później",
         variant: "destructive",
       });
     } finally {

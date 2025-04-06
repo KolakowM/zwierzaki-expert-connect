@@ -3,15 +3,28 @@ import { Users, PawPrint, CalendarIcon, PieChart } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
 import ProfileStatus from "./ProfileStatus";
-import { Client, Pet, Visit } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { getClients } from "@/services/clientService";
+import { getPets } from "@/services/petService";
+import { getVisits } from "@/services/visitService";
 
-interface DashboardOverviewProps {
-  clients: Client[];
-  pets: Pet[];
-  visits: Visit[];
-}
+const DashboardOverview = () => {
+  // Fetch data using React Query
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: getClients,
+  });
 
-const DashboardOverview = ({ clients, pets, visits }: DashboardOverviewProps) => {
+  const { data: pets = [] } = useQuery({
+    queryKey: ['pets'],
+    queryFn: getPets,
+  });
+
+  const { data: visits = [] } = useQuery({
+    queryKey: ['visits'],
+    queryFn: getVisits,
+  });
+
   const stats = [
     {
       title: "Klienci",
