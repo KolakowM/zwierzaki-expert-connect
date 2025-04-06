@@ -14,13 +14,46 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserCircle, Mail, Lock, Shield } from "lucide-react";
+import { 
+  UserCircle, 
+  Mail, 
+  Lock, 
+  Shield, 
+  Award, 
+  Camera, 
+  Phone, 
+  MapPin, 
+  FileText,
+  Trash2
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
+// Form schemas
 const accountFormSchema = z.object({
   firstName: z.string().min(2, "Imię musi mieć co najmniej 2 znaki"),
   lastName: z.string().min(2, "Nazwisko musi mieć co najmniej 2 znaki"),
@@ -38,15 +71,45 @@ const passwordFormSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const profileFormSchema = z.object({
+  title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki").optional(),
+  description: z.string().min(10, "Opis musi mieć co najmniej 10 znaków").optional(),
+  specializations: z.array(z.string()).min(1, "Wybierz co najmniej jedną specjalizację").optional(),
+  services: z.array(z.string()).min(1, "Dodaj co najmniej jedną usługę").optional(),
+  education: z.array(z.string()).optional(),
+  experience: z.string().optional(),
+  location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki").optional(),
+  phoneNumber: z.string().min(9, "Podaj prawidłowy numer telefonu").optional(),
+  website: z.string().optional(),
+});
+
+// Types based on schemas
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
+// Available specializations
+const availableSpecializations = [
+  { id: "diet", label: "Dietetyka zwierzęca" },
+  { id: "behavior", label: "Behawiorysta" },
+  { id: "training", label: "Trener" },
+  { id: "groomer", label: "Groomer" },
+  { id: "vet", label: "Weterynarz" },
+  { id: "physio", label: "Fizjoterapeuta" },
+  { id: "alternative", label: "Medycyna alternatywna" },
+];
 
 export default function AccountSettings() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("general");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [services, setServices] = useState<string[]>([""]);
+  const [education, setEducation] = useState<string[]>([""]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  // Initialize forms
   const accountForm = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
@@ -64,6 +127,21 @@ export default function AccountSettings() {
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
+    },
+  });
+
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      specializations: [],
+      services: [],
+      education: [],
+      experience: "",
+      location: "",
+      phoneNumber: "",
+      website: "",
     },
   });
 
@@ -92,18 +170,71 @@ export default function AccountSettings() {
     }
   }, [isAuthenticated, navigate, toast]);
 
+  // Handle file input change for profile photo
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Add a new service input field
+  const addService = () => {
+    setServices([...services, ""]);
+  };
+
+  // Update a service at specific index
+  const updateService = (index: number, value: string) => {
+    const updatedServices = [...services];
+    updatedServices[index] = value;
+    setServices(updatedServices);
+    profileForm.setValue("services", updatedServices.filter(service => service.trim() !== ""));
+  };
+
+  // Remove a service at specific index
+  const removeService = (index: number) => {
+    const updatedServices = [...services];
+    updatedServices.splice(index, 1);
+    setServices(updatedServices);
+    profileForm.setValue("services", updatedServices.filter(service => service.trim() !== ""));
+  };
+
+  // Add a new education input field
+  const addEducation = () => {
+    setEducation([...education, ""]);
+  };
+
+  // Update education at specific index
+  const updateEducation = (index: number, value: string) => {
+    const updatedEducation = [...education];
+    updatedEducation[index] = value;
+    setEducation(updatedEducation);
+    profileForm.setValue("education", updatedEducation.filter(item => item.trim() !== ""));
+  };
+
+  // Remove education at specific index
+  const removeEducation = (index: number) => {
+    const updatedEducation = [...education];
+    updatedEducation.splice(index, 1);
+    setEducation(updatedEducation);
+    profileForm.setValue("education", updatedEducation.filter(item => item.trim() !== ""));
+  };
+
+  // Form submission handlers
   function onAccountSubmit(values: AccountFormValues) {
-    // Here you would typically update the user account through an API
     console.log("Account update values:", values);
     
     toast({
-      title: "Zaktualizowano profil",
+      title: "Zaktualizowano dane",
       description: "Twoje dane zostały pomyślnie zaktualizowane.",
     });
   }
 
   function onPasswordSubmit(values: PasswordFormValues) {
-    // Here you would typically update the password through an API
     console.log("Password change values:", values);
     
     toast({
@@ -116,6 +247,30 @@ export default function AccountSettings() {
       newPassword: "",
       confirmPassword: "",
     });
+  }
+
+  function onProfileSubmit(values: ProfileFormValues) {
+    // Filter out empty strings from services and education
+    values.services = values.services?.filter(service => service.trim() !== "");
+    values.education = values.education?.filter(edu => edu.trim() !== "");
+    
+    console.log("Profile update values:", values);
+    
+    toast({
+      title: "Profil zaktualizowany",
+      description: "Twój profil specjalisty został pomyślnie zaktualizowany.",
+    });
+  }
+
+  function handleDeleteAccount() {
+    console.log("Deleting account...");
+    toast({
+      title: "Konto usunięte",
+      description: "Twoje konto zostało usunięte. Przekierowujemy Cię do strony głównej.",
+      variant: "destructive",
+    });
+    logout();
+    navigate("/");
   }
 
   if (!isAuthenticated) {
@@ -132,17 +287,22 @@ export default function AccountSettings() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="general">
                 <Mail className="mr-2 h-4 w-4" />
                 Dane podstawowe
               </TabsTrigger>
               <TabsTrigger value="password">
                 <Lock className="mr-2 h-4 w-4" />
-                Zmiana hasła
+                Hasło i bezpieczeństwo
+              </TabsTrigger>
+              <TabsTrigger value="specialist">
+                <Award className="mr-2 h-4 w-4" />
+                Profil specjalisty
               </TabsTrigger>
             </TabsList>
 
+            {/* General account information tab */}
             <TabsContent value="general">
               <Card>
                 <CardHeader>
@@ -233,6 +393,7 @@ export default function AccountSettings() {
               </Card>
             </TabsContent>
 
+            {/* Password change and security tab */}
             <TabsContent value="password">
               <Card>
                 <CardHeader>
@@ -304,23 +465,368 @@ export default function AccountSettings() {
                   </form>
                 </Form>
               </Card>
+
+              <Card className="mt-6 border-amber-200 bg-amber-50">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center">
+                    <Shield className="mr-2 h-5 w-5 text-amber-500" />
+                    <CardTitle>Bezpieczeństwo konta</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Dla zwiększenia bezpieczeństwa, zalecamy regularne zmienianie hasła
+                    oraz włączenie weryfikacji dwuetapowej, gdy tylko będzie dostępna.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="mt-6 border-red-200">
+                <CardHeader>
+                  <CardTitle className="text-red-600">Niebezpieczna strefa</CardTitle>
+                  <CardDescription>
+                    Usunięcie konta jest nieodwracalne. Wszystkie Twoje dane zostaną trwale usunięte.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Usuń konto
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Czy na pewno chcesz usunąć konto?</DialogTitle>
+                        <DialogDescription>
+                          Ta akcja jest nieodwracalna. Spowoduje trwałe usunięcie Twojego konta i wszystkich 
+                          powiązanych z nim danych, w tym profilu, ustawień i historii działań.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Separator className="my-4" />
+                      <div className="flex justify-between">
+                        <DialogClose asChild>
+                          <Button variant="outline">Anuluj</Button>
+                        </DialogClose>
+                        <Button 
+                          variant="destructive" 
+                          onClick={handleDeleteAccount}
+                        >
+                          Tak, usuń moje konto
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Specialist profile tab */}
+            <TabsContent value="specialist">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profil specjalisty</CardTitle>
+                  <CardDescription>
+                    Uzupełnij swój profil specjalisty, aby był widoczny w katalogu.
+                  </CardDescription>
+                </CardHeader>
+                <Form {...profileForm}>
+                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
+                    <CardContent className="space-y-6">
+                      {/* Profile photo */}
+                      <div className="space-y-4">
+                        <FormLabel>Zdjęcie profilowe</FormLabel>
+                        <div className="flex items-center gap-6">
+                          <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted bg-muted">
+                            {photoPreview ? (
+                              <img 
+                                src={photoPreview} 
+                                alt="Profile preview" 
+                                className="h-full w-full object-cover" 
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-muted">
+                                <Camera className="h-12 w-12 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <Input
+                              id="photo"
+                              type="file"
+                              accept="image/*"
+                              onChange={handlePhotoChange}
+                              className="w-full"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Zalecany format: JPG lub PNG. Maksymalny rozmiar: 5MB
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Basic specialist info */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Dane podstawowe</h3>
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tytuł zawodowy</FormLabel>
+                              <FormControl>
+                                <Input placeholder="np. Dietetyk zwierzęcy, Behawiorysta psów" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Tytuł zawodowy, który będzie widoczny w twoim profilu
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Opis</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Opisz swoją specjalizację, doświadczenie i podejście do pracy..." 
+                                  className="min-h-[150px]"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Szczegółowy opis Twojej działalności, doświadczenia i metod pracy
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={profileForm.control}
+                          name="experience"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Doświadczenie</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Opisz swoje doświadczenie zawodowe..." 
+                                  className="min-h-[100px]"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Opisz swoje doświadczenie zawodowe, np. lata praktyki, współpraca z klinikami
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Education */}
+                      <div className="space-y-4">
+                        <FormLabel>Wykształcenie i certyfikaty</FormLabel>
+                        <FormDescription>
+                          Dodaj informacje o swoim wykształceniu, ukończonych kursach i certyfikatach
+                        </FormDescription>
+                        
+                        {education.map((edu, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              placeholder="np. Uniwersytet Przyrodniczy - Zootechnika"
+                              value={edu}
+                              onChange={(e) => updateEducation(index, e.target.value)}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => removeEducation(index)}
+                            >
+                              Usuń
+                            </Button>
+                          </div>
+                        ))}
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={addEducation}
+                        >
+                          Dodaj wykształcenie / certyfikat
+                        </Button>
+                      </div>
+
+                      {/* Specializations */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Specjalizacje</h3>
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="specializations"
+                          render={() => (
+                            <FormItem>
+                              <div className="mb-4">
+                                <FormLabel>Specjalizacje</FormLabel>
+                                <FormDescription>
+                                  Wybierz obszary, w których się specjalizujesz
+                                </FormDescription>
+                              </div>
+                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                {availableSpecializations.map((item) => (
+                                  <FormField
+                                    key={item.id}
+                                    control={profileForm.control}
+                                    name="specializations"
+                                    render={({ field }) => {
+                                      return (
+                                        <FormItem
+                                          key={item.id}
+                                          className="flex flex-row items-start space-x-3 space-y-0"
+                                        >
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={field.value?.includes(item.id)}
+                                              onCheckedChange={(checked) => {
+                                                return checked
+                                                  ? field.onChange([...field.value || [], item.id])
+                                                  : field.onChange(
+                                                      field.value?.filter(
+                                                        (value) => value !== item.id
+                                                      )
+                                                    )
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormLabel className="font-normal">
+                                            {item.label}
+                                          </FormLabel>
+                                        </FormItem>
+                                      )
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Services */}
+                      <div className="space-y-4">
+                        <FormLabel>Oferowane usługi</FormLabel>
+                        <FormDescription>
+                          Dodaj usługi, które oferujesz swoim klientom
+                        </FormDescription>
+                        
+                        {services.map((service, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              placeholder="np. Konsultacja dietetyczna, Szkolenie indywidualne"
+                              value={service}
+                              onChange={(e) => updateService(index, e.target.value)}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => removeService(index)}
+                            >
+                              Usuń
+                            </Button>
+                          </div>
+                        ))}
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={addService}
+                        >
+                          Dodaj usługę
+                        </Button>
+                      </div>
+
+                      {/* Contact details */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Dane kontaktowe</h3>
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="location"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Lokalizacja</FormLabel>
+                              <FormControl>
+                                <div className="flex items-center">
+                                  <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                                  <Input placeholder="np. Warszawa, Mokotów" {...field} />
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                Miasto lub dzielnica, w której przyjmujesz klientów
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={profileForm.control}
+                          name="phoneNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Numer telefonu</FormLabel>
+                              <FormControl>
+                                <div className="flex items-center">
+                                  <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+                                  <Input placeholder="np. 123456789" {...field} />
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                Numer telefonu do kontaktu z klientami
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={profileForm.control}
+                          name="website"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Strona internetowa</FormLabel>
+                              <FormControl>
+                                <div className="flex items-center">
+                                  <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                                  <Input placeholder="np. www.twoja-strona.pl" {...field} />
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                Twoja strona internetowa (opcjonalnie)
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit">Zapisz profil</Button>
+                    </CardFooter>
+                  </form>
+                </Form>
+              </Card>
             </TabsContent>
           </Tabs>
-
-          <Card className="border-amber-200 bg-amber-50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center">
-                <Shield className="mr-2 h-5 w-5 text-amber-500" />
-                <CardTitle>Bezpieczeństwo konta</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Dla zwiększenia bezpieczeństwa, zalecamy regularne zmienianie hasła
-                oraz włączenie weryfikacji dwuetapowej, gdy tylko będzie dostępna.
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </MainLayout>

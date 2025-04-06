@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Settings, LogOut, UserCircle, Edit } from "lucide-react";
+import { Settings, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -43,21 +43,7 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
                 </Link>
               </li>
               <li>
-                <Link to="/profile/edit">
-                  <NavigationMenuLink
-                    className={cn(
-                      "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Edit className="h-4 w-4" />
-                      <div className="text-sm font-medium leading-none">Uzupełnij profil specjalisty</div>
-                    </div>
-                  </NavigationMenuLink>
-                </Link>
-              </li>
-              <li>
-                <Link to="/dashboard/profile">
+                <Link to="/dashboard">
                   <NavigationMenuLink
                     className={cn(
                       "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -65,7 +51,7 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
                   >
                     <div className="flex items-center gap-2">
                       <Settings className="h-4 w-4" />
-                      <div className="text-sm font-medium leading-none">Ustawienia</div>
+                      <div className="text-sm font-medium leading-none">Panel specjalisty</div>
                     </div>
                   </NavigationMenuLink>
                 </Link>

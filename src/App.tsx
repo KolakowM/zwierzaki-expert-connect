@@ -24,7 +24,6 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Terms2 from "./pages/Terms2";
 import AccountSettings from "./pages/AccountSettings";
-import ProfileEditor from "./pages/ProfileEditor";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +53,6 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/regulamin" element={<Terms2 />} />
             <Route path="/account" element={<AccountSettings />} />
-            <Route path="/profile/edit" element={<ProfileEditor />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
