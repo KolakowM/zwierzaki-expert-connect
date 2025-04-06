@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { Card } from "@/components/ui/card";
@@ -22,12 +21,13 @@ import {
   PlusCircle
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getPets, deletePet } from "@/services/petService";
+import { getPets, deletePet, getRelatedEntitiesCount } from "@/services/petService";
 import { getClients } from "@/services/clientService";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Pet } from "@/types";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 
 const AdminPets = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,13 +86,11 @@ const AdminPets = () => {
     });
   };
 
-  // Helper function to get client name from clientId
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
     return client ? `${client.firstName} ${client.lastName}` : "Nieznany";
   };
   
-  // Filter and sort pets
   const filteredPets = pets
     .filter(pet => 
       pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -132,7 +130,6 @@ const AdminPets = () => {
       return 0;
     });
 
-  // Find a client to use for new pet creation (default to first client if available)
   const defaultClientForNewPet = clients.length > 0 ? clients[0].id : undefined;
 
   return (
@@ -258,14 +255,7 @@ const AdminPets = () => {
                         >
                           <Edit className="h-4 w-4" />
                         </ResponsivePetForm>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => handleDeletePet(pet.id, pet.name)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <DeletePetButton pet={pet} />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -282,6 +272,127 @@ const AdminPets = () => {
         </div>
       </Card>
     </>
+  );
+};
+
+const DeletePetButton = ({ pet }: { pet: Pet }) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [dialogProps, setDialogProps] = useState<{
+    title: string;
+    description: string;
+    additionalWarning?: string;
+    onConfirm: () => Promise<void>;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const prepareDeleteDialog = async () => {
+    try {
+      setIsLoading(true);
+      const props = await handleDeletePet(pet);
+      setDialogProps(props);
+    } catch (error) {
+      console.error("Error preparing delete dialog:", error);
+      toast({
+        title: "Błąd",
+        description: "Wystąpił problem podczas przygotowywania usunięcia. Spróbuj ponownie.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeletePet = async (pet: Pet) => {
+    try {
+      const relatedEntities = await getRelatedEntitiesCount(pet.id);
+      
+      if (
+        relatedEntities.visitsCount > 0 || 
+        relatedEntities.careProgramsCount > 0
+      ) {
+        const deleteMessage = `
+          Wraz ze zwierzęciem zostaną również usunięte:
+          ${relatedEntities.visitsCount > 0 ? `\n- ${relatedEntities.visitsCount} wizyt` : ''}
+          ${relatedEntities.careProgramsCount > 0 ? `\n- ${relatedEntities.careProgramsCount} programów opieki` : ''}
+        `;
+        
+        return {
+          title: `Usuń zwierzę: ${pet.name}`,
+          description: "Czy na pewno chcesz usunąć to zwierzę?",
+          additionalWarning: deleteMessage.trim(),
+          onConfirm: async () => {
+            await deletePet(pet.id);
+            queryClient.invalidateQueries({ queryKey: ['pets'] });
+            
+            toast({
+              title: "Zwierzę usunięte",
+              description: `Zwierzę ${pet.name} oraz wszystkie powiązane dane zostały pomyślnie usunięte`
+            });
+          }
+        };
+      } else {
+        return {
+          title: `Usuń zwierzę: ${pet.name}`,
+          description: "Czy na pewno chcesz usunąć to zwierzę?",
+          onConfirm: async () => {
+            await deletePet(pet.id);
+            queryClient.invalidateQueries({ queryKey: ['pets'] });
+            
+            toast({
+              title: "Zwierzę usunięte",
+              description: `Zwierzę ${pet.name} zostało pomyślnie usunięte`
+            });
+          }
+        };
+      }
+    } catch (error) {
+      console.error("Error preparing pet deletion:", error);
+      toast({
+        title: "Błąd",
+        description: "Wystąpił błąd podczas przygotowywania usuwania zwierzęcia. Spróbuj ponownie.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Button variant="ghost" size="icon" disabled>
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-r-transparent" />
+      </Button>
+    );
+  }
+
+  return (
+    dialogProps ? (
+      <ConfirmDeleteDialog
+        title={dialogProps.title}
+        description={dialogProps.description}
+        additionalWarning={dialogProps.additionalWarning}
+        onConfirm={dialogProps.onConfirm}
+        triggerButtonVariant="ghost"
+        triggerButtonSize="icon"
+      >
+        <Button
+          variant="ghost" 
+          size="icon" 
+          className="text-red-500 hover:text-red-700"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </ConfirmDeleteDialog>
+    ) : (
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="text-red-500 hover:text-red-700"
+        onClick={prepareDeleteDialog}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    )
   );
 };
 

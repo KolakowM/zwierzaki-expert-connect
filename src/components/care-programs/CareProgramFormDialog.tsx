@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import CareProgramForm from "./CareProgramForm";
-import { Clipboard, Edit } from "lucide-react";
+import { ListPlus, Edit } from "lucide-react";
 import { CareProgram } from "@/types";
 import { createCareProgram, updateCareProgram } from "@/services/careProgramService";
 
@@ -26,7 +26,7 @@ interface CareProgramFormDialogProps {
 
 const CareProgramFormDialog = ({
   petId,
-  buttonText = "Nowy plan opieki",
+  buttonText = "Dodaj program opieki",
   buttonVariant = "default",
   buttonSize = "default",
   title,
@@ -41,7 +41,7 @@ const CareProgramFormDialog = ({
   const { toast } = useToast();
 
   // Set default title based on whether we're editing or creating
-  const dialogTitle = title || (isEditing ? "Edytuj plan opieki" : "Utwórz nowy plan opieki");
+  const dialogTitle = title || (isEditing ? "Edytuj program opieki" : "Dodaj nowy program opieki");
 
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
@@ -55,35 +55,35 @@ const CareProgramFormDialog = ({
       setIsSubmitting(true);
       console.log("Saving care program:", formData);
       
-      let careProgramData: CareProgram;
+      let careProgram: CareProgram;
       
       if (isEditing && defaultValues?.id) {
         // Update existing care program
-        careProgramData = await updateCareProgram(defaultValues.id, {
+        careProgram = await updateCareProgram(defaultValues.id, {
           ...formData,
-          petId,
+          petId
         });
         
         toast({
-          title: "Plan opieki zaktualizowany",
-          description: `Plan opieki "${formData.name}" został zaktualizowany`
+          title: "Program opieki zaktualizowany",
+          description: `Program opieki został zaktualizowany`
         });
       } else {
         // Create new care program
-        careProgramData = await createCareProgram({
+        careProgram = await createCareProgram({
           ...formData,
-          petId,
+          petId
         });
         
         toast({
-          title: "Plan opieki utworzony",
-          description: `Plan opieki "${formData.name}" został utworzony`,
+          title: "Program opieki dodany",
+          description: `Program opieki został pomyślnie dodany`,
         });
       }
 
       // Call the callback if provided
       if (onCareProgramSaved) {
-        onCareProgramSaved(careProgramData);
+        onCareProgramSaved(careProgram);
       }
 
       // Close the dialog
@@ -91,7 +91,7 @@ const CareProgramFormDialog = ({
     } catch (error) {
       console.error("Error saving care program:", error);
       toast({
-        title: isEditing ? "Błąd podczas aktualizacji planu" : "Błąd podczas tworzenia planu",
+        title: isEditing ? "Błąd podczas aktualizacji programu opieki" : "Błąd podczas dodawania programu opieki",
         description: "Spróbuj ponownie później",
         variant: "destructive",
       });
@@ -105,7 +105,7 @@ const CareProgramFormDialog = ({
       <DialogTrigger asChild>
         {children || (
           <Button variant={buttonVariant} size={buttonSize} className={className}>
-            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Clipboard className="mr-2 h-4 w-4" />}
+            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <ListPlus className="mr-2 h-4 w-4" />}
             {buttonText}
           </Button>
         )}

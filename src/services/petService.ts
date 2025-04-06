@@ -95,6 +95,29 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
 };
 
 export const deletePet = async (id: string): Promise<void> => {
+  // 1. Usuń powiązane programy opieki
+  const { error: careProgramsError } = await supabase
+    .from('care_programs')
+    .delete()
+    .eq('petid', id);
+  
+  if (careProgramsError) {
+    console.error(`Error deleting care programs for pet with id ${id}:`, careProgramsError);
+    throw careProgramsError;
+  }
+  
+  // 2. Usuń powiązane wizyty
+  const { error: visitsError } = await supabase
+    .from('visits')
+    .delete()
+    .eq('petid', id);
+  
+  if (visitsError) {
+    console.error(`Error deleting visits for pet with id ${id}:`, visitsError);
+    throw visitsError;
+  }
+  
+  // 3. Usuń zwierzę
   const { error } = await supabase
     .from('pets')
     .delete()
@@ -104,4 +127,36 @@ export const deletePet = async (id: string): Promise<void> => {
     console.error(`Error deleting pet with id ${id}:`, error);
     throw error;
   }
+};
+
+export const getRelatedEntitiesCount = async (petId: string): Promise<{
+  visitsCount: number;
+  careProgramsCount: number;
+}> => {
+  // 1. Pobierz liczbę wizyt
+  const { count: visitsCount, error: visitsError } = await supabase
+    .from('visits')
+    .select('id', { count: 'exact', head: true })
+    .eq('petid', petId);
+  
+  if (visitsError) {
+    console.error(`Error counting visits for pet ${petId}:`, visitsError);
+    throw visitsError;
+  }
+  
+  // 2. Pobierz liczbę programów opieki
+  const { count: careProgramsCount, error: programsError } = await supabase
+    .from('care_programs')
+    .select('id', { count: 'exact', head: true })
+    .eq('petid', petId);
+  
+  if (programsError) {
+    console.error(`Error counting care programs for pet ${petId}:`, programsError);
+    throw programsError;
+  }
+  
+  return {
+    visitsCount: visitsCount || 0,
+    careProgramsCount: careProgramsCount || 0
+  };
 };
