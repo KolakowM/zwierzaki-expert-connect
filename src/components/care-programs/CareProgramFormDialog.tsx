@@ -46,8 +46,8 @@ const CareProgramFormDialog = ({
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
-    startDate: defaultValues.startDate ? (defaultValues.startDate instanceof Date ? defaultValues.startDate : new Date(defaultValues.startDate)) : undefined,
-    endDate: defaultValues.endDate ? (defaultValues.endDate instanceof Date ? defaultValues.endDate : new Date(defaultValues.endDate)) : undefined
+    startDate: defaultValues.startDate ? (typeof defaultValues.startDate === 'string' ? new Date(defaultValues.startDate) : defaultValues.startDate) : undefined,
+    endDate: defaultValues.endDate ? (typeof defaultValues.endDate === 'string' ? new Date(defaultValues.endDate) : defaultValues.endDate) : undefined
   } : undefined;
 
   const handleSubmit = async (formData: any) => {

@@ -22,14 +22,13 @@ import {
   Calendar,
   Weight,
   FileText,
-  AlertCircle,
   Stethoscope,
   Edit,
   Plus,
-  Download,
   Clipboard,
+  Trash2
 } from "lucide-react";
-import { getPetById } from "@/services/petService";
+import { getPetById, deletePet } from "@/services/petService";
 import { getClientById } from "@/services/clientService";
 import { getVisitsByPetId } from "@/services/visitService";
 import { getCareProgramsByPetId } from "@/services/careProgramService";
@@ -37,6 +36,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
 import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 
 const PetProfile = () => {
   const { toast } = useToast();
@@ -121,7 +121,7 @@ const PetProfile = () => {
     });
   };
 
-  const handleVisitAdded = () => {
+  const handleVisitAdded = (visit: Visit) => {
     // React Query will automatically refetch the visits data
     queryClient.invalidateQueries({ queryKey: ['visits', id] });
     toast({
@@ -130,13 +130,40 @@ const PetProfile = () => {
     });
   };
 
-  const handleCareProgramAdded = () => {
+  const handleCareProgramAdded = (careProgram: CareProgram) => {
     // React Query will automatically refetch the care programs data
     queryClient.invalidateQueries({ queryKey: ['carePrograms', id] });
     toast({
       title: "Plan opieki utworzony pomyślnie",
       description: "Nowy plan opieki został zapisany"
     });
+  };
+
+  const handleDeletePet = async () => {
+    try {
+      if (!pet?.id) return;
+      
+      await deletePet(pet.id);
+      
+      toast({
+        title: "Zwierzę usunięte",
+        description: `${pet.name} oraz wszystkie powiązane dane zostały pomyślnie usunięte`
+      });
+      
+      // Navigate back to the owner's page if available, otherwise to clients page
+      if (pet.clientId) {
+        navigate(`/clients/${pet.clientId}`);
+      } else {
+        navigate("/clients");
+      }
+    } catch (error) {
+      console.error("Error deleting pet:", error);
+      toast({
+        title: "Błąd podczas usuwania zwierzęcia",
+        description: "Wystąpił błąd podczas usuwania zwierzęcia. Spróbuj ponownie później.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -174,6 +201,17 @@ const PetProfile = () => {
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
   const petWeight = pet.weight ? `${pet.weight} kg` : "Nieznana";
 
+  // Calculate total entities that would be deleted with this pet
+  const totalVisits = visits.length;
+  const totalCarePrograms = carePrograms.length;
+  let deleteWarning = '';
+  
+  if (totalVisits > 0 || totalCarePrograms > 0) {
+    deleteWarning = `Wraz ze zwierzęciem zostaną również usunięte:
+    ${totalVisits > 0 ? `\n- ${totalVisits} wizyt` : ''}
+    ${totalCarePrograms > 0 ? `\n- ${totalCarePrograms} programów opieki` : ''}`;
+  }
+
   return (
     <MainLayout>
       <div className="container py-8">
@@ -182,16 +220,27 @@ const PetProfile = () => {
             <PawPrint className="h-6 w-6 mr-2" />
             <h1 className="text-2xl font-bold">{pet.name}</h1>
           </div>
-          {pet.id && pet.clientId && (
-            <ResponsivePetForm
-              clientId={pet.clientId}
-              buttonText="Edytuj profil"
-              buttonVariant="outline"
-              defaultValues={pet}
-              isEditing={true}
-              onPetSaved={handlePetUpdated}
+          <div className="flex space-x-2">
+            {pet.id && pet.clientId && (
+              <ResponsivePetForm
+                clientId={pet.clientId}
+                buttonText="Edytuj profil"
+                buttonVariant="outline"
+                defaultValues={pet}
+                isEditing={true}
+                onPetSaved={handlePetUpdated}
+              />
+            )}
+            
+            <ConfirmDeleteDialog
+              title={`Usuń zwierzę: ${pet.name}`}
+              description="Czy na pewno chcesz usunąć to zwierzę?"
+              additionalWarning={deleteWarning}
+              onConfirm={handleDeletePet}
+              triggerButtonVariant="destructive"
+              triggerButtonText="Usuń zwierzę"
             />
-          )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -363,7 +412,7 @@ const PetProfile = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  {pet.id && pet.clientId && (
+                  {pet.id && (
                     <ResponsiveCareProgramForm
                       petId={pet.id}
                       buttonText="Dodaj plan opieki"
@@ -559,10 +608,6 @@ const PetProfile = () => {
                           <Button variant="outline" size="sm">
                             <Edit className="mr-2 h-4 w-4" />
                             Edytuj
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4" />
-                            Eksportuj PDF
                           </Button>
                         </CardFooter>
                       </Card>

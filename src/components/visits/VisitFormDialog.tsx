@@ -48,8 +48,8 @@ const VisitFormDialog = ({
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
-    date: defaultValues.date ? (defaultValues.date instanceof Date ? defaultValues.date : new Date(defaultValues.date)) : undefined,
-    followUpDate: defaultValues.followUpDate ? (defaultValues.followUpDate instanceof Date ? defaultValues.followUpDate : new Date(defaultValues.followUpDate)) : undefined
+    date: defaultValues.date ? (typeof defaultValues.date === 'string' ? new Date(defaultValues.date) : defaultValues.date) : undefined,
+    followUpDate: defaultValues.followUpDate ? (typeof defaultValues.followUpDate === 'string' ? new Date(defaultValues.followUpDate) : defaultValues.followUpDate) : undefined
   } : undefined;
 
   const handleSubmit = async (formData: any) => {

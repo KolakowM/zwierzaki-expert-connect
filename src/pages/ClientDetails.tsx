@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthProvider"; // Updated import path
+import { useAuth } from "@/contexts/AuthProvider";
 import { Client, Pet, Visit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -26,17 +26,21 @@ import {
   Plus,
   PawPrint,
   FileText,
+  Trash2
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getClientById } from "@/services/clientService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getClientById, deleteClient } from "@/services/clientService";
 import { getPets } from "@/services/petService";
 import { getVisits } from "@/services/visitService";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
+import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 
 const ClientDetails = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
@@ -116,6 +120,37 @@ const ClientDetails = () => {
     });
   };
 
+  const handleVisitAdded = (visit: Visit) => {
+    // React Query will automatically refetch the visits data
+    queryClient.invalidateQueries({ queryKey: ['visits'] });
+    toast({
+      title: "Wizyta dodana pomyślnie",
+      description: "Nowa wizyta została zapisana"
+    });
+  };
+
+  const handleDeleteClient = async () => {
+    try {
+      if (!client?.id) return;
+      
+      await deleteClient(client.id);
+      
+      toast({
+        title: "Klient usunięty",
+        description: `Klient ${client.firstName} ${client.lastName} oraz wszystkie powiązane dane zostały pomyślnie usunięte`
+      });
+      
+      navigate("/clients");
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast({
+        title: "Błąd podczas usuwania klienta",
+        description: "Wystąpił błąd podczas usuwania klienta. Spróbuj ponownie później.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (isLoadingClient) {
     return (
       <MainLayout>
@@ -148,6 +183,17 @@ const ClientDetails = () => {
     return null;
   }
 
+  // Calculate total entities that would be deleted with this client
+  const totalPets = pets.length;
+  const totalVisits = visits.length;
+  let deleteWarning = '';
+  
+  if (totalPets > 0 || totalVisits > 0) {
+    deleteWarning = `Wraz z klientem zostaną również usunięte:
+    ${totalPets > 0 ? `\n- ${totalPets} zwierząt` : ''}
+    ${totalVisits > 0 ? `\n- ${totalVisits} wizyt` : ''}`;
+  }
+
   return (
     <MainLayout>
       <div className="container py-8">
@@ -156,14 +202,25 @@ const ClientDetails = () => {
             <User className="h-6 w-6 mr-2" />
             <h1 className="text-2xl font-bold">{client.firstName} {client.lastName}</h1>
           </div>
-          <ResponsiveClientForm 
-            buttonText="Edytuj klienta" 
-            buttonVariant="outline" 
-            buttonSize="default"
-            title={`Edytuj dane: ${client.firstName} ${client.lastName}`}
-            defaultValues={client}
-            onClientSaved={handleClientUpdated}
-          />
+          <div className="flex space-x-2">
+            <ResponsiveClientForm 
+              buttonText="Edytuj klienta" 
+              buttonVariant="outline" 
+              buttonSize="default"
+              title={`Edytuj dane: ${client.firstName} ${client.lastName}`}
+              defaultValues={client}
+              onClientSaved={handleClientUpdated}
+            />
+            
+            <ConfirmDeleteDialog
+              title={`Usuń klienta: ${client.firstName} ${client.lastName}`}
+              description="Czy na pewno chcesz usunąć tego klienta?"
+              additionalWarning={deleteWarning}
+              onConfirm={handleDeleteClient}
+              triggerButtonVariant="destructive"
+              triggerButtonText="Usuń klienta"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -317,10 +374,15 @@ const ClientDetails = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj wizytę
-                  </Button>
+                  {client.id && pets.length > 0 && (
+                    <ResponsiveVisitForm
+                      petId={pets[0].id}
+                      clientId={client.id}
+                      buttonText="Dodaj wizytę"
+                      buttonSize="sm"
+                      onVisitSaved={handleVisitAdded}
+                    />
+                  )}
                 </CardFooter>
               </Card>
             </div>
@@ -369,9 +431,11 @@ const ClientDetails = () => {
                           <TableCell>{pet.age ? `${pet.age} lat` : '—'}</TableCell>
                           <TableCell>{pet.sex || '—'}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link to={`/pets/${pet.id}`}>Szczegóły</Link>
-                            </Button>
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="ghost" size="sm" asChild>
+                                <Link to={`/pets/${pet.id}`}>Szczegóły</Link>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -407,10 +471,14 @@ const ClientDetails = () => {
                     Wszystkie wizyty i konsultacje tego klienta
                   </CardDescription>
                 </div>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Dodaj wizytę
-                </Button>
+                {client.id && pets.length > 0 && (
+                  <ResponsiveVisitForm
+                    petId={pets[0].id}
+                    clientId={client.id}
+                    buttonText="Dodaj wizytę"
+                    onVisitSaved={handleVisitAdded}
+                  />
+                )}
               </CardHeader>
               <CardContent>
                 {visits.length > 0 ? (
@@ -466,10 +534,15 @@ const ClientDetails = () => {
                     <p className="text-muted-foreground mt-1">
                       Ten klient nie ma jeszcze zarejestrowanych wizyt
                     </p>
-                    <Button className="mt-4">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Zaplanuj pierwszą wizytę
-                    </Button>
+                    {client.id && pets.length > 0 && (
+                      <ResponsiveVisitForm
+                        petId={pets[0].id}
+                        clientId={client.id}
+                        buttonText="Zaplanuj pierwszą wizytę"
+                        className="mt-4"
+                        onVisitSaved={handleVisitAdded}
+                      />
+                    )}
                   </div>
                 )}
               </CardContent>
