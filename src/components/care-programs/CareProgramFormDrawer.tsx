@@ -21,10 +21,14 @@ interface CareProgramFormDrawerProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   title?: string;
-  defaultValues?: Partial<CareProgram>;
+  defaultValues?: Partial<CareProgram & {
+    startDate?: Date | string;
+    endDate?: Date | string;
+  }>;
   onCareProgramSaved?: (careProgram: CareProgram) => void;
   className?: string;
   isEditing?: boolean;
+  children?: React.ReactNode;
 }
 
 const CareProgramFormDrawer = ({
@@ -37,6 +41,7 @@ const CareProgramFormDrawer = ({
   onCareProgramSaved,
   className,
   isEditing = false,
+  children,
 }: CareProgramFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,8 +53,8 @@ const CareProgramFormDrawer = ({
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
-    startDate: defaultValues.startDate ? new Date(defaultValues.startDate) : undefined,
-    endDate: defaultValues.endDate ? new Date(defaultValues.endDate) : undefined
+    startDate: defaultValues.startDate ? (defaultValues.startDate instanceof Date ? defaultValues.startDate : new Date(defaultValues.startDate)) : undefined,
+    endDate: defaultValues.endDate ? (defaultValues.endDate instanceof Date ? defaultValues.endDate : new Date(defaultValues.endDate)) : undefined
   } : undefined;
 
   const handleSubmit = async (formData: any) => {
@@ -105,10 +110,12 @@ const CareProgramFormDrawer = ({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant={buttonVariant} size={buttonSize} className={className}>
-          {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Clipboard className="mr-2 h-4 w-4" />}
-          {buttonText}
-        </Button>
+        {children || (
+          <Button variant={buttonVariant} size={buttonSize} className={className}>
+            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Clipboard className="mr-2 h-4 w-4" />}
+            {buttonText}
+          </Button>
+        )}
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="text-left">

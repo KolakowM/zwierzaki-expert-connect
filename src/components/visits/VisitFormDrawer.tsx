@@ -22,10 +22,14 @@ interface VisitFormDrawerProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   title?: string;
-  defaultValues?: Partial<Visit>;
+  defaultValues?: Partial<Visit & {
+    date?: Date | string;
+    followUpDate?: Date | string;
+  }>;
   onVisitSaved?: (visit: Visit) => void;
   className?: string;
   isEditing?: boolean;
+  children?: React.ReactNode;
 }
 
 const VisitFormDrawer = ({
@@ -39,6 +43,7 @@ const VisitFormDrawer = ({
   onVisitSaved,
   className,
   isEditing = false,
+  children,
 }: VisitFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,8 +55,8 @@ const VisitFormDrawer = ({
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
-    date: defaultValues.date ? new Date(defaultValues.date) : undefined,
-    followUpDate: defaultValues.followUpDate ? new Date(defaultValues.followUpDate) : undefined
+    date: defaultValues.date ? (defaultValues.date instanceof Date ? defaultValues.date : new Date(defaultValues.date)) : undefined,
+    followUpDate: defaultValues.followUpDate ? (defaultValues.followUpDate instanceof Date ? defaultValues.followUpDate : new Date(defaultValues.followUpDate)) : undefined
   } : undefined;
 
   const handleSubmit = async (formData: any) => {
@@ -109,10 +114,12 @@ const VisitFormDrawer = ({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant={buttonVariant} size={buttonSize} className={className}>
-          {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
-          {buttonText}
-        </Button>
+        {children || (
+          <Button variant={buttonVariant} size={buttonSize} className={className}>
+            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
+            {buttonText}
+          </Button>
+        )}
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="text-left">

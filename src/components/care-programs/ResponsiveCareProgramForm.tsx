@@ -21,21 +21,9 @@ interface ResponsiveCareProgramFormProps {
 const ResponsiveCareProgramForm = (props: ResponsiveCareProgramFormProps) => {
   const isMobile = useIsMobile();
   
-  // Convert string dates to Date objects if they exist
-  const convertedDefaultValues = props.defaultValues ? {
-    ...props.defaultValues,
-    startDate: props.defaultValues.startDate ? new Date(props.defaultValues.startDate) : undefined,
-    endDate: props.defaultValues.endDate ? new Date(props.defaultValues.endDate) : undefined,
-  } : undefined;
-  
-  const updatedProps = {
-    ...props,
-    defaultValues: convertedDefaultValues
-  };
-  
   return isMobile 
-    ? <CareProgramFormDrawer {...updatedProps} /> 
-    : <CareProgramFormDialog {...updatedProps} />;
+    ? <CareProgramFormDrawer {...props} /> 
+    : <CareProgramFormDialog {...props} />;
 };
 
 export default ResponsiveCareProgramForm;

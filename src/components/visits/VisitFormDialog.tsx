@@ -15,10 +15,14 @@ interface VisitFormDialogProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   title?: string;
-  defaultValues?: Partial<Visit>;
+  defaultValues?: Partial<Visit & {
+    date?: Date | string;
+    followUpDate?: Date | string;
+  }>;
   onVisitSaved?: (visit: Visit) => void;
   className?: string;
   isEditing?: boolean;
+  children?: React.ReactNode;
 }
 
 const VisitFormDialog = ({
@@ -32,6 +36,7 @@ const VisitFormDialog = ({
   onVisitSaved,
   className,
   isEditing = false,
+  children,
 }: VisitFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,8 +48,8 @@ const VisitFormDialog = ({
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
-    date: defaultValues.date ? new Date(defaultValues.date) : undefined,
-    followUpDate: defaultValues.followUpDate ? new Date(defaultValues.followUpDate) : undefined
+    date: defaultValues.date ? (defaultValues.date instanceof Date ? defaultValues.date : new Date(defaultValues.date)) : undefined,
+    followUpDate: defaultValues.followUpDate ? (defaultValues.followUpDate instanceof Date ? defaultValues.followUpDate : new Date(defaultValues.followUpDate)) : undefined
   } : undefined;
 
   const handleSubmit = async (formData: any) => {
@@ -102,10 +107,12 @@ const VisitFormDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={buttonVariant} size={buttonSize} className={className}>
-          {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
-          {buttonText}
-        </Button>
+        {children || (
+          <Button variant={buttonVariant} size={buttonSize} className={className}>
+            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
+            {buttonText}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
