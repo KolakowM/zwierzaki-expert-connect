@@ -4,7 +4,6 @@ import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { mockClients, mockPets, mockVisits } from "@/data/mockData";
 import { Client, Pet, Visit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -27,8 +26,11 @@ import {
   Plus,
   PawPrint,
   FileText,
-  Clipboard,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getClientById } from "@/services/clientService";
+import { getPets } from "@/services/petService";
+import { getVisits } from "@/services/visitService";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
 
@@ -37,11 +39,9 @@ const ClientDetails = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { id } = useParams();
-  const [client, setClient] = useState<Client | null>(null);
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [visits, setVisits] = useState<Visit[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
@@ -50,33 +50,58 @@ const ClientDetails = () => {
         variant: "destructive"
       });
       navigate("/login");
-      return;
     }
+  }, [isAuthenticated, navigate, toast]);
 
-    // Fetch client details
-    const foundClient = mockClients.find(c => c.id === id);
-    if (!foundClient) {
+  // Fetch client details using React Query
+  const { 
+    data: client, 
+    isLoading: isLoadingClient,
+    isError: isClientError
+  } = useQuery({
+    queryKey: ['client', id],
+    queryFn: () => id ? getClientById(id) : null,
+    enabled: !!id && isAuthenticated,
+  });
+
+  // Fetch client's pets using React Query
+  const { 
+    data: allPets = [], 
+    isLoading: isLoadingPets 
+  } = useQuery({
+    queryKey: ['pets'],
+    queryFn: getPets,
+    enabled: isAuthenticated,
+  });
+
+  // Fetch client's visits using React Query
+  const { 
+    data: allVisits = [], 
+    isLoading: isLoadingVisits 
+  } = useQuery({
+    queryKey: ['visits'],
+    queryFn: getVisits,
+    enabled: isAuthenticated,
+  });
+
+  // Filter pets and visits for this client
+  const pets = allPets.filter(p => p.clientId === id);
+  const visits = allVisits.filter(v => v.clientId === id);
+
+  // Show error if client not found
+  useEffect(() => {
+    if (isClientError) {
       toast({
         title: "Nie znaleziono klienta",
-        description: "Klient o podanym identyfikatorze nie istnieje",
+        description: "Klient o podanym identyfikatorze nie istnieje lub wystąpił błąd",
         variant: "destructive"
       });
       navigate("/clients");
-      return;
     }
-    setClient(foundClient);
-
-    // Fetch client's pets
-    const clientPets = mockPets.filter(p => p.clientId === id);
-    setPets(clientPets);
-
-    // Fetch client's visits
-    const clientVisits = mockVisits.filter(v => v.clientId === id);
-    setVisits(clientVisits);
-  }, [id, isAuthenticated, navigate, toast]);
+  }, [isClientError, navigate, toast]);
 
   const handlePetSaved = (newPet: Pet) => {
-    setPets(prevPets => [newPet, ...prevPets]);
+    // React Query will automatically refetch the pets data
     toast({
       title: "Zwierzak dodany pomyślnie",
       description: `${newPet.name} został dodany do klientów ${client?.firstName} ${client?.lastName}`
@@ -84,15 +109,43 @@ const ClientDetails = () => {
   };
 
   const handleClientUpdated = (updatedClient: Client) => {
-    setClient(updatedClient);
+    // React Query will automatically refetch the client data
     toast({
       title: "Dane klienta zaktualizowane",
       description: "Zmiany zostały zapisane pomyślnie"
     });
   };
 
+  if (isLoadingClient) {
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <div className="flex items-center space-x-2">
+            <div className="h-6 w-6 rounded-full bg-muted/50 animate-pulse"></div>
+            <div className="h-8 w-48 bg-muted/50 animate-pulse rounded"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            {[1, 2].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-5 w-32 bg-muted/50 rounded"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="h-4 w-full bg-muted/50 rounded"></div>
+                    <div className="h-4 w-3/4 bg-muted/50 rounded"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   if (!client) {
-    return null; // Could add a loading skeleton here
+    return null;
   }
 
   return (

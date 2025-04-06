@@ -20,14 +20,19 @@ import {
   Eye,
   UserPlus
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getClients } from "@/services/clientService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getClients, deleteClient } from "@/services/clientService";
 import { Link } from "react-router-dom";
+import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
+import { useToast } from "@/hooks/use-toast";
+import { Client } from "@/types";
 
 const AdminClients = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -40,6 +45,37 @@ const AdminClients = () => {
     } else {
       setSortBy(column);
       setSortOrder("asc");
+    }
+  };
+  
+  const handleClientSaved = (client: Omit<Client, 'id' | 'createdAt'>) => {
+    // Invalidate clients query to refresh data after adding a new client
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+    
+    toast({
+      title: "Klient dodany pomyślnie",
+      description: `${client.firstName} ${client.lastName} został dodany do bazy klientów`
+    });
+  };
+
+  const handleDeleteClient = async (id: string, name: string) => {
+    if (confirm(`Czy na pewno chcesz usunąć klienta ${name}?`)) {
+      try {
+        await deleteClient(id);
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        
+        toast({
+          title: "Klient usunięty",
+          description: `Klient ${name} został pomyślnie usunięty`
+        });
+      } catch (error) {
+        console.error("Error deleting client:", error);
+        toast({
+          title: "Błąd podczas usuwania",
+          description: "Nie udało się usunąć klienta. Spróbuj ponownie.",
+          variant: "destructive"
+        });
+      }
     }
   };
   
@@ -101,9 +137,13 @@ const AdminClients = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="w-full sm:w-auto">
+          <ResponsiveClientForm
+            buttonText="Dodaj Klienta"
+            buttonVariant="default"
+            onClientSaved={handleClientSaved}
+          >
             <UserPlus className="mr-2 h-4 w-4" /> Dodaj Klienta
-          </Button>
+          </ResponsiveClientForm>
         </div>
         
         <div className="overflow-x-auto">
@@ -186,10 +226,27 @@ const AdminClients = () => {
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" asChild>
+                          <ResponsiveClientForm
+                            buttonText=""
+                            buttonVariant="ghost"
+                            buttonSize="icon"
+                            defaultValues={client}
+                            title={`Edytuj: ${client.firstName} ${client.lastName}`}
+                            onClientSaved={() => {
+                              queryClient.invalidateQueries({ queryKey: ['clients'] });
+                              queryClient.invalidateQueries({ queryKey: ['client', client.id] });
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </ResponsiveClientForm>
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteClient(client.id, `${client.firstName} ${client.lastName}`)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
