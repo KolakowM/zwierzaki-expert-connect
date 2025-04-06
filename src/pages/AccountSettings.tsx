@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,50 +6,15 @@ import { useToast } from "@/hooks/use-toast";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  UserCircle, 
-  Mail, 
-  Lock, 
-  Shield, 
-  Award, 
-  Camera, 
-  Phone, 
-  MapPin, 
-  FileText,
-  Trash2
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { UserCircle, Mail, Lock, Shield, Award, Camera, Phone, MapPin, FileText, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 
 // Form schemas
@@ -59,18 +23,16 @@ const accountFormSchema = z.object({
   lastName: z.string().min(2, "Nazwisko musi mieć co najmniej 2 znaki"),
   email: z.string().email("Wprowadź poprawny adres email"),
   phone: z.string().optional(),
-  city: z.string().optional(),
+  city: z.string().optional()
 });
-
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(1, "Obecne hasło jest wymagane"),
   newPassword: z.string().min(8, "Nowe hasło musi mieć co najmniej 8 znaków"),
-  confirmPassword: z.string().min(8, "Potwierdź nowe hasło"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
+  confirmPassword: z.string().min(8, "Potwierdź nowe hasło")
+}).refine(data => data.newPassword === data.confirmPassword, {
   message: "Hasła nie są identyczne",
-  path: ["confirmPassword"],
+  path: ["confirmPassword"]
 });
-
 const profileFormSchema = z.object({
   title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki").optional(),
   description: z.string().min(10, "Opis musi mieć co najmniej 10 znaków").optional(),
@@ -80,7 +42,7 @@ const profileFormSchema = z.object({
   experience: z.string().optional(),
   location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki").optional(),
   phoneNumber: z.string().min(9, "Podaj prawidłowy numer telefonu").optional(),
-  website: z.string().optional(),
+  website: z.string().optional()
 });
 
 // Types based on schemas
@@ -89,20 +51,38 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 // Available specializations
-const availableSpecializations = [
-  { id: "diet", label: "Dietetyka zwierzęca" },
-  { id: "behavior", label: "Behawiorysta" },
-  { id: "training", label: "Trener" },
-  { id: "groomer", label: "Groomer" },
-  { id: "vet", label: "Weterynarz" },
-  { id: "physio", label: "Fizjoterapeuta" },
-  { id: "alternative", label: "Medycyna alternatywna" },
-];
-
+const availableSpecializations = [{
+  id: "diet",
+  label: "Dietetyka zwierzęca"
+}, {
+  id: "behavior",
+  label: "Behawiorysta"
+}, {
+  id: "training",
+  label: "Trener"
+}, {
+  id: "groomer",
+  label: "Groomer"
+}, {
+  id: "vet",
+  label: "Weterynarz"
+}, {
+  id: "physio",
+  label: "Fizjoterapeuta"
+}, {
+  id: "alternative",
+  label: "Medycyna alternatywna"
+}];
 export default function AccountSettings() {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    logout
+  } = useAuth();
   const [activeTab, setActiveTab] = useState("general");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [services, setServices] = useState<string[]>([""]);
@@ -117,19 +97,17 @@ export default function AccountSettings() {
       lastName: "",
       email: "",
       phone: "",
-      city: "",
-    },
+      city: ""
+    }
   });
-
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
-    },
+      confirmPassword: ""
+    }
   });
-
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -141,8 +119,8 @@ export default function AccountSettings() {
       experience: "",
       location: "",
       phoneNumber: "",
-      website: "",
-    },
+      website: ""
+    }
   });
 
   // Load user data into the form when available
@@ -153,7 +131,7 @@ export default function AccountSettings() {
         lastName: user.lastName || "",
         email: user.email || "",
         phone: "",
-        city: "",
+        city: ""
       });
     }
   }, [user, accountForm]);
@@ -227,58 +205,47 @@ export default function AccountSettings() {
   // Form submission handlers
   function onAccountSubmit(values: AccountFormValues) {
     console.log("Account update values:", values);
-    
     toast({
       title: "Zaktualizowano dane",
-      description: "Twoje dane zostały pomyślnie zaktualizowane.",
+      description: "Twoje dane zostały pomyślnie zaktualizowane."
     });
   }
-
   function onPasswordSubmit(values: PasswordFormValues) {
     console.log("Password change values:", values);
-    
     toast({
       title: "Hasło zostało zmienione",
-      description: "Twoje hasło zostało pomyślnie zaktualizowane.",
+      description: "Twoje hasło zostało pomyślnie zaktualizowane."
     });
-    
     passwordForm.reset({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
+      confirmPassword: ""
     });
   }
-
   function onProfileSubmit(values: ProfileFormValues) {
     // Filter out empty strings from services and education
     values.services = values.services?.filter(service => service.trim() !== "");
     values.education = values.education?.filter(edu => edu.trim() !== "");
-    
     console.log("Profile update values:", values);
-    
     toast({
       title: "Profil zaktualizowany",
-      description: "Twój profil specjalisty został pomyślnie zaktualizowany.",
+      description: "Twój profil specjalisty został pomyślnie zaktualizowany."
     });
   }
-
   function handleDeleteAccount() {
     console.log("Deleting account...");
     toast({
       title: "Konto usunięte",
       description: "Twoje konto zostało usunięte. Przekierowujemy Cię do strony głównej.",
-      variant: "destructive",
+      variant: "destructive"
     });
     logout();
     navigate("/");
   }
-
   if (!isAuthenticated) {
     return <div />;
   }
-
-  return (
-    <MainLayout>
+  return <MainLayout>
       <div className="container py-12">
         <div className="mx-auto max-w-3xl space-y-6">
           <div className="flex items-center gap-3">
@@ -315,75 +282,55 @@ export default function AccountSettings() {
                   <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <FormField
-                          control={accountForm.control}
-                          name="firstName"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={accountForm.control} name="firstName" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Imię</FormLabel>
                               <FormControl>
                                 <Input placeholder="Imię" {...field} />
                               </FormControl>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={accountForm.control}
-                          name="lastName"
-                          render={({ field }) => (
-                            <FormItem>
+                            </FormItem>} />
+                        <FormField control={accountForm.control} name="lastName" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Nazwisko</FormLabel>
                               <FormControl>
                                 <Input placeholder="Nazwisko" {...field} />
                               </FormControl>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                       </div>
                       
-                      <FormField
-                        control={accountForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={accountForm.control} name="email" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
                               <Input placeholder="Email" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                       
-                      <FormField
-                        control={accountForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={accountForm.control} name="phone" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Telefon</FormLabel>
                             <FormControl>
                               <Input placeholder="Numer telefonu" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                       
-                      <FormField
-                        control={accountForm.control}
-                        name="city"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={accountForm.control} name="city" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Miasto</FormLabel>
                             <FormControl>
                               <Input placeholder="Miasto" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </CardContent>
                     <CardFooter>
                       <Button type="submit">Zapisz zmiany</Button>
@@ -405,59 +352,35 @@ export default function AccountSettings() {
                 <Form {...passwordForm}>
                   <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
                     <CardContent className="space-y-4">
-                      <FormField
-                        control={passwordForm.control}
-                        name="currentPassword"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={passwordForm.control} name="currentPassword" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Obecne hasło</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="••••••••" 
-                                {...field} 
-                              />
+                              <Input type="password" placeholder="••••••••" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                       
-                      <FormField
-                        control={passwordForm.control}
-                        name="newPassword"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={passwordForm.control} name="newPassword" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Nowe hasło</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="••••••••" 
-                                {...field} 
-                              />
+                              <Input type="password" placeholder="••••••••" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                       
-                      <FormField
-                        control={passwordForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={passwordForm.control} name="confirmPassword" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel>Potwierdź nowe hasło</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="••••••••" 
-                                {...field} 
-                              />
+                              <Input type="password" placeholder="••••••••" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </CardContent>
                     <CardFooter>
                       <Button type="submit">Zmień hasło</Button>
@@ -483,7 +406,7 @@ export default function AccountSettings() {
 
               <Card className="mt-6 border-red-200">
                 <CardHeader>
-                  <CardTitle className="text-red-600">Niebezpieczna strefa</CardTitle>
+                  <CardTitle className="text-red-600 my-[5px]">Muszę zakończyć współpracę</CardTitle>
                   <CardDescription>
                     Usunięcie konta jest nieodwracalne. Wszystkie Twoje dane zostaną trwale usunięte.
                   </CardDescription>
@@ -509,10 +432,7 @@ export default function AccountSettings() {
                         <DialogClose asChild>
                           <Button variant="outline">Anuluj</Button>
                         </DialogClose>
-                        <Button 
-                          variant="destructive" 
-                          onClick={handleDeleteAccount}
-                        >
+                        <Button variant="destructive" onClick={handleDeleteAccount}>
                           Tak, usuń moje konto
                         </Button>
                       </div>
@@ -539,26 +459,12 @@ export default function AccountSettings() {
                         <FormLabel>Zdjęcie profilowe</FormLabel>
                         <div className="flex items-center gap-6">
                           <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted bg-muted">
-                            {photoPreview ? (
-                              <img 
-                                src={photoPreview} 
-                                alt="Profile preview" 
-                                className="h-full w-full object-cover" 
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-muted">
+                            {photoPreview ? <img src={photoPreview} alt="Profile preview" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center bg-muted">
                                 <Camera className="h-12 w-12 text-muted-foreground" />
-                              </div>
-                            )}
+                              </div>}
                           </div>
                           <div className="flex flex-col space-y-2">
-                            <Input
-                              id="photo"
-                              type="file"
-                              accept="image/*"
-                              onChange={handlePhotoChange}
-                              className="w-full"
-                            />
+                            <Input id="photo" type="file" accept="image/*" onChange={handlePhotoChange} className="w-full" />
                             <p className="text-xs text-muted-foreground">
                               Zalecany format: JPG lub PNG. Maksymalny rozmiar: 5MB
                             </p>
@@ -570,11 +476,9 @@ export default function AccountSettings() {
                       <div className="space-y-4">
                         <h3 className="text-lg font-medium">Dane podstawowe</h3>
                         
-                        <FormField
-                          control={profileForm.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="title" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Tytuł zawodowy</FormLabel>
                               <FormControl>
                                 <Input placeholder="np. Dietetyk zwierzęcy, Behawiorysta psów" {...field} />
@@ -583,51 +487,33 @@ export default function AccountSettings() {
                                 Tytuł zawodowy, który będzie widoczny w twoim profilu
                               </FormDescription>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                         
-                        <FormField
-                          control={profileForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="description" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Opis</FormLabel>
                               <FormControl>
-                                <Textarea 
-                                  placeholder="Opisz swoją specjalizację, doświadczenie i podejście do pracy..." 
-                                  className="min-h-[150px]"
-                                  {...field} 
-                                />
+                                <Textarea placeholder="Opisz swoją specjalizację, doświadczenie i podejście do pracy..." className="min-h-[150px]" {...field} />
                               </FormControl>
                               <FormDescription>
                                 Szczegółowy opis Twojej działalności, doświadczenia i metod pracy
                               </FormDescription>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
 
-                        <FormField
-                          control={profileForm.control}
-                          name="experience"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="experience" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Doświadczenie</FormLabel>
                               <FormControl>
-                                <Textarea 
-                                  placeholder="Opisz swoje doświadczenie zawodowe..." 
-                                  className="min-h-[100px]"
-                                  {...field} 
-                                />
+                                <Textarea placeholder="Opisz swoje doświadczenie zawodowe..." className="min-h-[100px]" {...field} />
                               </FormControl>
                               <FormDescription>
                                 Opisz swoje doświadczenie zawodowe, np. lata praktyki, współpraca z klinikami
                               </FormDescription>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                       </div>
 
                       {/* Education */}
@@ -637,29 +523,14 @@ export default function AccountSettings() {
                           Dodaj informacje o swoim wykształceniu, ukończonych kursach i certyfikatach
                         </FormDescription>
                         
-                        {education.map((edu, index) => (
-                          <div key={index} className="flex gap-2">
-                            <Input
-                              placeholder="np. Uniwersytet Przyrodniczy - Zootechnika"
-                              value={edu}
-                              onChange={(e) => updateEducation(index, e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => removeEducation(index)}
-                            >
+                        {education.map((edu, index) => <div key={index} className="flex gap-2">
+                            <Input placeholder="np. Uniwersytet Przyrodniczy - Zootechnika" value={edu} onChange={e => updateEducation(index, e.target.value)} className="flex-1" />
+                            <Button type="button" variant="outline" onClick={() => removeEducation(index)}>
                               Usuń
                             </Button>
-                          </div>
-                        ))}
+                          </div>)}
                         
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={addEducation}
-                        >
+                        <Button type="button" variant="outline" onClick={addEducation}>
                           Dodaj wykształcenie / certyfikat
                         </Button>
                       </div>
@@ -668,11 +539,7 @@ export default function AccountSettings() {
                       <div className="space-y-4">
                         <h3 className="text-lg font-medium">Specjalizacje</h3>
                         
-                        <FormField
-                          control={profileForm.control}
-                          name="specializations"
-                          render={() => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="specializations" render={() => <FormItem>
                               <div className="mb-4">
                                 <FormLabel>Specjalizacje</FormLabel>
                                 <FormDescription>
@@ -680,44 +547,23 @@ export default function AccountSettings() {
                                 </FormDescription>
                               </div>
                               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                {availableSpecializations.map((item) => (
-                                  <FormField
-                                    key={item.id}
-                                    control={profileForm.control}
-                                    name="specializations"
-                                    render={({ field }) => {
-                                      return (
-                                        <FormItem
-                                          key={item.id}
-                                          className="flex flex-row items-start space-x-3 space-y-0"
-                                        >
+                                {availableSpecializations.map(item => <FormField key={item.id} control={profileForm.control} name="specializations" render={({
+                            field
+                          }) => {
+                            return <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
                                           <FormControl>
-                                            <Checkbox
-                                              checked={field.value?.includes(item.id)}
-                                              onCheckedChange={(checked) => {
-                                                return checked
-                                                  ? field.onChange([...field.value || [], item.id])
-                                                  : field.onChange(
-                                                      field.value?.filter(
-                                                        (value) => value !== item.id
-                                                      )
-                                                    )
-                                              }}
-                                            />
+                                            <Checkbox checked={field.value?.includes(item.id)} onCheckedChange={checked => {
+                                  return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter(value => value !== item.id));
+                                }} />
                                           </FormControl>
                                           <FormLabel className="font-normal">
                                             {item.label}
                                           </FormLabel>
-                                        </FormItem>
-                                      )
-                                    }}
-                                  />
-                                ))}
+                                        </FormItem>;
+                          }} />)}
                               </div>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                       </div>
 
                       {/* Services */}
@@ -727,29 +573,14 @@ export default function AccountSettings() {
                           Dodaj usługi, które oferujesz swoim klientom
                         </FormDescription>
                         
-                        {services.map((service, index) => (
-                          <div key={index} className="flex gap-2">
-                            <Input
-                              placeholder="np. Konsultacja dietetyczna, Szkolenie indywidualne"
-                              value={service}
-                              onChange={(e) => updateService(index, e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => removeService(index)}
-                            >
+                        {services.map((service, index) => <div key={index} className="flex gap-2">
+                            <Input placeholder="np. Konsultacja dietetyczna, Szkolenie indywidualne" value={service} onChange={e => updateService(index, e.target.value)} className="flex-1" />
+                            <Button type="button" variant="outline" onClick={() => removeService(index)}>
                               Usuń
                             </Button>
-                          </div>
-                        ))}
+                          </div>)}
                         
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={addService}
-                        >
+                        <Button type="button" variant="outline" onClick={addService}>
                           Dodaj usługę
                         </Button>
                       </div>
@@ -758,11 +589,9 @@ export default function AccountSettings() {
                       <div className="space-y-4">
                         <h3 className="text-lg font-medium">Dane kontaktowe</h3>
                         
-                        <FormField
-                          control={profileForm.control}
-                          name="location"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="location" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Lokalizacja</FormLabel>
                               <FormControl>
                                 <div className="flex items-center">
@@ -774,15 +603,11 @@ export default function AccountSettings() {
                                 Miasto lub dzielnica, w której przyjmujesz klientów
                               </FormDescription>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
 
-                        <FormField
-                          control={profileForm.control}
-                          name="phoneNumber"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="phoneNumber" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Numer telefonu</FormLabel>
                               <FormControl>
                                 <div className="flex items-center">
@@ -794,15 +619,11 @@ export default function AccountSettings() {
                                 Numer telefonu do kontaktu z klientami
                               </FormDescription>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
 
-                        <FormField
-                          control={profileForm.control}
-                          name="website"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={profileForm.control} name="website" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel>Strona internetowa</FormLabel>
                               <FormControl>
                                 <div className="flex items-center">
@@ -814,9 +635,7 @@ export default function AccountSettings() {
                                 Twoja strona internetowa (opcjonalnie)
                               </FormDescription>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                       </div>
                     </CardContent>
                     <CardFooter>
@@ -829,6 +648,5 @@ export default function AccountSettings() {
           </Tabs>
         </div>
       </div>
-    </MainLayout>
-  );
+    </MainLayout>;
 }
