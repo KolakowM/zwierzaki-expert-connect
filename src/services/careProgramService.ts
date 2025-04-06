@@ -13,7 +13,7 @@ export const getCarePrograms = async (): Promise<CareProgram[]> => {
     throw error;
   }
   
-  return (data || []).map(mapDbCareProgramToCareProgram);
+  return (data || []).map(program => mapDbCareProgramToCareProgram(program as DbCareProgram));
 };
 
 export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram[]> => {
@@ -28,7 +28,7 @@ export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram
     throw error;
   }
   
-  return (data || []).map(mapDbCareProgramToCareProgram);
+  return (data || []).map(program => mapDbCareProgramToCareProgram(program as DbCareProgram));
 };
 
 export const getCareProgramById = async (id: string): Promise<CareProgram | null> => {
@@ -47,9 +47,11 @@ export const getCareProgramById = async (id: string): Promise<CareProgram | null
 };
 
 export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
+  const dbProgram = mapCareProgramToDbCareProgram(program);
+  
   const { data, error } = await supabase
     .from('care_programs')
-    .insert([mapCareProgramToDbCareProgram(program)])
+    .insert([dbProgram])
     .select()
     .single();
   

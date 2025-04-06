@@ -13,7 +13,7 @@ export const getVisits = async (): Promise<Visit[]> => {
     throw error;
   }
   
-  return (data || []).map(mapDbVisitToVisit);
+  return (data || []).map(visit => mapDbVisitToVisit(visit as DbVisit));
 };
 
 export const getVisitsByClientId = async (clientId: string): Promise<Visit[]> => {
@@ -28,7 +28,7 @@ export const getVisitsByClientId = async (clientId: string): Promise<Visit[]> =>
     throw error;
   }
   
-  return (data || []).map(mapDbVisitToVisit);
+  return (data || []).map(visit => mapDbVisitToVisit(visit as DbVisit));
 };
 
 export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
@@ -43,7 +43,7 @@ export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
     throw error;
   }
   
-  return (data || []).map(mapDbVisitToVisit);
+  return (data || []).map(visit => mapDbVisitToVisit(visit as DbVisit));
 };
 
 export const getVisitById = async (id: string): Promise<Visit | null> => {
@@ -62,9 +62,11 @@ export const getVisitById = async (id: string): Promise<Visit | null> => {
 };
 
 export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
+  const dbVisit = mapVisitToDbVisit(visit);
+  
   const { data, error } = await supabase
     .from('visits')
-    .insert([mapVisitToDbVisit(visit)])
+    .insert([dbVisit])
     .select()
     .single();
   

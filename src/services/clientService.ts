@@ -13,7 +13,7 @@ export const getClients = async (): Promise<Client[]> => {
     throw error;
   }
   
-  return (data || []).map(mapDbClientToClient);
+  return (data || []).map(client => mapDbClientToClient(client as DbClient));
 };
 
 export const getClientById = async (id: string): Promise<Client | null> => {
@@ -32,9 +32,11 @@ export const getClientById = async (id: string): Promise<Client | null> => {
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> => {
+  const dbClient = mapClientToDbClient(client);
+  
   const { data, error } = await supabase
     .from('clients')
-    .insert([mapClientToDbClient(client)])
+    .insert([dbClient])
     .select()
     .single();
   

@@ -13,7 +13,7 @@ export const getPets = async (): Promise<Pet[]> => {
     throw error;
   }
   
-  return (data || []).map(mapDbPetToPet);
+  return (data || []).map(pet => mapDbPetToPet(pet as DbPet));
 };
 
 export const getPetsByClientId = async (clientId: string): Promise<Pet[]> => {
@@ -28,7 +28,7 @@ export const getPetsByClientId = async (clientId: string): Promise<Pet[]> => {
     throw error;
   }
   
-  return (data || []).map(mapDbPetToPet);
+  return (data || []).map(pet => mapDbPetToPet(pet as DbPet));
 };
 
 export const getPetById = async (id: string): Promise<Pet | null> => {
@@ -47,9 +47,11 @@ export const getPetById = async (id: string): Promise<Pet | null> => {
 };
 
 export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet> => {
+  const dbPet = mapPetToDbPet(pet);
+  
   const { data, error } = await supabase
     .from('pets')
-    .insert([mapPetToDbPet(pet)])
+    .insert([dbPet])
     .select()
     .single();
   
