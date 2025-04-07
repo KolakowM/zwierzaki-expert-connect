@@ -38,7 +38,7 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
           <NavigationMenuContent>
             <ul className="grid w-[200px] gap-2 p-4">
               <li>
-                <Link to="/account-settings">
+                <Link to="/settings">
                   <NavigationMenuLink
                     className={cn(
                       "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"

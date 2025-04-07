@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider"; 
@@ -69,7 +68,7 @@ export default function Header() {
               <Link to="/dashboard" className="text-base font-medium hover:text-primary py-2">
                 Panel Specjalisty
               </Link>
-              <Link to="/account-settings" className="text-base font-medium hover:text-primary py-2">
+              <Link to="/settings" className="text-base font-medium hover:text-primary py-2">
                 Ustawienia Konta
               </Link>
               <Button variant="ghost" onClick={handleLogout} className="justify-start px-0">
@@ -116,7 +115,7 @@ export default function Header() {
                   <Link to="/dashboard">
                     <Button variant="outline">Panel Specjalisty</Button>
                   </Link>
-                  <Link to="/account-settings">
+                  <Link to="/settings">
                     <Button variant="outline">
                       <UserCircle className="mr-2 h-4 w-4" />
                       Ustawienia Konta

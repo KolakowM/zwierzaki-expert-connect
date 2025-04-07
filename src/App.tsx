@@ -73,6 +73,7 @@ function App() {
               <Route path="/pets/:id" element={<PetProfile />} />
               <Route path="/profile" element={<ProfileEditor />} />
               <Route path="/settings" element={<AccountSettings />} />
+              <Route path="/account-settings" element={<AccountSettings />} /> {/* Keep this temporarily for backward compatibility */}
               <Route path="/become-specialist" element={<BecomeSpecialist />} />
 
               {/* Admin routes */}
