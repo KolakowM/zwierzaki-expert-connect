@@ -2,7 +2,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CareProgram } from "@/types";
 import {
   Form,
   FormControl,
@@ -10,7 +9,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -34,20 +32,20 @@ import {
 import { cn } from "@/lib/utils";
 
 // Define the schema for care program validation
-const careProgramFormSchema = z.object({
-  name: z.string().min(2, "Nazwa musi zawierać co najmniej 2 znaki"),
-  goal: z.string().min(2, "Cel musi zawierać co najmniej 2 znaki"),
+const careProgramSchema = z.object({
+  name: z.string().min(1, "Nazwa programu jest wymagana"),
+  goal: z.string().min(1, "Cel programu jest wymagany"),
   description: z.string().optional(),
   startDate: z.date({
     required_error: "Data rozpoczęcia jest wymagana",
   }),
   endDate: z.date().optional().nullable(),
-  status: z.enum(["aktywny", "zakończony", "anulowany"]).default("aktywny"),
+  status: z.string().min(1, "Status programu jest wymagany"),
   instructions: z.string().optional(),
   recommendations: z.string().optional(),
 });
 
-type CareProgramFormValues = z.infer<typeof careProgramFormSchema>;
+type CareProgramFormValues = z.infer<typeof careProgramSchema>;
 
 interface CareProgramFormProps {
   petId: string;
@@ -56,16 +54,23 @@ interface CareProgramFormProps {
   isSubmitting?: boolean;
 }
 
+const statusOptions = [
+  "Aktywny",
+  "Planowany",
+  "Zakończony",
+  "Wstrzymany",
+];
+
 const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false }: CareProgramFormProps) => {
   const form = useForm<CareProgramFormValues>({
-    resolver: zodResolver(careProgramFormSchema),
+    resolver: zodResolver(careProgramSchema),
     defaultValues: {
       name: "",
       goal: "",
       description: "",
       startDate: new Date(),
       endDate: null,
-      status: "aktywny",
+      status: "Aktywny",
       instructions: "",
       recommendations: "",
       ...defaultValues,
@@ -80,44 +85,9 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nazwa planu opieki*</FormLabel>
+              <FormLabel>Nazwa programu*</FormLabel>
               <FormControl>
-                <Input placeholder="np. Program redukcji wagi" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="goal"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cel planu*</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="np. Redukcja masy ciała o 2kg w ciągu 3 miesięcy"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Opis planu</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Szczegółowy opis planu opieki..."
-                  className="min-h-[80px]"
-                  {...field}
-                />
+                <Input placeholder="Np. Program rehabilitacji..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -155,10 +125,9 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -186,7 +155,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
                         {field.value ? (
                           format(field.value, "PPP", { locale: pl })
                         ) : (
-                          <span>Wybierz datę (opcjonalnie)</span>
+                          <span>Wybierz datę</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -197,16 +166,12 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
                       mode="single"
                       selected={field.value || undefined}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < form.getValues("startDate") || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
-                <FormDescription>
-                  Opcjonalne. Pozostaw puste dla planów bez określonej daty zakończenia.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -218,7 +183,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status planu*</FormLabel>
+              <FormLabel>Status programu*</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
@@ -229,11 +194,49 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="aktywny">Aktywny</SelectItem>
-                  <SelectItem value="zakończony">Zakończony</SelectItem>
-                  <SelectItem value="anulowany">Anulowany</SelectItem>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="goal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cel programu*</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Cel programu opieki..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Opis programu</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Dodatkowy opis programu opieki..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -247,7 +250,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
               <FormLabel>Instrukcje</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Szczegółowe instrukcje dotyczące realizacji planu..."
+                  placeholder="Szczegółowe instrukcje do programu opieki..."
                   className="min-h-[100px]"
                   {...field}
                 />
@@ -265,7 +268,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
               <FormLabel>Zalecenia</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Zalecenia dla właściciela..."
+                  placeholder="Zalecenia dla właściciela zwierzęcia..."
                   className="min-h-[100px]"
                   {...field}
                 />
@@ -277,7 +280,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Zapisywanie..." : "Zapisz plan opieki"}
+            {isSubmitting ? "Zapisywanie..." : "Zapisz program opieki"}
           </Button>
         </div>
       </form>

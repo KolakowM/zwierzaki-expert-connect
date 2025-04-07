@@ -37,7 +37,7 @@ const AnimalsTab = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <p className="font-medium">Ostatnio dodane zwierzęta</p>
-              <Link to="/clients" className="text-sm text-primary hover:underline">
+              <Link to="/pets" className="text-sm text-primary hover:underline">
                 Zobacz wszystkie
               </Link>
             </div>
@@ -73,7 +73,7 @@ const AnimalsTab = () => {
             <div className="flex flex-col items-center justify-center text-center p-4">
               <FileText className="h-10 w-10 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnych zarejestrowanych zwierząt</p>
-              <Link to="/clients">
+              <Link to="/pets">
                 <Button size="sm" className="mt-4">Dodaj zwierzę</Button>
               </Link>
             </div>
