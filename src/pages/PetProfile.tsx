@@ -200,6 +200,9 @@ const PetProfile = () => {
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
   const petWeight = pet.weight ? `${pet.weight} kg` : "Nieznana";
 
+  const totalVisits = visits.length;
+  const totalCarePrograms = carePrograms.length;
+  
   let deleteWarning = '';
 
   if (totalVisits > 0 || totalCarePrograms > 0) {
