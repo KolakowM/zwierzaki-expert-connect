@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -26,7 +25,8 @@ import {
   Edit,
   Plus,
   Clipboard,
-  Trash2
+  Trash2,
+  Eye
 } from "lucide-react";
 import { getPetById, deletePet } from "@/services/petService";
 import { getClientById } from "@/services/clientService";
@@ -37,6 +37,7 @@ import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
 import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
+import CareProgramDetailsDialog from "@/components/care-programs/CareProgramDetailsDialog";
 
 const PetProfile = () => {
   const { toast } = useToast();
@@ -44,10 +45,8 @@ const PetProfile = () => {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const { id } = useParams();
-  // Define activeTab state outside of any conditions
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
@@ -59,7 +58,6 @@ const PetProfile = () => {
     }
   }, [isAuthenticated, navigate, toast]);
 
-  // Fetch pet details using React Query
   const { 
     data: pet, 
     isLoading: isLoadingPet,
@@ -70,7 +68,6 @@ const PetProfile = () => {
     enabled: !!id && isAuthenticated,
   });
 
-  // Fetch owner details
   const { 
     data: owner, 
     isLoading: isLoadingOwner 
@@ -80,7 +77,6 @@ const PetProfile = () => {
     enabled: !!pet?.clientId && isAuthenticated,
   });
 
-  // Fetch visits for this pet
   const { 
     data: visits = [], 
     isLoading: isLoadingVisits 
@@ -90,7 +86,6 @@ const PetProfile = () => {
     enabled: !!id && isAuthenticated,
   });
 
-  // Fetch care programs for this pet
   const { 
     data: carePrograms = [], 
     isLoading: isLoadingCarePrograms 
@@ -102,7 +97,6 @@ const PetProfile = () => {
 
   const isLoading = isLoadingPet || isLoadingOwner || isLoadingVisits || isLoadingCarePrograms;
 
-  // Show error if pet not found
   useEffect(() => {
     if (isPetError) {
       toast({
@@ -115,7 +109,6 @@ const PetProfile = () => {
   }, [isPetError, navigate, toast]);
 
   const handlePetUpdated = (updatedPet: Pet) => {
-    // React Query will automatically refetch the pet data
     toast({
       title: "Dane zwierzęcia zaktualizowane",
       description: "Zmiany zostały zapisane pomyślnie"
@@ -123,7 +116,6 @@ const PetProfile = () => {
   };
 
   const handleVisitAdded = (visit: Visit) => {
-    // React Query will automatically refetch the visits data
     queryClient.invalidateQueries({ queryKey: ['visits', id] });
     toast({
       title: "Wizyta dodana pomyślnie",
@@ -132,7 +124,6 @@ const PetProfile = () => {
   };
 
   const handleCareProgramAdded = (careProgram: CareProgram) => {
-    // React Query will automatically refetch the care programs data
     queryClient.invalidateQueries({ queryKey: ['carePrograms', id] });
     toast({
       title: "Plan opieki utworzony pomyślnie",
@@ -151,7 +142,6 @@ const PetProfile = () => {
         description: `${pet.name} oraz wszystkie powiązane dane zostały pomyślnie usunięte`
       });
       
-      // Navigate back to the owner's page if available, otherwise to clients page
       if (pet.clientId) {
         navigate(`/clients/${pet.clientId}`);
       } else {
@@ -210,11 +200,8 @@ const PetProfile = () => {
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
   const petWeight = pet.weight ? `${pet.weight} kg` : "Nieznana";
 
-  // Calculate total entities that would be deleted with this pet
-  const totalVisits = visits.length;
-  const totalCarePrograms = carePrograms.length;
   let deleteWarning = '';
-  
+
   if (totalVisits > 0 || totalCarePrograms > 0) {
     deleteWarning = `Wraz ze zwierzęciem zostaną również usunięte:
     ${totalVisits > 0 ? `\n- ${totalVisits} wizyt` : ''}
