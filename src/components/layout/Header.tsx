@@ -1,23 +1,23 @@
 
 import React from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
 
 const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <Link href="/" className={styles.logo}>
+        <Link to="/" className={styles.logo}>
           PetProfile
         </Link>
         <nav className={styles.nav}>
-          <Link href="/pets" className={styles.navLink}>
+          <Link to="/pets" className={styles.navLink}>
             Pets
           </Link>
-          <Link href="/care" className={styles.navLink}>
+          <Link to="/care" className={styles.navLink}>
             Care Programs
           </Link>
-          <Link href="/account" className={styles.navLink}>
+          <Link to="/account" className={styles.navLink}>
             Account Settings
           </Link>
         </nav>
