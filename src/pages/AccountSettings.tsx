@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserCircle, Mail, Lock, Shield, Award, Camera, Phone, MapPin, FileText, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { updateUserProfile, updateUserPassword } from "@/services/authService";
 
 // Form schemas
 const accountFormSchema = z.object({
@@ -73,21 +75,17 @@ const availableSpecializations = [{
   id: "alternative",
   label: "Medycyna alternatywna"
 }];
+
 export default function AccountSettings() {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const {
-    user,
-    isAuthenticated,
-    logout
-  } = useAuth();
+  const { user, isAuthenticated, logout, refreshUserData } = useAuth();
   const [activeTab, setActiveTab] = useState("general");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [services, setServices] = useState<string[]>([""]);
   const [education, setEducation] = useState<string[]>([""]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize forms
   const accountForm = useForm<AccountFormValues>({
@@ -203,25 +201,67 @@ export default function AccountSettings() {
   };
 
   // Form submission handlers
-  function onAccountSubmit(values: AccountFormValues) {
-    console.log("Account update values:", values);
-    toast({
-      title: "Zaktualizowano dane",
-      description: "Twoje dane zostały pomyślnie zaktualizowane."
-    });
+  async function onAccountSubmit(values: AccountFormValues) {
+    try {
+      setIsSubmitting(true);
+      console.log("Account update values:", values);
+      
+      // Call the update function from authService
+      await updateUserProfile({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        // Email changes require a different flow with verification in Supabase
+        // Only updating name fields for now
+      });
+      
+      // Refresh user data to show updated information
+      await refreshUserData();
+      
+      toast({
+        title: "Zaktualizowano dane",
+        description: "Twoje dane zostały pomyślnie zaktualizowane."
+      });
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Błąd aktualizacji",
+        description: error.message || "Wystąpił błąd podczas aktualizacji danych.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
-  function onPasswordSubmit(values: PasswordFormValues) {
-    console.log("Password change values:", values);
-    toast({
-      title: "Hasło zostało zmienione",
-      description: "Twoje hasło zostało pomyślnie zaktualizowane."
-    });
-    passwordForm.reset({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: ""
-    });
+  
+  async function onPasswordSubmit(values: PasswordFormValues) {
+    try {
+      setIsSubmitting(true);
+      console.log("Password change values:", values);
+      
+      await updateUserPassword(values.currentPassword, values.newPassword);
+      
+      toast({
+        title: "Hasło zostało zmienione",
+        description: "Twoje hasło zostało pomyślnie zaktualizowane."
+      });
+      
+      passwordForm.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      toast({
+        title: "Błąd zmiany hasła",
+        description: error.message || "Wystąpił błąd podczas zmiany hasła.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
+  
   function onProfileSubmit(values: ProfileFormValues) {
     // Filter out empty strings from services and education
     values.services = values.services?.filter(service => service.trim() !== "");
@@ -232,6 +272,7 @@ export default function AccountSettings() {
       description: "Twój profil specjalisty został pomyślnie zaktualizowany."
     });
   }
+  
   function handleDeleteAccount() {
     console.log("Deleting account...");
     toast({
@@ -242,9 +283,11 @@ export default function AccountSettings() {
     logout();
     navigate("/");
   }
+  
   if (!isAuthenticated) {
     return <div />;
   }
+  
   return <MainLayout>
       <div className="container py-12">
         <div className="mx-auto max-w-3xl space-y-6">
@@ -307,8 +350,11 @@ export default function AccountSettings() {
                     }) => <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input placeholder="Email" {...field} />
+                              <Input placeholder="Email" {...field} disabled />
                             </FormControl>
+                            <FormDescription>
+                              Zmiana adresu email wymaga weryfikacji. Skontaktuj się z administratorem.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>} />
                       
@@ -333,7 +379,9 @@ export default function AccountSettings() {
                           </FormItem>} />
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit">Zapisz zmiany</Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? "Zapisywanie..." : "Zapisz zmiany"}
+                      </Button>
                     </CardFooter>
                   </form>
                 </Form>
@@ -383,7 +431,9 @@ export default function AccountSettings() {
                           </FormItem>} />
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit">Zmień hasło</Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? "Zmienianie hasła..." : "Zmień hasło"}
+                      </Button>
                     </CardFooter>
                   </form>
                 </Form>
@@ -639,7 +689,9 @@ export default function AccountSettings() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit">Zapisz profil</Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
+                      </Button>
                     </CardFooter>
                   </form>
                 </Form>

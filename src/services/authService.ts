@@ -19,6 +19,13 @@ export interface SignUpCredentials extends SignInCredentials {
   lastName?: string;
 }
 
+export interface UserProfileUpdate {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  city?: string;
+}
+
 export const signIn = async ({ email, password }: SignInCredentials) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -94,6 +101,55 @@ export const updatePassword = async (password: string) => {
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
+    throw error;
+  }
+};
+
+// New functions for account settings
+
+// Update user profile metadata
+export const updateUserProfile = async (profileData: UserProfileUpdate) => {
+  const { data, error } = await supabase.auth.updateUser({
+    data: {
+      first_name: profileData.firstName,
+      last_name: profileData.lastName,
+      // Add other profile data as needed
+    }
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data.user;
+};
+
+// Update user password
+export const updateUserPassword = async (currentPassword: string, newPassword: string) => {
+  // Supabase doesn't have a direct method to verify current password before changing
+  // We can simulate this by trying to sign in with the current password first
+  
+  // Get current user's email
+  const currentUser = await getCurrentUser();
+  if (!currentUser || !currentUser.email) {
+    throw new Error("Nie można znaleźć danych użytkownika");
+  }
+  
+  try {
+    // Verify current password works
+    await signIn({ email: currentUser.email, password: currentPassword });
+    
+    // If we get here, the password is correct, so update to the new password
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    
+    if (error) {
+      throw error;
+    }
+  } catch (error: any) {
+    // If the sign-in fails, the current password is incorrect
+    if (error.message.includes("Invalid login credentials")) {
+      throw new Error("Obecne hasło jest nieprawidłowe");
+    }
     throw error;
   }
 };

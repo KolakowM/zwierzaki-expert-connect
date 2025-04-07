@@ -13,6 +13,7 @@ interface AuthContextType {
   register: (credentials: SignUpCredentials) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: () => boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +23,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Function to refresh user data from the server
+  const refreshUserData = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -144,6 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     register,
     logout,
     isAdmin,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
