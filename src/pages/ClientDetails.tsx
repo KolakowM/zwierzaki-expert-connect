@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getClientById, deleteClient } from "@/services/clientService";
 import { getPets } from "@/services/petService";
 import { getVisits } from "@/services/visitService";
+import { Card, CardContent, CardHeader } from "@/components/ui/card"; // Added missing imports
 
 // Import our new components
 import ClientHeader from "@/components/clients/ClientHeader";
