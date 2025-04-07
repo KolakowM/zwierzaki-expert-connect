@@ -117,12 +117,12 @@ const UpcomingVisits = ({ visits, pets, clients }: UpcomingVisitsProps) => {
                 </div>
               )}
               
-              {selectedVisit.followupNeeded && (
+              {selectedVisit.followUpNeeded && (
                 <div>
                   <h4 className="font-medium">Wymagana wizyta kontrolna</h4>
                   <p>
-                    {selectedVisit.followupDate 
-                      ? `Zaplanowana na: ${new Date(selectedVisit.followupDate).toLocaleDateString('pl-PL')}` 
+                    {selectedVisit.followUpDate 
+                      ? `Zaplanowana na: ${new Date(selectedVisit.followUpDate).toLocaleDateString('pl-PL')}` 
                       : 'Tak'}
                   </p>
                 </div>
