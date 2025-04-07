@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -25,8 +26,7 @@ import {
   Edit,
   Plus,
   Clipboard,
-  Trash2,
-  FileDown
+  Trash2
 } from "lucide-react";
 import { getPetById, deletePet } from "@/services/petService";
 import { getClientById } from "@/services/clientService";
@@ -37,9 +37,6 @@ import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
 import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
-import DocumentUpload from "@/components/documents/DocumentUpload";
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 const PetProfile = () => {
   const { toast } = useToast();
@@ -49,6 +46,7 @@ const PetProfile = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
@@ -60,6 +58,7 @@ const PetProfile = () => {
     }
   }, [isAuthenticated, navigate, toast]);
 
+  // Fetch pet details using React Query
   const { 
     data: pet, 
     isLoading: isLoadingPet,
@@ -70,6 +69,7 @@ const PetProfile = () => {
     enabled: !!id && isAuthenticated,
   });
 
+  // Fetch owner details
   const { 
     data: owner, 
     isLoading: isLoadingOwner 
@@ -79,6 +79,7 @@ const PetProfile = () => {
     enabled: !!pet?.clientId && isAuthenticated,
   });
 
+  // Fetch visits for this pet
   const { 
     data: visits = [], 
     isLoading: isLoadingVisits 
@@ -88,6 +89,7 @@ const PetProfile = () => {
     enabled: !!id && isAuthenticated,
   });
 
+  // Fetch care programs for this pet
   const { 
     data: carePrograms = [], 
     isLoading: isLoadingCarePrograms 
@@ -99,6 +101,7 @@ const PetProfile = () => {
 
   const isLoading = isLoadingPet || isLoadingOwner || isLoadingVisits || isLoadingCarePrograms;
 
+  // Show error if pet not found
   useEffect(() => {
     if (isPetError) {
       toast({
@@ -111,6 +114,7 @@ const PetProfile = () => {
   }, [isPetError, navigate, toast]);
 
   const handlePetUpdated = (updatedPet: Pet) => {
+    // React Query will automatically refetch the pet data
     toast({
       title: "Dane zwierzęcia zaktualizowane",
       description: "Zmiany zostały zapisane pomyślnie"
@@ -118,6 +122,7 @@ const PetProfile = () => {
   };
 
   const handleVisitAdded = (visit: Visit) => {
+    // React Query will automatically refetch the visits data
     queryClient.invalidateQueries({ queryKey: ['visits', id] });
     toast({
       title: "Wizyta dodana pomyślnie",
@@ -126,6 +131,7 @@ const PetProfile = () => {
   };
 
   const handleCareProgramAdded = (careProgram: CareProgram) => {
+    // React Query will automatically refetch the care programs data
     queryClient.invalidateQueries({ queryKey: ['carePrograms', id] });
     toast({
       title: "Plan opieki utworzony pomyślnie",
@@ -144,6 +150,7 @@ const PetProfile = () => {
         description: `${pet.name} oraz wszystkie powiązane dane zostały pomyślnie usunięte`
       });
       
+      // Navigate back to the owner's page if available, otherwise to clients page
       if (pet.clientId) {
         navigate(`/clients/${pet.clientId}`);
       } else {
@@ -157,79 +164,6 @@ const PetProfile = () => {
         variant: "destructive"
       });
     }
-  };
-
-  const exportCareProgramToPDF = async (program: CareProgram) => {
-    if (!careProgramRef.current || !pet || !owner) return;
-    
-    try {
-      toast({
-        title: "Generowanie PDF",
-        description: "Trwa generowanie dokumentu PDF...",
-      });
-
-      const canvas = await html2canvas(careProgramRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      const currentDate = new Date().toLocaleDateString('pl-PL');
-      const currentUser = "Administrator"; // Replace with actual user info when auth is implemented
-      
-      pdf.setFontSize(16);
-      pdf.text("Plan Opieki", 105, 15, { align: 'center' });
-      
-      pdf.setFontSize(10);
-      pdf.text(`Data wygenerowania: ${currentDate}`, 15, 25);
-      pdf.text(`Użytkownik: ${currentUser}`, 15, 30);
-      
-      pdf.setFontSize(12);
-      pdf.text("Dane właściciela:", 15, 40);
-      pdf.setFontSize(10);
-      pdf.text(`${owner.firstName} ${owner.lastName}`, 15, 45);
-      pdf.text(`Tel: ${owner.phone || "Brak"}`, 15, 50);
-      pdf.text(`Email: ${owner.email || "Brak"}`, 15, 55);
-      
-      pdf.setFontSize(12);
-      pdf.text("Dane zwierzęcia:", 15, 65);
-      pdf.setFontSize(10);
-      pdf.text(`Imię: ${pet.name}`, 15, 70);
-      pdf.text(`Gatunek: ${pet.species}`, 15, 75);
-      pdf.text(`Rasa: ${pet.breed || "Nieznana"}`, 15, 80);
-      
-      pdf.addImage(imgData, 'PNG', 0, 90, imgWidth, imgHeight);
-      
-      pdf.save(`Plan_opieki_${pet.name}_${program.name.replace(/\s+/g, '_')}.pdf`);
-      
-      toast({
-        title: "Dokument PDF wygenerowany",
-        description: "Plan opieki został wyeksportowany do PDF",
-      });
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast({
-        title: "Błąd podczas generowania PDF",
-        description: "Spróbuj ponownie później",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDocumentUpload = async (files: File[]) => {
-    // Implement your document upload logic here
-    console.log('Uploading files:', files);
-    toast({
-      title: "Przesyłanie plików",
-      description: `Przesyłanie ${files.length} plików...`,
-    });
-    // You can use a service function to handle the actual upload
-    // Example: await uploadDocuments(pet.id, files);
   };
 
   if (isLoading) {
@@ -267,6 +201,7 @@ const PetProfile = () => {
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
   const petWeight = pet.weight ? `${pet.weight} kg` : "Nieznana";
 
+  // Calculate total entities that would be deleted with this pet
   const totalVisits = visits.length;
   const totalCarePrograms = carePrograms.length;
   let deleteWarning = '';
@@ -276,8 +211,6 @@ const PetProfile = () => {
     ${totalVisits > 0 ? `\n- ${totalVisits} wizyt` : ''}
     ${totalCarePrograms > 0 ? `\n- ${totalCarePrograms} programów opieki` : ''}`;
   }
-
-  const careProgramRef = useRef<HTMLDivElement>(null);
 
   return (
     <MainLayout>
@@ -403,7 +336,6 @@ const PetProfile = () => {
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="visits">Wizyty ({visits.length})</TabsTrigger>
             <TabsTrigger value="care-plans">Plany opieki ({carePrograms.length})</TabsTrigger>
-            <TabsTrigger value="documents">Dokumenty</TabsTrigger>
             <TabsTrigger value="notes">Notatki</TabsTrigger>
           </TabsList>
           
@@ -662,45 +594,20 @@ const PetProfile = () => {
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-0">
-                          <div ref={careProgramRef}>
-                            <p className="font-medium text-sm mb-1">Cel:</p>
-                            <p className="text-sm mb-4">{program.goal}</p>
-                            
-                            {program.instructions && (
-                              <>
-                                <p className="font-medium text-sm mb-1">Instrukcje:</p>
-                                <p className="text-sm whitespace-pre-line">{program.instructions}</p>
-                              </>
-                            )}
-                            
-                            {program.recommendations && (
-                              <>
-                                <p className="font-medium text-sm mt-4 mb-1">Zalecenia:</p>
-                                <p className="text-sm whitespace-pre-line">{program.recommendations}</p>
-                              </>
-                            )}
-                          </div>
+                          <p className="font-medium text-sm mb-1">Cel:</p>
+                          <p className="text-sm mb-4">{program.goal}</p>
+                          
+                          {program.instructions && (
+                            <>
+                              <p className="font-medium text-sm mb-1">Instrukcje:</p>
+                              <p className="text-sm whitespace-pre-line">{program.instructions}</p>
+                            </>
+                          )}
                         </CardContent>
                         <CardFooter className="flex justify-between border-t pt-4">
-                          {program.id && pet.id && (
-                            <ResponsiveCareProgramForm
-                              petId={pet.id}
-                              buttonText="Edytuj"
-                              buttonVariant="outline"
-                              buttonSize="sm"
-                              defaultValues={program}
-                              isEditing={true}
-                              onCareProgramSaved={handleCareProgramAdded}
-                            >
-                              <Button variant="outline" size="sm">
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edytuj
-                              </Button>
-                            </ResponsiveCareProgramForm>
-                          )}
-                          <Button variant="outline" size="sm" onClick={() => exportCareProgramToPDF(program)}>
-                            <FileDown className="mr-2 h-4 w-4" />
-                            Eksportuj PDF
+                          <Button variant="outline" size="sm">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edytuj
                           </Button>
                         </CardFooter>
                       </Card>
@@ -722,24 +629,6 @@ const PetProfile = () => {
                       />
                     )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="documents" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dokumenty</CardTitle>
-                <CardDescription>
-                  Prześlij dokumenty związane ze zwierzęciem
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {pet.id && (
-                  <DocumentUpload
-                    onUpload={handleDocumentUpload}
-                  />
                 )}
               </CardContent>
             </Card>
