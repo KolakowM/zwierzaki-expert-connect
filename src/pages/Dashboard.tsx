@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
@@ -16,8 +17,13 @@ import CalendarTab from "@/components/dashboard/CalendarTab";
 const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Get the tab from URL query parameter or default to "overview"
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromQuery = queryParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,6 +35,12 @@ const Dashboard = () => {
       navigate("/login");
     }
   }, [isAuthenticated, navigate, toast]);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/dashboard${value !== "overview" ? `?tab=${value}` : ""}`, { replace: true });
+  };
 
   const handleLogout = () => {
     logout();
@@ -57,12 +69,10 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4 md:w-auto md:grid-cols-4">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
-            <TabsTrigger value="clients">
-              <Link to="/clients" className="flex items-center">Klienci</Link>
-            </TabsTrigger>
+            <TabsTrigger value="clients">Klienci</TabsTrigger>
             <TabsTrigger value="animals">Zwierzęta</TabsTrigger>
             <TabsTrigger value="calendar">Kalendarz</TabsTrigger>
           </TabsList>

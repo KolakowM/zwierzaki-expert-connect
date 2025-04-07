@@ -38,21 +38,21 @@ const DashboardOverview = () => {
       value: pets.length.toString(),
       description: "Zarejestrowanych zwierząt",
       icon: <PawPrint className="h-4 w-4 text-muted-foreground" />,
-      link: "/clients"
+      link: "/dashboard?tab=animals"
     },
     {
       title: "Wizyty",
       value: visits.length.toString(),
       description: "Zaplanowane wizyty",
       icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-      link: "/dashboard"
+      link: "/dashboard?tab=calendar"
     },
     {
       title: "Plan",
       value: "Podstawowy",
       description: "Aktualny plan subskrypcji",
       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-      link: "/pricing"  // Changed from "/dashboard" to "/pricing"
+      link: "/pricing"
     }
   ];
 

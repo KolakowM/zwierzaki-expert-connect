@@ -1,7 +1,7 @@
 
-import { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ReactNode } from "react";
 
 interface StatsCardProps {
   title: string;
@@ -9,43 +9,22 @@ interface StatsCardProps {
   description: string;
   icon: ReactNode;
   link: string;
-  color?: "default" | "green" | "blue" | "amber" | "red";
 }
 
-const StatsCard = ({ 
-  title, 
-  value, 
-  description, 
-  icon, 
-  link,
-  color = "default" 
-}: StatsCardProps) => {
-  // Define color classes based on the color prop
-  const colorClasses = {
-    default: "",
-    green: "text-green-500",
-    blue: "text-blue-500",
-    amber: "text-amber-500",
-    red: "text-red-500"
-  };
-
-  const valueColorClass = colorClasses[color];
-
+const StatsCard = ({ title, value, description, icon, link }: StatsCardProps) => {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <Link to={link}>
+    <Link to={link} className="block">
+      <Card className="overflow-hidden transition-all hover:shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <div className={`${colorClasses[color]} p-2 rounded-md bg-muted/50`}>
-            {icon}
-          </div>
+          <div className="h-4 w-4 text-muted-foreground">{icon}</div>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${valueColorClass}`}>{value}</div>
+          <div className="text-2xl font-bold">{value}</div>
           <p className="text-xs text-muted-foreground">{description}</p>
         </CardContent>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 };
 
