@@ -1,10 +1,10 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCareProgramsByPetId } from "@/services/careProgramService";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CareProgram } from "@/types";
+import type { CareProgram } from "@/types";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { CalendarRange, Pencil, Eye, ListPlus } from "lucide-react";
@@ -99,6 +99,23 @@ const CareProgram = ({
   program: CareProgram; 
   onCareProgramSaved: () => void;
 }) => {
+  // Use the getStatusBadge function from the parent component
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+      case 'aktywny':
+        return <Badge className="bg-green-500">Aktywny</Badge>;
+      case 'completed':
+      case 'zakończony':
+        return <Badge className="bg-blue-500">Zakończony</Badge>;
+      case 'paused':
+      case 'wstrzymany':
+        return <Badge variant="outline" className="border-amber-500 text-amber-500">Wstrzymany</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+  
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4">

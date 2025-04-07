@@ -44,6 +44,7 @@ const PetProfile = () => {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const { id } = useParams();
+  // Define activeTab state outside of any conditions
   const [activeTab, setActiveTab] = useState("overview");
 
   // Redirect if not authenticated
@@ -195,7 +196,15 @@ const PetProfile = () => {
   }
 
   if (!pet) {
-    return null;
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <div className="text-center">
+            <h2 className="text-xl">Nie znaleziono zwierzęcia</h2>
+          </div>
+        </div>
+      </MainLayout>
+    );
   }
 
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
@@ -396,7 +405,9 @@ const PetProfile = () => {
                               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                                 Aktywny
                               </span>
-                              <Button variant="ghost" size="sm">Szczegóły</Button>
+                              <CareProgramDetailsDialog programId={program.id}>
+                                <Button variant="ghost" size="sm">Szczegóły</Button>
+                              </CareProgramDetailsDialog>
                             </div>
                           </div>
                         ))
@@ -605,10 +616,26 @@ const PetProfile = () => {
                           )}
                         </CardContent>
                         <CardFooter className="flex justify-between border-t pt-4">
-                          <Button variant="outline" size="sm">
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edytuj
-                          </Button>
+                          <ResponsiveCareProgramForm
+                            petId={program.petId}
+                            isEditing={true}
+                            defaultValues={program}
+                            onCareProgramSaved={handleCareProgramAdded}
+                            buttonVariant="outline"
+                            buttonSize="sm"
+                          >
+                            <Button variant="outline" size="sm">
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edytuj
+                            </Button>
+                          </ResponsiveCareProgramForm>
+
+                          <CareProgramDetailsDialog programId={program.id}>
+                            <Button variant="outline" size="sm">
+                              <Eye className="mr-2 h-4 w-4" />
+                              Szczegóły
+                            </Button>
+                          </CareProgramDetailsDialog>
                         </CardFooter>
                       </Card>
                     ))}
