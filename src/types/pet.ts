@@ -4,34 +4,34 @@ export interface DbPet {
   id: string;
   clientid: string;
   name: string;
-  species: "pies" | "kot" | "królik" | "chomik" | "świnka morska" | "inne";
+  species: string;
   breed?: string | null;
-  age?: number | null;
+  age?: number | null;  // This can be integer or decimal
   weight?: number | null;
-  sex?: "samiec" | "samica" | null;
+  sex?: string | null;
   neutered?: boolean | null;
   medicalhistory?: string | null;
   allergies?: string | null;
   dietaryrestrictions?: string | null;
   behavioralnotes?: string | null;
-  createdat: string;
+  createdat?: string;
 }
 
 export interface Pet {
   id: string;
   clientId: string;
   name: string;
-  species: "pies" | "kot" | "królik" | "chomik" | "świnka morska" | "inne";
+  species: string;
   breed?: string | null;
-  age?: number | null;
+  age?: number | null;  // This can be integer or decimal
   weight?: number | null;
-  sex?: "samiec" | "samica" | null;
+  sex?: string | null;
   neutered?: boolean | null;
   medicalHistory?: string | null;
   allergies?: string | null;
   dietaryRestrictions?: string | null;
   behavioralNotes?: string | null;
-  createdAt: string;
+  createdAt?: string;
 }
 
 // Mapping functions for pets
@@ -52,7 +52,7 @@ export const mapDbPetToPet = (dbPet: DbPet): Pet => ({
   createdAt: dbPet.createdat,
 });
 
-export const mapPetToDbPet = (pet: Omit<Pet, 'id' | 'createdAt'>): Omit<DbPet, 'id' | 'createdat'> => ({
+export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
   clientid: pet.clientId,
   name: pet.name,
   species: pet.species,

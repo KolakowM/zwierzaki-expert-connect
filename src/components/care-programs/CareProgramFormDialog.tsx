@@ -66,7 +66,7 @@ const CareProgramFormDialog = ({
         
         toast({
           title: "Program opieki zaktualizowany",
-          description: `Program opieki został zaktualizowany`
+          description: `Program opieki został zaktualizowany pomyślnie`
         });
       } else {
         // Create new care program

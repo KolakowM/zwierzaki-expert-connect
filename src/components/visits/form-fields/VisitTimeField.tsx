@@ -21,7 +21,8 @@ const VisitTimeField = ({ form }: VisitTimeFieldProps) => {
             <Input 
               type="time"
               className="pl-8"
-              {...field} 
+              {...field}
+              value={field.value || ""}
             />
           </div>
           <FormMessage />
