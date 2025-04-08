@@ -1,37 +1,15 @@
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Visit } from "@/types";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
-import { CalendarIcon, Clock } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import VisitDateField from "./form-fields/VisitDateField";
+import VisitTimeField from "./form-fields/VisitTimeField";
+import VisitTypeField from "./form-fields/VisitTypeField";
+import VisitRichTextField from "./form-fields/VisitRichTextField";
+import VisitFollowUpField from "./form-fields/VisitFollowUpField";
 
 // Define the schema for visit validation
 const visitFormSchema = z.object({
@@ -56,15 +34,6 @@ interface VisitFormProps {
   isSubmitting?: boolean;
 }
 
-const visitTypes = [
-  "Kontrola",
-  "Szczepienie",
-  "Zabieg",
-  "Konsultacja",
-  "Badanie diagnostyczne",
-  "Inny",
-];
-
 const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = false }: VisitFormProps) => {
   const form = useForm<VisitFormValues>({
     resolver: zodResolver(visitFormSchema),
@@ -86,212 +55,34 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data wizyty*</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: pl })
-                        ) : (
-                          <span>Wybierz datę</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
+          <VisitDateField 
+            form={form} 
+            name="date" 
+            label="Data wizyty" 
+            required 
           />
-
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Godzina wizyty</FormLabel>
-                <div className="relative">
-                  <Clock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    type="time"
-                    className="pl-8"
-                    {...field} 
-                  />
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Typ wizyty*</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Wybierz typ wizyty" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {visitTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <VisitTimeField form={form} />
+          <VisitTypeField form={form} />
         </div>
 
-        <FormField
-          control={form.control}
+        <VisitRichTextField
+          form={form}
           name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notatki z wizyty</FormLabel>
-              <FormControl>
-                <Controller
-                  name="notes"
-                  control={form.control}
-                  render={({ field }) => (
-                    <RichTextEditor
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      placeholder="Obserwacje, przeprowadzone badania, procedury..."
-                      className="min-h-[150px]"
-                    />
-                  )}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Notatki z wizyty"
+          placeholder="Obserwacje, przeprowadzone badania, procedury..."
         />
 
-        <FormField
-          control={form.control}
+        <VisitRichTextField
+          form={form}
           name="recommendations"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Zalecenia</FormLabel>
-              <FormControl>
-                <Controller
-                  name="recommendations"
-                  control={form.control}
-                  render={({ field }) => (
-                    <RichTextEditor
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      placeholder="Zalecenia dla właściciela..."
-                      className="min-h-[150px]"
-                    />
-                  )}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Zalecenia"
+          placeholder="Zalecenia dla właściciela..."
         />
 
-        <FormField
-          control={form.control}
-          name="followUpNeeded"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>
-                  Potrzebna wizyta kontrolna
-                </FormLabel>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
+        <VisitFollowUpField 
+          form={form} 
+          watchFollowUpNeeded={watchFollowUpNeeded} 
         />
-
-        {watchFollowUpNeeded && (
-          <FormField
-            control={form.control}
-            name="followUpDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data wizyty kontrolnej</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: pl })
-                        ) : (
-                          <span>Wybierz datę</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value || undefined}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date <= new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isSubmitting}>
