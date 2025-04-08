@@ -53,7 +53,7 @@ export default function Footer() {
                 <Link to="/terms" className="hover:text-primary">Warunki Korzystania</Link>
               </li>
               <li>
-                <Link to="/regulamin" className="hover:text-primary">Regulamin</Link>
+                <Link to="/terms2" className="hover:text-primary">Regulamin</Link>
               </li>
             </ul>
           </div>
