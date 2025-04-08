@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import PetForm from "./PetForm";
+import PetForm, { PetSpecies, PetSex } from "./PetForm";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
@@ -38,6 +38,13 @@ const PetFormDialog = ({
   // Set default title based on whether we're editing or creating
   const dialogTitle = title || (isEditing ? "Edytuj dane zwierzaka" : "Dodaj nowego zwierzaka");
 
+  // Convert Pet type to PetForm expected types
+  const formDefaultValues = defaultValues ? {
+    ...defaultValues,
+    species: defaultValues.species as PetSpecies,
+    sex: defaultValues.sex as PetSex || undefined
+  } : undefined;
+
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
@@ -54,7 +61,7 @@ const PetFormDialog = ({
         
         toast({
           title: "Dane zwierzaka zaktualizowane",
-          description: `Dane zwierzaka ${formData.name} zostały zaktualizowane`
+          description: `Dane zwierzaka ${formData.name} zostały zaktualizowane pomyślnie`
         });
       } else {
         // Create new pet
@@ -102,7 +109,7 @@ const PetFormDialog = ({
         </DialogHeader>
         <PetForm 
           clientId={clientId}
-          defaultValues={defaultValues} 
+          defaultValues={formDefaultValues} 
           onSubmit={handleSubmit} 
           isSubmitting={isSubmitting} 
         />

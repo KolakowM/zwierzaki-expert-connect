@@ -25,14 +25,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
+// Define species and sex as enum for consistent typing
+export const PET_SPECIES = ["pies", "kot", "królik", "chomik", "świnka morska", "inne"] as const;
+export const PET_SEX = ["samiec", "samica"] as const;
+
+export type PetSpecies = typeof PET_SPECIES[number];
+export type PetSex = typeof PET_SEX[number];
+
 // Define the schema for pet validation
 const petFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  species: z.enum(["pies", "kot", "królik", "chomik", "świnka morska", "inne"]),
+  species: z.enum(PET_SPECIES),
   breed: z.string().optional(),
   age: z.string().optional().transform((val) => (val ? Number(val) : undefined)),
   weight: z.string().optional().transform((val) => (val ? Number(val) : undefined)),
-  sex: z.enum(["samiec", "samica"]).optional(),
+  sex: z.enum(PET_SEX).optional(),
   neutered: z.boolean().optional(),
   medicalHistory: z.string().optional(),
   allergies: z.string().optional(),

@@ -10,7 +10,7 @@ import {
   DrawerFooter 
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import PetForm from "./PetForm";
+import PetForm, { PetSpecies, PetSex } from "./PetForm";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
@@ -45,6 +45,13 @@ const PetFormDrawer = ({
   // Set default title based on whether we're editing or creating
   const drawerTitle = title || (isEditing ? "Edytuj dane zwierzaka" : "Dodaj nowego zwierzaka");
 
+  // Convert Pet type to PetForm expected types
+  const formDefaultValues = defaultValues ? {
+    ...defaultValues,
+    species: defaultValues.species as PetSpecies,
+    sex: defaultValues.sex as PetSex || undefined
+  } : undefined;
+
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
@@ -61,7 +68,7 @@ const PetFormDrawer = ({
         
         toast({
           title: "Dane zwierzaka zaktualizowane",
-          description: `Dane zwierzaka ${formData.name} zostały zaktualizowane`
+          description: `Dane zwierzaka ${formData.name} zostały zaktualizowane pomyślnie`
         });
       } else {
         // Create new pet
@@ -110,7 +117,7 @@ const PetFormDrawer = ({
         <div className="px-4 pb-4 overflow-y-auto">
           <PetForm 
             clientId={clientId}
-            defaultValues={defaultValues} 
+            defaultValues={formDefaultValues} 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
           />
