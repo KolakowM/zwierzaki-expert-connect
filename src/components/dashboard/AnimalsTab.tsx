@@ -74,7 +74,7 @@ const AnimalsTab = () => {
               <FileText className="h-10 w-10 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnych zarejestrowanych zwierząt</p>
               <Link to="/pets">
-                <Button size="sm" className="mt-4">Dodaj zwierzę</Button>
+                <Button size="sm" className="mt-4">Przejdź do zwierząt</Button>
               </Link>
             </div>
           </div>

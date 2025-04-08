@@ -5,7 +5,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Pet, Client } from "@/types";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -16,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, PawPrint, Filter } from "lucide-react";
+import { Search, PawPrint, Mail, Phone } from "lucide-react";
 import { getPets } from "@/services/petService";
 import { getClients } from "@/services/clientService";
 import { useQuery } from "@tanstack/react-query";
@@ -28,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 
 const Pets = () => {
   const { toast } = useToast();
@@ -38,7 +36,7 @@ const Pets = () => {
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
 
   // Fetch pets using React Query
-  const { data: pets = [], isLoading: petsLoading, error: petsError, refetch: refetchPets } = useQuery({
+  const { data: pets = [], isLoading: petsLoading, error: petsError } = useQuery({
     queryKey: ['pets'],
     queryFn: getPets,
   });
@@ -71,53 +69,36 @@ const Pets = () => {
     }
   }, [petsError, toast]);
 
-  const handlePetSaved = (newPet: Pet) => {
-    refetchPets(); // Refresh the pets list after adding/updating a pet
-    toast({
-      title: "Zwierzę zapisane",
-      description: `Zwierzę ${newPet.name} zostało pomyślnie zapisane`,
-    });
-  };
-
   // Get unique species for filter
   const uniqueSpecies = Array.from(new Set(pets.map(pet => pet.species)));
 
-  // Get client name by ID
-  const getClientName = (clientId: string) => {
-    const client = clients.find(c => c.id === clientId);
-    return client ? `${client.firstName} ${client.lastName}` : "Nieznany";
+  // Get client by ID
+  const getClient = (clientId: string): Client | undefined => {
+    return clients.find(c => c.id === clientId);
   };
 
   // Apply filters
   const filteredPets = pets.filter(pet => {
+    const client = getClient(pet.clientId);
     const matchesSearch = 
       pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (pet.breed && pet.breed.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      getClientName(pet.clientId).toLowerCase().includes(searchTerm.toLowerCase());
+      (client?.firstName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (client?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (client?.email?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (client?.phone?.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesSpecies = speciesFilter === "all" || pet.species === speciesFilter;
     
     return matchesSearch && matchesSpecies;
   });
 
-  // Default client for new pet form
-  const defaultClientForNewPet = clients.length > 0 ? clients[0].id : undefined;
-
   return (
     <MainLayout>
       <div className="container py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <PawPrint className="h-6 w-6 mr-2" />
-            <h1 className="text-2xl font-bold">Zwierzęta</h1>
-          </div>
-          {defaultClientForNewPet && (
-            <ResponsivePetForm 
-              clientId={defaultClientForNewPet}
-              buttonText="Dodaj zwierzę"
-              onPetSaved={handlePetSaved}
-            />
-          )}
+        <div className="flex items-center mb-6">
+          <PawPrint className="h-6 w-6 mr-2" />
+          <h1 className="text-2xl font-bold">Zwierzęta</h1>
         </div>
 
         <Card className="mb-6">
@@ -178,35 +159,62 @@ const Pets = () => {
                     <TableHead>Gatunek</TableHead>
                     <TableHead>Rasa</TableHead>
                     <TableHead>Właściciel</TableHead>
-                    <TableHead className="text-right">Akcje</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Telefon</TableHead>
+                    <TableHead className="text-right">Szczegóły</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPets.map((pet) => (
-                    <TableRow key={pet.id}>
-                      <TableCell className="font-medium">
-                        <Link to={`/pets/${pet.id}`} className="hover:underline">
-                          {pet.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {pet.species.charAt(0).toUpperCase() + pet.species.slice(1)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{pet.breed || '—'}</TableCell>
-                      <TableCell>
-                        <Link to={`/clients/${pet.clientId}`} className="hover:underline">
-                          {getClientName(pet.clientId)}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to={`/pets/${pet.id}`}>Szczegóły</Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredPets.map((pet) => {
+                    const owner = getClient(pet.clientId);
+                    return (
+                      <TableRow key={pet.id}>
+                        <TableCell className="font-medium">
+                          <Link to={`/pets/${pet.id}`} className="hover:underline">
+                            {pet.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {pet.species.charAt(0).toUpperCase() + pet.species.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{pet.breed || '—'}</TableCell>
+                        <TableCell>
+                          {owner ? (
+                            <Link to={`/clients/${owner.id}`} className="hover:underline">
+                              {owner.firstName} {owner.lastName}
+                            </Link>
+                          ) : '—'}
+                        </TableCell>
+                        <TableCell>
+                          {owner?.email && (
+                            <div className="flex items-center">
+                              <Mail className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                              <a href={`mailto:${owner.email}`} className="hover:underline text-sm">
+                                {owner.email}
+                              </a>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {owner?.phone && (
+                            <div className="flex items-center">
+                              <Phone className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                              <a href={`tel:${owner.phone}`} className="hover:underline text-sm">
+                                {owner.phone}
+                              </a>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Link to={`/pets/${pet.id}`} className="text-sm font-medium text-primary hover:underline">
+                            Zobacz profil
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             ) : (
@@ -216,17 +224,8 @@ const Pets = () => {
                 <p className="text-muted-foreground mt-1">
                   {searchTerm || speciesFilter !== "all" 
                     ? "Nie znaleziono zwierząt spełniających kryteria wyszukiwania" 
-                    : "Nie masz jeszcze żadnych zwierząt. Dodaj pierwsze zwierzę."}
+                    : "Nie masz jeszcze żadnych zwierząt."}
                 </p>
-                {!searchTerm && speciesFilter === "all" && defaultClientForNewPet && (
-                  <div className="mt-4">
-                    <ResponsivePetForm 
-                      clientId={defaultClientForNewPet}
-                      buttonText="Dodaj pierwsze zwierzę"
-                      onPetSaved={handlePetSaved}
-                    />
-                  </div>
-                )}
               </div>
             )}
           </CardContent>
