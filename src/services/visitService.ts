@@ -84,6 +84,7 @@ export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Vi
   if (visit.petId !== undefined) dbVisitUpdate.petid = visit.petId;
   if (visit.clientId !== undefined) dbVisitUpdate.clientid = visit.clientId;
   if (visit.date !== undefined) dbVisitUpdate.date = visit.date;
+  if (visit.time !== undefined) dbVisitUpdate.time = visit.time;
   if (visit.type !== undefined) dbVisitUpdate.type = visit.type;
   if (visit.notes !== undefined) dbVisitUpdate.notes = visit.notes;
   if (visit.recommendations !== undefined) dbVisitUpdate.recommendations = visit.recommendations;

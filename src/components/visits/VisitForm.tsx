@@ -1,5 +1,5 @@
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Visit } from "@/types";
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -24,7 +23,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -32,12 +31,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 // Define the schema for visit validation
 const visitFormSchema = z.object({
   date: z.date({
     required_error: "Wybierz datę wizyty",
   }),
+  time: z.string().optional(),
   type: z.string().min(1, "Wybierz typ wizyty"),
   notes: z.string().optional(),
   recommendations: z.string().optional(),
@@ -69,6 +70,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
     resolver: zodResolver(visitFormSchema),
     defaultValues: {
       date: new Date(),
+      time: "12:00",
       type: "Konsultacja",
       notes: "",
       recommendations: "",
@@ -83,7 +85,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="date"
@@ -129,6 +131,25 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
 
           <FormField
             control={form.control}
+            name="time"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Godzina wizyty</FormLabel>
+                <div className="relative">
+                  <Clock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="time"
+                    className="pl-8"
+                    {...field} 
+                  />
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
@@ -163,10 +184,17 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
             <FormItem>
               <FormLabel>Notatki z wizyty</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Obserwacje, przeprowadzone badania, procedury..."
-                  className="min-h-[100px]"
-                  {...field}
+                <Controller
+                  name="notes"
+                  control={form.control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Obserwacje, przeprowadzone badania, procedury..."
+                      className="min-h-[150px]"
+                    />
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -181,9 +209,17 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
             <FormItem>
               <FormLabel>Zalecenia</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Zalecenia dla właściciela..."
-                  {...field}
+                <Controller
+                  name="recommendations"
+                  control={form.control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Zalecenia dla właściciela..."
+                      className="min-h-[150px]"
+                    />
+                  )}
                 />
               </FormControl>
               <FormMessage />

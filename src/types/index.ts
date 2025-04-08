@@ -1,4 +1,3 @@
-
 // Database types from Supabase (snake_case)
 export interface DbClient {
   id: string;
@@ -35,6 +34,7 @@ export interface DbVisit {
   petid: string;
   clientid: string;
   date: string;
+  time?: string | null;
   type: string;
   notes?: string | null;
   recommendations?: string | null;
@@ -92,6 +92,7 @@ export interface Visit {
   petId: string;
   clientId: string;
   date: string;
+  time?: string | null;
   type: string;
   notes?: string | null;
   recommendations?: string | null;
@@ -183,6 +184,7 @@ export const mapDbVisitToVisit = (dbVisit: DbVisit): Visit => ({
   petId: dbVisit.petid,
   clientId: dbVisit.clientid,
   date: dbVisit.date,
+  time: dbVisit.time,
   type: dbVisit.type,
   notes: dbVisit.notes,
   recommendations: dbVisit.recommendations,
@@ -194,6 +196,7 @@ export const mapVisitToDbVisit = (visit: Omit<Visit, 'id'>): Omit<DbVisit, 'id'>
   petid: visit.petId,
   clientid: visit.clientId,
   date: visit.date,
+  time: visit.time,
   type: visit.type,
   notes: visit.notes,
   recommendations: visit.recommendations,

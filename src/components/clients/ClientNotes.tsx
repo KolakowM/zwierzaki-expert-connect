@@ -1,7 +1,5 @@
 
-import { Edit } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Client } from "@/types";
 
 interface ClientNotesProps {
@@ -21,12 +19,6 @@ const ClientNotes = ({ client }: ClientNotesProps) => {
           <p className="text-muted-foreground">Brak notatek dla tego klienta.</p>
         )}
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" size="sm">
-          <Edit className="mr-2 h-4 w-4" />
-          Edytuj notatki
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
