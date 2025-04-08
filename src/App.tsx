@@ -13,6 +13,7 @@ import NotFound from './pages/NotFound';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import ClientDetails from './pages/ClientDetails';
+import Pets from './pages/Pets';
 import PetProfile from './pages/PetProfile';
 import Terms from './pages/Terms';
 import Terms2 from './pages/Terms2';
@@ -31,71 +32,55 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminClients from './pages/admin/AdminClients';
 import AdminPets from './pages/admin/AdminPets';
 import AdminVisits from './pages/admin/AdminVisits';
-import AdminCarePrograms from './pages/admin/AdminCarePrograms';
-import AdminUsers from './pages/admin/AdminUsers';
 import AdminSettings from './pages/admin/AdminSettings';
 
-// Create the query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-});
+// Create a client
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="light" storageKey="vetapp-ui-theme">
-          <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <Toaster position="top-right" />
+          <BrowserRouter>
             <Routes>
-              {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/pricing" element={<Pricing />} />
-              <Route path="/catalog" element={<Catalog />} />
-              <Route path="/specialists/:id" element={<SpecialistProfile />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/terms-of-service" element={<Terms2 />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/faq" element={<FAQ />} />
-
-              {/* Protected routes */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/clients" element={<Clients />} />
               <Route path="/clients/:id" element={<ClientDetails />} />
+              <Route path="/pets" element={<Pets />} />
               <Route path="/pets/:id" element={<PetProfile />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/terms2" element={<Terms2 />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/faq" element={<FAQ />} />
               <Route path="/profile" element={<ProfileEditor />} />
               <Route path="/settings" element={<AccountSettings />} />
-              <Route path="/account-settings" element={<AccountSettings />} /> {/* Keep this temporarily for backward compatibility */}
               <Route path="/become-specialist" element={<BecomeSpecialist />} />
-
+              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/specialist/:id" element={<SpecialistProfile />} />
+              
               {/* Admin routes */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="clients" element={<AdminClients />} />
                 <Route path="pets" element={<AdminPets />} />
                 <Route path="visits" element={<AdminVisits />} />
-                <Route path="care-programs" element={<AdminCarePrograms />} />
-                <Route path="users" element={<AdminUsers />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
-
-              {/* 404 route */}
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <Toaster />
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -7,6 +7,7 @@ import VisitForm from "./VisitForm";
 import { CalendarPlus, Edit } from "lucide-react";
 import { Visit } from "@/types";
 import { createVisit, updateVisit } from "@/services/visitService";
+import { ReactNode } from "react";
 
 interface VisitFormDialogProps {
   petId: string;
@@ -15,14 +16,11 @@ interface VisitFormDialogProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   title?: string;
-  defaultValues?: Partial<Visit & {
-    date?: Date | string;
-    followUpDate?: Date | string;
-  }>;
+  defaultValues?: Partial<Visit>;
   onVisitSaved?: (visit: Visit) => void;
   className?: string;
   isEditing?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -31,7 +29,7 @@ const VisitFormDialog = ({
   petId,
   clientId,
   buttonText = "Dodaj wizytę",
-  buttonVariant = "default",
+  buttonVariant = "outline",
   buttonSize = "default",
   title,
   defaultValues,
@@ -39,24 +37,16 @@ const VisitFormDialog = ({
   className,
   isEditing = false,
   children,
-  isOpen: controlledOpen,
-  onOpenChange: controlledOpenChange,
+  isOpen: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: VisitFormDialogProps) => {
-  // Use controlled state if provided, otherwise use internal state
   const [internalOpen, setInternalOpen] = useState(false);
-  const isControlled = controlledOpen !== undefined && controlledOpenChange !== undefined;
-  
-  const open = isControlled ? controlledOpen : internalOpen;
-  const setOpen = (newOpen: boolean) => {
-    if (isControlled) {
-      controlledOpenChange(newOpen);
-    } else {
-      setInternalOpen(newOpen);
-    }
-  };
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Use external or internal state based on what's provided
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalOnOpenChange || setInternalOpen;
 
   // Set default title based on whether we're editing or creating
   const dialogTitle = title || (isEditing ? "Edytuj wizytę" : "Dodaj nową wizytę");
@@ -64,8 +54,8 @@ const VisitFormDialog = ({
   // If defaultValues is present, ensure any date fields that might be strings are converted to Date objects
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
-    date: defaultValues.date ? (typeof defaultValues.date === 'string' ? new Date(defaultValues.date) : defaultValues.date) : undefined,
-    followUpDate: defaultValues.followUpDate ? (typeof defaultValues.followUpDate === 'string' ? new Date(defaultValues.followUpDate) : defaultValues.followUpDate) : undefined
+    date: defaultValues.date ? (typeof defaultValues.date === 'string' ? new Date(defaultValues.date) : defaultValues.date) : new Date(),
+    followUpDate: defaultValues.followUpDate ? (typeof defaultValues.followUpDate === 'string' ? new Date(defaultValues.followUpDate) : defaultValues.followUpDate) : null,
   } : undefined;
 
   const handleSubmit = async (formData: any) => {
@@ -85,7 +75,7 @@ const VisitFormDialog = ({
         
         toast({
           title: "Wizyta zaktualizowana",
-          description: `Dane wizyty zostały zaktualizowane`
+          description: `Dane wizyty zostały pomyślnie zaktualizowane`
         });
       } else {
         // Create new visit
@@ -97,7 +87,7 @@ const VisitFormDialog = ({
         
         toast({
           title: "Wizyta dodana pomyślnie",
-          description: `Dodano nową wizytę`,
+          description: `Nowa wizyta została zapisana`,
         });
       }
 

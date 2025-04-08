@@ -47,7 +47,14 @@ export const getCareProgramById = async (id: string): Promise<CareProgram | null
 };
 
 export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
-  const dbProgram = mapCareProgramToDbCareProgram(program);
+  // Convert dates to ISO strings if they are Date objects
+  const prepared = {
+    ...program,
+    startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
+    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate
+  };
+
+  const dbProgram = mapCareProgramToDbCareProgram(prepared);
   
   const { data, error } = await supabase
     .from('care_programs')
@@ -64,17 +71,24 @@ export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'creat
 };
 
 export const updateCareProgram = async (id: string, program: Partial<CareProgram>): Promise<CareProgram> => {
-  // Convert camelCase program properties to snake_case for the database
+  // Convert dates to ISO strings if they are Date objects
+  const prepared = {
+    ...program,
+    startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
+    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate
+  };
+
+  // Convert camelCase properties to snake_case for the database
   const dbProgramUpdate: Partial<DbCareProgram> = {};
-  if (program.petId !== undefined) dbProgramUpdate.petid = program.petId;
-  if (program.name !== undefined) dbProgramUpdate.name = program.name;
-  if (program.goal !== undefined) dbProgramUpdate.goal = program.goal;
-  if (program.description !== undefined) dbProgramUpdate.description = program.description;
-  if (program.startDate !== undefined) dbProgramUpdate.startdate = program.startDate;
-  if (program.endDate !== undefined) dbProgramUpdate.enddate = program.endDate;
-  if (program.status !== undefined) dbProgramUpdate.status = program.status;
-  if (program.instructions !== undefined) dbProgramUpdate.instructions = program.instructions;
-  if (program.recommendations !== undefined) dbProgramUpdate.recommendations = program.recommendations;
+  if (prepared.petId !== undefined) dbProgramUpdate.petid = prepared.petId;
+  if (prepared.name !== undefined) dbProgramUpdate.name = prepared.name;
+  if (prepared.description !== undefined) dbProgramUpdate.description = prepared.description;
+  if (prepared.goal !== undefined) dbProgramUpdate.goal = prepared.goal;
+  if (prepared.status !== undefined) dbProgramUpdate.status = prepared.status;
+  if (prepared.recommendations !== undefined) dbProgramUpdate.recommendations = prepared.recommendations;
+  if (prepared.instructions !== undefined) dbProgramUpdate.instructions = prepared.instructions;
+  if (prepared.startDate !== undefined) dbProgramUpdate.startdate = prepared.startDate;
+  if (prepared.endDate !== undefined) dbProgramUpdate.enddate = prepared.endDate;
 
   const { data, error } = await supabase
     .from('care_programs')

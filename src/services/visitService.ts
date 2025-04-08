@@ -62,7 +62,14 @@ export const getVisitById = async (id: string): Promise<Visit | null> => {
 };
 
 export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
-  const dbVisit = mapVisitToDbVisit(visit);
+  // Convert dates to ISO strings if they are Date objects
+  const prepared = {
+    ...visit,
+    date: visit.date instanceof Date ? visit.date.toISOString() : visit.date,
+    followUpDate: visit.followUpDate instanceof Date ? visit.followUpDate.toISOString() : visit.followUpDate
+  };
+  
+  const dbVisit = mapVisitToDbVisit(prepared);
   
   const { data, error } = await supabase
     .from('visits')
@@ -79,17 +86,24 @@ export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
 };
 
 export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Visit> => {
+  // Convert dates to ISO strings if they are Date objects
+  const prepared = {
+    ...visit,
+    date: visit.date instanceof Date ? visit.date.toISOString() : visit.date,
+    followUpDate: visit.followUpDate instanceof Date ? visit.followUpDate.toISOString() : visit.followUpDate
+  };
+  
   // Convert camelCase visit properties to snake_case for the database
   const dbVisitUpdate: Partial<DbVisit> = {};
-  if (visit.petId !== undefined) dbVisitUpdate.petid = visit.petId;
-  if (visit.clientId !== undefined) dbVisitUpdate.clientid = visit.clientId;
-  if (visit.date !== undefined) dbVisitUpdate.date = visit.date;
-  if (visit.time !== undefined) dbVisitUpdate.time = visit.time;
-  if (visit.type !== undefined) dbVisitUpdate.type = visit.type;
-  if (visit.notes !== undefined) dbVisitUpdate.notes = visit.notes;
-  if (visit.recommendations !== undefined) dbVisitUpdate.recommendations = visit.recommendations;
-  if (visit.followUpNeeded !== undefined) dbVisitUpdate.followupneeded = visit.followUpNeeded;
-  if (visit.followUpDate !== undefined) dbVisitUpdate.followupdate = visit.followUpDate;
+  if (prepared.petId !== undefined) dbVisitUpdate.petid = prepared.petId;
+  if (prepared.clientId !== undefined) dbVisitUpdate.clientid = prepared.clientId;
+  if (prepared.date !== undefined) dbVisitUpdate.date = prepared.date;
+  if (prepared.time !== undefined) dbVisitUpdate.time = prepared.time;
+  if (prepared.type !== undefined) dbVisitUpdate.type = prepared.type;
+  if (prepared.notes !== undefined) dbVisitUpdate.notes = prepared.notes;
+  if (prepared.recommendations !== undefined) dbVisitUpdate.recommendations = prepared.recommendations;
+  if (prepared.followUpNeeded !== undefined) dbVisitUpdate.followupneeded = prepared.followUpNeeded;
+  if (prepared.followUpDate !== undefined) dbVisitUpdate.followupdate = prepared.followUpDate;
 
   const { data, error } = await supabase
     .from('visits')

@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
-import { UserPlus } from "lucide-react";
-import { createClient } from "@/services/clientService";
+import { UserPlus, Edit } from "lucide-react";
+import { Client } from "@/types";
+import { createClient, updateClient } from "@/services/clientService";
 import { ReactNode } from "react";
 
 interface ClientFormDrawerProps {
@@ -20,44 +21,55 @@ interface ClientFormDrawerProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   title?: string;
-  defaultValues?: any;
-  onClientSaved?: (client: any) => void;
+  defaultValues?: Partial<Client>;
+  onClientSaved?: (client: Client) => void;
   children?: ReactNode;
+  isEditing?: boolean;
 }
 
 const ClientFormDrawer = ({
   buttonText = "Dodaj klienta",
   buttonVariant = "default",
   buttonSize = "default",
-  title = "Dodaj nowego klienta",
+  title,
   defaultValues,
   onClientSaved,
   children,
+  isEditing = false,
 }: ClientFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // Set default title based on whether we're editing or creating
+  const dialogTitle = title || (isEditing ? "Edytuj dane klienta" : "Dodaj nowego klienta");
+
   const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
       
-      let newClient;
-      if (defaultValues && defaultValues.id) {
-        // Update existing client logic would go here
-        newClient = { ...formData, id: defaultValues.id };
+      let clientData: Client;
+      
+      if (isEditing && defaultValues?.id) {
+        // Update existing client
+        clientData = await updateClient(defaultValues.id, formData);
+        
+        toast({
+          title: "Klient zaktualizowany",
+          description: `Dane klienta ${formData.firstName} ${formData.lastName} zostały pomyślnie zaktualizowane`,
+        });
       } else {
         // Create new client
-        newClient = await createClient(formData);
+        clientData = await createClient(formData);
+        
+        toast({
+          title: "Klient dodany pomyślnie",
+          description: `${formData.firstName} ${formData.lastName}`,
+        });
       }
 
-      toast({
-        title: defaultValues?.id ? "Klient zaktualizowany" : "Klient dodany pomyślnie",
-        description: `${formData.firstName} ${formData.lastName}`,
-      });
-
       if (onClientSaved) {
-        onClientSaved(newClient);
+        onClientSaved(clientData);
       }
 
       setOpen(false);
@@ -79,7 +91,7 @@ const ClientFormDrawer = ({
         <Button variant={buttonVariant} size={buttonSize}>
           {children || (
             <>
-              <UserPlus className="mr-2 h-4 w-4" />
+              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
               {buttonText}
             </>
           )}
@@ -87,7 +99,7 @@ const ClientFormDrawer = ({
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="text-left">
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle>{dialogTitle}</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-4 overflow-y-auto">
           <ClientForm 

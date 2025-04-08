@@ -10,9 +10,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getClientById, deleteClient } from "@/services/clientService";
 import { getPets } from "@/services/petService";
 import { getVisits } from "@/services/visitService";
-import { Card, CardContent, CardHeader } from "@/components/ui/card"; // Added missing imports
 
-// Import our new components
+// Import our components
 import ClientHeader from "@/components/clients/ClientHeader";
 import ClientContactInfo from "@/components/clients/ClientContactInfo";
 import ClientNotes from "@/components/clients/ClientNotes";
@@ -20,6 +19,7 @@ import ClientOverviewTab from "@/components/clients/tabs/ClientOverviewTab";
 import ClientPetsTab from "@/components/clients/tabs/ClientPetsTab";
 import ClientVisitsTab from "@/components/clients/tabs/ClientVisitsTab";
 import ClientDocumentsTab from "@/components/clients/tabs/ClientDocumentsTab";
+import ClientNotesTab from "@/components/clients/tabs/ClientNotesTab";
 
 const ClientDetails = () => {
   const { toast } = useToast();
@@ -55,7 +55,8 @@ const ClientDetails = () => {
   // Fetch client's pets using React Query
   const { 
     data: allPets = [], 
-    isLoading: isLoadingPets 
+    isLoading: isLoadingPets,
+    refetch: refetchPets
   } = useQuery({
     queryKey: ['pets'],
     queryFn: getPets,
@@ -65,7 +66,8 @@ const ClientDetails = () => {
   // Fetch client's visits using React Query
   const { 
     data: allVisits = [], 
-    isLoading: isLoadingVisits 
+    isLoading: isLoadingVisits,
+    refetch: refetchVisits
   } = useQuery({
     queryKey: ['visits'],
     queryFn: getVisits,
@@ -89,15 +91,17 @@ const ClientDetails = () => {
   }, [isClientError, navigate, toast]);
 
   const handlePetSaved = (newPet: Pet) => {
-    // React Query will automatically refetch the pets data
+    // Refresh the pets data
+    refetchPets();
     toast({
-      title: "Zwierzak dodany pomyślnie",
-      description: `${newPet.name} został dodany do klientów ${client?.firstName} ${client?.lastName}`
+      title: "Zwierzę zapisane pomyślnie",
+      description: `${newPet.name} został pomyślnie zapisany`
     });
   };
 
   const handleClientUpdated = (updatedClient: Client) => {
-    // React Query will automatically refetch the client data
+    // Refresh client data
+    queryClient.invalidateQueries({ queryKey: ['client', id] });
     toast({
       title: "Dane klienta zaktualizowane",
       description: "Zmiany zostały zapisane pomyślnie"
@@ -105,8 +109,8 @@ const ClientDetails = () => {
   };
 
   const handleVisitAdded = (visit: Visit) => {
-    // React Query will automatically refetch the visits data
-    queryClient.invalidateQueries({ queryKey: ['visits'] });
+    // Refresh visits data
+    refetchVisits();
     toast({
       title: "Wizyta dodana pomyślnie",
       description: "Nowa wizyta została zapisana"
@@ -201,6 +205,7 @@ const ClientDetails = () => {
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="pets">Zwierzęta ({pets.length})</TabsTrigger>
             <TabsTrigger value="visits">Historia wizyt ({visits.length})</TabsTrigger>
+            <TabsTrigger value="notes">Notatki</TabsTrigger>
             <TabsTrigger value="documents">Dokumenty</TabsTrigger>
           </TabsList>
           
@@ -229,6 +234,10 @@ const ClientDetails = () => {
               visits={visits}
               onVisitAdded={handleVisitAdded}
             />
+          </TabsContent>
+          
+          <TabsContent value="notes" className="space-y-4">
+            <ClientNotesTab client={client} />
           </TabsContent>
           
           <TabsContent value="documents" className="space-y-4">
