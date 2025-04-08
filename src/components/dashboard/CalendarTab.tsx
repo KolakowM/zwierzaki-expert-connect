@@ -27,7 +27,7 @@ const CalendarTab = () => {
   // Filter visits for the selected date
   const visitsForSelectedDate = date 
     ? visits.filter(visit => {
-        const visitDate = new Date(visit.date);
+        const visitDate = new Date(typeof visit.date === 'string' ? visit.date : visit.date);
         return (
           visitDate.getDate() === date.getDate() &&
           visitDate.getMonth() === date.getMonth() &&
@@ -39,7 +39,7 @@ const CalendarTab = () => {
   // Mark days with visits
   const isDayWithVisit = (day: Date) => {
     return visits.some(visit => {
-      const visitDate = new Date(visit.date);
+      const visitDate = new Date(typeof visit.date === 'string' ? visit.date : visit.date);
       return (
         visitDate.getDate() === day.getDate() &&
         visitDate.getMonth() === day.getMonth() &&
@@ -113,6 +113,11 @@ const CalendarTab = () => {
     return { client, pet };
   };
 
+  // Helper function to format date that handles both string and Date objects
+  const formatVisitDate = (dateValue: string | Date) => {
+    return format(typeof dateValue === 'string' ? parseISO(dateValue) : dateValue, "HH:mm");
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="md:col-span-1">
@@ -164,7 +169,7 @@ const CalendarTab = () => {
             <div className="space-y-4">
               {visitsForSelectedDate.map((visit) => {
                 const { client, pet } = getVisitDetails(visit);
-                const visitTime = format(parseISO(visit.date), "HH:mm");
+                const visitTime = formatVisitDate(visit.date);
                 return (
                   <div
                     key={visit.id}
@@ -372,7 +377,13 @@ const CalendarTab = () => {
                     <>
                       <div className="space-y-1">
                         <p className="text-sm font-medium">Data i godzina</p>
-                        <p>{format(new Date(selectedVisit.date), "dd.MM.yyyy, HH:mm")}</p>
+                        <p>{format(
+                            typeof selectedVisit.date === 'string' 
+                              ? new Date(selectedVisit.date) 
+                              : selectedVisit.date, 
+                            "dd.MM.yyyy, HH:mm"
+                          )}
+                        </p>
                       </div>
 
                       <div className="space-y-1">

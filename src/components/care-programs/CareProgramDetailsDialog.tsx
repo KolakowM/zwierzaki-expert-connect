@@ -80,9 +80,9 @@ const CareProgramDetailsDialog = ({ programId, children }: CareProgramDetailsDia
     window.print();
   };
   
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | Date) => {
     if (!dateString) return "";
-    return format(new Date(dateString), 'PPP', { locale: pl });
+    return format(typeof dateString === 'string' ? new Date(dateString) : dateString, 'PPP', { locale: pl });
   };
 
   return (

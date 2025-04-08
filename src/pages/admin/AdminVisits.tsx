@@ -112,8 +112,8 @@ const AdminVisits = () => {
       let valueA, valueB;
       
       if (sortBy === "date") {
-        valueA = new Date(a.date).getTime();
-        valueB = new Date(b.date).getTime();
+        valueA = new Date(typeof a.date === 'string' ? a.date : a.date).getTime();
+        valueB = new Date(typeof b.date === 'string' ? b.date : b.date).getTime();
       } else if (sortBy === "pet") {
         valueA = getPetName(a.petId).toLowerCase();
         valueB = getPetName(b.petId).toLowerCase();
@@ -141,8 +141,8 @@ const AdminVisits = () => {
       return 0;
     });
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateString: string | Date) => {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
     return new Intl.DateTimeFormat('pl-PL', {
       day: '2-digit',
       month: '2-digit',
