@@ -38,7 +38,7 @@ const DashboardOverview = () => {
       value: pets.length.toString(),
       description: "Zarejestrowanych zwierząt",
       icon: <PawPrint className="h-4 w-4 text-muted-foreground" />,
-      link: "/dashboard?tab=animals"
+      link: "/pets"
     },
     {
       title: "Wizyty",
