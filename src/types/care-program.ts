@@ -20,8 +20,8 @@ export interface CareProgram {
   name: string;
   goal: string;
   description?: string | null;
-  startDate: string;
-  endDate?: string | null;
+  startDate: string | Date;
+  endDate?: string | Date | null;
   status: "aktywny" | "zakończony" | "anulowany";
   instructions?: string | null;
   recommendations?: string | null;
@@ -48,8 +48,8 @@ export const mapCareProgramToDbCareProgram = (program: Omit<CareProgram, 'id' | 
   name: program.name,
   goal: program.goal,
   description: program.description,
-  startdate: program.startDate,
-  enddate: program.endDate,
+  startdate: typeof program.startDate === 'string' ? program.startDate : program.startDate.toISOString(),
+  enddate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate,
   status: program.status,
   instructions: program.instructions,
   recommendations: program.recommendations,

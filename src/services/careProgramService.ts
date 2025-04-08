@@ -50,8 +50,8 @@ export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'creat
   // Convert dates to ISO strings if they are Date objects
   const prepared = {
     ...program,
-    startDate: typeof program.startDate === 'object' && program.startDate ? program.startDate.toISOString() : program.startDate,
-    endDate: typeof program.endDate === 'object' && program.endDate ? program.endDate.toISOString() : program.endDate
+    startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
+    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate
   };
 
   const dbProgram = mapCareProgramToDbCareProgram(prepared);
@@ -74,8 +74,8 @@ export const updateCareProgram = async (id: string, program: Partial<CareProgram
   // Convert dates to ISO strings if they are Date objects
   const prepared = {
     ...program,
-    startDate: typeof program.startDate === 'object' && program.startDate ? program.startDate.toISOString() : program.startDate,
-    endDate: typeof program.endDate === 'object' && program.endDate ? program.endDate.toISOString() : program.endDate
+    startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
+    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate
   };
 
   // Convert camelCase properties to snake_case for the database

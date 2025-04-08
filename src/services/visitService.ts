@@ -65,8 +65,8 @@ export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
   // Convert dates to ISO strings if they are Date objects
   const prepared = {
     ...visit,
-    date: typeof visit.date === 'object' && visit.date ? visit.date.toISOString() : visit.date,
-    followUpDate: typeof visit.followUpDate === 'object' && visit.followUpDate ? visit.followUpDate.toISOString() : visit.followUpDate
+    date: visit.date instanceof Date ? visit.date.toISOString() : visit.date,
+    followUpDate: visit.followUpDate instanceof Date ? visit.followUpDate.toISOString() : visit.followUpDate
   };
   
   const dbVisit = mapVisitToDbVisit(prepared);
@@ -89,8 +89,8 @@ export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Vi
   // Convert dates to ISO strings if they are Date objects
   const prepared = {
     ...visit,
-    date: typeof visit.date === 'object' && visit.date ? visit.date.toISOString() : visit.date,
-    followUpDate: typeof visit.followUpDate === 'object' && visit.followUpDate ? visit.followUpDate.toISOString() : visit.followUpDate
+    date: visit.date instanceof Date ? visit.date.toISOString() : visit.date,
+    followUpDate: visit.followUpDate instanceof Date ? visit.followUpDate.toISOString() : visit.followUpDate
   };
   
   // Convert camelCase visit properties to snake_case for the database

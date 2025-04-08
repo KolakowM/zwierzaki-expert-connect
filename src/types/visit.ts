@@ -17,13 +17,13 @@ export interface Visit {
   id: string;
   petId: string;
   clientId: string;
-  date: string;
+  date: string | Date;
   time?: string | null;
   type: string;
   notes?: string | null;
   recommendations?: string | null;
   followUpNeeded?: boolean | null;
-  followUpDate?: string | null;
+  followUpDate?: string | Date | null;
 }
 
 // Mapping functions for visits
@@ -43,11 +43,11 @@ export const mapDbVisitToVisit = (dbVisit: DbVisit): Visit => ({
 export const mapVisitToDbVisit = (visit: Omit<Visit, 'id'>): Omit<DbVisit, 'id'> => ({
   petid: visit.petId,
   clientid: visit.clientId,
-  date: visit.date,
+  date: typeof visit.date === 'string' ? visit.date : visit.date.toISOString(),
   time: visit.time,
   type: visit.type,
   notes: visit.notes,
   recommendations: visit.recommendations,
   followupneeded: visit.followUpNeeded,
-  followupdate: visit.followUpDate,
+  followupdate: visit.followUpDate instanceof Date ? visit.followUpDate.toISOString() : visit.followUpDate,
 });
