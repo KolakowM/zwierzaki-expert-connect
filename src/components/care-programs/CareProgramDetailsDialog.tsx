@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getCareProgramById } from "@/services/careProgramService";
 import { getPetById } from "@/services/petService";
@@ -10,8 +9,11 @@ import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, CalendarRange, CheckCircle, XCircle, User, PawPrint } from "lucide-react";
+import { Printer, User, PawPrint, XCircle } from "lucide-react";
 import type { CareProgram, Pet, Client } from "@/types";
+import ProgramHeader from "./details/ProgramHeader";
+import EntityInfoCard from "./details/EntityInfoCard";
+import ProgramDetailsCard from "./details/ProgramDetailsCard";
 
 interface CareProgramDetailsDialogProps {
   programId: string;
@@ -108,134 +110,36 @@ const CareProgramDetailsDialog = ({ programId, children }: CareProgramDetailsDia
         ) : program ? (
           <div className="space-y-6">
             {/* Header - Program Name and Status */}
-            <div className="flex justify-between items-center border-b pb-4">
-              <div>
-                <h2 className="text-2xl font-bold">{program.name}</h2>
-                <div className="flex items-center mt-1 text-muted-foreground">
-                  <CalendarRange className="h-4 w-4 mr-1.5" />
-                  <span className="text-sm">
-                    {formatDate(program.startDate)}
-                    {program.endDate && ` - ${formatDate(program.endDate)}`}
-                  </span>
-                </div>
-              </div>
-              <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                program.status === "aktywny"
-                  ? "bg-green-100 text-green-800"
-                  : program.status === "zakończony"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-red-100 text-red-800"
-              }`}>
-                {program.status}
-              </div>
-            </div>
+            <ProgramHeader program={program} formatDate={formatDate} />
 
             {/* Pet and Owner Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <PawPrint className="h-5 w-5 mr-2" />
-                    Dane zwierzęcia
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {pet ? (
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">Imię:</span>
-                        <span>{pet.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium">Gatunek:</span>
-                        <span>{pet.species}</span>
-                      </div>
-                      {pet.breed && (
-                        <div className="flex justify-between">
-                          <span className="font-medium">Rasa:</span>
-                          <span>{pet.breed}</span>
-                        </div>
-                      )}
-                      {pet.age && (
-                        <div className="flex justify-between">
-                          <span className="font-medium">Wiek:</span>
-                          <span>{pet.age} lat</span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">Dane zwierzęcia niedostępne</p>
-                  )}
-                </CardContent>
-              </Card>
+              <EntityInfoCard 
+                title="Dane zwierzęcia" 
+                Icon={PawPrint}
+                infoItems={[
+                  { label: "Imię", value: pet?.name },
+                  { label: "Gatunek", value: pet?.species },
+                  { label: "Rasa", value: pet?.breed },
+                  { label: "Wiek", value: pet?.age ? `${pet.age} lat` : undefined }
+                ]}
+                emptyMessage="Dane zwierzęcia niedostępne"
+              />
               
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2" />
-                    Właściciel
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {owner ? (
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">Imię i nazwisko:</span>
-                        <span>{owner.firstName} {owner.lastName}</span>
-                      </div>
-                      {owner.phone && (
-                        <div className="flex justify-between">
-                          <span className="font-medium">Telefon:</span>
-                          <span>{owner.phone}</span>
-                        </div>
-                      )}
-                      {owner.email && (
-                        <div className="flex justify-between">
-                          <span className="font-medium">Email:</span>
-                          <span>{owner.email}</span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">Dane właściciela niedostępne</p>
-                  )}
-                </CardContent>
-              </Card>
+              <EntityInfoCard 
+                title="Właściciel" 
+                Icon={User}
+                infoItems={[
+                  { label: "Imię i nazwisko", value: owner ? `${owner.firstName} ${owner.lastName}` : undefined },
+                  { label: "Telefon", value: owner?.phone },
+                  { label: "Email", value: owner?.email }
+                ]}
+                emptyMessage="Dane właściciela niedostępne"
+              />
             </div>
             
             {/* Plan Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Plan opieki</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-sm mb-1">Cel planu:</h4>
-                  <p>{program.goal}</p>
-                </div>
-                
-                {program.description && (
-                  <div>
-                    <h4 className="font-medium text-sm mb-1">Opis:</h4>
-                    <p className="whitespace-pre-line">{program.description}</p>
-                  </div>
-                )}
-                
-                {program.instructions && (
-                  <div>
-                    <h4 className="font-medium text-sm mb-1">Instrukcje:</h4>
-                    <p className="whitespace-pre-line">{program.instructions}</p>
-                  </div>
-                )}
-                
-                {program.recommendations && (
-                  <div>
-                    <h4 className="font-medium text-sm mb-1">Rekomendacje:</h4>
-                    <p className="whitespace-pre-line">{program.recommendations}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <ProgramDetailsCard program={program} />
             
             {/* Footer - Generation info */}
             <div className="text-sm text-muted-foreground pt-4 border-t">
