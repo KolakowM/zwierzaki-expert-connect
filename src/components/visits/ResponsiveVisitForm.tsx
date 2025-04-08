@@ -17,6 +17,8 @@ interface ResponsiveVisitFormProps {
   className?: string;
   isEditing?: boolean;
   children?: ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const ResponsiveVisitForm = (props: ResponsiveVisitFormProps) => {

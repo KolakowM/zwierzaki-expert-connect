@@ -23,6 +23,8 @@ interface VisitFormDialogProps {
   className?: string;
   isEditing?: boolean;
   children?: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const VisitFormDialog = ({
@@ -37,8 +39,22 @@ const VisitFormDialog = ({
   className,
   isEditing = false,
   children,
+  isOpen: controlledOpen,
+  onOpenChange: controlledOpenChange,
 }: VisitFormDialogProps) => {
-  const [open, setOpen] = useState(false);
+  // Use controlled state if provided, otherwise use internal state
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined && controlledOpenChange !== undefined;
+  
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (newOpen: boolean) => {
+    if (isControlled) {
+      controlledOpenChange(newOpen);
+    } else {
+      setInternalOpen(newOpen);
+    }
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
