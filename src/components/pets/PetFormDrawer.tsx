@@ -10,7 +10,8 @@ import {
   DrawerFooter 
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import PetForm, { PetSpecies, PetSex, PetFormOutput } from "./PetForm";
+import PetForm from "./PetForm";
+import { PetSpecies, PetSex, PetFormOutput } from "./PetFormSchema";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
