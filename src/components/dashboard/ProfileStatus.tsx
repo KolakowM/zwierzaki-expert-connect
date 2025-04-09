@@ -30,7 +30,7 @@ const ProfileStatus = () => {
             <span className="text-sm">Dane kontaktowe</span>
             <span className="text-xs text-green-500 font-medium">Kompletne</span>
           </div>
-          <Link to="/account?tab=specialist">
+          <Link to="/settings">
             <Button size="sm" className="mt-2 w-full">
               Edytuj profil
             </Button>
