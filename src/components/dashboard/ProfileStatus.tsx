@@ -2,8 +2,11 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthProvider";
 
 const ProfileStatus = () => {
+  const { isAdmin } = useAuth();
+  
   return (
     <Card>
       <CardHeader>
@@ -30,11 +33,24 @@ const ProfileStatus = () => {
             <span className="text-sm">Dane kontaktowe</span>
             <span className="text-xs text-green-500 font-medium">Kompletne</span>
           </div>
+          {isAdmin() && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Uprawnienia administratora</span>
+              <span className="text-xs text-green-500 font-medium">Aktywne</span>
+            </div>
+          )}
           <Link to="/settings">
             <Button size="sm" className="mt-2 w-full">
               Edytuj profil
             </Button>
           </Link>
+          {isAdmin() && (
+            <Link to="/admin">
+              <Button size="sm" variant="outline" className="mt-2 w-full">
+                Panel administratora
+              </Button>
+            </Link>
+          )}
         </div>
       </CardContent>
     </Card>

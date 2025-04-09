@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AuthUser {
@@ -78,10 +77,19 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
+  const { data: roleData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('role', 'admin')
+    .maybeSingle();
+  
+  const isAdmin = !!roleData;
+  
   return {
     id: user.id,
     email: user.email || '',
-    role: user.user_metadata?.role || 'user',
+    role: isAdmin ? 'admin' : 'user',
     firstName: user.user_metadata?.first_name,
     lastName: user.user_metadata?.last_name,
   };
