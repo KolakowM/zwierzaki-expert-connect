@@ -78,10 +78,20 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
+  // Use raw query format to avoid TypeScript issues
+  const { data: roleData } = await supabase
+    .from('user_roles')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('role', 'admin')
+    .maybeSingle() as any;
+  
+  const isAdmin = !!roleData;
+  
   return {
     id: user.id,
     email: user.email || '',
-    role: user.user_metadata?.role || 'user',
+    role: isAdmin ? 'admin' : 'user',
     firstName: user.user_metadata?.first_name,
     lastName: user.user_metadata?.last_name,
   };

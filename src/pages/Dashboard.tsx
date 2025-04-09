@@ -1,61 +1,98 @@
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast"; 
-import DashboardTabs from "@/components/dashboard/DashboardTabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthProvider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
+
+// Import dashboard components
+import UserMenu from "@/components/dashboard/UserMenu";
+import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import ClientsTab from "@/components/dashboard/ClientsTab";
+import AnimalsTab from "@/components/dashboard/AnimalsTab";
+import CalendarTab from "@/components/dashboard/CalendarTab";
 
 const Dashboard = () => {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Get the tab from URL query parameter or default to "overview"
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromQuery = queryParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
+
   useEffect(() => {
-    // Check authentication state after loading is complete
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
       toast({
-        title: "Dostęp zabroniony",
-        description: "Musisz być zalogowany, aby zobaczyć panel",
+        title: "Brak dostępu",
+        description: "Musisz być zalogowany, aby zobaczyć ten panel",
         variant: "destructive"
       });
       navigate("/login");
     }
-  }, [isAuthenticated, isLoading, navigate, toast]);
+  }, [isAuthenticated, navigate, toast]);
 
-  // Show nothing while checking authentication
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="container py-8 flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </MainLayout>
-    );
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/dashboard${value !== "overview" ? `?tab=${value}` : ""}`, { replace: true });
+  };
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Wylogowano pomyślnie",
+      description: "Do zobaczenia wkrótce!",
+    });
+    navigate("/");
+  };
+
+  if (!isAuthenticated) {
+    return <div />;
   }
 
-  // If we get past the effect, we're authenticated
   return (
     <MainLayout>
       <div className="container py-8">
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle>Witaj, {user?.firstName || user?.email || 'Użytkowniku'}</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {user?.email}
-              </p>
-            </div>
-          </CardHeader>
-        </Card>
-        
-        <h1 className="text-2xl font-bold mb-6">Panel główny</h1>
-        <DashboardTabs />
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Panel Specjalisty</h1>
+          <div className="flex items-center gap-4">
+            <UserMenu 
+              firstName={user?.firstName} 
+              lastName={user?.lastName} 
+              onLogout={handleLogout} 
+            />
+          </div>
+        </div>
+
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4 md:w-auto md:grid-cols-4">
+            <TabsTrigger value="overview">Przegląd</TabsTrigger>
+            <TabsTrigger value="clients">Klienci</TabsTrigger>
+            <TabsTrigger value="animals">Zwierzęta</TabsTrigger>
+            <TabsTrigger value="calendar">Kalendarz</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-4">
+            <DashboardOverview />
+          </TabsContent>
+          
+          <TabsContent value="clients" className="space-y-4">
+            <ClientsTab />
+          </TabsContent>
+          
+          <TabsContent value="animals" className="space-y-4">
+            <AnimalsTab />
+          </TabsContent>
+          
+          <TabsContent value="calendar" className="space-y-4">
+            <CalendarTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </MainLayout>
   );

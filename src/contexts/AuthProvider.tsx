@@ -52,10 +52,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
+          // Check if user has admin role
+          // We can't use typings for user_roles in onAuthStateChange 
+          // so we use raw query to avoid TypeScript issues
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .maybeSingle() as any;
+          
+          const isAdmin = !!roleData;
+          
           const updatedUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
-            role: session.user.user_metadata?.role || 'user',
+            role: isAdmin ? 'admin' : 'user',
             firstName: session.user.user_metadata?.first_name,
             lastName: session.user.user_metadata?.last_name,
           };

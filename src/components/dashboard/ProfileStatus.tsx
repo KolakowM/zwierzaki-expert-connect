@@ -2,59 +2,55 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Shield, Mail, User, Camera } from "lucide-react";
+import { useAuth } from "@/contexts/AuthProvider";
 
 const ProfileStatus = () => {
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   
   return (
     <Card>
       <CardHeader>
         <CardTitle>Status profilu</CardTitle>
         <CardDescription>
-          {user ? `Witaj, ${user.firstName || user.email}` : 'Uzupełnij swój profil, aby był widoczny w katalogu'}
+          Uzupełnij swój profil, aby był widoczny w katalogu
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Dane podstawowe</span>
-            </div>
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-700">
-              {user?.firstName && user?.lastName ? 'Kompletne' : 'Częściowo'}
-            </span>
+            <span className="text-sm">Dane podstawowe</span>
+            <span className="text-xs text-amber-500 font-medium">Częściowo</span>
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Specjalizacje</span>
-            </div>
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">Brak</span>
+            <span className="text-sm">Specjalizacje</span>
+            <span className="text-xs text-red-500 font-medium">Brak</span>
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Camera className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Zdjęcie</span>
-            </div>
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">Brak</span>
+            <span className="text-sm">Zdjęcie</span>
+            <span className="text-xs text-red-500 font-medium">Brak</span>
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Dane kontaktowe</span>
-            </div>
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
-              {user?.email ? 'Kompletne' : 'Brak'}
-            </span>
+            <span className="text-sm">Dane kontaktowe</span>
+            <span className="text-xs text-green-500 font-medium">Kompletne</span>
           </div>
+          {isAdmin() && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Uprawnienia administratora</span>
+              <span className="text-xs text-green-500 font-medium">Aktywne</span>
+            </div>
+          )}
           <Link to="/settings">
             <Button size="sm" className="mt-2 w-full">
               Edytuj profil
             </Button>
           </Link>
+          {isAdmin() && (
+            <Link to="/admin">
+              <Button size="sm" variant="outline" className="mt-2 w-full">
+                Panel administratora
+              </Button>
+            </Link>
+          )}
         </div>
       </CardContent>
     </Card>

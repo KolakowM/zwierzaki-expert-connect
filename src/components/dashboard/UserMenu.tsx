@@ -31,9 +31,9 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
           <NavigationMenuTrigger className="gap-2">
             <Avatar className="h-8 w-8">
               <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback>{initials || "U"}</AvatarFallback>
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <span>{firstName || ''} {lastName || ''}</span>
+            <span>{firstName} {lastName}</span>
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[200px] gap-2 p-4">

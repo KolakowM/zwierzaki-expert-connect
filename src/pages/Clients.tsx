@@ -24,24 +24,17 @@ import { useQuery } from "@tanstack/react-query";
 const Clients = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch clients using React Query
-  const { 
-    data: clients = [], 
-    isLoading: clientsLoading, 
-    error, 
-    refetch 
-  } = useQuery({
+  const { data: clients = [], isLoading, error, refetch } = useQuery({
     queryKey: ['clients'],
     queryFn: getClients,
-    // Don't fetch if not authenticated yet
-    enabled: isAuthenticated,
   });
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
       toast({
         title: "Brak dostępu",
         description: "Musisz być zalogowany, aby przeglądać klientów",
@@ -49,7 +42,7 @@ const Clients = () => {
       });
       navigate("/login");
     }
-  }, [isAuthenticated, isLoading, navigate, toast]);
+  }, [isAuthenticated, navigate, toast]);
 
   // Handle errors in fetching clients
   useEffect(() => {
@@ -75,17 +68,6 @@ const Clients = () => {
     client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.phone && client.phone.includes(searchTerm))
   );
-
-  // Show loading while checking auth
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="container flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
