@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -5,22 +6,22 @@ import { useAuth } from "@/contexts/AuthProvider";
 import AdminSidebar from "./AdminSidebar";
 
 const AdminLayout = () => {
-  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || !isAdmin())) {
+    if (!isLoading && !isAuthenticated) {
       toast({
         title: "Brak dostępu",
-        description: "Wymagane są uprawnienia administratora",
+        description: "Musisz być zalogowany, aby uzyskać dostęp do tego obszaru",
         variant: "destructive"
       });
       navigate("/login");
     }
-  }, [isAuthenticated, isLoading, isAdmin, navigate, toast]);
+  }, [isAuthenticated, isLoading, navigate, toast]);
 
-  if (isLoading || !isAuthenticated || !isAdmin()) {
+  if (isLoading || !isAuthenticated) {
     return <div className="flex h-screen items-center justify-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>;
