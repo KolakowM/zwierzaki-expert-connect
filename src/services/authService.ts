@@ -79,18 +79,15 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
-  // Pobierz informacje o rolach użytkownika przy pomocy SQL bezpośrednio
-  const { data: rolesData, error } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id) as { data: { role: string }[] | null, error: any };
-
-  if (error) {
-    console.error("Błąd podczas pobierania roli użytkownika:", error);
+  // Wykorzystujemy rpc (remote procedure call) zamiast bezpośredniego zapytania do tabeli
+  const { data: isAdmin, error: adminError } = await supabase.rpc('has_role', {
+    _user_id: user.id,
+    _role: 'admin'
+  });
+  
+  if (adminError) {
+    console.error("Błąd podczas sprawdzania roli administratora:", adminError);
   }
-
-  // Sprawdź, czy użytkownik ma rolę admina
-  const isAdmin = rolesData && rolesData.some(r => r.role === 'admin');
   
   return {
     id: user.id,
@@ -98,7 +95,7 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     role: user.user_metadata?.role || 'user',
     firstName: user.user_metadata?.first_name,
     lastName: user.user_metadata?.last_name,
-    isAdmin: isAdmin // Dodaj informację o roli admina
+    isAdmin: isAdmin === true
   };
 };
 
@@ -106,19 +103,18 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
 export const checkIsAdmin = async (userId: string): Promise<boolean> => {
   if (!userId) return false;
 
-  // Użyj bezpośredniego zapytania SQL zamiast from()
-  const { data: rolesData, error } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('role', 'admin') as { data: { role: string }[] | null, error: any };
+  // Użyj funkcji RPC zamiast zapytania SQL
+  const { data: isAdmin, error } = await supabase.rpc('has_role', {
+    _user_id: userId,
+    _role: 'admin'
+  });
 
   if (error) {
     console.error("Błąd podczas sprawdzania roli admina:", error);
     return false;
   }
 
-  return rolesData && rolesData.length > 0;
+  return isAdmin === true;
 };
 
 export const resetPassword = async (email: string) => {
