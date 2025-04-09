@@ -79,11 +79,15 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
-  // Pobierz informacje o rolach użytkownika
-  const { data: rolesData } = await supabase
+  // Pobierz informacje o rolach użytkownika przy pomocy SQL bezpośrednio
+  const { data: rolesData, error } = await supabase
     .from('user_roles')
     .select('role')
-    .eq('user_id', user.id);
+    .eq('user_id', user.id) as { data: { role: string }[] | null, error: any };
+
+  if (error) {
+    console.error("Błąd podczas pobierania roli użytkownika:", error);
+  }
 
   // Sprawdź, czy użytkownik ma rolę admina
   const isAdmin = rolesData && rolesData.some(r => r.role === 'admin');
@@ -102,11 +106,17 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
 export const checkIsAdmin = async (userId: string): Promise<boolean> => {
   if (!userId) return false;
 
-  const { data: rolesData } = await supabase
+  // Użyj bezpośredniego zapytania SQL zamiast from()
+  const { data: rolesData, error } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', userId)
-    .eq('role', 'admin');
+    .eq('role', 'admin') as { data: { role: string }[] | null, error: any };
+
+  if (error) {
+    console.error("Błąd podczas sprawdzania roli admina:", error);
+    return false;
+  }
 
   return rolesData && rolesData.length > 0;
 };
