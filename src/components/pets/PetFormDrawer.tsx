@@ -79,9 +79,24 @@ const PetFormDrawer = ({
         });
       } else {
         // Create new pet
+        // Ensure required fields are present for new pet creation
+        if (!formData.name || !formData.species) {
+          throw new Error("Imię i gatunek zwierzęcia są wymagane");
+        }
+        
         petData = await createPet({
-          ...formData,
-          clientId
+          name: formData.name,
+          species: formData.species,
+          clientId,
+          breed: formData.breed,
+          age: formData.age,
+          weight: formData.weight,
+          sex: formData.sex,
+          neutered: formData.neutered,
+          medicalHistory: formData.medicalHistory,
+          allergies: formData.allergies,
+          dietaryRestrictions: formData.dietaryRestrictions,
+          behavioralNotes: formData.behavioralNotes
         });
         
         toast({
