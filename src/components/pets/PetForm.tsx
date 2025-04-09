@@ -1,8 +1,6 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pet } from "@/types";
 import {
   Form,
   FormControl,
@@ -61,12 +59,15 @@ const petFormSchema = z.object({
   behavioralNotes: z.string().optional(),
 });
 
-type PetFormValues = z.infer<typeof petFormSchema>;
+// Define the actual form values type (before transformation)
+export type PetFormValues = z.input<typeof petFormSchema>;
+// Define the transformed output type (after zod transforms)
+export type PetFormOutput = z.output<typeof petFormSchema>;
 
 interface PetFormProps {
   clientId: string;
   defaultValues?: Partial<PetFormValues>;
-  onSubmit: (data: PetFormValues) => void;
+  onSubmit: (data: PetFormOutput) => void;
   isSubmitting?: boolean;
 }
 
@@ -89,9 +90,17 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
     },
   });
 
+  // Pass form data through the schema's transform to convert string values to numbers
+  const handleSubmit = (values: PetFormValues) => {
+    const result = petFormSchema.safeParse(values);
+    if (result.success) {
+      onSubmit(result.data);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"

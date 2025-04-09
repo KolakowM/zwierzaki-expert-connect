@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import PetForm, { PetSpecies, PetSex } from "./PetForm";
+import PetForm, { PetSpecies, PetSex, PetFormOutput } from "./PetForm";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
@@ -52,7 +52,7 @@ const PetFormDialog = ({
     sex: defaultValues.sex as PetSex || undefined
   } : undefined;
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: PetFormOutput) => {
     try {
       setIsSubmitting(true);
       console.log("Saving pet:", formData);

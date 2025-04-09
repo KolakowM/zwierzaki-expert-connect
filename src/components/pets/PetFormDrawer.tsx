@@ -10,10 +10,11 @@ import {
   DrawerFooter 
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import PetForm, { PetSpecies, PetSex } from "./PetForm";
+import PetForm, { PetSpecies, PetSex, PetFormOutput } from "./PetForm";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PetFormDrawerProps {
   clientId: string;
@@ -25,6 +26,7 @@ interface PetFormDrawerProps {
   onPetSaved?: (pet: Pet) => void;
   className?: string;
   isEditing?: boolean;
+  children?: React.ReactNode;
 }
 
 const PetFormDrawer = ({
@@ -37,10 +39,12 @@ const PetFormDrawer = ({
   onPetSaved,
   className,
   isEditing = false,
+  children,
 }: PetFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Set default title based on whether we're editing or creating
   const drawerTitle = title || (isEditing ? "Edytuj dane zwierzaka" : "Dodaj nowego zwierzaka");
@@ -48,11 +52,14 @@ const PetFormDrawer = ({
   // Convert Pet type to PetForm expected types
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
+    // Convert number values to strings for the form inputs
+    age: defaultValues.age?.toString() || '',
+    weight: defaultValues.weight?.toString() || '',
     species: defaultValues.species as PetSpecies,
     sex: defaultValues.sex as PetSex || undefined
   } : undefined;
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: PetFormOutput) => {
     try {
       setIsSubmitting(true);
       console.log("Saving pet:", formData);
@@ -81,6 +88,15 @@ const PetFormDrawer = ({
           title: "Zwierzak dodany pomyślnie",
           description: `Dodano zwierzaka ${formData.name}`,
         });
+      }
+
+      // Invalidate queries to refresh data
+      if (defaultValues?.id) {
+        queryClient.invalidateQueries({ queryKey: ['pet', defaultValues.id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['pets'] });
+      if (defaultValues?.clientId) {
+        queryClient.invalidateQueries({ queryKey: ['pets', defaultValues.clientId] });
       }
 
       // Call the callback if provided
