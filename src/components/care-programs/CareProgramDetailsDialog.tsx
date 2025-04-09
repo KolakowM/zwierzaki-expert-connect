@@ -96,10 +96,7 @@ const CareProgramDetailsDialog = ({ programId, children }: CareProgramDetailsDia
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">Szczegóły planu opieki</DialogTitle>
-            <Button variant="outline" size="sm" onClick={handlePrint} className="print:hidden">
-              <Printer className="mr-2 h-4 w-4" />
-              Drukuj
-            </Button>
+            
           </div>
         </DialogHeader>
         
@@ -148,7 +145,7 @@ const CareProgramDetailsDialog = ({ programId, children }: CareProgramDetailsDia
                   Plan utworzony: {formatDate(program.createdAt)}
                 </div>
                 <div>
-                  Wygenerowano przez: {user?.email || "Specjalista"}
+                  Wygenerowano przez: {user?.firstName || user?.lastName || "Specjalista"}
                 </div>
               </div>
             </div>
