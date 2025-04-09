@@ -33,6 +33,8 @@ import AdminClients from './pages/admin/AdminClients';
 import AdminPets from './pages/admin/AdminPets';
 import AdminVisits from './pages/admin/AdminVisits';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminCarePrograms from './pages/admin/AdminCarePrograms';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -73,6 +75,8 @@ function App() {
                 <Route path="pets" element={<AdminPets />} />
                 <Route path="visits" element={<AdminVisits />} />
                 <Route path="settings" element={<AdminSettings />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="care-programs" element={<AdminCarePrograms />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />

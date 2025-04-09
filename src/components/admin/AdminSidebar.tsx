@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthProvider"; // Updated import path
+import { useAuth } from "@/contexts/AuthProvider"; 
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import {

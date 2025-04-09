@@ -15,66 +15,64 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
-  PlusCircle, 
   Edit, 
   Trash2, 
-  ArrowUpDown,
-  UserPlus
+  ArrowUpDown, 
+  User,
+  UserPlus, 
+  Shield, 
+  Mail,
+  Calendar
 } from "lucide-react";
 
-// Dummy users data for demonstration
-const usersData = [
-  { 
-    id: "1", 
-    firstName: "Jan", 
-    lastName: "Kowalski", 
-    email: "jan.kowalski@example.com", 
+// Mock data for illustration, would come from API in real implementation
+const mockUsers = [
+  {
+    id: "1",
+    name: "Anna Kowalska",
+    email: "anna.kowalska@example.com",
     role: "admin",
     status: "active",
-    createdAt: "2023-01-15"
+    lastLogin: "2023-04-05T12:00:00Z"
   },
-  { 
-    id: "2", 
-    firstName: "Anna", 
-    lastName: "Nowak", 
-    email: "anna.nowak@example.com", 
+  {
+    id: "2",
+    name: "Jan Nowak",
+    email: "jan.nowak@example.com",
     role: "specialist",
     status: "active",
-    createdAt: "2023-02-20"
+    lastLogin: "2023-04-03T14:30:00Z"
   },
-  { 
-    id: "3", 
-    firstName: "Piotr", 
-    lastName: "Wiśniewski", 
-    email: "piotr.wisniewski@example.com", 
+  {
+    id: "3",
+    name: "Maria Wiśniewska",
+    email: "maria.wisniewska@example.com",
     role: "specialist",
     status: "inactive",
-    createdAt: "2023-03-10"
+    lastLogin: "2023-03-25T09:15:00Z"
   },
-  { 
-    id: "4", 
-    firstName: "Maria", 
-    lastName: "Lewandowska", 
-    email: "maria.lewandowska@example.com", 
-    role: "specialist",
+  {
+    id: "4",
+    name: "Piotr Dąbrowski",
+    email: "piotr.dabrowski@example.com",
+    role: "user",
     status: "active",
-    createdAt: "2023-04-05"
+    lastLogin: "2023-04-04T16:45:00Z"
   },
-  { 
-    id: "5", 
-    firstName: "Krzysztof", 
-    lastName: "Kowalczyk", 
-    email: "krzysztof.kowalczyk@example.com", 
-    role: "specialist",
-    status: "active",
-    createdAt: "2023-05-12"
+  {
+    id: "5",
+    name: "Aleksandra Lewandowska",
+    email: "aleksandra.lewandowska@example.com",
+    role: "user",
+    status: "pending",
+    lastLogin: null
   },
 ];
 
 const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState<string | null>("lastLogin");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -86,23 +84,27 @@ const AdminUsers = () => {
   };
   
   // Filter and sort users
-  const filteredUsers = usersData
-    .filter(user => 
-      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+  const filteredUsers = mockUsers
+    .filter(user => {
+      const query = searchQuery.toLowerCase();
+      return (
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.role.toLowerCase().includes(query) ||
+        user.status.toLowerCase().includes(query)
+      );
+    })
     .sort((a, b) => {
       if (!sortBy) return 0;
       
       let valueA, valueB;
       
-      if (sortBy === "name") {
-        valueA = `${a.firstName} ${a.lastName}`.toLowerCase();
-        valueB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      if (sortBy === "lastLogin") {
+        valueA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+        valueB = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
       } else {
-        valueA = a[sortBy as keyof typeof a];
-        valueB = b[sortBy as keyof typeof b];
+        valueA = a[sortBy as keyof typeof a] || '';
+        valueB = b[sortBy as keyof typeof b] || '';
         
         if (typeof valueA === "string") {
           valueA = valueA.toLowerCase();
@@ -120,12 +122,65 @@ const AdminUsers = () => {
       }
       return 0;
     });
+  
+  // Format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Nigdy";
+    return new Date(dateString).toLocaleDateString('pl-PL', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+  
+  // Get badge variant based on status
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'active':
+        return <Badge variant="success">Aktywny</Badge>;
+      case 'inactive':
+        return <Badge variant="secondary">Nieaktywny</Badge>;
+      case 'pending':
+        return <Badge variant="warning">Oczekujący</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+  
+  // Get role badge
+  const getRoleBadge = (role: string) => {
+    switch(role) {
+      case 'admin':
+        return (
+          <div className="flex items-center">
+            <Shield className="mr-1 h-3 w-3 text-red-500" />
+            <span>Administrator</span>
+          </div>
+        );
+      case 'specialist':
+        return (
+          <div className="flex items-center">
+            <User className="mr-1 h-3 w-3 text-blue-500" />
+            <span>Specjalista</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center">
+            <User className="mr-1 h-3 w-3 text-gray-500" />
+            <span>Użytkownik</span>
+          </div>
+        );
+    }
+  };
 
   return (
     <>
       <AdminHeader 
         title="Zarządzanie Użytkownikami" 
-        description="Przeglądaj, dodawaj i zarządzaj użytkownikami platformy"
+        description="Przeglądaj, dodawaj i zarządzaj użytkownikami systemu"
       />
       
       <Card className="mt-6">
@@ -149,7 +204,7 @@ const AdminUsers = () => {
             <TableHeader>
               <TableRow>
                 <TableHead 
-                  className="w-[200px] cursor-pointer"
+                  className="w-[250px] cursor-pointer"
                   onClick={() => handleSort("name")}
                 >
                   <div className="flex items-center">
@@ -167,7 +222,7 @@ const AdminUsers = () => {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer"
+                  className="cursor-pointer hidden md:table-cell"
                   onClick={() => handleSort("role")}
                 >
                   <div className="flex items-center">
@@ -176,7 +231,7 @@ const AdminUsers = () => {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer"
+                  className="cursor-pointer hidden md:table-cell"
                   onClick={() => handleSort("status")}
                 >
                   <div className="flex items-center">
@@ -185,11 +240,11 @@ const AdminUsers = () => {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer"
-                  onClick={() => handleSort("createdAt")}
+                  className="cursor-pointer hidden lg:table-cell"
+                  onClick={() => handleSort("lastLogin")}
                 >
                   <div className="flex items-center">
-                    Data Utworzenia
+                    Ostatnie Logowanie
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -200,19 +255,32 @@ const AdminUsers = () => {
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === "admin" ? "destructive" : "default"}>
-                        {user.role === "admin" ? "Administrator" : "Specjalista"}
-                      </Badge>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2">
+                          {user.name.charAt(0)}
+                        </div>
+                        {user.name}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.status === "active" ? "outline" : "secondary"}>
-                        {user.status === "active" ? "Aktywny" : "Nieaktywny"}
-                      </Badge>
+                      <div className="flex items-center">
+                        <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {user.email}
+                      </div>
                     </TableCell>
-                    <TableCell>{user.createdAt}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {getRoleBadge(user.role)}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {getStatusBadge(user.status)}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="flex items-center text-muted-foreground">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {formatDate(user.lastLogin)}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="icon">

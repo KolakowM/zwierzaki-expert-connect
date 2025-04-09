@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getPets } from "@/services/petService";
+import CareProgramDetailsDialog from "@/components/care-programs/CareProgramDetailsDialog";
 
 // Mock care programs data for demonstration until we have a real API
 const mockCarePrograms = [
@@ -281,9 +282,11 @@ const AdminCarePrograms = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <FileText className="h-4 w-4" />
-                        </Button>
+                        <CareProgramDetailsDialog programId={program.id}>
+                          <Button variant="ghost" size="icon">
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        </CareProgramDetailsDialog>
                         <Button variant="ghost" size="icon">
                           <Edit className="h-4 w-4" />
                         </Button>
