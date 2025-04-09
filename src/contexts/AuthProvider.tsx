@@ -2,16 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { 
-  getCurrentUser, 
-  signIn, 
-  signOut, 
-  signUp, 
-  AuthUser, 
-  SignInCredentials, 
-  SignUpCredentials, 
-  checkIsAdmin 
-} from "@/services/authService";
+import { getCurrentUser, signIn, signOut, signUp, AuthUser, SignInCredentials, SignUpCredentials } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AuthContextType {
@@ -61,9 +52,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          // Pobierz pełne dane użytkownika, w tym rolę admina
-          const currentUser = await getCurrentUser();
-          setUser(currentUser);
+          const updatedUser: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            role: session.user.user_metadata?.role || 'user',
+            firstName: session.user.user_metadata?.first_name,
+            lastName: session.user.user_metadata?.last_name,
+          };
+          setUser(updatedUser);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
         }
@@ -148,7 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isAdmin = () => {
-    return user?.isAdmin === true;
+    return user?.role === 'admin';
   };
 
   const value = {

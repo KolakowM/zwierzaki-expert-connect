@@ -7,7 +7,6 @@ export interface AuthUser {
   role?: string;
   firstName?: string;
   lastName?: string;
-  isAdmin?: boolean; // Dodane pole dla szybszego sprawdzania roli admina
 }
 
 export interface SignInCredentials {
@@ -79,42 +78,13 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
-  // Wykorzystujemy rpc (remote procedure call) zamiast bezpośredniego zapytania do tabeli
-  const { data: isAdmin, error: adminError } = await supabase.rpc('has_role', {
-    _user_id: user.id,
-    _role: 'admin'
-  });
-  
-  if (adminError) {
-    console.error("Błąd podczas sprawdzania roli administratora:", adminError);
-  }
-  
   return {
     id: user.id,
     email: user.email || '',
     role: user.user_metadata?.role || 'user',
     firstName: user.user_metadata?.first_name,
     lastName: user.user_metadata?.last_name,
-    isAdmin: isAdmin === true
   };
-};
-
-// Sprawdzenie czy użytkownik ma rolę administratora
-export const checkIsAdmin = async (userId: string): Promise<boolean> => {
-  if (!userId) return false;
-
-  // Użyj funkcji RPC zamiast zapytania SQL
-  const { data: isAdmin, error } = await supabase.rpc('has_role', {
-    _user_id: userId,
-    _role: 'admin'
-  });
-
-  if (error) {
-    console.error("Błąd podczas sprawdzania roli admina:", error);
-    return false;
-  }
-
-  return isAdmin === true;
 };
 
 export const resetPassword = async (email: string) => {
