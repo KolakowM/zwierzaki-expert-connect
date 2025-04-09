@@ -112,7 +112,7 @@ const ClientVisitsTab = ({
                     <TableCell>
                       {visit.followUpNeeded ? (
                         <span className="text-amber-600">
-                          {new Date(visit.followUpDate || '').toLocaleDateString('pl-PL')}
+                          {visit.followUpDate ? new Date(visit.followUpDate).toLocaleDateString('pl-PL') : 'Tak'}
                         </span>
                       ) : 'Nie wymagana'}
                     </TableCell>
