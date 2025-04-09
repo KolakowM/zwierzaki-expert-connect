@@ -145,7 +145,7 @@ const CareProgramDetailsDialog = ({ programId, children }: CareProgramDetailsDia
                   Plan utworzony: {formatDate(program.createdAt)}
                 </div>
                 <div>
-                  Wygenerowano przez: {user?.firstName || user?.lastName || "Specjalista"}
+                  Wygenerowano przez: {user?.firstName} {user?.lastName || "Specjalista"}
                 </div>
               </div>
             </div>
