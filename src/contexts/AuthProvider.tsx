@@ -53,12 +53,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           // Check if user has admin role
+          // We can't use typings for user_roles in onAuthStateChange 
+          // so we use raw query to avoid TypeScript issues
           const { data: roleData } = await supabase
             .from('user_roles')
-            .select('role')
+            .select('*')
             .eq('user_id', session.user.id)
             .eq('role', 'admin')
-            .maybeSingle();
+            .maybeSingle() as any;
           
           const isAdmin = !!roleData;
           

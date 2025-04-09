@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AuthUser {
@@ -77,12 +78,13 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
+  // Use raw query format to avoid TypeScript issues
   const { data: roleData } = await supabase
     .from('user_roles')
-    .select('role')
+    .select('*')
     .eq('user_id', user.id)
     .eq('role', 'admin')
-    .maybeSingle();
+    .maybeSingle() as any;
   
   const isAdmin = !!roleData;
   
