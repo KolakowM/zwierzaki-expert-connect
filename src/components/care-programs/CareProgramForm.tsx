@@ -55,10 +55,10 @@ interface CareProgramFormProps {
 }
 
 const statusOptions = [
-  "Aktywny",
-  "Planowany",
-  "Zakończony",
-  "Wstrzymany",
+  "aktywny",
+  "planowany",
+  "zakończony",
+  "wstrzymany",
 ];
 
 const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false }: CareProgramFormProps) => {
@@ -70,7 +70,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
       description: "",
       startDate: new Date(),
       endDate: null,
-      status: "Aktywny",
+      status: "aktywny",
       instructions: "",
       recommendations: "",
       ...defaultValues,
@@ -196,7 +196,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
                 <SelectContent>
                   {statusOptions.map((status) => (
                     <SelectItem key={status} value={status}>
-                      {status}
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>

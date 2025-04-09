@@ -8,7 +8,7 @@ export interface DbCareProgram {
   description?: string | null;
   startdate: string;
   enddate?: string | null;
-  status: "aktywny" | "zakończony" | "anulowany";
+  status: "aktywny" | "planowany" | "zakończony" | "wstrzymany";
   instructions?: string | null;
   recommendations?: string | null;
   createdat: string;
@@ -22,7 +22,7 @@ export interface CareProgram {
   description?: string | null;
   startDate: string | Date;
   endDate?: string | Date | null;
-  status: "aktywny" | "zakończony" | "anulowany";
+  status: "aktywny" | "planowany" | "zakończony" | "wstrzymany";
   instructions?: string | null;
   recommendations?: string | null;
   createdAt: string;

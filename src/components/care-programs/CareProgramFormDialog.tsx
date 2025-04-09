@@ -7,6 +7,7 @@ import CareProgramForm from "./CareProgramForm";
 import { ListPlus, Edit } from "lucide-react";
 import { CareProgram } from "@/types";
 import { createCareProgram, updateCareProgram } from "@/services/careProgramService";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CareProgramFormDialogProps {
   petId: string;
@@ -39,6 +40,7 @@ const CareProgramFormDialog = ({
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Set default title based on whether we're editing or creating
   const dialogTitle = title || (isEditing ? "Edytuj program opieki" : "Dodaj nowy program opieki");
@@ -72,7 +74,8 @@ const CareProgramFormDialog = ({
         // Create new care program
         careProgram = await createCareProgram({
           ...formData,
-          petId
+          petId,
+          status: formData.status || "aktywny" // Ensure status is set
         });
         
         toast({
@@ -80,6 +83,10 @@ const CareProgramFormDialog = ({
           description: `Program opieki został pomyślnie dodany`,
         });
       }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['carePrograms'] });
+      queryClient.invalidateQueries({ queryKey: ['carePrograms', petId] });
 
       // Call the callback if provided
       if (onCareProgramSaved) {

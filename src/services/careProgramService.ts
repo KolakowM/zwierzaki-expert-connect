@@ -51,10 +51,14 @@ export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'creat
   const prepared = {
     ...program,
     startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
-    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate
+    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate,
+    // Ensure status is one of the allowed values
+    status: program.status || "aktywny"
   };
 
+  console.log("Creating care program with data:", prepared);
   const dbProgram = mapCareProgramToDbCareProgram(prepared);
+  console.log("DB program data:", dbProgram);
   
   const { data, error } = await supabase
     .from('care_programs')
@@ -89,6 +93,9 @@ export const updateCareProgram = async (id: string, program: Partial<CareProgram
   if (prepared.instructions !== undefined) dbProgramUpdate.instructions = prepared.instructions;
   if (prepared.startDate !== undefined) dbProgramUpdate.startdate = prepared.startDate;
   if (prepared.endDate !== undefined) dbProgramUpdate.enddate = prepared.endDate;
+
+  console.log("Updating care program with ID:", id);
+  console.log("Update data:", dbProgramUpdate);
 
   const { data, error } = await supabase
     .from('care_programs')
