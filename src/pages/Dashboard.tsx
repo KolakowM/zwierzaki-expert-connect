@@ -5,9 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast"; 
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { User } from "lucide-react";
 
 const Dashboard = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -38,6 +40,20 @@ const Dashboard = () => {
   return (
     <MainLayout>
       <div className="container py-8">
+        <Card className="mb-6">
+          <CardHeader className="flex flex-row items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <User className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle>Witaj, {user?.firstName || user?.email || 'Użytkowniku'}</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {user?.email}
+              </p>
+            </div>
+          </CardHeader>
+        </Card>
+        
         <h1 className="text-2xl font-bold mb-6">Panel główny</h1>
         <DashboardTabs />
       </div>
