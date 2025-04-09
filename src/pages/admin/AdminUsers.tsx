@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,13 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
   Edit, 
-  Trash2, 
   ArrowUpDown, 
   User,
   UserPlus, 
@@ -24,55 +22,33 @@ import {
   Mail,
   Calendar
 } from "lucide-react";
-
-// Mock data for illustration, would come from API in real implementation
-const mockUsers = [
-  {
-    id: "1",
-    name: "Anna Kowalska",
-    email: "anna.kowalska@example.com",
-    role: "admin",
-    status: "active",
-    lastLogin: "2023-04-05T12:00:00Z"
-  },
-  {
-    id: "2",
-    name: "Jan Nowak",
-    email: "jan.nowak@example.com",
-    role: "specialist",
-    status: "active",
-    lastLogin: "2023-04-03T14:30:00Z"
-  },
-  {
-    id: "3",
-    name: "Maria Wiśniewska",
-    email: "maria.wisniewska@example.com",
-    role: "specialist",
-    status: "inactive",
-    lastLogin: "2023-03-25T09:15:00Z"
-  },
-  {
-    id: "4",
-    name: "Piotr Dąbrowski",
-    email: "piotr.dabrowski@example.com",
-    role: "user",
-    status: "active",
-    lastLogin: "2023-04-04T16:45:00Z"
-  },
-  {
-    id: "5",
-    name: "Aleksandra Lewandowska",
-    email: "aleksandra.lewandowska@example.com",
-    role: "user",
-    status: "pending",
-    lastLogin: null
-  },
-];
+import UserFormDialog from "@/components/admin/users/UserFormDialog";
+import DeleteUserButton from "@/components/admin/users/DeleteUserButton";
+import { getUsers } from "@/services/userService";
 
 const AdminUsers = () => {
+  const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string | null>("lastLogin");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Load users
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedUsers = await getUsers();
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Error loading users:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadUsers();
+  }, []);
   
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -83,8 +59,31 @@ const AdminUsers = () => {
     }
   };
   
+  // Handle user saved (created or updated)
+  const handleUserSaved = (user: any) => {
+    setUsers(prevUsers => {
+      // Check if the user already exists (update case)
+      const existingUserIndex = prevUsers.findIndex(u => u.id === user.id);
+      
+      if (existingUserIndex >= 0) {
+        // Update existing user
+        const updatedUsers = [...prevUsers];
+        updatedUsers[existingUserIndex] = user;
+        return updatedUsers;
+      } else {
+        // Add new user
+        return [...prevUsers, user];
+      }
+    });
+  };
+  
+  // Handle user deleted
+  const handleUserDeleted = (userId: string) => {
+    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+  };
+  
   // Filter and sort users
-  const filteredUsers = mockUsers
+  const filteredUsers = users
     .filter(user => {
       const query = searchQuery.toLowerCase();
       return (
@@ -194,114 +193,122 @@ const AdminUsers = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="w-full sm:w-auto">
-            <UserPlus className="mr-2 h-4 w-4" /> Dodaj Użytkownika
-          </Button>
+          <UserFormDialog onUserSaved={handleUserSaved} />
         </div>
         
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead 
-                  className="w-[250px] cursor-pointer"
-                  onClick={() => handleSort("name")}
-                >
-                  <div className="flex items-center">
-                    Imię i Nazwisko
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer"
-                  onClick={() => handleSort("email")}
-                >
-                  <div className="flex items-center">
-                    Email
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hidden md:table-cell"
-                  onClick={() => handleSort("role")}
-                >
-                  <div className="flex items-center">
-                    Rola
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hidden md:table-cell"
-                  onClick={() => handleSort("status")}
-                >
-                  <div className="flex items-center">
-                    Status
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hidden lg:table-cell"
-                  onClick={() => handleSort("lastLogin")}
-                >
-                  <div className="flex items-center">
-                    Ostatnie Logowanie
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead className="text-right">Akcje</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2">
-                          {user.name.charAt(0)}
+          {isLoading ? (
+            <div className="flex justify-center items-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead 
+                    className="w-[250px] cursor-pointer"
+                    onClick={() => handleSort("name")}
+                  >
+                    <div className="flex items-center">
+                      Imię i Nazwisko
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer"
+                    onClick={() => handleSort("email")}
+                  >
+                    <div className="flex items-center">
+                      Email
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hidden md:table-cell"
+                    onClick={() => handleSort("role")}
+                  >
+                    <div className="flex items-center">
+                      Rola
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hidden md:table-cell"
+                    onClick={() => handleSort("status")}
+                  >
+                    <div className="flex items-center">
+                      Status
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hidden lg:table-cell"
+                    onClick={() => handleSort("lastLogin")}
+                  >
+                    <div className="flex items-center">
+                      Ostatnie Logowanie
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-right">Akcje</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2">
+                            {user.name.charAt(0)}
+                          </div>
+                          {user.name}
                         </div>
-                        {user.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {user.email}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {getRoleBadge(user.role)}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {getStatusBadge(user.status)}
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <div className="flex items-center text-muted-foreground">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {formatDate(user.lastLogin)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                          {user.email}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {getRoleBadge(user.role)}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {getStatusBadge(user.status)}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <div className="flex items-center text-muted-foreground">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {formatDate(user.lastLogin)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <UserFormDialog 
+                            user={user} 
+                            isEditing={true} 
+                            onUserSaved={handleUserSaved}
+                          />
+                          <DeleteUserButton 
+                            userId={user.id} 
+                            userName={user.name}
+                            onUserDeleted={() => handleUserDeleted(user.id)}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      {searchQuery ? "Nie znaleziono użytkowników pasujących do wyszukiwania" : "Nie znaleziono użytkowników"}
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Nie znaleziono użytkowników
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </Card>
     </>
