@@ -64,14 +64,30 @@ export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet
 };
 
 export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => {
-  // Convert camelCase pet properties to snake_case for the database
+  // Convert pet data to database format with proper type handling
   const dbPetUpdate: Partial<DbPet> = {};
+  
   if (pet.clientId !== undefined) dbPetUpdate.clientid = pet.clientId;
   if (pet.name !== undefined) dbPetUpdate.name = pet.name;
   if (pet.species !== undefined) dbPetUpdate.species = pet.species;
   if (pet.breed !== undefined) dbPetUpdate.breed = pet.breed;
-  if (pet.age !== undefined) dbPetUpdate.age = pet.age;
-  if (pet.weight !== undefined) dbPetUpdate.weight = pet.weight;
+  
+  // Ensure age is properly converted to a number (integer)
+  if (pet.age !== undefined) {
+    // If age is a string, convert to number and round to integer
+    dbPetUpdate.age = typeof pet.age === 'string' 
+      ? Math.round(Number(pet.age)) 
+      : Math.round(pet.age);
+  }
+  
+  // Ensure weight is properly handled as a decimal
+  if (pet.weight !== undefined) {
+    // Convert weight to a number (can be decimal)
+    dbPetUpdate.weight = typeof pet.weight === 'string' 
+      ? Number(pet.weight) 
+      : pet.weight;
+  }
+  
   if (pet.sex !== undefined) dbPetUpdate.sex = pet.sex;
   if (pet.neutered !== undefined) dbPetUpdate.neutered = pet.neutered;
   if (pet.medicalHistory !== undefined) dbPetUpdate.medicalhistory = pet.medicalHistory;

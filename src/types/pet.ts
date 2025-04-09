@@ -6,8 +6,8 @@ export interface DbPet {
   name: string;
   species: string;
   breed?: string | null;
-  age?: number | null;  // This can be integer or decimal
-  weight?: number | null;
+  age?: number | null;  // Integer in database
+  weight?: number | null;  // Decimal in database
   sex?: string | null;
   neutered?: boolean | null;
   medicalhistory?: string | null;
@@ -23,8 +23,8 @@ export interface Pet {
   name: string;
   species: string;
   breed?: string | null;
-  age?: number | null;  // This can be integer or decimal
-  weight?: number | null;
+  age?: number | null;  // Integer in frontend
+  weight?: number | null;  // Decimal in frontend
   sex?: string | null;
   neutered?: boolean | null;
   medicalHistory?: string | null;
@@ -57,8 +57,12 @@ export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
   name: pet.name,
   species: pet.species,
   breed: pet.breed,
-  age: pet.age,
-  weight: pet.weight,
+  age: pet.age !== undefined && pet.age !== null 
+    ? Math.round(Number(pet.age)) // Ensure age is an integer
+    : null,
+  weight: pet.weight !== undefined && pet.weight !== null 
+    ? Number(pet.weight) // Allow decimal for weight
+    : null,
   sex: pet.sex,
   neutered: pet.neutered,
   medicalhistory: pet.medicalHistory,

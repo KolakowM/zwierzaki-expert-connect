@@ -37,8 +37,22 @@ const petFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   species: z.enum(PET_SPECIES),
   breed: z.string().optional(),
-  age: z.string().optional().transform((val) => (val ? Number(val) : undefined)),
-  weight: z.string().optional().transform((val) => (val ? Number(val) : undefined)),
+  // Parse age as a number (integer)
+  age: z.string()
+    .optional()
+    .transform((val) => (val ? Number(val) : undefined))
+    .refine(
+      (val) => val === undefined || !isNaN(val),
+      { message: "Wiek musi być liczbą" }
+    ),
+  // Parse weight as a number (can be decimal)
+  weight: z.string()
+    .optional()
+    .transform((val) => (val ? Number(val) : undefined))
+    .refine(
+      (val) => val === undefined || !isNaN(val),
+      { message: "Waga musi być liczbą" }
+    ),
   sex: z.enum(PET_SEX).optional(),
   neutered: z.boolean().optional(),
   medicalHistory: z.string().optional(),
@@ -63,6 +77,8 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
       name: "",
       species: "pies",
       breed: "",
+      age: "",
+      weight: "",
       sex: undefined,
       neutered: false,
       medicalHistory: "",
@@ -142,7 +158,14 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
               <FormItem>
                 <FormLabel>Wiek (lata)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.5" placeholder="np. 3" {...field} />
+                  <Input 
+                    type="number" 
+                    inputMode="decimal"
+                    min="0" 
+                    step="1" 
+                    placeholder="np. 3" 
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,7 +178,14 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
               <FormItem>
                 <FormLabel>Waga (kg)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.1" placeholder="np. 15" {...field} />
+                  <Input 
+                    type="number" 
+                    inputMode="decimal"
+                    min="0" 
+                    step="0.1" 
+                    placeholder="np. 15" 
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
