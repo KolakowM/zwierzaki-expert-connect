@@ -1,26 +1,26 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import App from './App.tsx'
-import './index.css'
-import { AuthProvider } from './contexts/AuthProvider'
-import { ThemeProvider } from './components/ui/theme-provider'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import App from "./App";
+import "./index.css";
+import { AuthProvider } from "./contexts/AuthProvider";
 
-// Create a client for React Query
-const queryClient = new QueryClient()
+// Create a client
+const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="light" storageKey="pets-flow-theme">
-          <AuthProvider>
+    <ThemeProvider defaultTheme="light">
+      <AuthProvider>
+        <BrowserRouter>
+          <QueryClientProvider client={queryClient}>
             <App />
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
-)
+          </QueryClientProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
+  </React.StrictMode>
+);
