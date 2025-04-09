@@ -29,6 +29,7 @@ import { AuthProvider } from './contexts/AuthProvider';
 // Admin routes
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';  // Dodana strona AdminUsers
 import AdminClients from './pages/admin/AdminClients';
 import AdminPets from './pages/admin/AdminPets';
 import AdminVisits from './pages/admin/AdminVisits';
@@ -69,6 +70,7 @@ function App() {
               {/* Admin routes */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} /> {/* Dodana ścieżka */}
                 <Route path="clients" element={<AdminClients />} />
                 <Route path="pets" element={<AdminPets />} />
                 <Route path="visits" element={<AdminVisits />} />

@@ -7,6 +7,7 @@ export interface AuthUser {
   role?: string;
   firstName?: string;
   lastName?: string;
+  isAdmin?: boolean; // Dodane pole dla szybszego sprawdzania roli admina
 }
 
 export interface SignInCredentials {
@@ -78,13 +79,36 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return null;
   }
   
+  // Pobierz informacje o rolach użytkownika
+  const { data: rolesData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id);
+
+  // Sprawdź, czy użytkownik ma rolę admina
+  const isAdmin = rolesData && rolesData.some(r => r.role === 'admin');
+  
   return {
     id: user.id,
     email: user.email || '',
     role: user.user_metadata?.role || 'user',
     firstName: user.user_metadata?.first_name,
     lastName: user.user_metadata?.last_name,
+    isAdmin: isAdmin // Dodaj informację o roli admina
   };
+};
+
+// Sprawdzenie czy użytkownik ma rolę administratora
+export const checkIsAdmin = async (userId: string): Promise<boolean> => {
+  if (!userId) return false;
+
+  const { data: rolesData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('role', 'admin');
+
+  return rolesData && rolesData.length > 0;
 };
 
 export const resetPassword = async (email: string) => {
