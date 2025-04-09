@@ -19,6 +19,19 @@ export interface UserRole {
   createdAt: string | null;
 }
 
+// Mapping functions for user roles
+export const mapDbUserRoleToUserRole = (dbUserRole: DbUserRole): UserRole => ({
+  id: dbUserRole.id,
+  userId: dbUserRole.user_id,
+  role: dbUserRole.role,
+  createdAt: dbUserRole.created_at,
+});
+
+export const mapUserRoleToDbUserRole = (userRole: Omit<UserRole, 'id' | 'createdAt'>): Omit<DbUserRole, 'id' | 'created_at'> => ({
+  user_id: userRole.userId,
+  role: userRole.role,
+});
+
 // Type mappings between database and application types
 export type Tables = {
   clients: DbClient;
