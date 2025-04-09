@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { Card } from "@/components/ui/card";
 import {
@@ -16,82 +17,39 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
   Edit, 
-  Trash2, 
   ArrowUpDown,
   ClipboardList,
   Calendar,
   FileText,
   PlusCircle,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { getPets } from "@/services/petService";
+import { getCarePrograms } from "@/services/careProgramService";
 import CareProgramDetailsDialog from "@/components/care-programs/CareProgramDetailsDialog";
-
-// Mock care programs data for demonstration until we have a real API
-const mockCarePrograms = [
-  {
-    id: "1",
-    petId: "1", // This should match an actual pet ID in your system
-    name: "Plan odchudzania",
-    goal: "Redukcja wagi o 20%",
-    startDate: "2023-04-01",
-    endDate: "2023-10-01",
-    status: "aktywny",
-    createdAt: "2023-03-25"
-  },
-  {
-    id: "2",
-    petId: "2",
-    name: "Rehabilitacja po złamaniu",
-    goal: "Przywrócenie sprawności kończyny",
-    startDate: "2023-03-15",
-    endDate: "2023-06-15",
-    status: "aktywny",
-    createdAt: "2023-03-10"
-  },
-  {
-    id: "3",
-    petId: "3",
-    name: "Program odżywiania",
-    goal: "Wzmocnienie systemu odpornościowego",
-    startDate: "2023-02-01",
-    endDate: "2023-08-01",
-    status: "aktywny",
-    createdAt: "2023-01-28"
-  },
-  {
-    id: "4",
-    petId: "4",
-    name: "Terapia alergiczna",
-    goal: "Zidentyfikowanie i wyeliminowanie alergenów",
-    startDate: "2023-01-10",
-    endDate: "2023-04-10",
-    status: "zakończony",
-    createdAt: "2023-01-05"
-  },
-  {
-    id: "5",
-    petId: "5",
-    name: "Program szczepień",
-    goal: "Kompletny program szczepień dla szczeniaka",
-    startDate: "2023-05-01",
-    endDate: "2024-05-01",
-    status: "aktywny",
-    createdAt: "2023-04-25"
-  },
-];
+import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
+import DeleteCareProgramButton from "@/components/admin/care-programs/DeleteCareProgramButton";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
+import { CareProgram } from "@/types";
 
 const AdminCarePrograms = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string | null>("startDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   
+  // Fetch all care programs
+  const { data: carePrograms = [], isLoading: programsLoading, refetch: refetchPrograms } = useQuery({
+    queryKey: ['carePrograms'],
+    queryFn: getCarePrograms,
+  });
+  
+  // Fetch all pets for reference
   const { data: pets = [], isLoading: petsLoading } = useQuery({
     queryKey: ['pets'],
     queryFn: getPets,
   });
   
-  const isLoading = petsLoading;
+  const isLoading = programsLoading || petsLoading;
   
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -109,7 +67,7 @@ const AdminCarePrograms = () => {
   };
   
   // Filter and sort care programs
-  const filteredPrograms = mockCarePrograms
+  const filteredPrograms = carePrograms
     .filter(program => {
       const petName = getPetName(program.petId).toLowerCase();
       const searchLower = searchQuery.toLowerCase();
@@ -124,15 +82,18 @@ const AdminCarePrograms = () => {
       
       let valueA, valueB;
       
-      if (sortBy === "startDate" || sortBy === "endDate") {
-        valueA = new Date(a[sortBy]).getTime();
-        valueB = new Date(b[sortBy]).getTime();
+      if (sortBy === "startDate") {
+        valueA = new Date(a.startDate).getTime();
+        valueB = new Date(b.startDate).getTime();
+      } else if (sortBy === "endDate") {
+        valueA = a.endDate ? new Date(a.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+        valueB = b.endDate ? new Date(b.endDate).getTime() : Number.MAX_SAFE_INTEGER;
       } else if (sortBy === "pet") {
         valueA = getPetName(a.petId).toLowerCase();
         valueB = getPetName(b.petId).toLowerCase();
       } else {
-        valueA = a[sortBy as keyof typeof a] || '';
-        valueB = b[sortBy as keyof typeof b] || '';
+        valueA = a[sortBy as keyof CareProgram] || '';
+        valueB = b[sortBy as keyof CareProgram] || '';
         
         if (typeof valueA === "string") {
           valueA = valueA.toLowerCase();
@@ -152,9 +113,9 @@ const AdminCarePrograms = () => {
     });
     
   // Helper function to format dates
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pl-PL');
+  const formatDate = (dateString: string | Date) => {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return format(date, 'PPP', { locale: pl });
   };
   
   // Helper function to get status badge variant
@@ -164,11 +125,18 @@ const AdminCarePrograms = () => {
         return 'default';
       case 'zakończony':
         return 'secondary';
-      case 'anulowany':
-        return 'destructive';
+      case 'wstrzymany':
+        return 'warning';
+      case 'planowany':
+        return 'success';
       default:
         return 'outline';
     }
+  };
+
+  // Handle program deleted callback
+  const handleProgramDeleted = () => {
+    refetchPrograms();
   };
 
   return (
@@ -189,9 +157,22 @@ const AdminCarePrograms = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" /> Dodaj Program
-          </Button>
+          
+          {/* Add new care program - we'll need to pick a pet first */}
+          <div className="flex space-x-2 w-full sm:w-auto">
+            {pets.length > 0 && (
+              <ResponsiveCareProgramForm
+                petId={pets[0].id}
+                buttonText="Dodaj Program"
+                buttonVariant="default"
+                onCareProgramSaved={() => refetchPrograms()}
+              >
+                <Button className="w-full sm:w-auto">
+                  <PlusCircle className="mr-2 h-4 w-4" /> Dodaj Program
+                </Button>
+              </ResponsiveCareProgramForm>
+            )}
+          </div>
         </div>
         
         <div className="overflow-x-auto">
@@ -282,17 +263,31 @@ const AdminCarePrograms = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {/* View details */}
                         <CareProgramDetailsDialog programId={program.id}>
                           <Button variant="ghost" size="icon">
                             <FileText className="h-4 w-4" />
                           </Button>
                         </CareProgramDetailsDialog>
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        
+                        {/* Edit program */}
+                        <ResponsiveCareProgramForm
+                          petId={program.petId}
+                          isEditing={true}
+                          defaultValues={program}
+                          onCareProgramSaved={() => refetchPrograms()}
+                        >
+                          <Button variant="ghost" size="icon">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </ResponsiveCareProgramForm>
+                        
+                        {/* Delete program */}
+                        <DeleteCareProgramButton 
+                          programId={program.id} 
+                          programName={program.name}
+                          onProgramDeleted={handleProgramDeleted}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
