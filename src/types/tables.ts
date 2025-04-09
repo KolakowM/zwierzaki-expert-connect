@@ -11,3 +11,8 @@ export type Tables = {
   visits: DbVisit;
   care_programs: DbCareProgram;
 };
+
+// User ID can be used across types
+export type WithUserId = {
+  user_id: string;
+};

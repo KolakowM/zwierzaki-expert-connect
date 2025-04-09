@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Client, DbClient, mapDbClientToClient, mapClientToDbClient } from "@/types";
+import { getCurrentUser } from "./authService";
 
 export const getClients = async (): Promise<Client[]> => {
   const { data, error } = await supabase
@@ -32,7 +33,16 @@ export const getClientById = async (id: string): Promise<Client | null> => {
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> => {
-  const dbClient = mapClientToDbClient(client);
+  // Get current user to associate with the client
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    throw new Error('You must be logged in to create a client');
+  }
+  
+  const dbClient = {
+    ...mapClientToDbClient(client),
+    user_id: currentUser.id // Associate client with current user
+  };
   
   const { data, error } = await supabase
     .from('clients')

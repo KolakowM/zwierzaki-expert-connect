@@ -1,52 +1,56 @@
 
-// Client types
-export interface DbClient {
+import { WithUserId } from './tables';
+
+export type DbClient = {
   id: string;
   firstname: string;
   lastname: string;
   email: string;
-  phone?: string | null;
-  address?: string | null;
-  city?: string | null;
-  postcode?: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  postcode: string | null;
+  notes: string | null;
   createdat: string;
-  notes?: string | null;
-}
+  user_id: string | null;
+};
 
-export interface Client {
+export type Client = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string | null;
-  address?: string | null;
-  city?: string | null;
-  postCode?: string | null;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postCode?: string;
+  notes?: string;
   createdAt: string;
-  notes?: string | null;
-}
+  userId?: string;
+};
 
-// Mapping functions for clients
 export const mapDbClientToClient = (dbClient: DbClient): Client => ({
   id: dbClient.id,
   firstName: dbClient.firstname,
   lastName: dbClient.lastname,
   email: dbClient.email,
-  phone: dbClient.phone,
-  address: dbClient.address,
-  city: dbClient.city,
-  postCode: dbClient.postcode,
+  phone: dbClient.phone || undefined,
+  address: dbClient.address || undefined,
+  city: dbClient.city || undefined,
+  postCode: dbClient.postcode || undefined,
+  notes: dbClient.notes || undefined,
   createdAt: dbClient.createdat,
-  notes: dbClient.notes,
+  userId: dbClient.user_id || undefined,
 });
 
 export const mapClientToDbClient = (client: Omit<Client, 'id' | 'createdAt'>): Omit<DbClient, 'id' | 'createdat'> => ({
   firstname: client.firstName,
   lastname: client.lastName,
   email: client.email,
-  phone: client.phone,
-  address: client.address,
-  city: client.city,
-  postcode: client.postCode,
-  notes: client.notes,
+  phone: client.phone || null,
+  address: client.address || null,
+  city: client.city || null,
+  postcode: client.postCode || null,
+  notes: client.notes || null,
+  user_id: client.userId || null,
 });
