@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 // Import dashboard components
 import UserMenu from "@/components/dashboard/UserMenu";
@@ -19,6 +20,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
+  const [specialistProfile, setSpecialistProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Get the tab from URL query parameter or default to "overview"
   const queryParams = new URLSearchParams(location.search);
@@ -33,8 +36,31 @@ const Dashboard = () => {
         variant: "destructive"
       });
       navigate("/login");
+    } else if (user?.id) {
+      fetchSpecialistProfile(user.id);
     }
-  }, [isAuthenticated, navigate, toast]);
+  }, [isAuthenticated, navigate, toast, user?.id]);
+
+  const fetchSpecialistProfile = async (userId: string) => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('specialist_profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+        
+      if (error) throw error;
+      
+      if (data) {
+        setSpecialistProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching specialist profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
@@ -64,7 +90,8 @@ const Dashboard = () => {
             <UserMenu 
               firstName={user?.firstName} 
               lastName={user?.lastName} 
-              onLogout={handleLogout} 
+              onLogout={handleLogout}
+              photoUrl={specialistProfile?.photo_url} 
             />
           </div>
         </div>

@@ -17,9 +17,10 @@ interface UserMenuProps {
   firstName: string | undefined;
   lastName: string | undefined;
   onLogout: () => void;
+  photoUrl?: string | null;
 }
 
-const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
+const UserMenu = ({ firstName, lastName, onLogout, photoUrl }: UserMenuProps) => {
   const initials = 
     (firstName?.charAt(0) || '') + 
     (lastName?.charAt(0) || '');
@@ -30,8 +31,11 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
         <NavigationMenuItem>
           <NavigationMenuTrigger className="gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback>{initials}</AvatarFallback>
+              {photoUrl ? (
+                <AvatarImage src={photoUrl} alt={`${firstName} ${lastName}`} />
+              ) : (
+                <AvatarFallback>{initials}</AvatarFallback>
+              )}
             </Avatar>
             <span>{firstName} {lastName}</span>
           </NavigationMenuTrigger>
