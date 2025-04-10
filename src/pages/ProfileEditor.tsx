@@ -1,27 +1,30 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
-import MainLayout from "@/components/layout/MainLayout";
-import { useAuth } from "@/contexts/AuthContext";
-import { UserCircle } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useProfileForm } from "@/hooks/useProfileForm";
-import { SpecialistProfileTab, profileFormSchema, ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
 
-export default function ProfileEditor() {
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthProvider";
+import MainLayout from "@/components/layout/MainLayout";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { SpecialistProfileTab, ProfileFormValues, profileFormSchema } from "@/components/profile/SpecialistProfileTab";
+import { useToast } from "@/hooks/use-toast";
+import { useProfileForm } from "@/hooks/useProfileForm";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { supabase } from "@/integrations/supabase/client";
+import { SocialMediaLinks } from "@/types";
+
+const ProfileEditor = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
   const [activeTab, setActiveTab] = useState("basic");
-  const [existingProfile, setExistingProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [initialData, setInitialData] = useState<any>(null);
   
   const {
     services,
     education,
     photoUrl,
-    photoFile,
     isSubmitting,
+    isUploading,
     setIsSubmitting,
     uploadProfilePhoto,
     addService,
@@ -33,19 +36,18 @@ export default function ProfileEditor() {
     handlePhotoChange,
     processFormData,
   } = useProfileForm();
-  
+
+  // Create form with zod validation
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       title: "",
       description: "",
       specializations: [],
-      services: [],
-      education: [],
       experience: "",
       location: "",
       phoneNumber: "",
-      email: user?.email || "",
+      email: "",
       website: "",
       socialMedia: {
         facebook: "",
@@ -56,153 +58,215 @@ export default function ProfileEditor() {
         tiktok: "",
         twitch: ""
       }
-    },
+    }
   });
 
+  // Load existing profile data if available
   useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!user?.id) return;
+    const fetchProfile = async () => {
+      if (!userId) return;
       
       try {
-        const { data, error } = await supabase
+        setLoading(true);
+        console.log('Fetching specialist profile for user:', userId);
+        
+        // Get specialist profile
+        const { data: profileData, error: profileError } = await supabase
           .from('specialist_profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', userId)
           .maybeSingle();
           
-        if (error) throw error;
+        if (profileError) throw profileError;
         
-        if (data) {
-          console.log('Loaded profile data:', data);
-          setExistingProfile(data);
+        // Get user data (for email)
+        const { data: userData, error: userError } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+          
+        if (userError) throw userError;
+        
+        console.log('Profile data:', profileData);
+        console.log('User data:', userData);
+        
+        if (profileData) {
+          // Set initial form values from database
+          const socialMedia = profileData.social_media as SocialMediaLinks || {};
           
           form.reset({
-            title: data.title || "",
-            description: data.description || "",
-            specializations: data.specializations || [],
-            services: data.services || [],
-            education: data.education || [],
-            experience: data.experience || "",
-            location: data.location || "",
-            phoneNumber: data.phone_number || "",
-            email: user.email || "",
-            website: data.website || "",
-            socialMedia: data.social_media || {
-              facebook: "",
-              instagram: "",
-              twitter: "",
-              linkedin: "",
-              youtube: "",
-              tiktok: "",
-              twitch: ""
+            title: profileData.title || "",
+            description: profileData.description || "",
+            specializations: profileData.specializations || [],
+            experience: profileData.experience || "",
+            location: profileData.location || "",
+            phoneNumber: profileData.phone_number || "",
+            email: userData?.email || session?.user?.email || "",
+            website: profileData.website || "",
+            socialMedia: {
+              facebook: socialMedia.facebook || "",
+              instagram: socialMedia.instagram || "",
+              twitter: socialMedia.twitter || "",
+              linkedin: socialMedia.linkedin || "",
+              youtube: socialMedia.youtube || "",
+              tiktok: socialMedia.tiktok || "",
+              twitch: socialMedia.twitch || ""
             }
           });
           
-          if (data.services?.length) {
-            const servicesWithEmpty = [...data.services, ""];
-            setServices(servicesWithEmpty);
+          // Initialize services and education arrays
+          if (profileData.services && profileData.services.length > 0) {
+            services.splice(0, services.length, ...profileData.services);
           }
           
-          if (data.education?.length) {
-            const educationWithEmpty = [...data.education, ""];
-            setEducation(educationWithEmpty);
+          if (profileData.education && profileData.education.length > 0) {
+            education.splice(0, education.length, ...profileData.education);
           }
           
-          if (data.photo_url) {
-            handlePhotoChange(data.photo_url, null);
-          }
+          setInitialData(profileData);
         }
       } catch (error) {
-        console.error('Error loading profile:', error);
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Błąd",
+          description: "Nie udało się załadować profilu",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
     };
     
-    fetchProfileData();
-  }, [user?.id]);
+    fetchProfile();
+  }, [userId]);
 
-  async function onSubmit(values: ProfileFormValues) {
+  // Submit form handler
+  const onSubmit = async (values: ProfileFormValues) => {
+    if (!userId) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany, aby edytować profil",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
+      console.log('Saving profile with values:', values);
       
-      if (!user?.id) {
-        throw new Error("Użytkownik nie jest zalogowany");
+      // Upload photo if provided
+      let photoUrlToSave = initialData?.photo_url;
+      
+      if (photoUrl && photoUrl !== initialData?.photo_url) {
+        photoUrlToSave = await uploadProfilePhoto(userId);
       }
       
-      console.log('Submitting profile with values:', values);
+      // Prepare data for saving
+      const profileData = processFormData(values, userId, photoUrlToSave);
       
-      let photoUrlToSave = existingProfile?.photo_url || null;
-      if (photoFile) {
-        console.log('Uploading new photo');
-        photoUrlToSave = await uploadProfilePhoto(user.id);
-        console.log('Photo uploaded, URL:', photoUrlToSave);
-      } else if (photoUrl && !photoUrl.startsWith('data:')) {
-        photoUrlToSave = photoUrl;
-      }
+      console.log('Saving profile data:', profileData);
       
-      const profileData = processFormData(values, user.id, photoUrlToSave);
-      console.log('Processed profile data:', profileData);
-      
+      // Save to Supabase
       const { error } = await supabase
         .from('specialist_profiles')
-        .upsert(profileData);
-      
+        .upsert(profileData)
+        .select();
+        
       if (error) throw error;
       
       toast({
-        title: "Profil zaktualizowany",
-        description: "Twój profil został pomyślnie zaktualizowany.",
+        title: "Zapisano",
+        description: "Twój profil został pomyślnie zapisany",
       });
-    } catch (error: any) {
-      console.error("Error saving profile:", error);
+      
+      // Move to the next tab after saving basic info
+      if (activeTab === "basic") {
+        setActiveTab("specializations");
+      } else if (activeTab === "specializations") {
+        setActiveTab("contact");
+      } else if (activeTab === "contact") {
+        setActiveTab("social");
+      }
+      
+    } catch (error) {
+      console.error('Error saving profile:', error);
       toast({
-        title: "Błąd zapisu",
-        description: error.message || "Wystąpił błąd podczas zapisywania profilu.",
+        title: "Błąd",
+        description: "Nie udało się zapisać profilu",
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <MainLayout>
-      <div className="container py-12">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <div className="flex items-center gap-3">
-            <UserCircle className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Edycja profilu specjalisty</h1>
+      <div className="container py-8">
+        <div className="mx-auto max-w-3xl">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Edytuj profil specjalisty</h1>
+            <p className="text-muted-foreground">
+              Uzupełnij informacje o sobie, aby potencjalni klienci mogli Cię lepiej poznać
+            </p>
           </div>
 
-          <Card className="border-amber-200 bg-amber-50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-amber-600">Uzupełnij swój profil</CardTitle>
-              <CardDescription>
-                Aby być widocznym w katalogu specjalistów, uzupełnij wszystkie wymagane pola profilu.
-                Im więcej informacji podasz, tym większa szansa, że klienci Cię znajdą.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <SpecialistProfileTab
+              form={form}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              onSubmit={onSubmit}
+              photoUrl={photoUrl || initialData?.photo_url}
+              userId={userId}
+              services={services}
+              education={education}
+              isSubmitting={isSubmitting}
+              updateService={updateService}
+              removeService={removeService}
+              addService={addService}
+              updateEducation={updateEducation}
+              removeEducation={removeEducation}
+              addEducation={addEducation}
+              onPhotoChange={handlePhotoChange}
+            />
+          )}
 
-          <SpecialistProfileTab
-            form={form}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            onSubmit={onSubmit}
-            photoUrl={photoUrl}
-            userId={user?.id}
-            services={services}
-            education={education}
-            isSubmitting={isSubmitting}
-            updateService={updateService}
-            removeService={removeService}
-            addService={addService}
-            updateEducation={updateEducation}
-            removeEducation={removeEducation}
-            addEducation={addEducation}
-            onPhotoChange={handlePhotoChange}
-          />
+          <div className="mt-8 flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (activeTab === "specializations") {
+                  setActiveTab("basic");
+                } else if (activeTab === "contact") {
+                  setActiveTab("specializations");
+                } else if (activeTab === "social") {
+                  setActiveTab("contact");
+                }
+              }}
+              disabled={activeTab === "basic" || isSubmitting}
+            >
+              Wstecz
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => form.handleSubmit(onSubmit)()}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Zapisywanie..." : "Zapisz i kontynuuj"}
+            </Button>
+          </div>
         </div>
       </div>
     </MainLayout>
   );
-}
+};
+
+export default ProfileEditor;
