@@ -46,7 +46,7 @@ export function ContactInfoTab({ form, isSubmitting }: ContactInfoTabProps) {
           name="phoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Numer telefonu</FormLabel>
+              <FormLabel>Numer telefonu (opcjonalnie)</FormLabel>
               <FormControl>
                 <div className="flex items-center">
                   <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -54,7 +54,7 @@ export function ContactInfoTab({ form, isSubmitting }: ContactInfoTabProps) {
                 </div>
               </FormControl>
               <FormDescription>
-                Numer telefonu do kontaktu z klientami
+                Numer telefonu do kontaktu z klientami (pole opcjonalne)
               </FormDescription>
               <FormMessage />
             </FormItem>

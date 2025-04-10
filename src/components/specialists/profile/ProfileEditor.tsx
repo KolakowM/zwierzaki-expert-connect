@@ -103,13 +103,13 @@ const ProfileEditor = () => {
             email: userEmail,
             website: profileData.website || "",
             socialMedia: {
-              facebook: socialMedia.facebook || "",
-              instagram: socialMedia.instagram || "",
-              twitter: socialMedia.twitter || "",
-              linkedin: socialMedia.linkedin || "",
-              youtube: socialMedia.youtube || "",
-              tiktok: socialMedia.tiktok || "",
-              twitch: socialMedia.twitch || ""
+              facebook: typeof socialMedia === 'object' ? socialMedia.facebook || "" : "",
+              instagram: typeof socialMedia === 'object' ? socialMedia.instagram || "" : "",
+              twitter: typeof socialMedia === 'object' ? socialMedia.twitter || "" : "",
+              linkedin: typeof socialMedia === 'object' ? socialMedia.linkedin || "" : "",
+              youtube: typeof socialMedia === 'object' ? socialMedia.youtube || "" : "",
+              tiktok: typeof socialMedia === 'object' ? socialMedia.tiktok || "" : "",
+              twitch: typeof socialMedia === 'object' ? socialMedia.twitch || "" : ""
             }
           });
           
