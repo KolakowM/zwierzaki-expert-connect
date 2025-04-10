@@ -132,6 +132,7 @@ export function useProfileForm() {
       phone_number: formData.phoneNumber,
       website: formData.website,
       social_media: socialMedia,
+      photo_url: photoUrl, // Include the photo_url in the return object
       updated_at: new Date().toISOString()
     };
   };

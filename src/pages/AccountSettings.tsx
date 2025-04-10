@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -308,6 +307,8 @@ export default function AccountSettings() {
       
       // Create the payload to update
       const profileData = processFormData(values, user?.id);
+      
+      // Explicitly add the photo_url to the profileData
       profileData.photo_url = photoUrlToSave;
       
       // Update specialist profile in Supabase

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +32,6 @@ export default function ProfileEditor() {
     processFormData,
   } = useProfileForm();
   
-  // Initialize form with default values
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -65,7 +63,7 @@ export default function ProfileEditor() {
       
       // Upload profile photo if provided
       let photoUrlToSave = null;
-      if (photoUrl) {
+      if (photoUrl && photoFile) {
         photoUrlToSave = await uploadProfilePhoto(user?.id || "");
       }
       
@@ -76,7 +74,7 @@ export default function ProfileEditor() {
       // Create profile data object
       const profileData = processFormData(values, user.id);
       
-      // Add photo URL if it was uploaded
+      // Explicitly add the photo_url to the profileData if it was uploaded
       if (photoUrlToSave) {
         profileData.photo_url = photoUrlToSave;
       }
