@@ -30,6 +30,7 @@ const UserMenu = ({ firstName, lastName, onLogout }: UserMenuProps) => {
         <NavigationMenuItem>
           <NavigationMenuTrigger className="gap-2">
             <Avatar className="h-8 w-8">
+              <AvatarImage src="/placeholder.svg" />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <span>{firstName} {lastName}</span>
