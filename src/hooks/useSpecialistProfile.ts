@@ -3,18 +3,17 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
+import { ProfileFormValues, profileFormSchema } from "@/components/profile/SpecialistProfileTab";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { profileFormSchema } from "@/components/profile/SpecialistProfileTab";
 import { SocialMediaLinks } from "@/types";
 
-export const useSpecialistProfile = () => {
+export const useSpecialistProfile = (initialProfileData: any = null) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const userId = user?.id;
   const [loading, setLoading] = useState(true);
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = useState<any>(initialProfileData);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   
@@ -25,6 +24,8 @@ export const useSpecialistProfile = () => {
       title: "",
       description: "",
       specializations: [],
+      services: [],
+      education: [],
       experience: "",
       location: "",
       phoneNumber: "",
@@ -47,6 +48,13 @@ export const useSpecialistProfile = () => {
     const fetchProfile = async () => {
       if (!userId) return;
       
+      // If we already have profile data provided, use it
+      if (initialProfileData) {
+        populateFormWithProfileData(initialProfileData);
+        setLoading(false);
+        return;
+      }
+      
       try {
         setLoading(true);
         console.log('Fetching specialist profile for user:', userId);
@@ -66,46 +74,7 @@ export const useSpecialistProfile = () => {
         console.log('Profile data:', profileData);
         
         if (profileData) {
-          // Set initial form values from database
-          // Initialize a default empty social media object
-          const socialMediaDefault: SocialMediaLinks = {
-            facebook: "",
-            instagram: "",
-            twitter: "",
-            linkedin: "",
-            youtube: "",
-            tiktok: "",
-            twitch: ""
-          };
-          
-          // Safely extract social media data with proper type checking
-          let socialMedia: SocialMediaLinks = socialMediaDefault;
-          
-          if (profileData.social_media && typeof profileData.social_media === 'object' && !Array.isArray(profileData.social_media)) {
-            const socialMediaObj = profileData.social_media as Record<string, unknown>;
-            
-            // Safely extract each property with type checking
-            if (typeof socialMediaObj.facebook === 'string') socialMedia.facebook = socialMediaObj.facebook;
-            if (typeof socialMediaObj.instagram === 'string') socialMedia.instagram = socialMediaObj.instagram;
-            if (typeof socialMediaObj.twitter === 'string') socialMedia.twitter = socialMediaObj.twitter;
-            if (typeof socialMediaObj.linkedin === 'string') socialMedia.linkedin = socialMediaObj.linkedin;
-            if (typeof socialMediaObj.youtube === 'string') socialMedia.youtube = socialMediaObj.youtube;
-            if (typeof socialMediaObj.tiktok === 'string') socialMedia.tiktok = socialMediaObj.tiktok;
-            if (typeof socialMediaObj.twitch === 'string') socialMedia.twitch = socialMediaObj.twitch;
-          }
-          
-          form.reset({
-            title: profileData.title || "",
-            description: profileData.description || "",
-            specializations: profileData.specializations || [],
-            experience: profileData.experience || "",
-            location: profileData.location || "",
-            phoneNumber: profileData.phone_number || "",
-            email: userEmail,
-            website: profileData.website || "",
-            socialMedia: socialMedia
-          });
-          
+          populateFormWithProfileData(profileData, userEmail);
           setInitialData(profileData);
         }
       } catch (error) {
@@ -121,7 +90,50 @@ export const useSpecialistProfile = () => {
     };
     
     fetchProfile();
-  }, [userId, user?.email, form, toast]);
+  }, [userId, user?.email, form, toast, initialProfileData]);
+
+  const populateFormWithProfileData = (profileData: any, userEmail?: string) => {
+    // Initialize a default empty social media object
+    const socialMediaDefault: SocialMediaLinks = {
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      linkedin: "",
+      youtube: "",
+      tiktok: "",
+      twitch: ""
+    };
+    
+    // Safely extract social media data with proper type checking
+    let socialMedia: SocialMediaLinks = socialMediaDefault;
+    
+    if (profileData.social_media && typeof profileData.social_media === 'object' && !Array.isArray(profileData.social_media)) {
+      const socialMediaObj = profileData.social_media as Record<string, unknown>;
+      
+      // Safely extract each property with type checking
+      if (typeof socialMediaObj.facebook === 'string') socialMedia.facebook = socialMediaObj.facebook;
+      if (typeof socialMediaObj.instagram === 'string') socialMedia.instagram = socialMediaObj.instagram;
+      if (typeof socialMediaObj.twitter === 'string') socialMedia.twitter = socialMediaObj.twitter;
+      if (typeof socialMediaObj.linkedin === 'string') socialMedia.linkedin = socialMediaObj.linkedin;
+      if (typeof socialMediaObj.youtube === 'string') socialMedia.youtube = socialMediaObj.youtube;
+      if (typeof socialMediaObj.tiktok === 'string') socialMedia.tiktok = socialMediaObj.tiktok;
+      if (typeof socialMediaObj.twitch === 'string') socialMedia.twitch = socialMediaObj.twitch;
+    }
+    
+    form.reset({
+      title: profileData.title || "",
+      description: profileData.description || "",
+      specializations: profileData.specializations || [],
+      services: profileData.services || [],
+      education: profileData.education || [],
+      experience: profileData.experience || "",
+      location: profileData.location || "",
+      phoneNumber: profileData.phone_number || "",
+      email: userEmail || profileData.email || "",
+      website: profileData.website || "",
+      socialMedia: socialMedia
+    });
+  };
 
   return {
     form,
