@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Separator } from "@/components/ui/separator";
 import { updateUserProfile, updateUserPassword } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialMediaLinks } from "@/types";
 
 // Form schemas
 const accountFormSchema = z.object({
@@ -41,7 +41,6 @@ const passwordFormSchema = z.object({
   path: ["confirmPassword"]
 });
 
-// Define social media links schema
 const socialMediaSchema = z.object({
   facebook: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
   instagram: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
@@ -177,11 +176,25 @@ export default function AccountSettings() {
           if (data) {
             setSpecialistProfile(data);
             
-            // Initialize form with data from database
             // Ensure social_media is correctly formatted as an object
-            const socialMediaData = data.social_media ? 
-              (typeof data.social_media === 'object' ? data.social_media : {}) : 
-              {};
+            let socialMediaData: SocialMediaLinks = {};
+            
+            if (data.social_media) {
+              // Check if social_media is an object and not an array
+              if (typeof data.social_media === 'object' && !Array.isArray(data.social_media)) {
+                // Safely access properties with type casting
+                const socialMediaObj = data.social_media as Record<string, unknown>;
+                
+                // Extract each property safely
+                if (typeof socialMediaObj.facebook === 'string') socialMediaData.facebook = socialMediaObj.facebook;
+                if (typeof socialMediaObj.instagram === 'string') socialMediaData.instagram = socialMediaObj.instagram;
+                if (typeof socialMediaObj.twitter === 'string') socialMediaData.twitter = socialMediaObj.twitter;
+                if (typeof socialMediaObj.linkedin === 'string') socialMediaData.linkedin = socialMediaObj.linkedin;
+                if (typeof socialMediaObj.youtube === 'string') socialMediaData.youtube = socialMediaObj.youtube;
+                if (typeof socialMediaObj.tiktok === 'string') socialMediaData.tiktok = socialMediaObj.tiktok;
+                if (typeof socialMediaObj.twitch === 'string') socialMediaData.twitch = socialMediaObj.twitch;
+              }
+            }
               
             profileForm.reset({
               title: data.title || "",
