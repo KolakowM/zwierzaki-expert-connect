@@ -22,6 +22,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserCircle, Mail, Phone, MapPin, Award, Camera, FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { SocialMediaLinks } from "@/types";
 
 const profileFormSchema = z.object({
   title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki"),
@@ -56,6 +58,7 @@ export default function ProfileEditor() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [services, setServices] = useState<string[]>([""]);
   const [education, setEducation] = useState<string[]>([""]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Initialize form with default values
   const form = useForm<ProfileFormValues>({
@@ -128,18 +131,56 @@ export default function ProfileEditor() {
     form.setValue("education", updatedEducation.filter(item => item.trim() !== ""));
   };
 
-  function onSubmit(values: ProfileFormValues) {
-    // Filter out empty strings from services and education
-    values.services = values.services.filter(service => service.trim() !== "");
-    values.education = values.education.filter(edu => edu.trim() !== "");
-    
-    // Here you would typically save the profile data through an API
-    console.log("Profile update values:", values);
-    
-    toast({
-      title: "Profil zaktualizowany",
-      description: "Twój profil został pomyślnie zaktualizowany.",
-    });
+  async function onSubmit(values: ProfileFormValues) {
+    try {
+      setIsSubmitting(true);
+      
+      // Filter out empty strings from services and education
+      values.services = values.services.filter(service => service.trim() !== "");
+      values.education = values.education.filter(edu => edu.trim() !== "");
+      
+      console.log("Profile submission values:", values);
+      
+      if (!user?.id) {
+        throw new Error("Użytkownik nie jest zalogowany");
+      }
+      
+      // Create profile data object
+      const profileData = {
+        id: user.id,
+        title: values.title,
+        description: values.description,
+        specializations: values.specializations,
+        services: values.services,
+        education: values.education,
+        experience: values.experience,
+        location: values.location,
+        phone_number: values.phoneNumber,
+        website: values.website,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Here you would typically save the profile data through an API
+      const { error } = await supabase
+        .from('specialist_profiles')
+        .upsert(profileData);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Profil zaktualizowany",
+        description: "Twój profil został pomyślnie zaktualizowany.",
+      });
+    } catch (error: any) {
+      console.error("Error saving profile:", error);
+      toast({
+        title: "Błąd zapisu",
+        description: error.message || "Wystąpił błąd podczas zapisywania profilu.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -507,8 +548,8 @@ export default function ProfileEditor() {
                       />
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit" className="ml-auto">
-                        Zapisz profil
+                      <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+                        {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
                       </Button>
                     </CardFooter>
                   </Card>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -196,7 +197,8 @@ export default function AccountSettings() {
               }
             }
               
-            profileForm.reset({
+            // Initialize form values with database data
+            const formValues = {
               title: data.title || "",
               description: data.description || "",
               specializations: data.specializations || [],
@@ -215,14 +217,17 @@ export default function AccountSettings() {
                 tiktok: socialMediaData.tiktok || "",
                 twitch: socialMediaData.twitch || ""
               }
-            });
+            };
             
-            // Initialize services state array
+            console.log("Setting form values:", formValues);
+            profileForm.reset(formValues);
+            
+            // Initialize services state array - ensure it's not empty
             if (data.services && data.services.length > 0) {
               setServices(data.services);
             }
             
-            // Initialize education state array
+            // Initialize education state array - ensure it's not empty
             if (data.education && data.education.length > 0) {
               setEducation(data.education);
             }
@@ -372,6 +377,7 @@ export default function AccountSettings() {
   async function onProfileSubmit(values: ProfileFormValues) {
     try {
       setIsSubmitting(true);
+      console.log("Profile submission values:", values);
       
       // Filter out empty strings from services and education
       const cleanedServices = (values.services || []).filter(service => service.trim() !== "");
@@ -387,33 +393,9 @@ export default function AccountSettings() {
         });
       }
       
-      // Update specialist profile in Supabase
-      const { error } = await supabase
-        .from('specialist_profiles')
-        .upsert({
-          id: user?.id,
-          title: values.title,
-          description: values.description,
-          specializations: values.specializations,
-          services: cleanedServices,
-          education: cleanedEducation,
-          experience: values.experience,
-          location: values.location,
-          phone_number: values.phoneNumber,
-          website: values.website,
-          social_media: socialMedia
-        });
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Profil zaktualizowany",
-        description: "Twój profil specjalisty został pomyślnie zaktualizowany."
-      });
-      
-      // Update local state
-      setSpecialistProfile({
-        ...specialistProfile,
+      // Create the payload to update
+      const profileData = {
+        id: user?.id,
         title: values.title,
         description: values.description,
         specializations: values.specializations,
@@ -423,7 +405,31 @@ export default function AccountSettings() {
         location: values.location,
         phone_number: values.phoneNumber,
         website: values.website,
-        social_media: socialMedia
+        social_media: socialMedia,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log("Updating profile with:", profileData);
+      
+      // Update specialist profile in Supabase
+      const { error } = await supabase
+        .from('specialist_profiles')
+        .upsert(profileData);
+        
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Profil zaktualizowany",
+        description: "Twój profil specjalisty został pomyślnie zaktualizowany."
+      });
+      
+      // Update local state
+      setSpecialistProfile({
+        ...specialistProfile,
+        ...profileData
       });
       
     } catch (error: any) {
