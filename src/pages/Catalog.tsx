@@ -1,99 +1,81 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
-
-// Sample data for the catalog
-const allSpecialists: Specialist[] = [
-  {
-    id: "1",
-    name: "Anna Kowalska",
-    title: "Dietetyk zwierzęcy",
-    specializations: ["Dietetyka", "Żywienie psów", "Alergie pokarmowe"],
-    location: "Warszawa",
-    image: "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=2376&auto=format&fit=crop",
-    rating: 4.9,
-    verified: true,
-  },
-  {
-    id: "2",
-    name: "Piotr Nowak",
-    title: "Behawiorysta psów",
-    specializations: ["Behawiorystyka", "Terapia lękowa", "Agresja"],
-    location: "Kraków",
-    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2369&auto=format&fit=crop",
-    rating: 5.0,
-    verified: true,
-  },
-  {
-    id: "3",
-    name: "Magdalena Wiśniewska",
-    title: "Fizjoterapeuta zwierzęcy",
-    specializations: ["Rehabilitacja", "Fizjoterapia", "Masaż"],
-    location: "Wrocław",
-    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=2374&auto=format&fit=crop",
-    rating: 4.8,
-    verified: true,
-  },
-  {
-    id: "4",
-    name: "Tomasz Kaczmarek",
-    title: "Trener psów",
-    specializations: ["Szkolenie podstawowe", "Posłuszeństwo", "Trick training"],
-    location: "Poznań",
-    image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2368&auto=format&fit=crop",
-    rating: 4.7,
-    verified: true,
-  },
-  {
-    id: "5",
-    name: "Karolina Zielińska",
-    title: "Groomer",
-    specializations: ["Strzyżenie", "Pielęgnacja", "Kąpiele"],
-    location: "Łódź",
-    image: "https://images.unsplash.com/photo-1605464066904-b98ef4522ffc?q=80&w=2370&auto=format&fit=crop",
-    rating: 4.5,
-    verified: true,
-  },
-  {
-    id: "6",
-    name: "Marcin Lewandowski",
-    title: "Weterynarz",
-    specializations: ["Diagnostyka", "Stomatologia", "Chirurgia"],
-    location: "Gdańsk",
-    image: "https://images.unsplash.com/photo-1570824104453-508955ab713e?q=80&w=2311&auto=format&fit=crop",
-    rating: 4.9,
-    verified: true,
-  },
-  {
-    id: "7",
-    name: "Julia Dąbrowska",
-    title: "Dietetyk kotów",
-    specializations: ["Żywienie kotów", "BARF", "Choroby metaboliczne"],
-    location: "Warszawa",
-    image: "https://images.unsplash.com/photo-1615812214207-34e3be6812df?q=80&w=2370&auto=format&fit=crop",
-    rating: 4.6,
-    verified: true,
-  },
-  {
-    id: "8",
-    name: "Robert Szymański",
-    title: "Behawiorysta kotów",
-    specializations: ["Zaburzenia zachowania", "Socjalizacja", "Terapia lękowa"],
-    location: "Kraków",
-    image: "https://images.unsplash.com/photo-1492370284958-c20b15c692d2?q=80&w=2049&auto=format&fit=crop",
-    rating: 4.8,
-    verified: true,
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<any>({});
-  const [currentSpecialists, setCurrentSpecialists] = useState(allSpecialists);
+  const [specialists, setSpecialists] = useState<Specialist[]>([]);
+  const [filteredSpecialists, setFilteredSpecialists] = useState<Specialist[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch specialists from the database
+  useEffect(() => {
+    const fetchSpecialists = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching specialists from database');
+        
+        const { data, error } = await supabase
+          .from('specialist_profiles')
+          .select('*');
+          
+        if (error) throw error;
+        
+        if (data) {
+          console.log('Fetched specialists:', data);
+          
+          // Transform data to match Specialist interface
+          const transformedData: Specialist[] = await Promise.all(data.map(async (item: any) => {
+            // Try to get user's name from user_profiles
+            let name = "Specjalista";
+            try {
+              const { data: userData } = await supabase
+                .from('user_profiles')
+                .select('first_name, last_name')
+                .eq('id', item.id)
+                .maybeSingle();
+                
+              if (userData) {
+                name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+                if (!name) name = "Specjalista";
+              }
+            } catch (e) {
+              console.error('Error fetching user profile:', e);
+            }
+            
+            return {
+              id: item.id,
+              name: name,
+              title: item.title || "Specjalista",
+              specializations: item.specializations || [],
+              location: item.location || "Polska",
+              image: item.photo_url || "/placeholder.svg",
+              rating: 4.8, // Sample rating
+              verified: true, // Sample verification status
+            };
+          }));
+          
+          setSpecialists(transformedData);
+          setFilteredSpecialists(transformedData);
+        }
+      } catch (error) {
+        console.error('Error fetching specialists:', error);
+        // Fallback to empty array
+        setSpecialists([]);
+        setFilteredSpecialists([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSpecialists();
+  }, []);
 
   const handleSearch = () => {
     filterSpecialists({ searchTerm, ...activeFilters });
@@ -105,7 +87,7 @@ const Catalog = () => {
   };
 
   const filterSpecialists = (filters: any) => {
-    let filtered = [...allSpecialists];
+    let filtered = [...specialists];
 
     // Filter by search term
     if (filters.searchTerm) {
@@ -137,7 +119,7 @@ const Catalog = () => {
       );
     }
 
-    setCurrentSpecialists(filtered);
+    setFilteredSpecialists(filtered);
   };
 
   return (
@@ -167,13 +149,19 @@ const Catalog = () => {
           <div className="md:col-span-3">
             <div className="mb-4">
               <p className="text-muted-foreground">
-                Znaleziono {currentSpecialists.length} specjalistów
+                {loading ? "Ładowanie specjalistów..." : `Znaleziono ${filteredSpecialists.length} specjalistów`}
               </p>
             </div>
             
-            {currentSpecialists.length > 0 ? (
+            {loading ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {currentSpecialists.map(specialist => (
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="h-[300px] w-full animate-pulse rounded-lg bg-gray-200"></div>
+                ))}
+              </div>
+            ) : filteredSpecialists.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredSpecialists.map(specialist => (
                   <SpecialistCard specialist={specialist} key={specialist.id} />
                 ))}
               </div>

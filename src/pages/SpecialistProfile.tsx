@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FacebookIcon, InstagramIcon, TwitterIcon, LinkedinIcon, YoutubeIcon, TwitchIcon } from "lucide-react";
+import { FacebookIcon, InstagramIcon, TwitterIcon, LinkedinIcon, YoutubeIcon, TwitchIcon, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const SpecialistProfile = () => {
@@ -18,6 +18,9 @@ const SpecialistProfile = () => {
     const fetchSpecialist = async () => {
       try {
         setLoading(true);
+        console.log('Fetching specialist profile with ID:', id);
+        
+        // First try to get the specialist profile
         const { data, error } = await supabase
           .from('specialist_profiles')
           .select('*')
@@ -26,69 +29,63 @@ const SpecialistProfile = () => {
         
         if (error) throw error;
         
+        // Now try to get the user profile to get name
+        let userName = "Specjalista";
+        
+        try {
+          const { data: userData } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name')
+            .eq('id', id || '')
+            .maybeSingle();
+            
+          if (userData) {
+            userName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+          }
+        } catch (userError) {
+          console.error('Error fetching user profile:', userError);
+        }
+        
         if (data) {
+          console.log('Loaded specialist profile:', data);
           setSpecialist({
             id: data.id,
-            name: "Anna Kowalska", // Replace with actual name from user_profiles join
-            title: data.title || "Dietetyk zwierzęcy",
-            specializations: data.specializations || ["Dietetyka psów i kotów", "Żywienie psów", "Alergie pokarmowe", "BARF", "Diety eliminacyjne"],
-            description: data.description || "Dyplomowany dietetyk zwierzęcy z ponad 10-letnim doświadczeniem...",
-            services: data.services || [
-              "Konsultacje dietetyczne",
-              "Plany żywieniowe dostosowane do indywidualnych potrzeb",
-              "Diety eliminacyjne dla zwierząt z alergiami",
-              "Żywienie w chorobach przewlekłych",
-              "Dieta BARF i naturalne żywienie"
-            ],
-            education: data.education || [
-              "Uniwersytet Przyrodniczy we Wrocławiu - Zootechnika, specjalizacja: żywienie zwierząt",
-              "Certyfikat Dietetyka Zwierzęcego - Animal Nutrition Academy",
-              "Kurs Terapii Żywieniowej w Chorobach Metabolicznych"
-            ],
-            experience: data.experience || "10+ lat doświadczenia w dietetyce zwierzęcej...",
-            location: data.location || "Warszawa, Mokotów",
-            phoneNumber: data.phone_number || "+48 123 456 789",
-            email: "anna.kowalska@example.com", // Replace with actual email from user_profiles join
-            website: data.website || "www.annakdietetyk.pl",
+            name: userName || "Specjalista",
+            title: data.title || "Specjalista",
+            specializations: data.specializations || [],
+            description: data.description || "Brak opisu",
+            services: data.services || [],
+            education: data.education || [],
+            experience: data.experience || "Brak informacji o doświadczeniu",
+            location: data.location || "Brak lokalizacji",
+            phoneNumber: data.phone_number || "Brak numeru telefonu",
+            email: "Brak adresu email", // We don't have direct access to email
+            website: data.website || "",
             socialMedia: data.social_media || {},
-            image: data.photo_url || "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=2376&auto=format&fit=crop",
-            rating: 4.9,
-            reviewCount: 126,
-            verified: true,
+            image: data.photo_url || null,
+            rating: 4.9, // Sample rating for UI display
+            reviewCount: 5, // Sample review count for UI display
+            verified: true, // Sample verified status for UI display
           });
         } else {
           // Fallback to sample data for demo
           setSpecialist({
             id: "1",
-            name: "Anna Kowalska",
-            title: "Dietetyk zwierzęcy",
-            specializations: ["Dietetyka psów i kotów", "Żywienie psów", "Alergie pokarmowe", "BARF", "Diety eliminacyjne"],
-            description: "Dyplomowany dietetyk zwierzęcy z ponad 10-letnim doświadczeniem. Specjalizuję się w tworzeniu indywidualnych planów żywieniowych dla psów i kotów z alergiami pokarmowymi oraz problemami zdrowotnymi. Absolwentka Uniwersytetu Przyrodniczego we Wrocławiu oraz licznych kursów i szkoleń z zakresu żywienia zwierząt towarzyszących.",
-            services: [
-              "Konsultacje dietetyczne",
-              "Plany żywieniowe dostosowane do indywidualnych potrzeb",
-              "Diety eliminacyjne dla zwierząt z alergiami",
-              "Żywienie w chorobach przewlekłych",
-              "Dieta BARF i naturalne żywienie"
-            ],
-            education: [
-              "Uniwersytet Przyrodniczy we Wrocławiu - Zootechnika, specjalizacja: żywienie zwierząt",
-              "Certyfikat Dietetyka Zwierzęcego - Animal Nutrition Academy",
-              "Kurs Terapii Żywieniowej w Chorobach Metabolicznych"
-            ],
-            experience: "10+ lat doświadczenia w dietetyce zwierzęcej. Współpraca z klinikami weterynaryjnymi na terenie Warszawy. Autorka licznych artykułów z zakresu żywienia zwierząt towarzyszących.",
-            location: "Warszawa, Mokotów",
-            phoneNumber: "+48 123 456 789",
-            email: "anna.kowalska@example.com",
-            website: "www.annakdietetyk.pl",
-            socialMedia: {
-              facebook: "https://facebook.com/annadietetyk",
-              instagram: "https://instagram.com/annadietetyk",
-              twitter: "https://twitter.com/annadietetyk"
-            },
-            image: "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=2376&auto=format&fit=crop",
+            name: "Specjalista",
+            title: "Specjalista",
+            specializations: ["Specjalizacja 1"],
+            description: "Brak opisu",
+            services: ["Konsultacje"],
+            education: ["Edukacja"],
+            experience: "Brak informacji o doświadczeniu",
+            location: "Brak lokalizacji",
+            phoneNumber: "Brak numeru telefonu",
+            email: "Brak adresu email",
+            website: "",
+            socialMedia: {},
+            image: null,
             rating: 4.9,
-            reviewCount: 126,
+            reviewCount: 5,
             verified: true,
           });
         }
@@ -147,11 +144,17 @@ const SpecialistProfile = () => {
             <Card>
               <CardContent className="p-0">
                 <div className="aspect-square w-full">
-                  <img
-                    src={specialist.image}
-                    alt={specialist.name}
-                    className="h-full w-full object-cover"
-                  />
+                  {specialist.image ? (
+                    <img
+                      src={specialist.image}
+                      alt={specialist.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-muted">
+                      <Camera className="h-20 w-20 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <h1 className="mb-2 text-2xl font-bold">{specialist.name}</h1>
@@ -299,11 +302,15 @@ const SpecialistProfile = () => {
               <CardContent className="p-6">
                 <h3 className="mb-4 text-lg font-medium">Specjalizacje</h3>
                 <div className="flex flex-wrap gap-2">
-                  {specialist.specializations.map((spec: string, index: number) => (
-                    <Badge key={index} variant="secondary">
-                      {spec}
-                    </Badge>
-                  ))}
+                  {specialist.specializations && specialist.specializations.length > 0 ? (
+                    specialist.specializations.map((spec: string, index: number) => (
+                      <Badge key={index} variant="secondary">
+                        {spec}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">Brak specjalizacji</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -338,30 +345,34 @@ const SpecialistProfile = () => {
                 <Card>
                   <CardContent className="p-6">
                     <h2 className="text-2xl font-bold mb-6">Oferowane usługi</h2>
-                    <ul className="space-y-4">
-                      {specialist.services.map((service: string, index: number) => (
-                        <li key={index} className="flex">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-3 h-6 w-6 text-primary"
-                          >
-                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                            <path d="m9 12 2 2 4-4" />
-                          </svg>
-                          <div>
-                            <p className="font-medium">{service}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                    {specialist.services && specialist.services.length > 0 ? (
+                      <ul className="space-y-4">
+                        {specialist.services.map((service: string, index: number) => (
+                          <li key={index} className="flex">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="mr-3 h-6 w-6 text-primary"
+                            >
+                              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                              <path d="m9 12 2 2 4-4" />
+                            </svg>
+                            <div>
+                              <p className="font-medium">{service}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground">Brak informacji o oferowanych usługach</p>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -370,30 +381,34 @@ const SpecialistProfile = () => {
                 <Card>
                   <CardContent className="p-6">
                     <h2 className="text-2xl font-bold mb-6">Wykształcenie i certyfikaty</h2>
-                    <ul className="space-y-4">
-                      {specialist.education.map((edu: string, index: number) => (
-                        <li key={index} className="flex">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-3 h-6 w-6 text-primary"
-                          >
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                            <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                          </svg>
-                          <div>
-                            <p className="font-medium">{edu}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                    {specialist.education && specialist.education.length > 0 ? (
+                      <ul className="space-y-4">
+                        {specialist.education.map((edu: string, index: number) => (
+                          <li key={index} className="flex">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="mr-3 h-6 w-6 text-primary"
+                            >
+                              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                            </svg>
+                            <div>
+                              <p className="font-medium">{edu}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground">Brak informacji o wykształceniu i certyfikatach</p>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

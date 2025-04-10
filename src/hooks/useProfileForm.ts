@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialMediaLinks } from "@/types";
@@ -13,35 +13,51 @@ export function useProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Load existing profile data (to be implemented in a future feature)
+  useEffect(() => {
+    // Load existing profile data and set initial states
+  }, []);
+
   // Upload photo to Supabase storage
   const uploadProfilePhoto = async (userId: string): Promise<string | null> => {
     if (!photoFile || !userId) return null;
     
     setIsUploading(true);
     try {
+      console.log('Uploading profile photo for user:', userId);
+      
       // Create a unique file name
       const fileExt = photoFile.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = `profile-photos/${fileName}`;
       
+      console.log('Upload path:', filePath);
+      
       // Upload the file
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('profiles')
-        .upload(filePath, photoFile);
+        .upload(filePath, photoFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
         
       if (uploadError) throw uploadError;
       
+      console.log('Upload successful:', data);
+      
       // Get public URL
-      const { data } = supabase.storage
+      const { data: urlData } = supabase.storage
         .from('profiles')
         .getPublicUrl(filePath);
         
+      console.log('Public URL:', urlData.publicUrl);
+      
       toast({
         title: "Zdjęcie przesłane",
         description: "Zdjęcie profilowe zostało pomyślnie zaktualizowane."
       });
       
-      return data.publicUrl;
+      return urlData.publicUrl;
     } catch (error) {
       console.error('Error uploading profile photo:', error);
       toast({
@@ -99,15 +115,16 @@ export function useProfileForm() {
 
   // Handle photo change
   const handlePhotoChange = (url: string | null, file: File | null) => {
+    console.log('Photo changed:', { url, file });
     setPhotoUrl(url);
     setPhotoFile(file);
   };
 
   // Process form data for saving to database
-  const processFormData = (formData: any, userId: string | undefined) => {
+  const processFormData = (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
     // Filter out empty strings from services and education
-    const cleanedServices = (formData.services || []).filter((service: string) => service.trim() !== "");
-    const cleanedEducation = (formData.education || []).filter((edu: string) => edu.trim() !== "");
+    const cleanedServices = services.filter(service => service.trim() !== "");
+    const cleanedEducation = education.filter(edu => edu.trim() !== "");
     
     // Filter out empty social media links
     const socialMedia: Record<string, string> = {};
@@ -132,7 +149,7 @@ export function useProfileForm() {
       phone_number: formData.phoneNumber,
       website: formData.website,
       social_media: socialMedia,
-      photo_url: photoUrl, // Include the photo_url in the return object
+      photo_url: photoUrl,
       updated_at: new Date().toISOString()
     };
   };

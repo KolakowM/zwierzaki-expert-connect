@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,12 +14,13 @@ export default function ProfileEditor() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("basic");
+  const [existingProfile, setExistingProfile] = useState<any>(null);
   
   const {
     services,
     education,
     photoUrl,
-    photoFile, // Make sure we explicitly destructure photoFile from the hook
+    photoFile,
     isSubmitting,
     setIsSubmitting,
     uploadProfilePhoto,
@@ -59,29 +59,89 @@ export default function ProfileEditor() {
     },
   });
 
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('specialist_profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+          
+        if (error) throw error;
+        
+        if (data) {
+          console.log('Loaded profile data:', data);
+          setExistingProfile(data);
+          
+          form.reset({
+            title: data.title || "",
+            description: data.description || "",
+            specializations: data.specializations || [],
+            services: data.services || [],
+            education: data.education || [],
+            experience: data.experience || "",
+            location: data.location || "",
+            phoneNumber: data.phone_number || "",
+            email: user.email || "",
+            website: data.website || "",
+            socialMedia: data.social_media || {
+              facebook: "",
+              instagram: "",
+              twitter: "",
+              linkedin: "",
+              youtube: "",
+              tiktok: "",
+              twitch: ""
+            }
+          });
+          
+          if (data.services?.length) {
+            const servicesWithEmpty = [...data.services, ""];
+            setServices(servicesWithEmpty);
+          }
+          
+          if (data.education?.length) {
+            const educationWithEmpty = [...data.education, ""];
+            setEducation(educationWithEmpty);
+          }
+          
+          if (data.photo_url) {
+            handlePhotoChange(data.photo_url, null);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    };
+    
+    fetchProfileData();
+  }, [user?.id]);
+
   async function onSubmit(values: ProfileFormValues) {
     try {
       setIsSubmitting(true);
-      
-      // Upload profile photo if provided
-      let photoUrlToSave = null;
-      if (photoUrl && photoFile) {
-        photoUrlToSave = await uploadProfilePhoto(user?.id || "");
-      }
       
       if (!user?.id) {
         throw new Error("Użytkownik nie jest zalogowany");
       }
       
-      // Create profile data object
-      const profileData = processFormData(values, user.id);
+      console.log('Submitting profile with values:', values);
       
-      // Explicitly add the photo_url to the profileData if it was uploaded
-      if (photoUrlToSave) {
-        profileData.photo_url = photoUrlToSave;
+      let photoUrlToSave = existingProfile?.photo_url || null;
+      if (photoFile) {
+        console.log('Uploading new photo');
+        photoUrlToSave = await uploadProfilePhoto(user.id);
+        console.log('Photo uploaded, URL:', photoUrlToSave);
+      } else if (photoUrl && !photoUrl.startsWith('data:')) {
+        photoUrlToSave = photoUrl;
       }
       
-      // Save the profile data to Supabase
+      const profileData = processFormData(values, user.id, photoUrlToSave);
+      console.log('Processed profile data:', profileData);
+      
       const { error } = await supabase
         .from('specialist_profiles')
         .upsert(profileData);

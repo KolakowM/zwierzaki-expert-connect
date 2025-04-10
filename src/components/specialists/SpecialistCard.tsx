@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { Camera } from "lucide-react";
 
 export interface Specialist {
   id: string;
@@ -24,11 +25,20 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="p-0">
         <div className="relative h-48 w-full overflow-hidden">
-          <img
-            src={specialist.image}
-            alt={specialist.name}
-            className="h-full w-full object-cover object-center"
-          />
+          {specialist.image && !specialist.image.includes('placeholder.svg') ? (
+            <img
+              src={specialist.image}
+              alt={specialist.name}
+              className="h-full w-full object-cover object-center"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.svg";
+              }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <Camera className="h-12 w-12 text-muted-foreground" />
+            </div>
+          )}
           {specialist.verified && (
             <div className="absolute right-2 top-2">
               <Badge className="bg-primary/90 hover:bg-primary">Zweryfikowany</Badge>
@@ -42,15 +52,21 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
           {specialist.title}
         </CardDescription>
         <div className="mb-3 flex flex-wrap gap-1">
-          {specialist.specializations.slice(0, 3).map((spec) => (
-            <Badge key={spec} variant="secondary" className="text-xs">
-              {spec}
-            </Badge>
-          ))}
-          {specialist.specializations.length > 3 && (
-            <Badge variant="outline" className="text-xs">
-              +{specialist.specializations.length - 3}
-            </Badge>
+          {specialist.specializations && specialist.specializations.length > 0 ? (
+            <>
+              {specialist.specializations.slice(0, 3).map((spec) => (
+                <Badge key={spec} variant="secondary" className="text-xs">
+                  {spec}
+                </Badge>
+              ))}
+              {specialist.specializations.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{specialist.specializations.length - 3}
+                </Badge>
+              )}
+            </>
+          ) : (
+            <Badge variant="outline" className="text-xs">Brak specjalizacji</Badge>
           )}
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
@@ -73,7 +89,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Link to={`/catalog/${specialist.id}`} className="w-full">
+        <Link to={`/specialist/${specialist.id}`} className="w-full">
           <Button className="w-full" variant="outline">
             Zobacz profil
           </Button>

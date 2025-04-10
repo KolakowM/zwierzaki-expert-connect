@@ -22,55 +22,20 @@ export function ProfilePhotoUploader({
   const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Show preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      
-      // Pass the file and current preview URL to parent component
-      onPhotoChange(photoUrl, file);
-    }
-  };
-
-  const uploadProfilePhoto = async (photoFile: File): Promise<string | null> => {
-    if (!photoFile || !userId) return null;
+    if (!file) return;
     
-    setIsUploading(true);
-    try {
-      // Create a unique file name
-      const fileExt = photoFile.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `profile-photos/${fileName}`;
+    // Show local preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const previewUrl = reader.result as string;
+      setPhotoUrl(previewUrl);
       
-      // Upload the file
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, photoFile);
-        
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
-        
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading profile photo:', error);
-      toast({
-        title: "Błąd",
-        description: "Nie udało się przesłać zdjęcia profilowego",
-        variant: "destructive"
-      });
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
+      // Pass the file to parent component for later upload
+      onPhotoChange(previewUrl, file);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
