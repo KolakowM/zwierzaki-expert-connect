@@ -178,6 +178,11 @@ export default function AccountSettings() {
             setSpecialistProfile(data);
             
             // Initialize form with data from database
+            // Ensure social_media is correctly formatted as an object
+            const socialMediaData = data.social_media ? 
+              (typeof data.social_media === 'object' ? data.social_media : {}) : 
+              {};
+              
             profileForm.reset({
               title: data.title || "",
               description: data.description || "",
@@ -188,14 +193,14 @@ export default function AccountSettings() {
               location: data.location || "",
               phoneNumber: data.phone_number || "",
               website: data.website || "",
-              socialMedia: data.social_media || {
-                facebook: "",
-                instagram: "",
-                twitter: "",
-                linkedin: "",
-                youtube: "",
-                tiktok: "",
-                twitch: ""
+              socialMedia: {
+                facebook: socialMediaData.facebook || "",
+                instagram: socialMediaData.instagram || "",
+                twitter: socialMediaData.twitter || "",
+                linkedin: socialMediaData.linkedin || "",
+                youtube: socialMediaData.youtube || "",
+                tiktok: socialMediaData.tiktok || "",
+                twitch: socialMediaData.twitch || ""
               }
             });
             
