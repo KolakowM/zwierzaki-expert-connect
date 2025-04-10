@@ -1,5 +1,6 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { SpecializationCheckboxes } from "./SpecializationCheckboxes";
 import { ServicesFieldsArray } from "./ServicesFieldsArray";
 import { UseFormReturn } from "react-hook-form";
@@ -10,6 +11,7 @@ interface SpecializationsTabProps {
   updateService: (index: number, value: string) => void;
   removeService: (index: number) => void;
   addService: () => void;
+  isSubmitting: boolean;
 }
 
 export function SpecializationsTab({
@@ -17,7 +19,8 @@ export function SpecializationsTab({
   services,
   updateService,
   removeService,
-  addService
+  addService,
+  isSubmitting
 }: SpecializationsTabProps) {
   return (
     <Card>
@@ -39,6 +42,11 @@ export function SpecializationsTab({
           addService={addService}
         />
       </CardContent>
+      <CardFooter>
+        <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+          {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

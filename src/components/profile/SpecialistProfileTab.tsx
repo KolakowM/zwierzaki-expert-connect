@@ -91,6 +91,7 @@ export function SpecialistProfileTab({
               removeEducation={removeEducation}
               addEducation={addEducation}
               onPhotoChange={onPhotoChange}
+              isSubmitting={isSubmitting}
             />
           </TabsContent>
           
@@ -101,6 +102,7 @@ export function SpecialistProfileTab({
               updateService={updateService}
               removeService={removeService}
               addService={addService}
+              isSubmitting={isSubmitting}
             />
           </TabsContent>
 

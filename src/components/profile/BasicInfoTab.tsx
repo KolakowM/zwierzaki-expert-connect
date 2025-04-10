@@ -2,7 +2,8 @@
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EducationFieldsArray } from "./EducationFieldsArray";
 import { ProfilePhotoUploader } from "./ProfilePhotoUploader";
 import { UseFormReturn } from "react-hook-form";
@@ -16,6 +17,7 @@ interface BasicInfoTabProps {
   removeEducation: (index: number) => void;
   addEducation: () => void;
   onPhotoChange: (url: string | null, file: File | null) => void;
+  isSubmitting: boolean;
 }
 
 export function BasicInfoTab({
@@ -26,7 +28,8 @@ export function BasicInfoTab({
   updateEducation,
   removeEducation,
   addEducation,
-  onPhotoChange
+  onPhotoChange,
+  isSubmitting
 }: BasicInfoTabProps) {
   return (
     <Card>
@@ -114,6 +117,11 @@ export function BasicInfoTab({
           addEducation={addEducation}
         />
       </CardContent>
+      <CardFooter>
+        <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+          {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
