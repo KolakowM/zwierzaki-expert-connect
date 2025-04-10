@@ -160,6 +160,81 @@ export type Database = {
           },
         ]
       }
+      specialist_profiles: {
+        Row: {
+          description: string | null
+          education: string[] | null
+          experience: string | null
+          id: string
+          location: string | null
+          phone_number: string | null
+          photo_url: string | null
+          services: string[] | null
+          social_media: Json | null
+          specializations: string[] | null
+          title: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          description?: string | null
+          education?: string[] | null
+          experience?: string | null
+          id: string
+          location?: string | null
+          phone_number?: string | null
+          photo_url?: string | null
+          services?: string[] | null
+          social_media?: Json | null
+          specializations?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          description?: string | null
+          education?: string[] | null
+          experience?: string | null
+          id?: string
+          location?: string | null
+          phone_number?: string | null
+          photo_url?: string | null
+          services?: string[] | null
+          social_media?: Json | null
+          specializations?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          city: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          city?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          city?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

@@ -6,7 +6,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import MainLayout from "@/components/layout/MainLayout";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthProvider"; // Fixed import
+import { useAuth } from "@/contexts/AuthProvider"; 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserCircle, Mail, Lock, Shield, Award, Camera, Phone, MapPin, FileText, Trash2 } from "lucide-react";
+import { 
+  UserCircle, Mail, Lock, Shield, Award, Camera, Phone, MapPin, FileText, Trash2,
+  Facebook, Instagram, Youtube, Twitter, Linkedin, Twitch, TikTok
+} from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { updateUserProfile, updateUserPassword } from "@/services/authService";
+import { supabase } from "@/integrations/supabase/client";
 
 // Form schemas
 const accountFormSchema = z.object({
@@ -27,6 +31,7 @@ const accountFormSchema = z.object({
   phone: z.string().optional(),
   city: z.string().optional()
 });
+
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(1, "Obecne hasło jest wymagane"),
   newPassword: z.string().min(8, "Nowe hasło musi mieć co najmniej 8 znaków"),
@@ -35,6 +40,18 @@ const passwordFormSchema = z.object({
   message: "Hasła nie są identyczne",
   path: ["confirmPassword"]
 });
+
+// Define social media links schema
+const socialMediaSchema = z.object({
+  facebook: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
+  instagram: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
+  twitter: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
+  linkedin: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
+  youtube: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
+  tiktok: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
+  twitch: z.string().url("Wprowadź poprawny URL").optional().or(z.literal(""))
+});
+
 const profileFormSchema = z.object({
   title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki").optional(),
   description: z.string().min(10, "Opis musi mieć co najmniej 10 znaków").optional(),
@@ -44,13 +61,15 @@ const profileFormSchema = z.object({
   experience: z.string().optional(),
   location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki").optional(),
   phoneNumber: z.string().min(9, "Podaj prawidłowy numer telefonu").optional(),
-  website: z.string().optional()
+  website: z.string().optional(),
+  socialMedia: socialMediaSchema.optional()
 });
 
 // Types based on schemas
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type SocialMediaValues = z.infer<typeof socialMediaSchema>;
 
 // Available specializations
 const availableSpecializations = [{
@@ -86,6 +105,7 @@ export default function AccountSettings() {
   const [education, setEducation] = useState<string[]>([""]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [specialistProfile, setSpecialistProfile] = useState<any>(null);
 
   // Initialize forms
   const accountForm = useForm<AccountFormValues>({
@@ -98,6 +118,7 @@ export default function AccountSettings() {
       city: ""
     }
   });
+  
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
@@ -106,6 +127,7 @@ export default function AccountSettings() {
       confirmPassword: ""
     }
   });
+  
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -117,7 +139,16 @@ export default function AccountSettings() {
       experience: "",
       location: "",
       phoneNumber: "",
-      website: ""
+      website: "",
+      socialMedia: {
+        facebook: "",
+        instagram: "",
+        twitter: "",
+        linkedin: "",
+        youtube: "",
+        tiktok: "",
+        twitch: ""
+      }
     }
   });
 
@@ -131,8 +162,61 @@ export default function AccountSettings() {
         phone: "",
         city: ""
       });
+      
+      // Fetch specialist profile data if user is authenticated
+      const fetchSpecialistProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('specialist_profiles')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
+            
+          if (error) throw error;
+          
+          if (data) {
+            setSpecialistProfile(data);
+            
+            // Initialize form with data from database
+            profileForm.reset({
+              title: data.title || "",
+              description: data.description || "",
+              specializations: data.specializations || [],
+              services: data.services || [],
+              education: data.education || [],
+              experience: data.experience || "",
+              location: data.location || "",
+              phoneNumber: data.phone_number || "",
+              website: data.website || "",
+              socialMedia: data.social_media || {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                linkedin: "",
+                youtube: "",
+                tiktok: "",
+                twitch: ""
+              }
+            });
+            
+            // Initialize services state array
+            if (data.services && data.services.length > 0) {
+              setServices(data.services);
+            }
+            
+            // Initialize education state array
+            if (data.education && data.education.length > 0) {
+              setEducation(data.education);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching specialist profile:", error);
+        }
+      };
+      
+      fetchSpecialistProfile();
     }
-  }, [user, accountForm]);
+  }, [user, accountForm, profileForm]);
 
   // Check if user is authenticated
   useEffect(() => {
@@ -206,13 +290,18 @@ export default function AccountSettings() {
       setIsSubmitting(true);
       console.log("Account update values:", values);
       
-      // Call the update function from authService
-      await updateUserProfile({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        // Email changes require a different flow with verification in Supabase
-        // Only updating name fields for now
-      });
+      // Update user profile in Supabase
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          id: user?.id,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          phone: values.phone,
+          city: values.city
+        });
+        
+      if (error) throw error;
       
       // Refresh user data to show updated information
       await refreshUserData();
@@ -262,15 +351,73 @@ export default function AccountSettings() {
     }
   }
   
-  function onProfileSubmit(values: ProfileFormValues) {
-    // Filter out empty strings from services and education
-    values.services = values.services?.filter(service => service.trim() !== "");
-    values.education = values.education?.filter(edu => edu.trim() !== "");
-    console.log("Profile update values:", values);
-    toast({
-      title: "Profil zaktualizowany",
-      description: "Twój profil specjalisty został pomyślnie zaktualizowany."
-    });
+  async function onProfileSubmit(values: ProfileFormValues) {
+    try {
+      setIsSubmitting(true);
+      
+      // Filter out empty strings from services and education
+      const cleanedServices = (values.services || []).filter(service => service.trim() !== "");
+      const cleanedEducation = (values.education || []).filter(edu => edu.trim() !== "");
+      
+      // Filter out empty social media links
+      const socialMedia: Record<string, string> = {};
+      if (values.socialMedia) {
+        Object.entries(values.socialMedia).forEach(([key, value]) => {
+          if (value && value.trim() !== '') {
+            socialMedia[key] = value.trim();
+          }
+        });
+      }
+      
+      // Update specialist profile in Supabase
+      const { error } = await supabase
+        .from('specialist_profiles')
+        .upsert({
+          id: user?.id,
+          title: values.title,
+          description: values.description,
+          specializations: values.specializations,
+          services: cleanedServices,
+          education: cleanedEducation,
+          experience: values.experience,
+          location: values.location,
+          phone_number: values.phoneNumber,
+          website: values.website,
+          social_media: socialMedia
+        });
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Profil zaktualizowany",
+        description: "Twój profil specjalisty został pomyślnie zaktualizowany."
+      });
+      
+      // Update local state
+      setSpecialistProfile({
+        ...specialistProfile,
+        title: values.title,
+        description: values.description,
+        specializations: values.specializations,
+        services: cleanedServices,
+        education: cleanedEducation,
+        experience: values.experience,
+        location: values.location,
+        phone_number: values.phoneNumber,
+        website: values.website,
+        social_media: socialMedia
+      });
+      
+    } catch (error: any) {
+      console.error("Error updating specialist profile:", error);
+      toast({
+        title: "Błąd aktualizacji",
+        description: error.message || "Wystąpił błąd podczas aktualizacji profilu specjalisty.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   
   function handleDeleteAccount() {
@@ -287,6 +434,17 @@ export default function AccountSettings() {
   if (!isAuthenticated) {
     return <div />;
   }
+  
+  // Social media input components with appropriate icons
+  const socialMediaInputs = [
+    { name: "facebook", label: "Facebook", icon: <Facebook className="mr-2 h-4 w-4 text-blue-600" /> },
+    { name: "instagram", label: "Instagram", icon: <Instagram className="mr-2 h-4 w-4 text-pink-600" /> },
+    { name: "twitter", label: "Twitter", icon: <Twitter className="mr-2 h-4 w-4 text-blue-400" /> },
+    { name: "linkedin", label: "LinkedIn", icon: <Linkedin className="mr-2 h-4 w-4 text-blue-700" /> },
+    { name: "youtube", label: "YouTube", icon: <Youtube className="mr-2 h-4 w-4 text-red-600" /> },
+    { name: "tiktok", label: "TikTok", icon: <TikTok className="mr-2 h-4 w-4" /> },
+    { name: "twitch", label: "Twitch", icon: <Twitch className="mr-2 h-4 w-4 text-purple-600" /> }
+  ];
   
   return <MainLayout>
       <div className="container py-12">
@@ -633,6 +791,39 @@ export default function AccountSettings() {
                         <Button type="button" variant="outline" onClick={addService}>
                           Dodaj usługę
                         </Button>
+                      </div>
+
+                      {/* Social Media Links */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Media społecznościowe</h3>
+                        <FormDescription>
+                          Dodaj linki do swoich profili w mediach społecznościowych
+                        </FormDescription>
+                        
+                        <div className="space-y-4">
+                          {socialMediaInputs.map((social) => (
+                            <FormField
+                              key={social.name}
+                              control={profileForm.control}
+                              name={`socialMedia.${social.name}` as any}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="flex items-center">
+                                    {social.icon}
+                                    {social.label}
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder={`https://${social.name}.com/twojprofil`} 
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
                       </div>
 
                       {/* Contact details */}

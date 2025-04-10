@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,8 @@ import {
   Download,
   Upload,
   RefreshCcw,
-  AlertTriangle
+  AlertTriangle,
+  Languages
 } from "lucide-react";
 
 const AdminSettings = () => {
@@ -37,6 +37,7 @@ const AdminSettings = () => {
       case 'notification': return 'powiadomień';
       case 'security': return 'bezpieczeństwa';
       case 'backup': return 'kopii zapasowych';
+      case 'language': return 'języka';
       default: return '';
     }
   };
@@ -49,11 +50,12 @@ const AdminSettings = () => {
       />
       
       <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="general">Ogólne</TabsTrigger>
           <TabsTrigger value="notification">Powiadomienia</TabsTrigger>
           <TabsTrigger value="security">Bezpieczeństwo</TabsTrigger>
           <TabsTrigger value="backup">Kopie zapasowe</TabsTrigger>
+          <TabsTrigger value="language">Język</TabsTrigger>
         </TabsList>
         
         <TabsContent value="general">
@@ -395,6 +397,105 @@ const AdminSettings = () => {
               </div>
               
               <Button onClick={() => handleSaveSettings('backup')}>
+                <Save className="mr-2 h-4 w-4" />
+                Zapisz Ustawienia
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="language">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ustawienia Językowe</CardTitle>
+              <CardDescription>
+                Skonfiguruj opcje językowe dla platformy
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-medium mb-4 flex items-center">
+                    <Languages className="mr-2 h-5 w-5" />
+                    Język Platformy
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="default-language">Domyślny język platformy</Label>
+                    <select
+                      id="default-language"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      defaultValue="pl"
+                    >
+                      <option value="pl">Polski</option>
+                      <option value="en">English</option>
+                      <option value="de">Deutsch</option>
+                      <option value="fr">Français</option>
+                      <option value="es">Español</option>
+                    </select>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2">
+                    <Label>Dostępne języki dla użytkowników</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="lang-pl" defaultChecked />
+                        <label htmlFor="lang-pl">Polski</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="lang-en" defaultChecked />
+                        <label htmlFor="lang-en">English</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="lang-de" />
+                        <label htmlFor="lang-de">Deutsch</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="lang-fr" />
+                        <label htmlFor="lang-fr">Français</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="lang-es" />
+                        <label htmlFor="lang-es">Español</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-medium mb-4">Tłumaczenia</h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="translation-service">Usługa tłumaczeniowa</Label>
+                    <select
+                      id="translation-service"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      defaultValue="none"
+                    >
+                      <option value="none">Brak (ręczne tłumaczenia)</option>
+                      <option value="google">Google Translate API</option>
+                      <option value="deepl">DeepL API</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="api-key">Klucz API</Label>
+                    <Input id="api-key" type="password" placeholder="Wprowadź klucz API dla usługi tłumaczeniowej" />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 mt-4">
+                    <Checkbox id="auto-translate" />
+                    <div>
+                      <Label htmlFor="auto-translate">Automatyczne tłumaczenie treści</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Automatycznie tłumacz treść na język preferowany przez użytkownika
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <Button onClick={() => handleSaveSettings('language')}>
                 <Save className="mr-2 h-4 w-4" />
                 Zapisz Ustawienia
               </Button>
