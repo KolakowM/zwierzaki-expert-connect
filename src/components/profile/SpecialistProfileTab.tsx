@@ -17,7 +17,7 @@ export const profileFormSchema = z.object({
   education: z.array(z.string()),
   experience: z.string(),
   location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki"),
-  phoneNumber: z.string().min(9, "Podaj prawidłowy numer telefonu"),
+  phoneNumber: z.string().optional(), // Changed from required to optional
   email: z.string().email("Wprowadź poprawny adres email"),
   website: z.string().optional(),
   socialMedia: z.object({
