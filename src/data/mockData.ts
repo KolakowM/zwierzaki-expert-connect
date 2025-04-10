@@ -11,7 +11,8 @@ export const mockClients: Client[] = [
     address: "ul. Kwiatowa 1",
     city: "Warszawa",
     postCode: "00-001",
-    createdAt: "2023-01-15T10:30:00Z",
+    // Fix: Convert string to Date object
+    createdAt: new Date("2023-01-15T10:30:00Z"),
     notes: "Regularny klient, przychodzi co miesiąc."
   },
   {
@@ -23,7 +24,8 @@ export const mockClients: Client[] = [
     address: "ul. Słoneczna 5",
     city: "Kraków",
     postCode: "30-001",
-    createdAt: "2023-02-20T14:15:00Z",
+    // Fix: Convert string to Date object
+    createdAt: new Date("2023-02-20T14:15:00Z"),
     notes: "Dwóch psów i jeden kot."
   },
   {
@@ -35,7 +37,8 @@ export const mockClients: Client[] = [
     address: "ul. Lipowa 8",
     city: "Wrocław",
     postCode: "50-001",
-    createdAt: "2023-03-05T09:00:00Z",
+    // Fix: Convert string to Date object
+    createdAt: new Date("2023-03-05T09:00:00Z"),
     notes: "Alergiczny na niektóre karmy dla psów. Kot ma specjalną dietę."
   }
 ];
