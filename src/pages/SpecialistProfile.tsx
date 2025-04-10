@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FacebookIcon, InstagramIcon, TwitterIcon, LinkedinIcon, YoutubeIcon, TwitchIcon, TikTokIcon } from "lucide-react";
+import { FacebookIcon, InstagramIcon, TwitterIcon, LinkedinIcon, YoutubeIcon, TwitchIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const SpecialistProfile = () => {
@@ -18,18 +18,11 @@ const SpecialistProfile = () => {
     const fetchSpecialist = async () => {
       try {
         setLoading(true);
-        let query = supabase
+        const { data, error } = await supabase
           .from('specialist_profiles')
           .select('*')
-          
-        if (id) {
-          query = query.eq('id', id);
-        } else {
-          // For demo purposes - fetch first specialist if no ID provided
-          query = query.limit(1);
-        }
-          
-        const { data, error } = await query.maybeSingle();
+          .eq('id', id || '')
+          .maybeSingle();
         
         if (error) throw error;
         
@@ -141,7 +134,7 @@ const SpecialistProfile = () => {
     twitter: { icon: <TwitterIcon className="h-5 w-5 text-blue-400" />, label: "Twitter" },
     linkedin: { icon: <LinkedinIcon className="h-5 w-5 text-blue-700" />, label: "LinkedIn" },
     youtube: { icon: <YoutubeIcon className="h-5 w-5 text-red-600" />, label: "YouTube" },
-    tiktok: { icon: <TikTokIcon className="h-5 w-5" />, label: "TikTok" },
+    tiktok: { icon: <div className="h-5 w-5 flex items-center justify-center">TikTok</div>, label: "TikTok" },
     twitch: { icon: <TwitchIcon className="h-5 w-5 text-purple-600" />, label: "Twitch" }
   };
 

@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   UserCircle, Mail, Lock, Shield, Award, Camera, Phone, MapPin, FileText, Trash2,
-  Facebook, Instagram, Youtube, Twitter, Linkedin, Twitch, TikTok
+  Facebook, Instagram, Youtube, Twitter, Linkedin, Twitch
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -442,7 +442,7 @@ export default function AccountSettings() {
     { name: "twitter", label: "Twitter", icon: <Twitter className="mr-2 h-4 w-4 text-blue-400" /> },
     { name: "linkedin", label: "LinkedIn", icon: <Linkedin className="mr-2 h-4 w-4 text-blue-700" /> },
     { name: "youtube", label: "YouTube", icon: <Youtube className="mr-2 h-4 w-4 text-red-600" /> },
-    { name: "tiktok", label: "TikTok", icon: <TikTok className="mr-2 h-4 w-4" /> },
+    { name: "tiktok", label: "TikTok", icon: <div className="mr-2 h-4 w-4">TT</div> },
     { name: "twitch", label: "Twitch", icon: <Twitch className="mr-2 h-4 w-4 text-purple-600" /> }
   ];
   
