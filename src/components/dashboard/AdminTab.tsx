@@ -46,10 +46,12 @@ const AdminTab = () => {
       // Here we're demonstrating the concept for the current user's profile
       
       // Update all clients that have no user_id to the current user
-      // Fix: Use the correct function call syntax
-      const { error } = await supabase.rpc('assign_unassigned_clients_to_user', {
-        user_id_param: user.id
-      });
+      // Fix: Using the more type-safe function call approach
+      const { data, error } = await supabase
+        .from('clients')
+        .update({ user_id: user.id })
+        .is('user_id', null)
+        .select();
       
       if (error) throw error;
       
