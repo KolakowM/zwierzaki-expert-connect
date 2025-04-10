@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { UserCircle, Mail, Phone, MapPin, Award, Camera, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialMediaLinks } from "@/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const profileFormSchema = z.object({
   title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki"),
@@ -55,10 +56,12 @@ export default function ProfileEditor() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("basic");
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [services, setServices] = useState<string[]>([""]);
   const [education, setEducation] = useState<string[]>([""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Initialize form with default values
   const form = useForm<ProfileFormValues>({
@@ -81,11 +84,51 @@ export default function ProfileEditor() {
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setPhotoFile(file);
+      
+      // Show preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
+        setPhotoUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload photo to Supabase storage
+  const uploadProfilePhoto = async (): Promise<string | null> => {
+    if (!photoFile || !user?.id) return null;
+    
+    setIsUploading(true);
+    try {
+      // Create a unique file name
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-photos/${fileName}`;
+      
+      // Upload the file
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, photoFile);
+        
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+        
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading profile photo:', error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się przesłać zdjęcia profilowego",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -135,6 +178,12 @@ export default function ProfileEditor() {
     try {
       setIsSubmitting(true);
       
+      // Upload profile photo if provided
+      let photoUrlToSave = null;
+      if (photoFile) {
+        photoUrlToSave = await uploadProfilePhoto();
+      }
+      
       // Filter out empty strings from services and education
       values.services = values.services.filter(service => service.trim() !== "");
       values.education = values.education.filter(edu => edu.trim() !== "");
@@ -157,10 +206,11 @@ export default function ProfileEditor() {
         location: values.location,
         phone_number: values.phoneNumber,
         website: values.website,
+        photo_url: photoUrlToSave,
         updated_at: new Date().toISOString()
       };
       
-      // Here you would typically save the profile data through an API
+      // Save the profile data to Supabase
       const { error } = await supabase
         .from('specialist_profiles')
         .upsert(profileData);
@@ -233,30 +283,34 @@ export default function ProfileEditor() {
                       <div className="space-y-4">
                         <FormLabel>Zdjęcie profilowe</FormLabel>
                         <div className="flex items-center gap-6">
-                          <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted bg-muted">
-                            {photoPreview ? (
-                              <img 
-                                src={photoPreview} 
-                                alt="Profile preview" 
-                                className="h-full w-full object-cover" 
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-muted">
-                                <Camera className="h-12 w-12 text-muted-foreground" />
-                              </div>
-                            )}
+                          <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted">
+                            <Avatar className="h-full w-full">
+                              {photoUrl ? (
+                                <AvatarImage src={photoUrl} alt="Zdjęcie profilowe" className="object-cover" />
+                              ) : (
+                                <AvatarFallback className="bg-muted">
+                                  <Camera className="h-12 w-12 text-muted-foreground" />
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
                           </div>
                           <div className="flex flex-col space-y-2">
-                            <Input
-                              id="photo"
-                              type="file"
-                              accept="image/*"
-                              onChange={handlePhotoChange}
+                            <Input 
+                              id="photo" 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={handlePhotoChange} 
                               className="w-full"
+                              disabled={isUploading} 
                             />
                             <p className="text-xs text-muted-foreground">
                               Zalecany format: JPG lub PNG. Maksymalny rozmiar: 5MB
                             </p>
+                            {isUploading && (
+                              <p className="text-xs text-blue-600">
+                                Przesyłanie zdjęcia...
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -548,7 +602,7 @@ export default function ProfileEditor() {
                       />
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+                      <Button type="submit" className="ml-auto" disabled={isSubmitting || isUploading}>
                         {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
                       </Button>
                     </CardFooter>

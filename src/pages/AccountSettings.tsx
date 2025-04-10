@@ -14,23 +14,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   UserCircle, Mail, Lock, Shield, Award, Camera, Phone, MapPin, FileText, Trash2,
-  Facebook, Instagram, Youtube, Twitter, Linkedin, Twitch
+  Facebook, Instagram, Youtube, Twitter, Linkedin, Twitch, Info, AlertCircle
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { updateUserProfile, updateUserPassword } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialMediaLinks } from "@/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // Form schemas
 const accountFormSchema = z.object({
   firstName: z.string().min(2, "Imię musi mieć co najmniej 2 znaki"),
   lastName: z.string().min(2, "Nazwisko musi mieć co najmniej 2 znaki"),
   email: z.string().email("Wprowadź poprawny adres email"),
-  phone: z.string().optional(),
-  city: z.string().optional()
 });
 
 const passwordFormSchema = z.object({
@@ -100,12 +100,15 @@ export default function AccountSettings() {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, refreshUserData } = useAuth();
   const [activeTab, setActiveTab] = useState("general");
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [services, setServices] = useState<string[]>([""]);
   const [education, setEducation] = useState<string[]>([""]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [specialistProfile, setSpecialistProfile] = useState<any>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // Initialize forms
   const accountForm = useForm<AccountFormValues>({
@@ -113,9 +116,7 @@ export default function AccountSettings() {
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: "",
-      phone: "",
-      city: ""
+      email: ""
     }
   });
   
@@ -158,13 +159,12 @@ export default function AccountSettings() {
       accountForm.reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
-        email: user.email || "",
-        phone: "",
-        city: ""
+        email: user.email || ""
       });
       
       // Fetch specialist profile data if user is authenticated
       const fetchSpecialistProfile = async () => {
+        setIsLoadingProfile(true);
         try {
           const { data, error } = await supabase
             .from('specialist_profiles')
@@ -177,13 +177,18 @@ export default function AccountSettings() {
           if (data) {
             setSpecialistProfile(data);
             
+            // Set photo URL if it exists
+            if (data.photo_url) {
+              setPhotoUrl(data.photo_url);
+            }
+            
             // Ensure social_media is correctly formatted as an object
             let socialMediaData: SocialMediaLinks = {};
             
             if (data.social_media) {
               // Check if social_media is an object and not an array
               if (typeof data.social_media === 'object' && !Array.isArray(data.social_media)) {
-                // Safely access properties with type casting
+                // Type assertion to work with Record<string, unknown>
                 const socialMediaObj = data.social_media as Record<string, unknown>;
                 
                 // Extract each property safely
@@ -219,7 +224,6 @@ export default function AccountSettings() {
               }
             };
             
-            console.log("Setting form values:", formValues);
             profileForm.reset(formValues);
             
             // Initialize services state array - ensure it's not empty
@@ -234,12 +238,19 @@ export default function AccountSettings() {
           }
         } catch (error) {
           console.error("Error fetching specialist profile:", error);
+          toast({
+            title: "Błąd",
+            description: "Nie udało się pobrać danych profilu specjalisty",
+            variant: "destructive"
+          });
+        } finally {
+          setIsLoadingProfile(false);
         }
       };
       
       fetchSpecialistProfile();
     }
-  }, [user, accountForm, profileForm]);
+  }, [user, accountForm, profileForm, toast]);
 
   // Check if user is authenticated
   useEffect(() => {
@@ -257,11 +268,51 @@ export default function AccountSettings() {
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setPhotoFile(file);
+      
+      // Show preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
+        setPhotoUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload photo to Supabase storage
+  const uploadProfilePhoto = async (): Promise<string | null> => {
+    if (!photoFile || !user?.id) return null;
+    
+    setIsUploading(true);
+    try {
+      // Create a unique file name
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-photos/${fileName}`;
+      
+      // Upload the file
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, photoFile);
+        
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+        
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading profile photo:', error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się przesłać zdjęcia profilowego",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -320,8 +371,7 @@ export default function AccountSettings() {
           id: user?.id,
           first_name: values.firstName,
           last_name: values.lastName,
-          phone: values.phone,
-          city: values.city
+          updated_at: new Date().toISOString()
         });
         
       if (error) throw error;
@@ -379,6 +429,15 @@ export default function AccountSettings() {
       setIsSubmitting(true);
       console.log("Profile submission values:", values);
       
+      // Upload profile photo if changed
+      let photoUrlToSave = specialistProfile?.photo_url || null;
+      if (photoFile) {
+        const uploadedUrl = await uploadProfilePhoto();
+        if (uploadedUrl) {
+          photoUrlToSave = uploadedUrl;
+        }
+      }
+      
       // Filter out empty strings from services and education
       const cleanedServices = (values.services || []).filter(service => service.trim() !== "");
       const cleanedEducation = (values.education || []).filter(edu => edu.trim() !== "");
@@ -405,6 +464,7 @@ export default function AccountSettings() {
         location: values.location,
         phone_number: values.phoneNumber,
         website: values.website,
+        photo_url: photoUrlToSave,
         social_media: socialMedia,
         updated_at: new Date().toISOString()
       };
@@ -540,25 +600,49 @@ export default function AccountSettings() {
                             <FormMessage />
                           </FormItem>} />
                       
-                      <FormField control={accountForm.control} name="phone" render={({
-                      field
-                    }) => <FormItem>
-                            <FormLabel>Telefon</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Numer telefonu" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>} />
+                      {/* Read-only contact info with referral to specialist tab */}
+                      {!isLoadingProfile && (
+                        <>
+                          <div className="space-y-2">
+                            <div className="flex items-center">
+                              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <div className="text-sm font-medium">Telefon</div>
+                            </div>
+                            <div className="flex items-center justify-between rounded-md border p-3 bg-muted/50">
+                              <div className="text-sm">
+                                {specialistProfile?.phone_number || "Nie podano numeru telefonu"}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Info className="h-3 w-3" />
+                                Można edytować w zakładce "Profil specjalisty"
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center">
+                              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <div className="text-sm font-medium">Miasto</div>
+                            </div>
+                            <div className="flex items-center justify-between rounded-md border p-3 bg-muted/50">
+                              <div className="text-sm">
+                                {specialistProfile?.location || "Nie podano lokalizacji"}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Info className="h-3 w-3" />
+                                Można edytować w zakładce "Profil specjalisty"
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
                       
-                      <FormField control={accountForm.control} name="city" render={({
-                      field
-                    }) => <FormItem>
-                            <FormLabel>Miasto</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Miasto" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>} />
+                      <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200 mt-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          Numer telefonu i lokalizację możesz zaktualizować w zakładce "Profil specjalisty".
+                        </AlertDescription>
+                      </Alert>
                     </CardContent>
                     <CardFooter>
                       <Button type="submit" disabled={isSubmitting}>
@@ -690,16 +774,34 @@ export default function AccountSettings() {
                       <div className="space-y-4">
                         <FormLabel>Zdjęcie profilowe</FormLabel>
                         <div className="flex items-center gap-6">
-                          <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted bg-muted">
-                            {photoPreview ? <img src={photoPreview} alt="Profile preview" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center bg-muted">
-                                <Camera className="h-12 w-12 text-muted-foreground" />
-                              </div>}
+                          <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted">
+                            <Avatar className="h-full w-full">
+                              {photoUrl ? (
+                                <AvatarImage src={photoUrl} alt="Zdjęcie profilowe" className="object-cover" />
+                              ) : (
+                                <AvatarFallback className="bg-muted">
+                                  <Camera className="h-12 w-12 text-muted-foreground" />
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
                           </div>
                           <div className="flex flex-col space-y-2">
-                            <Input id="photo" type="file" accept="image/*" onChange={handlePhotoChange} className="w-full" />
+                            <Input 
+                              id="photo" 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={handlePhotoChange} 
+                              className="w-full"
+                              disabled={isUploading}
+                            />
                             <p className="text-xs text-muted-foreground">
                               Zalecany format: JPG lub PNG. Maksymalny rozmiar: 5MB
                             </p>
+                            {isUploading && (
+                              <p className="text-xs text-blue-600">
+                                Przesyłanie zdjęcia...
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -904,7 +1006,7 @@ export default function AccountSettings() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit" disabled={isSubmitting}>
+                      <Button type="submit" disabled={isSubmitting || isUploading}>
                         {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
                       </Button>
                     </CardFooter>
