@@ -13,8 +13,8 @@ import { SocialMediaLinks } from "@/types";
 
 const ProfileEditor = () => {
   const { toast } = useToast();
-  const { session } = useAuth();
-  const userId = session?.user?.id;
+  const { user } = useAuth(); // Changed from session to user
+  const userId = user?.id; // Now using user?.id instead of session?.user?.id
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(true);
   const [initialData, setInitialData] = useState<any>(null);
@@ -79,17 +79,10 @@ const ProfileEditor = () => {
           
         if (profileError) throw profileError;
         
-        // Get user data (for email)
-        const { data: userData, error: userError } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle();
+        // Get user email from auth context instead of fetching from user_profiles
+        const userEmail = user?.email || ''; // Using user from context, which has email
           
-        if (userError) throw userError;
-        
         console.log('Profile data:', profileData);
-        console.log('User data:', userData);
         
         if (profileData) {
           // Set initial form values from database
@@ -102,7 +95,7 @@ const ProfileEditor = () => {
             experience: profileData.experience || "",
             location: profileData.location || "",
             phoneNumber: profileData.phone_number || "",
-            email: userData?.email || session?.user?.email || "",
+            email: userEmail, // Now using userEmail from auth context
             website: profileData.website || "",
             socialMedia: {
               facebook: socialMedia.facebook || "",
@@ -139,7 +132,7 @@ const ProfileEditor = () => {
     };
     
     fetchProfile();
-  }, [userId]);
+  }, [userId, user?.email]); // Added user?.email to dependency array
 
   // Submit form handler
   const onSubmit = async (values: ProfileFormValues) => {
