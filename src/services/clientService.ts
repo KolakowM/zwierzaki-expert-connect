@@ -1,8 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Client, DbClient, mapDbClientToClient, mapClientToDbClient } from "@/types";
+import { useAuth } from "@/contexts/AuthProvider";
 
 export const getClients = async (): Promise<Client[]> => {
+  // With RLS enabled, this will automatically only return the user's clients
   const { data, error } = await supabase
     .from('clients')
     .select('*')
@@ -17,6 +19,7 @@ export const getClients = async (): Promise<Client[]> => {
 };
 
 export const getClientById = async (id: string): Promise<Client | null> => {
+  // With RLS enabled, this will only return the client if it belongs to the user
   const { data, error } = await supabase
     .from('clients')
     .select('*')
@@ -32,7 +35,16 @@ export const getClientById = async (id: string): Promise<Client | null> => {
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> => {
-  const dbClient = mapClientToDbClient(client);
+  // Get the current user's ID from the session
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user?.id) {
+    throw new Error('User must be logged in to create a client');
+  }
+  
+  const dbClient = {
+    ...mapClientToDbClient(client),
+    user_id: session.user.id // Set the user_id to the current user's ID
+  };
   
   const { data, error } = await supabase
     .from('clients')
