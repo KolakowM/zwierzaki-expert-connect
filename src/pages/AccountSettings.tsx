@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -137,24 +138,31 @@ export default function AccountSettings() {
               handlePhotoChange(data.photo_url, null);
             }
             
-            // Ensure social_media is correctly formatted as an object
-            let socialMediaData: SocialMediaLinks = {};
+            // Initialize a default empty social media object
+            const socialMediaDefault: SocialMediaLinks = {
+              facebook: "",
+              instagram: "",
+              twitter: "",
+              linkedin: "",
+              youtube: "",
+              tiktok: "",
+              twitch: ""
+            };
             
-            if (data.social_media) {
-              // Check if social_media is an object and not an array
-              if (typeof data.social_media === 'object' && !Array.isArray(data.social_media)) {
-                // Type assertion to work with Record<string, unknown>
-                const socialMediaObj = data.social_media as Record<string, unknown>;
-                
-                // Extract each property safely
-                if (typeof socialMediaObj.facebook === 'string') socialMediaData.facebook = socialMediaObj.facebook;
-                if (typeof socialMediaObj.instagram === 'string') socialMediaData.instagram = socialMediaObj.instagram;
-                if (typeof socialMediaObj.twitter === 'string') socialMediaData.twitter = socialMediaObj.twitter;
-                if (typeof socialMediaObj.linkedin === 'string') socialMediaData.linkedin = socialMediaObj.linkedin;
-                if (typeof socialMediaObj.youtube === 'string') socialMediaData.youtube = socialMediaObj.youtube;
-                if (typeof socialMediaObj.tiktok === 'string') socialMediaData.tiktok = socialMediaObj.tiktok;
-                if (typeof socialMediaObj.twitch === 'string') socialMediaData.twitch = socialMediaObj.twitch;
-              }
+            // Safely extract social media data with proper type checking
+            let socialMediaData: SocialMediaLinks = socialMediaDefault;
+            
+            if (data.social_media && typeof data.social_media === 'object' && !Array.isArray(data.social_media)) {
+              const socialMediaObj = data.social_media as Record<string, unknown>;
+              
+              // Safely extract each property with type checking
+              if (typeof socialMediaObj.facebook === 'string') socialMediaData.facebook = socialMediaObj.facebook;
+              if (typeof socialMediaObj.instagram === 'string') socialMediaData.instagram = socialMediaObj.instagram;
+              if (typeof socialMediaObj.twitter === 'string') socialMediaData.twitter = socialMediaObj.twitter;
+              if (typeof socialMediaObj.linkedin === 'string') socialMediaData.linkedin = socialMediaObj.linkedin;
+              if (typeof socialMediaObj.youtube === 'string') socialMediaData.youtube = socialMediaObj.youtube;
+              if (typeof socialMediaObj.tiktok === 'string') socialMediaData.tiktok = socialMediaObj.tiktok;
+              if (typeof socialMediaObj.twitch === 'string') socialMediaData.twitch = socialMediaObj.twitch;
             }
               
             // Initialize form values with database data
@@ -169,15 +177,7 @@ export default function AccountSettings() {
               phoneNumber: data.phone_number || "",
               email: user.email || "",
               website: data.website || "",
-              socialMedia: {
-                facebook: socialMediaData.facebook || "",
-                instagram: socialMediaData.instagram || "",
-                twitter: socialMediaData.twitter || "",
-                linkedin: socialMediaData.linkedin || "",
-                youtube: socialMediaData.youtube || "",
-                tiktok: socialMediaData.tiktok || "",
-                twitch: socialMediaData.twitch || ""
-              }
+              socialMedia: socialMediaData
             };
             
             profileForm.reset(formValues);

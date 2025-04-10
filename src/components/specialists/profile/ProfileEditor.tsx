@@ -13,6 +13,7 @@ import { ProfileFormSkeleton } from "./ProfileFormSkeleton";
 import { ProfileFormWrapper } from "./ProfileFormWrapper";
 import { ProfileNavigationButtons } from "./ProfileNavigationButtons";
 import { ProfileNotifications } from "./ProfileNotifications";
+import { SocialMediaLinks } from "@/types";
 
 const ProfileEditor = () => {
   const { toast } = useToast();
@@ -91,7 +92,32 @@ const ProfileEditor = () => {
         
         if (profileData) {
           // Set initial form values from database
-          const socialMedia = profileData.social_media || {};
+          // Initialize a default empty social media object
+          const socialMediaDefault: SocialMediaLinks = {
+            facebook: "",
+            instagram: "",
+            twitter: "",
+            linkedin: "",
+            youtube: "",
+            tiktok: "",
+            twitch: ""
+          };
+          
+          // Safely extract social media data with proper type checking
+          let socialMedia: SocialMediaLinks = socialMediaDefault;
+          
+          if (profileData.social_media && typeof profileData.social_media === 'object' && !Array.isArray(profileData.social_media)) {
+            const socialMediaObj = profileData.social_media as Record<string, unknown>;
+            
+            // Safely extract each property with type checking
+            if (typeof socialMediaObj.facebook === 'string') socialMedia.facebook = socialMediaObj.facebook;
+            if (typeof socialMediaObj.instagram === 'string') socialMedia.instagram = socialMediaObj.instagram;
+            if (typeof socialMediaObj.twitter === 'string') socialMedia.twitter = socialMediaObj.twitter;
+            if (typeof socialMediaObj.linkedin === 'string') socialMedia.linkedin = socialMediaObj.linkedin;
+            if (typeof socialMediaObj.youtube === 'string') socialMedia.youtube = socialMediaObj.youtube;
+            if (typeof socialMediaObj.tiktok === 'string') socialMedia.tiktok = socialMediaObj.tiktok;
+            if (typeof socialMediaObj.twitch === 'string') socialMedia.twitch = socialMediaObj.twitch;
+          }
           
           form.reset({
             title: profileData.title || "",
@@ -102,15 +128,7 @@ const ProfileEditor = () => {
             phoneNumber: profileData.phone_number || "",
             email: userEmail,
             website: profileData.website || "",
-            socialMedia: {
-              facebook: typeof socialMedia === 'object' ? socialMedia.facebook || "" : "",
-              instagram: typeof socialMedia === 'object' ? socialMedia.instagram || "" : "",
-              twitter: typeof socialMedia === 'object' ? socialMedia.twitter || "" : "",
-              linkedin: typeof socialMedia === 'object' ? socialMedia.linkedin || "" : "",
-              youtube: typeof socialMedia === 'object' ? socialMedia.youtube || "" : "",
-              tiktok: typeof socialMedia === 'object' ? socialMedia.tiktok || "" : "",
-              twitch: typeof socialMedia === 'object' ? socialMedia.twitch || "" : ""
-            }
+            socialMedia: socialMedia
           });
           
           // Initialize services and education arrays
