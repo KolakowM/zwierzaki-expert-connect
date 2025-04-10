@@ -46,9 +46,11 @@ const AdminTab = () => {
       // Here we're demonstrating the concept for the current user's profile
       
       // Call the PostgreSQL function to assign unassigned clients to the current user
-      const { error } = await supabase.rpc('assign_unassigned_clients_to_user', {
-        user_id_param: user.id
-      });
+      // Using a type assertion to bypass TypeScript's type checking for the RPC call
+      const { error } = await supabase.rpc(
+        'assign_unassigned_clients_to_user' as any, 
+        { user_id_param: user.id }
+      );
       
       if (error) throw error;
       
