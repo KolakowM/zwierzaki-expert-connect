@@ -45,13 +45,10 @@ const AdminTab = () => {
       // In a real-world scenario, you would likely want this to be a secure admin function
       // Here we're demonstrating the concept for the current user's profile
       
-      // Update all clients that have no user_id to the current user
-      // Fix: Using the more type-safe function call approach
-      const { data, error } = await supabase
-        .from('clients')
-        .update({ user_id: user.id })
-        .is('user_id', null)
-        .select();
+      // Call the PostgreSQL function to assign unassigned clients to the current user
+      const { error } = await supabase.rpc('assign_unassigned_clients_to_user', {
+        user_id_param: user.id
+      });
       
       if (error) throw error;
       
