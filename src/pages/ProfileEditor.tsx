@@ -10,6 +10,8 @@ import { useProfileForm } from "@/hooks/useProfileForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialMediaLinks } from "@/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle, AlertCircle } from "lucide-react";
 
 const ProfileEditor = () => {
   const { toast } = useToast();
@@ -18,6 +20,8 @@ const ProfileEditor = () => {
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(true);
   const [initialData, setInitialData] = useState<any>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   
   const {
     services,
@@ -146,6 +150,9 @@ const ProfileEditor = () => {
     }
     
     try {
+      // Reset notification states
+      setSaveError(null);
+      setSaveSuccess(false);
       setIsSubmitting(true);
       console.log('Saving profile with values:', values);
       
@@ -169,6 +176,8 @@ const ProfileEditor = () => {
         
       if (error) throw error;
       
+      // Show success notification
+      setSaveSuccess(true);
       toast({
         title: "Zapisano",
         description: "Twój profil został pomyślnie zapisany",
@@ -183,8 +192,14 @@ const ProfileEditor = () => {
         setActiveTab("social");
       }
       
+      // Clear success message after 5 seconds
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 5000);
+      
     } catch (error) {
       console.error('Error saving profile:', error);
+      setSaveError(error instanceof Error ? error.message : "Nieznany błąd podczas zapisywania profilu");
       toast({
         title: "Błąd",
         description: "Nie udało się zapisać profilu",
@@ -205,6 +220,26 @@ const ProfileEditor = () => {
               Uzupełnij informacje o sobie, aby potencjalni klienci mogli Cię lepiej poznać
             </p>
           </div>
+
+          {saveSuccess && (
+            <Alert className="mb-4 bg-green-50 border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-800">Zapisano pomyślnie</AlertTitle>
+              <AlertDescription className="text-green-700">
+                Twój profil został pomyślnie zaktualizowany.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {saveError && (
+            <Alert className="mb-4 bg-red-50 border-red-200" variant="destructive">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800">Błąd zapisu</AlertTitle>
+              <AlertDescription className="text-red-700">
+                {saveError}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {loading ? (
             <div className="flex justify-center py-8">
