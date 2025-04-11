@@ -1,6 +1,7 @@
 
 import { ProfileFormValues, SpecialistProfileTab } from "@/components/profile/SpecialistProfileTab";
 import { UseFormReturn } from "react-hook-form";
+import { useEffect } from "react";
 
 interface SpecialistProfileTabWrapperProps {
   profileForm: UseFormReturn<ProfileFormValues>;
@@ -17,7 +18,7 @@ interface SpecialistProfileTabWrapperProps {
   addService: () => void;
   updateEducation: (index: number, value: string) => void;
   removeEducation: (index: number) => void;
-  addEducation: () => void; // Changed from addEducation: (index: number) => void to addEducation: () => void
+  addEducation: () => void; 
   onPhotoChange: (url: string | null, file: File | null) => void;
   isLoadingProfile: boolean;
 }
@@ -41,6 +42,18 @@ export function SpecialistProfileTabWrapper({
   onPhotoChange,
   isLoadingProfile
 }: SpecialistProfileTabWrapperProps) {
+  // Log each time component renders with its data
+  useEffect(() => {
+    console.log("SpecialistProfileTabWrapper rendering with:", {
+      specialistActiveTab,
+      services,
+      education,
+      photoUrl,
+      isLoading: isLoadingProfile,
+      formValues: profileForm.getValues()
+    });
+  }, [specialistActiveTab, services, education, photoUrl, isLoadingProfile, profileForm]);
+
   if (isLoadingProfile) {
     return (
       <div className="p-8 text-center">

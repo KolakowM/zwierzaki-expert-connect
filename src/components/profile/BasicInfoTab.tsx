@@ -31,6 +31,9 @@ export function BasicInfoTab({
   onPhotoChange,
   isSubmitting
 }: BasicInfoTabProps) {
+  console.log("BasicInfoTab rendering with education:", education);
+  console.log("Form values:", form.getValues());
+  
   return (
     <Card>
       <CardHeader>

@@ -31,6 +31,8 @@ export function useSpecialistSettingsTab(
     try {
       setIsSubmitting(true);
       console.log('Saving profile with values:', values);
+      console.log('Current services array:', services);
+      console.log('Current education array:', education);
       
       // Upload profile photo if changed
       let photoUrlToSave = specialistProfile?.photo_url || null;

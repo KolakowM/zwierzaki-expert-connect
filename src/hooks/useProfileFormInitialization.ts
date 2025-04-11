@@ -19,6 +19,8 @@ export function useProfileFormInitialization(
   // Update profileForm when specialistProfile is loaded
   useEffect(() => {
     if (specialistProfile && !isLoadingProfile) {
+      console.log("Initializing profile form with data:", specialistProfile);
+      
       // Initialize a default empty social media object
       const socialMedia = {
         facebook: "",
@@ -42,17 +44,54 @@ export function useProfileFormInitialization(
         if (typeof sm.twitch === 'string') socialMedia.twitch = sm.twitch;
       }
       
-      // Update services and education arrays
+      // Update services array
       if (Array.isArray(specialistProfile.services)) {
+        console.log("Setting up services array:", specialistProfile.services);
+        // Clear existing services
+        while (services.length > 0) services.pop();
+        
+        // Add services from profile
         const svcs = [...specialistProfile.services];
-        while (services.length < svcs.length) addService();
-        svcs.forEach((svc: string, idx: number) => updateService(idx, svc));
+        if (svcs.length === 0) {
+          // Add empty service if none exist
+          addService();
+        } else {
+          // Add all services from profile
+          svcs.forEach((svc: string) => {
+            updateService(services.length, svc);
+            addService();
+          });
+        }
+      } else {
+        // Ensure at least one empty service field
+        if (services.length === 0) {
+          addService();
+        }
       }
       
+      // Update education array
       if (Array.isArray(specialistProfile.education)) {
+        console.log("Setting up education array:", specialistProfile.education);
+        // Clear existing education
+        while (education.length > 0) education.pop();
+        
+        // Add education from profile
         const edu = [...specialistProfile.education];
-        while (education.length < edu.length) addEducation();
-        edu.forEach((item: string, idx: number) => updateEducation(idx, item));
+        if (edu.length === 0) {
+          // Add empty education if none exist
+          addEducation();
+        } else {
+          // Add all education from profile
+          edu.forEach((item: string) => {
+            updateEducation(education.length, item);
+            addEducation();
+          });
+        }
+      } else {
+        // Ensure at least one empty education field
+        if (education.length === 0) {
+          addEducation();
+        }
       }
       
       // Reset form with specialist profile data
