@@ -49,7 +49,7 @@ export default function Pricing() {
         "Nieograniczona liczba zwierząt",
         <del>"Analityka i raporty",
         "Płatności online",
-        "Integracja z zewnętrznymi systemami",</del>
+        "Integracja z zewnętrznymi systemami"</del>
         "Dedykowane wsparcie",
       ],
       cta: "Skontaktuj się",
