@@ -8,23 +8,23 @@ import { Link } from "react-router-dom";
 export default function Pricing() {
   const tiers = [
     {
-      name: "Testowy",
+      name: "Kociak",
       price: "0 zł",
       description: "Dla rozpoczynających działalność",
       features: [
         "Miejsce w katalogu specjalistów",
         "Możliwość wskazania 1 specjalizacji zawodowych ",
-        <del>"Podstawowy profil"</del>,
         "Do 5 klientów",
         "Do 10 zwierząt",
         "Pomoc mailowa",
+        <del>"Podstawowy profil"</del>,
         <del>"Kalendarz podstawowy"</del>
       ],
       cta: "Rozpocznij za darmo",
       popular: false
     },
     {
-      name: "Zaawansowany",
+      name: "Aktywny",
       price: "29 zł / miesiąc",
       description: "Dla rozwijających się praktyk",
       features: [
@@ -33,6 +33,7 @@ export default function Pricing() {
         "Do 15 klientów",
         "Do 30 zwierząt",
         "Piorytetowa pomoc",
+        "Ograniczony dostep do bazy wiedzy - wkrótce",
         <del>"Dokumenty i załączniki",
         "Automatyczne powiadomienia",
         "Historia leczenia",
@@ -42,7 +43,7 @@ export default function Pricing() {
       popular: true
     },
     {
-      name: "Zawodowiec",
+      name: "Alfa",
       price: "49 zł / miesiąc",
       description: "Dla większych praktyków pracy z zwierzętami",
       features: [
@@ -50,12 +51,26 @@ export default function Pricing() {
         "Możliwość wskazania 5 specjalizacji zawodowych ",
         "Nieograniczeni klienci",
         "Nieograniczona liczba zwierząt",
+        "Dostep do bazy wiedzy - wkrótce",
+        "Możliwośc generowania karty zwierząt do .PDF - wkrótce",
         <del>"Analityka i raporty",
         "Płatności online",
         "Integracja z zewnętrznymi systemami",
         "Dedykowane wsparcie"</del>
       ],
       cta: "Wybierz plan",
+      popular: false
+    }
+        {
+      name: "Wspomóż Nas",
+      price: "5 zł jednorazowe ",
+      description: "Dla tych co chcą ",
+      features: [
+        "Jednorazowe wsparcie naszej działalności",
+        "Otrzymasz kupon  10 zł na powyższe pakiety",
+        "Otrzymasz zniżnikę 10 zł na konsultacji do naszej zaprzyjaźnionej dietetyczki"
+      ],
+      cta: "Wspieram Was",
       popular: false
     }
   ];
