@@ -43,7 +43,7 @@ export default function Pricing() {
     },
     {
       name: "Zawodowiec",
-      price: "99 zł / miesiąc",
+      price: "49 zł / miesiąc",
       description: "Dla większych praktyków pracy z zwierzętami",
       features: [
         "Miejsce w katalogu specjalistów",
