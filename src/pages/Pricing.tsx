@@ -49,8 +49,8 @@ export default function Pricing() {
         "Nieograniczona liczba zwierząt",
         <del>"Analityka i raporty",
         "Płatności online",
-        "Integracja z zewnętrznymi systemami"</del>
-        "Dedykowane wsparcie",
+        "Integracja z zewnętrznymi systemami",
+        "Dedykowane wsparcie"</del>
       ],
       cta: "Skontaktuj się",
       popular: false
