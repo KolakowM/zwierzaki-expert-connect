@@ -13,6 +13,7 @@ export default function Pricing() {
       description: "Dla rozpoczynających działalność",
       features: [
         "Miejsce w katalogu specjalistów",
+        "Możliwość wskazania 1 specalizacji zawodowych",
         <del>"Podstawowy profil"</del>,
         "Do 5 klientów",
         "Do 10 zwierząt",
@@ -28,6 +29,7 @@ export default function Pricing() {
       description: "Dla rozwijających się praktyk",
       features: [
         "Miejsce w katalogu specjalistów",
+        "Możliwość wskazania 3 specalizacji zawodowych",
         "Do 15 klientów",
         "Do 30 zwierząt",
         "Piorytetowa pomoc",
@@ -44,7 +46,8 @@ export default function Pricing() {
       price: "99 zł / miesiąc",
       description: "Dla większych praktyków pracy z zwierzętami",
       features: [
-        "Specjalnie miejsce w katalogu specjalistów",
+        "Miejsce w katalogu specjalistów",
+        "Możliwość wskazania aż 5 specalizacji zawodowych",
         "Nieograniczeni klienci",
         "Nieograniczona liczba zwierząt",
         <del>"Analityka i raporty",
