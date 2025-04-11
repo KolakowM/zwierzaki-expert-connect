@@ -54,6 +54,21 @@ export function SpecialistProfileTabWrapper({
     });
   }, [specialistActiveTab, services, education, photoUrl, isLoadingProfile, profileForm]);
 
+  // Ensure form submission is properly triggered
+  const handleSubmit = (values: ProfileFormValues) => {
+    console.log("SpecialistProfileTabWrapper - handleSubmit called with:", values);
+    console.log("Current services and education:", { services, education });
+    
+    // Make sure the form includes current services and education
+    const valuesWithArrays = {
+      ...values,
+      services: services.filter(s => s.trim() !== ""),
+      education: education.filter(e => e.trim() !== "")
+    };
+    
+    onProfileSubmit(valuesWithArrays);
+  };
+
   if (isLoadingProfile) {
     return (
       <div className="p-8 text-center">
@@ -68,7 +83,7 @@ export function SpecialistProfileTabWrapper({
       form={profileForm}
       activeTab={specialistActiveTab}
       setActiveTab={setSpecialistActiveTab}
-      onSubmit={onProfileSubmit}
+      onSubmit={handleSubmit}
       photoUrl={photoUrl}
       userId={userId}
       services={services}

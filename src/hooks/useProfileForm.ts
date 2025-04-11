@@ -12,6 +12,14 @@ export function useProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  useEffect(() => {
+    console.log('useProfileForm - current state:', {
+      services,
+      education,
+      photoUrl
+    });
+  }, [services, education, photoUrl]);
+
   // Upload photo to Supabase storage
   const uploadProfilePhoto = async (userId: string): Promise<string | null> => {
     if (!photoFile || !userId) return null;

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
@@ -17,6 +17,17 @@ export function useSpecialistSettingsTab(
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
+
+  // Debug log current state
+  useEffect(() => {
+    console.log("useSpecialistSettingsTab - Current state:", {
+      userId,
+      photoUrl,
+      services,
+      education,
+      profileData: specialistProfile
+    });
+  }, [userId, photoUrl, services, education, specialistProfile]);
 
   async function onProfileSubmit(values: ProfileFormValues) {
     if (!userId) {
@@ -37,9 +48,11 @@ export function useSpecialistSettingsTab(
       // Upload profile photo if changed
       let photoUrlToSave = specialistProfile?.photo_url || null;
       if (photoUrl && photoUrl !== specialistProfile?.photo_url) {
+        console.log('Uploading new profile photo');
         const uploadedUrl = await uploadProfilePhoto(userId);
         if (uploadedUrl) {
           photoUrlToSave = uploadedUrl;
+          console.log('New photo URL:', photoUrlToSave);
         }
       }
       
@@ -49,14 +62,17 @@ export function useSpecialistSettingsTab(
       console.log('Saving profile data:', profileData);
       
       // Update specialist profile in Supabase
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('specialist_profiles')
-        .upsert(profileData);
+        .upsert(profileData)
+        .select();
         
       if (error) {
         console.error("Supabase error:", error);
         throw error;
       }
+      
+      console.log('Profile saved successfully, response:', data);
       
       // Save specializations
       if (values.specializations && values.specializations.length > 0) {
