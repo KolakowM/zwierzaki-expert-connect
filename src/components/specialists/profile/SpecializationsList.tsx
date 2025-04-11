@@ -1,19 +1,23 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { mapSpecializationIdsToLabels } from "@/data/specializations";
 
 interface SpecializationsListProps {
   specializations: string[];
 }
 
 export function SpecializationsList({ specializations }: SpecializationsListProps) {
+  // Mapujemy ID specjalizacji na etykiety do wyświetlenia
+  const specializationLabels = mapSpecializationIdsToLabels(specializations);
+
   return (
     <Card className="mt-6">
       <CardContent className="p-6">
         <h3 className="mb-4 text-lg font-medium">Specjalizacje</h3>
         <div className="flex flex-wrap gap-2">
-          {specializations && specializations.length > 0 ? (
-            specializations.map((spec: string, index: number) => (
+          {specializationLabels.length > 0 ? (
+            specializationLabels.map((spec: string, index: number) => (
               <Badge key={index} variant="secondary">
                 {spec}
               </Badge>

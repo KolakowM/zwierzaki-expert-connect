@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
+import { getSpecializationLabel } from "@/data/specializations";
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -96,7 +97,11 @@ const Catalog = () => {
         specialist =>
           specialist.name.toLowerCase().includes(term) ||
           specialist.title.toLowerCase().includes(term) ||
-          specialist.specializations.some(spec => spec.toLowerCase().includes(term))
+          // Sprawdzamy zarówno ID specjalizacji, jak i ich etykiety
+          specialist.specializations.some(specId => {
+            const label = getSpecializationLabel(specId);
+            return specId.toLowerCase().includes(term) || label.toLowerCase().includes(term);
+          })
       );
     }
 
@@ -108,13 +113,12 @@ const Catalog = () => {
       );
     }
 
-    // Filter by specializations
+    // Filter by specializations - używamy ID z naszego słownika
     if (filters.specializations && filters.specializations.length > 0) {
       filtered = filtered.filter(specialist =>
-        specialist.specializations.some(spec =>
-          filters.specializations.some((filterSpec: string) =>
-            spec.toLowerCase().includes(filterSpec.toLowerCase())
-          )
+        // Sprawdzamy czy specialist ma jakąkolwiek z wybranych specjalizacji
+        specialist.specializations.some(specId =>
+          filters.specializations.includes(specId)
         )
       );
     }

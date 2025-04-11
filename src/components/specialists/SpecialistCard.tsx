@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Camera } from "lucide-react";
+import { mapSpecializationIdsToLabels } from "@/data/specializations";
 
 export interface Specialist {
   id: string;
@@ -21,6 +22,9 @@ interface SpecialistCardProps {
 }
 
 export function SpecialistCard({ specialist }: SpecialistCardProps) {
+  // Mapujemy ID specjalizacji na etykiety do wyświetlenia
+  const specializationLabels = mapSpecializationIdsToLabels(specialist.specializations);
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="p-0">
@@ -52,16 +56,16 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
           {specialist.title}
         </CardDescription>
         <div className="mb-3 flex flex-wrap gap-1">
-          {specialist.specializations && specialist.specializations.length > 0 ? (
+          {specializationLabels.length > 0 ? (
             <>
-              {specialist.specializations.slice(0, 3).map((spec) => (
+              {specializationLabels.slice(0, 3).map((spec) => (
                 <Badge key={spec} variant="secondary" className="text-xs">
                   {spec}
                 </Badge>
               ))}
-              {specialist.specializations.length > 3 && (
+              {specializationLabels.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{specialist.specializations.length - 3}
+                  +{specializationLabels.length - 3}
                 </Badge>
               )}
             </>

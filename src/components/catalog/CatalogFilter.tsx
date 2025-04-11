@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { specializations } from "@/data/specializations";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: any) => void;
@@ -11,20 +12,10 @@ interface CatalogFilterProps {
 
 export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [location, setLocation] = useState("");
-  const [specializations, setSpecializations] = useState<string[]>([]);
-
-  const specializationOptions = [
-    { id: "dietetyk", label: "Dietetyk zwierzęcy" },
-    { id: "behawiorysta", label: "Behawiorysta" },
-    { id: "fizjoterapeuta", label: "Fizjoterapeuta" },
-    { id: "trener", label: "Trener" },
-    { id: "groomer", label: "Groomer" },
-    { id: "weterynarz", label: "Weterynarz" },
-
-  ];
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
 
   const handleSpecializationChange = (id: string) => {
-    setSpecializations(prev => {
+    setSelectedSpecializations(prev => {
       if (prev.includes(id)) {
         return prev.filter(item => item !== id);
       } else {
@@ -36,13 +27,13 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const handleApplyFilter = () => {
     onFilterChange({
       location,
-      specializations
+      specializations: selectedSpecializations
     });
   };
 
   const handleReset = () => {
     setLocation("");
-    setSpecializations([]);
+    setSelectedSpecializations([]);
     onFilterChange({});
   };
 
@@ -63,11 +54,11 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
           <div className="space-y-3">
             <Label>Specjalizacje</Label>
             <div className="space-y-2">
-              {specializationOptions.map((specialization) => (
+              {specializations.map((specialization) => (
                 <div className="flex items-center space-x-2" key={specialization.id}>
                   <Checkbox 
                     id={specialization.id} 
-                    checked={specializations.includes(specialization.id)}
+                    checked={selectedSpecializations.includes(specialization.id)}
                     onCheckedChange={() => handleSpecializationChange(specialization.id)}
                   />
                   <label
