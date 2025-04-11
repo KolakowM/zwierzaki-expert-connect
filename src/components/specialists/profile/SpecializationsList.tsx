@@ -8,8 +8,11 @@ interface SpecializationsListProps {
 }
 
 export function SpecializationsList({ specializations }: SpecializationsListProps) {
-  // Mapujemy ID specjalizacji na etykiety do wyświetlenia
-  const specializationLabels = mapSpecializationIdsToLabels(specializations);
+  // Make sure we have an array of specializations to map
+  const specializationsArray = Array.isArray(specializations) ? specializations : [];
+  
+  // Map IDs to labels for display
+  const specializationLabels = mapSpecializationIdsToLabels(specializationsArray);
 
   return (
     <Card className="mt-6">

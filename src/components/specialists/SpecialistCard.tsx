@@ -22,8 +22,11 @@ interface SpecialistCardProps {
 }
 
 export function SpecialistCard({ specialist }: SpecialistCardProps) {
-  // Mapujemy ID specjalizacji na etykiety do wyświetlenia
-  const specializationLabels = mapSpecializationIdsToLabels(specialist.specializations);
+  // Ensure specializations is an array before mapping
+  const specializations = Array.isArray(specialist.specializations) ? specialist.specializations : [];
+  
+  // Map IDs to labels for display
+  const specializationLabels = mapSpecializationIdsToLabels(specializations);
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">

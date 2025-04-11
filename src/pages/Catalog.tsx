@@ -50,11 +50,14 @@ const Catalog = () => {
               console.error('Error fetching user profile:', e);
             }
             
+            // Ensure specializations is always an array
+            const specializations = Array.isArray(item.specializations) ? item.specializations : [];
+            
             return {
               id: item.id,
               name: name,
               title: item.title || "Specjalista",
-              specializations: item.specializations || [],
+              specializations: specializations,
               location: item.location || "Polska",
               image: item.photo_url || "/placeholder.svg",
               rating: 4.8, // Sample rating
@@ -97,11 +100,11 @@ const Catalog = () => {
         specialist =>
           specialist.name.toLowerCase().includes(term) ||
           specialist.title.toLowerCase().includes(term) ||
-          // Sprawdzamy zarówno ID specjalizacji, jak i ich etykiety
-          specialist.specializations.some(specId => {
+          // Check both specialization IDs and their labels
+          (Array.isArray(specialist.specializations) && specialist.specializations.some(specId => {
             const label = getSpecializationLabel(specId);
             return specId.toLowerCase().includes(term) || label.toLowerCase().includes(term);
-          })
+          }))
       );
     }
 
@@ -113,11 +116,11 @@ const Catalog = () => {
       );
     }
 
-    // Filter by specializations - używamy ID z naszego słownika
+    // Filter by specializations using IDs
     if (filters.specializations && filters.specializations.length > 0) {
       filtered = filtered.filter(specialist =>
-        // Sprawdzamy czy specialist ma jakąkolwiek z wybranych specjalizacji
-        specialist.specializations.some(specId =>
+        // Make sure specialist.specializations is an array and check if it contains any of the selected IDs
+        Array.isArray(specialist.specializations) && specialist.specializations.some(specId =>
           filters.specializations.includes(specId)
         )
       );
