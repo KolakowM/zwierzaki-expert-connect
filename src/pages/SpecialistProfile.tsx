@@ -44,7 +44,6 @@ const SpecialistProfile = () => {
             
           if (userData) {
             userName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-            if (!userName) userName = "Specjalista";
           }
         } catch (userError) {
           console.error('Error fetching user profile:', userError);
@@ -56,6 +55,7 @@ const SpecialistProfile = () => {
             id: data.id,
             name: userName || "Specjalista",
             title: data.title || "Specjalista",
+            specializations: data.specializations || [],
             description: data.description || "Brak opisu",
             services: data.services || [],
             education: data.education || [],
@@ -76,6 +76,7 @@ const SpecialistProfile = () => {
             id: "1",
             name: "Specjalista",
             title: "Specjalista",
+            specializations: ["Specjalizacja 1"],
             description: "Brak opisu",
             services: ["Konsultacje"],
             education: ["Edukacja"],
@@ -145,7 +146,7 @@ const SpecialistProfile = () => {
             </Card>
             
             {/* Specializations */}
-            <SpecializationsList specialistId={specialist.id} />
+            <SpecializationsList specializations={specialist.specializations} />
           </div>
           
           {/* Right column - Tabs with detailed info */}
@@ -156,6 +157,6 @@ const SpecialistProfile = () => {
       </div>
     </MainLayout>
   );
-}
+};
 
 export default SpecialistProfile;

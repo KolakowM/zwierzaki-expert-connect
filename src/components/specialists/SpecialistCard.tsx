@@ -4,9 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Camera } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Specialization } from "@/hooks/useSpecializations";
 
 export interface Specialist {
   id: string;
@@ -24,39 +21,6 @@ interface SpecialistCardProps {
 }
 
 export function SpecialistCard({ specialist }: SpecialistCardProps) {
-  const [specializations, setSpecializations] = useState<Specialization[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch specialization names for this specialist
-  useEffect(() => {
-    const fetchSpecializations = async () => {
-      try {
-        setLoading(true);
-        
-        if (!specialist.specializations || specialist.specializations.length === 0) {
-          setSpecializations([]);
-          return;
-        }
-        
-        // Fetch specialization details for the IDs we have
-        const { data, error } = await supabase
-          .from('specializations')
-          .select('*')
-          .in('id', specialist.specializations);
-          
-        if (error) throw error;
-        
-        setSpecializations(data || []);
-      } catch (err) {
-        console.error('Error fetching specializations:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchSpecializations();
-  }, [specialist.specializations]);
-
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="p-0">
@@ -88,18 +52,16 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
           {specialist.title}
         </CardDescription>
         <div className="mb-3 flex flex-wrap gap-1">
-          {loading ? (
-            <Badge variant="outline" className="text-xs">Ładowanie...</Badge>
-          ) : specializations.length > 0 ? (
+          {specialist.specializations && specialist.specializations.length > 0 ? (
             <>
-              {specializations.slice(0, 3).map((spec) => (
-                <Badge key={spec.id} variant="secondary" className="text-xs">
-                  {spec.name}
+              {specialist.specializations.slice(0, 3).map((spec) => (
+                <Badge key={spec} variant="secondary" className="text-xs">
+                  {spec}
                 </Badge>
               ))}
-              {specializations.length > 3 && (
+              {specialist.specializations.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{specializations.length - 3}
+                  +{specialist.specializations.length - 3}
                 </Badge>
               )}
             </>

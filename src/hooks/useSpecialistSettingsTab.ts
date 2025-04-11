@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
-import { useSpecialistSpecializationsManager } from "@/data/specializations";
 
 export function useSpecialistSettingsTab(
   userId: string | undefined,
@@ -16,18 +15,6 @@ export function useSpecialistSettingsTab(
 ) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
-
-  // Debug log current state
-  useEffect(() => {
-    console.log("useSpecialistSettingsTab - Current state:", {
-      userId,
-      photoUrl,
-      services,
-      education,
-      profileData: specialistProfile
-    });
-  }, [userId, photoUrl, services, education, specialistProfile]);
 
   async function onProfileSubmit(values: ProfileFormValues) {
     if (!userId) {
@@ -42,17 +29,13 @@ export function useSpecialistSettingsTab(
     try {
       setIsSubmitting(true);
       console.log('Saving profile with values:', values);
-      console.log('Current services array:', services);
-      console.log('Current education array:', education);
       
       // Upload profile photo if changed
       let photoUrlToSave = specialistProfile?.photo_url || null;
       if (photoUrl && photoUrl !== specialistProfile?.photo_url) {
-        console.log('Uploading new profile photo');
         const uploadedUrl = await uploadProfilePhoto(userId);
         if (uploadedUrl) {
           photoUrlToSave = uploadedUrl;
-          console.log('New photo URL:', photoUrlToSave);
         }
       }
       
@@ -62,27 +45,13 @@ export function useSpecialistSettingsTab(
       console.log('Saving profile data:', profileData);
       
       // Update specialist profile in Supabase
-      const { error, data } = await supabase
+      const { error } = await supabase
         .from('specialist_profiles')
-        .upsert(profileData)
-        .select();
+        .upsert(profileData);
         
       if (error) {
         console.error("Supabase error:", error);
         throw error;
-      }
-      
-      console.log('Profile saved successfully, response:', data);
-      
-      // Save specializations
-      if (values.specializations && values.specializations.length > 0) {
-        console.log('Saving specializations:', values.specializations);
-        const { success, error: specError } = await saveSpecializations(values.specializations);
-        
-        if (!success) {
-          console.error("Error saving specializations:", specError);
-          throw new Error(specError || "Error saving specializations");
-        }
       }
       
       toast({

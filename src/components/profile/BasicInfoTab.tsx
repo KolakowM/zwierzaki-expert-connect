@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { EducationFieldsArray } from "./EducationFieldsArray";
 import { ProfilePhotoUploader } from "./ProfilePhotoUploader";
 import { UseFormReturn } from "react-hook-form";
-import { useEffect } from "react";
 
 interface BasicInfoTabProps {
   form: UseFormReturn<any>;
@@ -32,17 +31,6 @@ export function BasicInfoTab({
   onPhotoChange,
   isSubmitting
 }: BasicInfoTabProps) {
-  console.log("BasicInfoTab rendering with education:", education);
-  console.log("Form values:", form.getValues());
-  
-  // Log form values when they change
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      console.log("BasicInfoTab - Form values changed:", value);
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-
   return (
     <Card>
       <CardHeader>
@@ -67,10 +55,7 @@ export function BasicInfoTab({
             <FormItem>
               <FormLabel>Tytuł zawodowy</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="np. Dietetyk zwierzęcy, Behawiorysta psów" 
-                  {...field} 
-                />
+                <Input placeholder="np. Dietetyk zwierzęcy, Behawiorysta psów" {...field} />
               </FormControl>
               <FormDescription>
                 Tytuł zawodowy, który będzie widoczny w twoim profilu

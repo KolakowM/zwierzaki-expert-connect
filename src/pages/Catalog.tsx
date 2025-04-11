@@ -21,61 +21,49 @@ const Catalog = () => {
         setLoading(true);
         console.log('Fetching specialists from database');
         
-        // Get all specialist profiles
         const { data, error } = await supabase
           .from('specialist_profiles')
           .select('*');
           
         if (error) throw error;
         
-        // For each specialist, fetch their specializations
-        const specialistsWithData = await Promise.all((data || []).map(async (specialist: any) => {
-          // Try to get user's name from user_profiles
-          let name = "Specjalista";
-          try {
-            const { data: userData } = await supabase
-              .from('user_profiles')
-              .select('first_name, last_name')
-              .eq('id', specialist.id)
-              .maybeSingle();
-              
-            if (userData) {
-              name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-              if (!name) name = "Specjalista";
-            }
-          } catch (e) {
-            console.error('Error fetching user profile:', e);
-          }
+        if (data) {
+          console.log('Fetched specialists:', data);
           
-          // Fetch specializations for this specialist
-          let specializations: string[] = [];
-          try {
-            const { data: specData } = await supabase
-              .from('specialist_specializations')
-              .select('specialization_id')
-              .eq('specialist_id', specialist.id);
-              
-            if (specData && specData.length > 0) {
-              specializations = specData.map(item => item.specialization_id);
+          // Transform data to match Specialist interface
+          const transformedData: Specialist[] = await Promise.all(data.map(async (item: any) => {
+            // Try to get user's name from user_profiles
+            let name = "Specjalista";
+            try {
+              const { data: userData } = await supabase
+                .from('user_profiles')
+                .select('first_name, last_name')
+                .eq('id', item.id)
+                .maybeSingle();
+                
+              if (userData) {
+                name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+                if (!name) name = "Specjalista";
+              }
+            } catch (e) {
+              console.error('Error fetching user profile:', e);
             }
-          } catch (e) {
-            console.error('Error fetching specializations:', e);
-          }
+            
+            return {
+              id: item.id,
+              name: name,
+              title: item.title || "Specjalista",
+              specializations: item.specializations || [],
+              location: item.location || "Polska",
+              image: item.photo_url || "/placeholder.svg",
+              rating: 4.8, // Sample rating
+              verified: true, // Sample verification status
+            };
+          }));
           
-          return {
-            id: specialist.id,
-            name: name,
-            title: specialist.title || "Specjalista",
-            specializations: specializations,
-            location: specialist.location || "Polska",
-            image: specialist.photo_url || "/placeholder.svg",
-            rating: 4.8, // Sample rating
-            verified: true, // Sample verification status
-          };
-        }));
-        
-        setSpecialists(specialistsWithData);
-        setFilteredSpecialists(specialistsWithData);
+          setSpecialists(transformedData);
+          setFilteredSpecialists(transformedData);
+        }
       } catch (error) {
         console.error('Error fetching specialists:', error);
         // Fallback to empty array
@@ -107,7 +95,8 @@ const Catalog = () => {
       filtered = filtered.filter(
         specialist =>
           specialist.name.toLowerCase().includes(term) ||
-          specialist.title.toLowerCase().includes(term)
+          specialist.title.toLowerCase().includes(term) ||
+          specialist.specializations.some(spec => spec.toLowerCase().includes(term))
       );
     }
 
@@ -119,12 +108,13 @@ const Catalog = () => {
       );
     }
 
-    // Filter by specializations using IDs
+    // Filter by specializations
     if (filters.specializations && filters.specializations.length > 0) {
       filtered = filtered.filter(specialist =>
-        // Make sure specialist.specializations is an array and check if it contains any of the selected IDs
-        Array.isArray(specialist.specializations) && specialist.specializations.some(specId =>
-          filters.specializations.includes(specId)
+        specialist.specializations.some(spec =>
+          filters.specializations.some((filterSpec: string) =>
+            spec.toLowerCase().includes(filterSpec.toLowerCase())
+          )
         )
       );
     }
@@ -188,6 +178,6 @@ const Catalog = () => {
       </div>
     </MainLayout>
   );
-}
+};
 
 export default Catalog;
