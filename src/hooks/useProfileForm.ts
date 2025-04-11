@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialMediaLinks } from "@/types";
+import { useSpecialistSpecializationsManager } from "@/data/specializations";
 
 export function useProfileForm() {
   const { toast } = useToast();
@@ -121,7 +122,11 @@ export function useProfileForm() {
   };
 
   // Process form data for saving to database
-  const processFormData = (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
+  const processFormData = async (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+    
     // Filter out empty strings from services and education
     const cleanedServices = services.filter(service => service.trim() !== "");
     const cleanedEducation = education.filter(edu => edu.trim() !== "");
@@ -135,13 +140,23 @@ export function useProfileForm() {
         }
       });
     }
+
+    // Get specializations manager
+    const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
     
-    // Create the payload
+    // Save specializations to the junction table
+    if (formData.specializations && formData.specializations.length > 0) {
+      const { success, error } = await saveSpecializations(formData.specializations);
+      if (!success) {
+        console.error("Error saving specializations:", error);
+      }
+    }
+    
+    // Create the payload without specializations (they're now in the junction table)
     return {
       id: userId,
       title: formData.title,
       description: formData.description,
-      specializations: formData.specializations,
       services: cleanedServices,
       education: cleanedEducation,
       experience: formData.experience,

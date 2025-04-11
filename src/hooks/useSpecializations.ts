@@ -40,3 +40,53 @@ export const useSpecializations = () => {
 
   return { specializations, isLoading, error };
 };
+
+// New hook to fetch specialist's specializations from the junction table
+export const useSpecialistSpecializations = (specialistId: string | undefined) => {
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [specializationIds, setSpecializationIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSpecialistSpecializations = async () => {
+      if (!specialistId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        
+        // Get the specializations related to this specialist via the junction table
+        const { data, error } = await supabase
+          .from('specialist_specializations')
+          .select(`
+            specialization_id,
+            specializations:specialization_id (
+              id, code, name, description
+            )
+          `)
+          .eq('specialist_id', specialistId);
+          
+        if (error) throw error;
+        
+        // Extract specialization objects and their IDs
+        const specs = data?.map(item => item.specializations) || [];
+        const specIds = specs.map(spec => spec.id);
+        
+        setSpecializations(specs);
+        setSpecializationIds(specIds);
+      } catch (err) {
+        console.error('Error fetching specialist specializations:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSpecialistSpecializations();
+  }, [specialistId]);
+
+  return { specializations, specializationIds, isLoading, error };
+};

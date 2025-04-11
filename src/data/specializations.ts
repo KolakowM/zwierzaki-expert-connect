@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useSpecializations, Specialization } from '@/hooks/useSpecializations';
+import { useSpecializations, Specialization, useSpecialistSpecializations } from '@/hooks/useSpecializations';
 
 // Legacy specializations data structure (fallback)
 const FALLBACK_SPECIALIZATIONS = [
@@ -55,7 +55,7 @@ export function getSpecializationLabel(code: string): string {
   return specializationsCache.get(code) || code;
 }
 
-// Function to get specialization code by label
+// Function to get specialization ID by code
 export function getSpecializationId(label: string): string | undefined {
   if (!specializationsCache) {
     // If cache is not initialized, use fallback
@@ -83,7 +83,7 @@ export function mapSpecializationLabelsToIds(labels: string[]): string[] {
     .filter((id): id is string => id !== undefined);
 }
 
-// Hook to use specializations data
+// Updated hook to use specializations data
 export function useSpecializationsData() {
   const { specializations, isLoading, error } = useSpecializations();
   
@@ -105,5 +105,62 @@ export function useSpecializationsData() {
     })),
     isLoading,
     error
+  };
+}
+
+// New hook to manage specialist specializations
+export function useSpecialistSpecializationsManager(specialistId?: string) {
+  const { specializations, isLoading: isLoadingAll } = useSpecializations();
+  const { 
+    specializations: specialistSpecializations, 
+    specializationIds,
+    isLoading: isLoadingSpecialist, 
+    error 
+  } = useSpecialistSpecializations(specialistId);
+
+  // Function to save specializations for a specialist
+  const saveSpecializations = async (selectedIds: string[]) => {
+    if (!specialistId) return { success: false, error: 'No specialist ID provided' };
+    
+    try {
+      // First, remove all existing specializations for this specialist
+      const { error: deleteError } = await supabase
+        .from('specialist_specializations')
+        .delete()
+        .eq('specialist_id', specialistId);
+      
+      if (deleteError) throw deleteError;
+      
+      // Then, insert the new selected specializations
+      if (selectedIds.length > 0) {
+        const newSpecializations = selectedIds.map(specId => ({
+          specialist_id: specialistId,
+          specialization_id: specId
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('specialist_specializations')
+          .insert(newSpecializations);
+        
+        if (insertError) throw insertError;
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving specializations:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  };
+  
+  return {
+    allSpecializations: specializations,
+    specialistSpecializations,
+    selectedSpecializationIds: specializationIds,
+    isLoading: isLoadingAll || isLoadingSpecialist,
+    error,
+    saveSpecializations
   };
 }

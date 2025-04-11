@@ -7,6 +7,7 @@ import { ProfileFormValues, profileFormSchema } from "@/components/profile/Speci
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SocialMediaLinks } from "@/types";
+import { useSpecialistSpecializations } from "@/hooks/useSpecializations";
 
 export const useSpecialistProfile = (initialProfileData: any = null) => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ export const useSpecialistProfile = (initialProfileData: any = null) => {
   const [initialData, setInitialData] = useState<any>(initialProfileData);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const { specializationIds } = useSpecialistSpecializations(userId);
   
   // Create form with zod validation
   const form = useForm<ProfileFormValues>({
@@ -92,6 +94,13 @@ export const useSpecialistProfile = (initialProfileData: any = null) => {
     fetchProfile();
   }, [userId, user?.email, form, toast, initialProfileData]);
 
+  // Update form when specialization IDs are loaded
+  useEffect(() => {
+    if (specializationIds.length > 0) {
+      form.setValue('specializations', specializationIds);
+    }
+  }, [specializationIds, form]);
+
   const populateFormWithProfileData = (profileData: any, userEmail?: string) => {
     // Initialize a default empty social media object
     const socialMediaDefault: SocialMediaLinks = {
@@ -123,7 +132,7 @@ export const useSpecialistProfile = (initialProfileData: any = null) => {
     form.reset({
       title: profileData.title || "",
       description: profileData.description || "",
-      specializations: profileData.specializations || [],
+      specializations: [], // We'll load this separately from the junction table
       services: profileData.services || [],
       education: profileData.education || [],
       experience: profileData.experience || "",

@@ -54,6 +54,30 @@ export function useSpecialistSettingsTab(
         throw error;
       }
       
+      // Save specializations
+      if (values.specializations && values.specializations.length > 0) {
+        // First, delete existing specializations
+        await supabase
+          .from('specialist_specializations')
+          .delete()
+          .eq('specialist_id', userId);
+          
+        // Then, insert new specializations
+        const specInserts = values.specializations.map(specId => ({
+          specialist_id: userId,
+          specialization_id: specId
+        }));
+        
+        const { error: specError } = await supabase
+          .from('specialist_specializations')
+          .insert(specInserts);
+          
+        if (specError) {
+          console.error("Error saving specializations:", specError);
+          throw specError;
+        }
+      }
+      
       toast({
         title: "Profil zaktualizowany",
         description: "Twój profil specjalisty został pomyślnie zaktualizowany."

@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Camera } from "lucide-react";
-import { mapSpecializationIdsToLabels } from "@/data/specializations";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Specialization } from "@/hooks/useSpecializations";
 
 export interface Specialist {
   id: string;
@@ -22,11 +24,38 @@ interface SpecialistCardProps {
 }
 
 export function SpecialistCard({ specialist }: SpecialistCardProps) {
-  // Ensure specializations is an array before mapping
-  const specializations = Array.isArray(specialist.specializations) ? specialist.specializations : [];
-  
-  // Map IDs to labels for display
-  const specializationLabels = mapSpecializationIdsToLabels(specializations);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch specialization names for this specialist
+  useEffect(() => {
+    const fetchSpecializations = async () => {
+      try {
+        setLoading(true);
+        
+        if (!specialist.specializations || specialist.specializations.length === 0) {
+          setSpecializations([]);
+          return;
+        }
+        
+        // Fetch specialization details for the IDs we have
+        const { data, error } = await supabase
+          .from('specializations')
+          .select('*')
+          .in('id', specialist.specializations);
+          
+        if (error) throw error;
+        
+        setSpecializations(data || []);
+      } catch (err) {
+        console.error('Error fetching specializations:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSpecializations();
+  }, [specialist.specializations]);
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
@@ -59,16 +88,18 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
           {specialist.title}
         </CardDescription>
         <div className="mb-3 flex flex-wrap gap-1">
-          {specializationLabels.length > 0 ? (
+          {loading ? (
+            <Badge variant="outline" className="text-xs">Ładowanie...</Badge>
+          ) : specializations.length > 0 ? (
             <>
-              {specializationLabels.slice(0, 3).map((spec) => (
-                <Badge key={spec} variant="secondary" className="text-xs">
-                  {spec}
+              {specializations.slice(0, 3).map((spec) => (
+                <Badge key={spec.id} variant="secondary" className="text-xs">
+                  {spec.name}
                 </Badge>
               ))}
-              {specializationLabels.length > 3 && (
+              {specializations.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{specializationLabels.length - 3}
+                  +{specializations.length - 3}
                 </Badge>
               )}
             </>

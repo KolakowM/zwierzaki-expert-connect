@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
-import { getSpecializationLabel } from "@/data/specializations";
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,52 +21,61 @@ const Catalog = () => {
         setLoading(true);
         console.log('Fetching specialists from database');
         
+        // Get all specialist profiles
         const { data, error } = await supabase
           .from('specialist_profiles')
           .select('*');
           
         if (error) throw error;
         
-        if (data) {
-          console.log('Fetched specialists:', data);
-          
-          // Transform data to match Specialist interface
-          const transformedData: Specialist[] = await Promise.all(data.map(async (item: any) => {
-            // Try to get user's name from user_profiles
-            let name = "Specjalista";
-            try {
-              const { data: userData } = await supabase
-                .from('user_profiles')
-                .select('first_name, last_name')
-                .eq('id', item.id)
-                .maybeSingle();
-                
-              if (userData) {
-                name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-                if (!name) name = "Specjalista";
-              }
-            } catch (e) {
-              console.error('Error fetching user profile:', e);
+        // For each specialist, fetch their specializations
+        const specialistsWithData = await Promise.all((data || []).map(async (specialist: any) => {
+          // Try to get user's name from user_profiles
+          let name = "Specjalista";
+          try {
+            const { data: userData } = await supabase
+              .from('user_profiles')
+              .select('first_name, last_name')
+              .eq('id', specialist.id)
+              .maybeSingle();
+              
+            if (userData) {
+              name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+              if (!name) name = "Specjalista";
             }
-            
-            // Ensure specializations is always an array
-            const specializations = Array.isArray(item.specializations) ? item.specializations : [];
-            
-            return {
-              id: item.id,
-              name: name,
-              title: item.title || "Specjalista",
-              specializations: specializations,
-              location: item.location || "Polska",
-              image: item.photo_url || "/placeholder.svg",
-              rating: 4.8, // Sample rating
-              verified: true, // Sample verification status
-            };
-          }));
+          } catch (e) {
+            console.error('Error fetching user profile:', e);
+          }
           
-          setSpecialists(transformedData);
-          setFilteredSpecialists(transformedData);
-        }
+          // Fetch specializations for this specialist
+          let specializations: string[] = [];
+          try {
+            const { data: specData } = await supabase
+              .from('specialist_specializations')
+              .select('specialization_id')
+              .eq('specialist_id', specialist.id);
+              
+            if (specData && specData.length > 0) {
+              specializations = specData.map(item => item.specialization_id);
+            }
+          } catch (e) {
+            console.error('Error fetching specializations:', e);
+          }
+          
+          return {
+            id: specialist.id,
+            name: name,
+            title: specialist.title || "Specjalista",
+            specializations: specializations,
+            location: specialist.location || "Polska",
+            image: specialist.photo_url || "/placeholder.svg",
+            rating: 4.8, // Sample rating
+            verified: true, // Sample verification status
+          };
+        }));
+        
+        setSpecialists(specialistsWithData);
+        setFilteredSpecialists(specialistsWithData);
       } catch (error) {
         console.error('Error fetching specialists:', error);
         // Fallback to empty array
@@ -99,12 +107,7 @@ const Catalog = () => {
       filtered = filtered.filter(
         specialist =>
           specialist.name.toLowerCase().includes(term) ||
-          specialist.title.toLowerCase().includes(term) ||
-          // Check both specialization IDs and their labels
-          (Array.isArray(specialist.specializations) && specialist.specializations.some(specId => {
-            const label = getSpecializationLabel(specId);
-            return specId.toLowerCase().includes(term) || label.toLowerCase().includes(term);
-          }))
+          specialist.title.toLowerCase().includes(term)
       );
     }
 
@@ -185,6 +188,6 @@ const Catalog = () => {
       </div>
     </MainLayout>
   );
-};
+}
 
 export default Catalog;
