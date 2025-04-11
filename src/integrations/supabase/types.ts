@@ -208,6 +208,66 @@ export type Database = {
         }
         Relationships: []
       }
+      specialist_specializations: {
+        Row: {
+          created_at: string
+          id: string
+          specialist_id: string
+          specialization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          specialist_id: string
+          specialization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          specialist_id?: string
+          specialization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialist_specializations_specialist_id_fkey"
+            columns: ["specialist_id"]
+            isOneToOne: false
+            referencedRelation: "specialist_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "specialist_specializations_specialization_id_fkey"
+            columns: ["specialization_id"]
+            isOneToOne: false
+            referencedRelation: "specializations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specializations: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           city: string | null

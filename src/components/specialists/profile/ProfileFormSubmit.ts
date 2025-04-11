@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
 import { UseFormReturn } from "react-hook-form";
+import { useSpecialistSpecializationsManager } from "@/data/specializations";
 
 interface UseProfileFormSubmitProps {
   form: UseFormReturn<ProfileFormValues>;
@@ -36,6 +37,7 @@ export const useProfileFormSubmit = ({
 }: UseProfileFormSubmitProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
 
   // Submit form handler
   const onSubmit = async (values: ProfileFormValues) => {
@@ -74,6 +76,17 @@ export const useProfileFormSubmit = ({
         .select();
         
       if (error) throw error;
+      
+      // Save specializations if we're on the specializations tab
+      if (values.specializations && activeTab === "specializations") {
+        console.log('Saving specializations:', values.specializations);
+        const { success, error: specError } = await saveSpecializations(values.specializations);
+        
+        if (!success) {
+          console.error('Error saving specializations:', specError);
+          throw new Error(specError || 'Error saving specializations');
+        }
+      }
       
       // Show success notification
       setSaveSuccess(true);

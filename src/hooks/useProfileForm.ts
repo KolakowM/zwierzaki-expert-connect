@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { SocialMediaLinks } from "@/types";
 
 export function useProfileForm() {
   const { toast } = useToast();
@@ -13,10 +12,13 @@ export function useProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Load existing profile data (to be implemented in a future feature)
   useEffect(() => {
-    // Load existing profile data and set initial states
-  }, []);
+    console.log('useProfileForm - current state:', {
+      services,
+      education,
+      photoUrl
+    });
+  }, [services, education, photoUrl]);
 
   // Upload photo to Supabase storage
   const uploadProfilePhoto = async (userId: string): Promise<string | null> => {
@@ -73,44 +75,74 @@ export function useProfileForm() {
 
   // Add a new service input field
   const addService = () => {
-    setServices([...services, ""]);
+    console.log("Adding new service, current services:", services);
+    setServices(prevServices => [...prevServices, ""]);
   };
 
   // Update a service at specific index
   const updateService = (index: number, value: string) => {
-    const updatedServices = [...services];
-    updatedServices[index] = value;
-    setServices(updatedServices);
-    return updatedServices.filter(service => service.trim() !== "");
+    console.log(`Updating service at index ${index} with value:`, value);
+    setServices(prevServices => {
+      const updated = [...prevServices];
+      if (index >= updated.length) {
+        // If index is out of bounds, add new entries
+        while (updated.length <= index) {
+          updated.push("");
+        }
+      }
+      updated[index] = value;
+      return updated;
+    });
   };
 
   // Remove a service at specific index
   const removeService = (index: number) => {
-    const updatedServices = [...services];
-    updatedServices.splice(index, 1);
-    setServices(updatedServices);
-    return updatedServices.filter(service => service.trim() !== "");
+    console.log(`Removing service at index ${index}`);
+    setServices(prevServices => {
+      const updated = [...prevServices];
+      updated.splice(index, 1);
+      // Always ensure at least one field
+      if (updated.length === 0) {
+        updated.push("");
+      }
+      return updated;
+    });
   };
 
   // Add a new education input field
   const addEducation = () => {
-    setEducation([...education, ""]);
+    console.log("Adding new education, current education:", education);
+    setEducation(prevEducation => [...prevEducation, ""]);
   };
 
   // Update education at specific index
   const updateEducation = (index: number, value: string) => {
-    const updatedEducation = [...education];
-    updatedEducation[index] = value;
-    setEducation(updatedEducation);
-    return updatedEducation.filter(item => item.trim() !== "");
+    console.log(`Updating education at index ${index} with value:`, value);
+    setEducation(prevEducation => {
+      const updated = [...prevEducation];
+      if (index >= updated.length) {
+        // If index is out of bounds, add new entries
+        while (updated.length <= index) {
+          updated.push("");
+        }
+      }
+      updated[index] = value;
+      return updated;
+    });
   };
 
   // Remove education at specific index
   const removeEducation = (index: number) => {
-    const updatedEducation = [...education];
-    updatedEducation.splice(index, 1);
-    setEducation(updatedEducation);
-    return updatedEducation.filter(item => item.trim() !== "");
+    console.log(`Removing education at index ${index}`);
+    setEducation(prevEducation => {
+      const updated = [...prevEducation];
+      updated.splice(index, 1);
+      // Always ensure at least one field
+      if (updated.length === 0) {
+        updated.push("");
+      }
+      return updated;
+    });
   };
 
   // Handle photo change
@@ -122,6 +154,14 @@ export function useProfileForm() {
 
   // Process form data for saving to database
   const processFormData = (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+    
+    console.log("Processing form data:", formData);
+    console.log("Current services:", services);
+    console.log("Current education:", education);
+    
     // Filter out empty strings from services and education
     const cleanedServices = services.filter(service => service.trim() !== "");
     const cleanedEducation = education.filter(edu => edu.trim() !== "");
@@ -136,12 +176,11 @@ export function useProfileForm() {
       });
     }
     
-    // Create the payload
+    // Create the payload without specializations (they're now in the junction table)
     return {
       id: userId,
       title: formData.title,
       description: formData.description,
-      specializations: formData.specializations,
       services: cleanedServices,
       education: cleanedEducation,
       experience: formData.experience,
