@@ -8,46 +8,48 @@ import { Link } from "react-router-dom";
 export default function Pricing() {
   const tiers = [
     {
-      name: "Podstawowy",
+      name: "Testowy",
       price: "0 zł",
       description: "Dla rozpoczynających działalność",
       features: [
-        "Katalog specjalisty",
-        "Podstawowy profil",
-        "Do 10 klientów",
-        "Do 15 pacjentów",
-        "Kalendarz podstawowy"
+        "Miejsce w katalogu specjalistów",
+        <del>"Podstawowy profil"</del>,
+        "Do 5 klientów",
+        "Do 10 zwierząt",
+        "Pomoc mailowa",
+        <del>"Kalendarz podstawowy"</del>
       ],
       cta: "Rozpocznij za darmo",
       popular: false
     },
     {
-      name: "Profesjonalny",
-      price: "99 zł / miesiąc",
+      name: "Zaawansowany",
+      price: "29 zł / miesiąc",
       description: "Dla rozwijających się praktyk",
       features: [
-        "Wszystko z planu Podstawowego",
-        "Nieograniczeni klienci",
-        "Nieograniczeni pacjenci",
-        "Dokumenty i załączniki",
+        "Miejsce w katalogu specjalistów",
+        "Do 15 klientów",
+        "Do 30 zwierząt",
+        "Piorytetowa pomoc",
+        <del>"Dokumenty i załączniki",
         "Automatyczne powiadomienia",
         "Historia leczenia",
-        "Eksport danych"
+        "Eksport danych"</del>
       ],
       cta: "Wybierz plan",
       popular: true
     },
     {
-      name: "Klinika",
-      price: "199 zł / miesiąc",
-      description: "Dla klinik i większych praktyk",
+      name: "Zawodowiec",
+      price: "99 zł / miesiąc",
+      description: "Dla większych praktyków pracy z zwierzętami",
       features: [
-        "Wszystko z planu Profesjonalnego",
-        "Wielu specjalistów",
-        "Panel administracyjny",
-        "Analityka i raporty",
+        "Specjalnie miejsce w katalogu specjalistów",
+        "Nieograniczeni klienci",
+        "Nieograniczona liczba zwierząt",
+        <del>"Analityka i raporty",
         "Płatności online",
-        "Integracja z zewnętrznymi systemami",
+        "Integracja z zewnętrznymi systemami",</del>
         "Dedykowane wsparcie"
       ],
       cta: "Skontaktuj się",
