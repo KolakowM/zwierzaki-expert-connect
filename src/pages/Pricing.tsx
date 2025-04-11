@@ -52,7 +52,7 @@ export default function Pricing() {
         "Integracja z zewnętrznymi systemami",
         "Dedykowane wsparcie"</del>
       ],
-      cta: "Skontaktuj się",
+      cta: "Wybierz plan",
       popular: false
     }
   ];
