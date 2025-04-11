@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { specializations } from "@/data/specializations";
+import { useSpecializationsData } from "@/data/specializations";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: any) => void;
@@ -13,6 +14,7 @@ interface CatalogFilterProps {
 export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [location, setLocation] = useState("");
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const { specializations, isLoading, error } = useSpecializationsData();
 
   const handleSpecializationChange = (id: string) => {
     setSelectedSpecializations(prev => {
@@ -54,21 +56,33 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
           <div className="space-y-3">
             <Label>Specjalizacje</Label>
             <div className="space-y-2">
-              {specializations.map((specialization) => (
-                <div className="flex items-center space-x-2" key={specialization.id}>
-                  <Checkbox 
-                    id={specialization.id} 
-                    checked={selectedSpecializations.includes(specialization.id)}
-                    onCheckedChange={() => handleSpecializationChange(specialization.id)}
-                  />
-                  <label
-                    htmlFor={specialization.id}
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {specialization.label}
-                  </label>
-                </div>
-              ))}
+              {isLoading ? (
+                // Show loading skeletons while data is being fetched
+                Array.from({ length: 5 }).map((_, index) => (
+                  <div className="flex items-center space-x-2" key={index}>
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                ))
+              ) : error ? (
+                <p className="text-sm text-destructive">Error loading specializations</p>
+              ) : (
+                specializations.map((specialization) => (
+                  <div className="flex items-center space-x-2" key={specialization.id}>
+                    <Checkbox 
+                      id={specialization.id} 
+                      checked={selectedSpecializations.includes(specialization.id)}
+                      onCheckedChange={() => handleSpecializationChange(specialization.id)}
+                    />
+                    <label
+                      htmlFor={specialization.id}
+                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {specialization.label}
+                    </label>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
