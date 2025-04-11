@@ -122,7 +122,7 @@ export function useProfileForm() {
   };
 
   // Process form data for saving to database
-  const processFormData = async (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
+  const processFormData = (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
     if (!userId) {
       throw new Error("User ID is required");
     }
@@ -139,17 +139,6 @@ export function useProfileForm() {
           socialMedia[key] = value.trim();
         }
       });
-    }
-
-    // Get specializations manager
-    const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
-    
-    // Save specializations to the junction table
-    if (formData.specializations && formData.specializations.length > 0) {
-      const { success, error } = await saveSpecializations(formData.specializations);
-      if (!success) {
-        console.error("Error saving specializations:", error);
-      }
     }
     
     // Create the payload without specializations (they're now in the junction table)

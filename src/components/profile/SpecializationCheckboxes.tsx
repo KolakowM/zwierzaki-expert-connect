@@ -5,7 +5,6 @@ import { UseFormReturn } from "react-hook-form";
 import { useSpecializationsData, useSpecialistSpecializationsManager } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 
 interface SpecializationCheckboxesProps {
@@ -23,6 +22,7 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
   // Set the initial form values when specializations are loaded
   useEffect(() => {
     if (!isLoadingSpecialist && selectedSpecializationIds.length > 0) {
+      console.log('Setting initial specializations:', selectedSpecializationIds);
       form.setValue('specializations', selectedSpecializationIds);
     }
   }, [selectedSpecializationIds, isLoadingSpecialist, form]);

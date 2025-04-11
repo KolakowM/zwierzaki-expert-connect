@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
+import { useSpecialistSpecializationsManager } from "@/data/specializations";
 
 export function useSpecialistSettingsTab(
   userId: string | undefined,
@@ -15,6 +16,7 @@ export function useSpecialistSettingsTab(
 ) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
 
   async function onProfileSubmit(values: ProfileFormValues) {
     if (!userId) {
@@ -56,25 +58,12 @@ export function useSpecialistSettingsTab(
       
       // Save specializations
       if (values.specializations && values.specializations.length > 0) {
-        // First, delete existing specializations
-        await supabase
-          .from('specialist_specializations')
-          .delete()
-          .eq('specialist_id', userId);
-          
-        // Then, insert new specializations
-        const specInserts = values.specializations.map(specId => ({
-          specialist_id: userId,
-          specialization_id: specId
-        }));
+        console.log('Saving specializations:', values.specializations);
+        const { success, error: specError } = await saveSpecializations(values.specializations);
         
-        const { error: specError } = await supabase
-          .from('specialist_specializations')
-          .insert(specInserts);
-          
-        if (specError) {
+        if (!success) {
           console.error("Error saving specializations:", specError);
-          throw specError;
+          throw new Error(specError || "Error saving specializations");
         }
       }
       
