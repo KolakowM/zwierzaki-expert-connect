@@ -50,7 +50,7 @@ export default function Pricing() {
         <del>"Analityka i raporty",
         "Płatności online",
         "Integracja z zewnętrznymi systemami",</del>
-        "Dedykowane wsparcie"
+        "Dedykowane wsparcie",
       ],
       cta: "Skontaktuj się",
       popular: false
