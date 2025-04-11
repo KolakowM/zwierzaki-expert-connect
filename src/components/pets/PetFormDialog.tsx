@@ -130,9 +130,7 @@ const PetFormDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {children ? (
-          children
-        ) : (
+        {children || (
           <Button variant={buttonVariant} size={buttonSize} className={className}>
             {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Dog className="mr-2 h-4 w-4" />}
             {buttonText}

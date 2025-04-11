@@ -157,7 +157,9 @@ const AdminPets = () => {
               buttonVariant="default"
               onPetSaved={handlePetSaved}
             >
-              <PlusCircle className="mr-2 h-4 w-4" /> Dodaj Zwierzę
+              <Button variant="default">
+                <PlusCircle className="mr-2 h-4 w-4" /> Dodaj Zwierzę
+              </Button>
             </ResponsivePetForm>
           )}
         </div>
@@ -246,14 +248,15 @@ const AdminPets = () => {
                         </Button>
                         <ResponsivePetForm
                           clientId={pet.clientId}
-                          buttonText=""
                           buttonVariant="ghost"
                           buttonSize="icon"
                           defaultValues={pet}
                           isEditing={true}
                           onPetSaved={handlePetSaved}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Button variant="ghost" size="icon">
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </ResponsivePetForm>
                         <DeletePetButton pet={pet} />
                       </div>
