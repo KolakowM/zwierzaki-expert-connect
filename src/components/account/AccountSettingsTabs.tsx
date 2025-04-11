@@ -35,7 +35,7 @@ interface AccountSettingsTabsProps {
   addService: () => void;
   updateEducation: (index: number, value: string) => void;
   removeEducation: (index: number) => void;
-  addEducation: (index: number) => void;
+  addEducation: () => void; // Changed from addEducation: (index: number) => void to addEducation: () => void
   onPhotoChange: (url: string | null, file: File | null) => void;
 }
 
