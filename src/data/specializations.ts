@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useSpecializations, Specialization, useSpecialistSpecializations } from '@/hooks/useSpecializations';
+import { supabase } from '@/integrations/supabase/client';
 
 // Legacy specializations data structure (fallback)
 const FALLBACK_SPECIALIZATIONS = [
