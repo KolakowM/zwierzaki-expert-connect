@@ -4,21 +4,37 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ReactNode } from "react";
 
 export default function Pricing() {
-  const tiers = [
+  // Explicitly define the feature type to handle both strings and JSX elements
+  type Feature = {
+    id: string;
+    content: ReactNode;
+  };
+
+  type PricingTier = {
+    name: string;
+    price: string;
+    description: string;
+    features: Feature[];
+    cta: string;
+    popular: boolean;
+  };
+
+  const tiers: PricingTier[] = [
     {
       name: "Testowy",
       price: "0 zł",
       description: "Dla rozpoczynających działalność",
       features: [
-        "Miejsce w katalogu specjalistów",
-        "Możliwość wskazania 1 specjalizacji zawodowych ",
-        <del>"Podstawowy profil"</del>,
-        "Do 5 klientów",
-        "Do 10 zwierząt",
-        "Pomoc mailowa",
-        <del>"Kalendarz podstawowy"</del>
+        { id: "t1", content: "Miejsce w katalogu specjalistów" },
+        { id: "t2", content: "Możliwość wskazania 1 specjalizacji zawodowych " },
+        { id: "t3", content: <del>"Podstawowy profil"</del> },
+        { id: "t4", content: "Do 5 klientów" },
+        { id: "t5", content: "Do 10 zwierząt" },
+        { id: "t6", content: "Pomoc mailowa" },
+        { id: "t7", content: <del>"Kalendarz podstawowy"</del> }
       ],
       cta: "Rozpocznij za darmo",
       popular: false
@@ -28,15 +44,15 @@ export default function Pricing() {
       price: "29 zł / miesiąc",
       description: "Dla rozwijających się praktyk",
       features: [
-        "Miejsce w katalogu specjalistów",
-        "Możliwość wskazania 3 specjalizacji zawodowych ",
-        "Do 15 klientów",
-        "Do 30 zwierząt",
-        "Piorytetowa pomoc",
-        <del>"Dokumenty i załączniki",
-        "Automatyczne powiadomienia",
-        "Historia leczenia",
-        "Eksport danych"</del>
+        { id: "a1", content: "Miejsce w katalogu specjalistów" },
+        { id: "a2", content: "Możliwość wskazania 3 specjalizacji zawodowych " },
+        { id: "a3", content: "Do 15 klientów" },
+        { id: "a4", content: "Do 30 zwierząt" },
+        { id: "a5", content: "Piorytetowa pomoc" },
+        { id: "a6", content: <del>"Dokumenty i załączniki"</del> },
+        { id: "a7", content: <del>"Automatyczne powiadomienia"</del> },
+        { id: "a8", content: <del>"Historia leczenia"</del> },
+        { id: "a9", content: <del>"Eksport danych"</del> }
       ],
       cta: "Wybierz plan",
       popular: true
@@ -46,14 +62,14 @@ export default function Pricing() {
       price: "49 zł / miesiąc",
       description: "Dla większych praktyków pracy z zwierzętami",
       features: [
-        "Miejsce w katalogu specjalistów",
-        "Możliwość wskazania 5 specjalizacji zawodowych ",
-        "Nieograniczeni klienci",
-        "Nieograniczona liczba zwierząt",
-        <del>"Analityka i raporty",
-        "Płatności online",
-        "Integracja z zewnętrznymi systemami",
-        "Dedykowane wsparcie"</del>
+        { id: "p1", content: "Miejsce w katalogu specjalistów" },
+        { id: "p2", content: "Możliwość wskazania 5 specjalizacji zawodowych " },
+        { id: "p3", content: "Nieograniczeni klienci" },
+        { id: "p4", content: "Nieograniczona liczba zwierząt" },
+        { id: "p5", content: <del>"Analityka i raporty"</del> },
+        { id: "p6", content: <del>"Płatności online"</del> },
+        { id: "p7", content: <del>"Integracja z zewnętrznymi systemami"</del> },
+        { id: "p8", content: <del>"Dedykowane wsparcie"</del> }
       ],
       cta: "Wybierz plan",
       popular: false
@@ -92,9 +108,9 @@ export default function Pricing() {
                 <CardContent>
                   <ul className="space-y-3">
                     {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-center">
+                      <li key={feature.id} className="flex items-center">
                         <Check className="mr-2 h-4 w-4 text-primary" />
-                        <span>{feature}</span>
+                        <span>{feature.content}</span>
                       </li>
                     ))}
                   </ul>
