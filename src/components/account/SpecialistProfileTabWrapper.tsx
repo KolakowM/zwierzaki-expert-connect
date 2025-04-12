@@ -47,7 +47,7 @@ export function SpecialistProfileTabWrapper({
   
   // Log each time component renders with its data - ONLY when relevant props change
   useEffect(() => {
-    const currentProps = { specialistActiveTab, services, education, photoUrl, isLoading: isLoadingProfile };
+    const currentProps = { specialistActiveTab, services, education, photoUrl, isLoadingProfile };
     const prevProps = prevPropsRef.current;
     
     const hasChanged = 
