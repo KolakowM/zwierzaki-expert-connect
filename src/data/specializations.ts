@@ -31,6 +31,18 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
     try {
       console.log('Saving specializations with IDs:', selectedIds);
       
+      // Validate that all IDs are valid UUIDs before proceeding
+      const validUUIDs = selectedIds.filter(id => {
+        // Simple UUID format validation
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      });
+      
+      if (validUUIDs.length !== selectedIds.length) {
+        console.error('Invalid specialization IDs detected:', 
+          selectedIds.filter(id => !validUUIDs.includes(id)));
+        return { success: false, error: 'Invalid specialization IDs detected' };
+      }
+      
       // First, remove all existing specializations for this specialist
       const { error: deleteError } = await supabase
         .from('specialist_specializations')
@@ -40,8 +52,8 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
       if (deleteError) throw deleteError;
       
       // Then, insert the new selected specializations
-      if (selectedIds.length > 0) {
-        const newSpecializations = selectedIds.map(specId => ({
+      if (validUUIDs.length > 0) {
+        const newSpecializations = validUUIDs.map(specId => ({
           specialist_id: specialistId,
           specialization_id: specId
         }));
