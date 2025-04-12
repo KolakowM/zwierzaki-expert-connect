@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
 
 interface UserMenuProps {
   firstName: string | undefined;
@@ -21,9 +22,20 @@ interface UserMenuProps {
 }
 
 const UserMenu = ({ firstName, lastName, onLogout, photoUrl }: UserMenuProps) => {
-  const initials = 
-    (firstName?.charAt(0) || '') + 
-    (lastName?.charAt(0) || '');
+  const [displayName, setDisplayName] = useState<string>('');
+  const [initials, setInitials] = useState<string>('');
+  
+  // Update initials and display name when props change
+  useEffect(() => {
+    const firstInitial = firstName?.charAt(0) || '';
+    const lastInitial = lastName?.charAt(0) || '';
+    setInitials(firstInitial + lastInitial);
+    
+    const name = `${firstName || ''} ${lastName || ''}`.trim();
+    setDisplayName(name || 'Użytkownik');
+    
+    console.log('UserMenu updated with:', { firstName, lastName, photoUrl, displayName: name, initials: firstInitial + lastInitial });
+  }, [firstName, lastName]);
 
   return (
     <NavigationMenu>
@@ -32,12 +44,12 @@ const UserMenu = ({ firstName, lastName, onLogout, photoUrl }: UserMenuProps) =>
           <NavigationMenuTrigger className="gap-2">
             <Avatar className="h-8 w-8">
               {photoUrl ? (
-                <AvatarImage src={photoUrl} alt={`${firstName} ${lastName}`} />
+                <AvatarImage src={photoUrl} alt={displayName} />
               ) : (
                 <AvatarFallback>{initials}</AvatarFallback>
               )}
             </Avatar>
-            <span>{firstName} {lastName}</span>
+            <span>{displayName}</span>
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[200px] gap-2 p-4">

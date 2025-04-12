@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Mail } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { PhoneDisplayInfo, LocationDisplayInfo } from "./ProfileDisplayInfo";
+import { useEffect } from "react";
 
 interface AccountGeneralTabProps {
   form: UseFormReturn<any>;
@@ -21,6 +22,15 @@ export function AccountGeneralTab({
   specialistProfile,
   isLoadingProfile
 }: AccountGeneralTabProps) {
+  
+  // For debugging - log when form values change
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      console.log("AccountGeneralTab - Form values changed:", value);
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   return (
     <Card>
       <CardHeader>

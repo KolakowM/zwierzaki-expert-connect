@@ -60,6 +60,7 @@ export function useAccountSettings() {
   // Load user data into the form when available
   useEffect(() => {
     if (user) {
+      console.log("Loading user data into account form:", user);
       accountForm.reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -79,6 +80,7 @@ export function useAccountSettings() {
           if (error) throw error;
           
           if (data) {
+            console.log("Loaded specialist profile:", data);
             setSpecialistProfile(data);
           }
         } catch (error) {
@@ -111,6 +113,7 @@ export function useAccountSettings() {
 
   // Form submission handlers
   async function onAccountSubmit(values: AccountFormValues) {
+    console.log("Submitting account form with values:", values);
     try {
       setIsSubmitting(true);
       
@@ -124,7 +127,10 @@ export function useAccountSettings() {
           updated_at: new Date().toISOString()
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
       
       // Refresh user data to show updated information
       await refreshUserData();

@@ -54,6 +54,14 @@ export function SpecialistProfileTabWrapper({
     });
   }, [specialistActiveTab, services, education, photoUrl, isLoadingProfile, profileForm]);
 
+  // Log form values when they change
+  useEffect(() => {
+    const subscription = profileForm.watch((value) => {
+      console.log("SpecialistProfileTabWrapper - profileForm values changed:", value);
+    });
+    return () => subscription.unsubscribe();
+  }, [profileForm]);
+
   // Ensure form submission is properly triggered
   const handleSubmit = (values: ProfileFormValues) => {
     console.log("SpecialistProfileTabWrapper - handleSubmit called with:", values);

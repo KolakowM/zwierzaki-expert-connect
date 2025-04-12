@@ -201,6 +201,8 @@ export function useProfileForm() {
     isSubmitting,
     isUploading,
     setIsSubmitting,
+    setServices,
+    setEducation,
     uploadProfilePhoto,
     addService,
     updateService,

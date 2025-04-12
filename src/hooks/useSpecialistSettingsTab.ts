@@ -56,8 +56,12 @@ export function useSpecialistSettingsTab(
         }
       }
       
-      // Create the payload to update
-      const profileData = processFormData(values, userId, photoUrlToSave);
+      // Create the payload to update with proper data from services and education arrays
+      const profileData = processFormData({
+        ...values,
+        services: services,
+        education: education
+      }, userId, photoUrlToSave);
       
       console.log('Saving profile data:', profileData);
       

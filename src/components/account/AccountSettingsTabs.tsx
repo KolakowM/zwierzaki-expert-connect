@@ -35,7 +35,7 @@ interface AccountSettingsTabsProps {
   addService: () => void;
   updateEducation: (index: number, value: string) => void;
   removeEducation: (index: number) => void;
-  addEducation: () => void; // Changed from addEducation: (index: number) => void to addEducation: () => void
+  addEducation: () => void;
   onPhotoChange: (url: string | null, file: File | null) => void;
 }
 
@@ -67,6 +67,9 @@ export function AccountSettingsTabs({
   addEducation,
   onPhotoChange
 }: AccountSettingsTabsProps) {
+  console.log("AccountSettingsTabs rendering with accountForm values:", accountForm.getValues());
+  console.log("Account form submission handler:", onAccountSubmit);
+  
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
       <TabsList className="grid w-full grid-cols-3">
