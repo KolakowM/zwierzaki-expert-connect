@@ -78,7 +78,7 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
                       htmlFor={specialization.id}
                       className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      {specialization.label}
+                      {specialization.name}
                     </label>
                   </div>
                 ))
