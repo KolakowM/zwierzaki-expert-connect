@@ -27,6 +27,7 @@ export const useSpecializations = () => {
         if (error) throw error;
         
         setSpecializations(data || []);
+        console.log('Fetched specializations:', data);
       } catch (err) {
         console.error('Error fetching specializations:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
@@ -41,7 +42,7 @@ export const useSpecializations = () => {
   return { specializations, isLoading, error };
 };
 
-// New hook to fetch specialist's specializations from the junction table
+// Hook to fetch specialist's specializations from the junction table
 export const useSpecialistSpecializations = (specialistId: string | undefined) => {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [specializationIds, setSpecializationIds] = useState<string[]>([]);
@@ -74,6 +75,9 @@ export const useSpecialistSpecializations = (specialistId: string | undefined) =
         // Extract specialization objects and their IDs
         const specs = data?.map(item => item.specializations) || [];
         const specIds = specs.map(spec => spec.id);
+        
+        console.log('Fetched specialist specializations:', specs);
+        console.log('Specialization IDs:', specIds);
         
         setSpecializations(specs);
         setSpecializationIds(specIds);

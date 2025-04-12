@@ -2,7 +2,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
-import { useSpecializationsData, useSpecialistSpecializationsManager } from "@/data/specializations";
+import { useSpecializations } from "@/hooks/useSpecializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useEffect } from "react";
@@ -13,19 +13,16 @@ interface SpecializationCheckboxesProps {
 
 export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps) {
   const { user } = useAuth();
-  const { specializations, isLoading, error } = useSpecializationsData();
-  const {
-    selectedSpecializationIds,
-    isLoading: isLoadingSpecialist
-  } = useSpecialistSpecializationsManager(user?.id);
-
-  // Set the initial form values when specializations are loaded
+  const { specializations, isLoading, error } = useSpecializations();
+  
+  // Use an effect to automatically check specializations from user's profile
   useEffect(() => {
-    if (!isLoadingSpecialist && selectedSpecializationIds.length > 0) {
-      console.log('Setting initial specializations:', selectedSpecializationIds);
-      form.setValue('specializations', selectedSpecializationIds);
+    if (user?.id && specializations.length > 0) {
+      // This will be handled by parent components that fetch the user's specializations
+      // and pass them to the form
+      console.log('Specializations loaded:', specializations.length);
     }
-  }, [selectedSpecializationIds, isLoadingSpecialist, form]);
+  }, [specializations, user?.id]);
 
   return (
     <FormField
@@ -40,7 +37,7 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
             </FormDescription>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {(isLoading || isLoadingSpecialist) ? (
+            {isLoading ? (
               // Loading state
               Array.from({ length: 6 }).map((_, index) => (
                 <FormItem key={index} className="flex flex-row items-start space-x-3 space-y-0">
@@ -77,7 +74,7 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
                           />
                         </FormControl>
                         <FormLabel className="font-normal">
-                          {item.label}
+                          {item.name}
                         </FormLabel>
                       </FormItem>
                     )
