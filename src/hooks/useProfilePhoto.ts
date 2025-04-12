@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,7 +10,7 @@ export function useProfilePhoto() {
   const [isUploading, setIsUploading] = useState(false);
 
   // Upload photo to Supabase storage
-  const uploadProfilePhoto = async (userId: string): Promise<string | null> => {
+  const uploadProfilePhoto = useCallback(async (userId: string): Promise<string | null> => {
     if (!photoFile || !userId) return null;
     
     setIsUploading(true);
@@ -60,14 +60,14 @@ export function useProfilePhoto() {
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [photoFile, toast]);
 
   // Handle photo change
-  const handlePhotoChange = (url: string | null, file: File | null) => {
+  const handlePhotoChange = useCallback((url: string | null, file: File | null) => {
     console.log('Photo changed:', { url, file });
     setPhotoUrl(url);
     setPhotoFile(file);
-  };
+  }, []);
 
   return {
     photoUrl,

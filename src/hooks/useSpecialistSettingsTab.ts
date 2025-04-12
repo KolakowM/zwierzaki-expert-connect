@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
@@ -17,19 +17,29 @@ export function useSpecialistSettingsTab(
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { saveSpecializations } = useSpecialistSpecializationsManager(userId);
+  const lastPropsRef = useRef({ userId, specialistProfile, photoUrl, services, education });
 
-  // Debug log current state
+  // Debug log current state ONLY when props change
   useEffect(() => {
-    console.log("useSpecialistSettingsTab - Current state:", {
-      userId,
-      photoUrl,
-      services,
-      education,
-      profileData: specialistProfile
-    });
+    // Check if any props have changed before logging
+    const currentProps = { userId, photoUrl, services, education, profileData: specialistProfile };
+    const prevProps = lastPropsRef.current;
+    
+    const hasChanged = 
+      prevProps.userId !== userId || 
+      prevProps.photoUrl !== photoUrl || 
+      prevProps.services !== services || 
+      prevProps.education !== education || 
+      prevProps.specialistProfile !== specialistProfile;
+      
+    if (hasChanged) {
+      console.log("useSpecialistSettingsTab - Current state:", currentProps);
+      lastPropsRef.current = { userId, specialistProfile, photoUrl, services, education };
+    }
   }, [userId, photoUrl, services, education, specialistProfile]);
 
-  async function onProfileSubmit(values: ProfileFormValues) {
+  // Memoize the submit function to prevent recreating it on every render
+  const onProfileSubmit = useCallback(async (values: ProfileFormValues) => {
     if (!userId) {
       toast({
         title: "Błąd",
@@ -59,8 +69,8 @@ export function useSpecialistSettingsTab(
       // Create the payload to update with proper data from services and education arrays
       const profileData = processFormData({
         ...values,
-        services: services,
-        education: education
+        services: services.filter(s => s.trim() !== ""),
+        education: education.filter(e => e.trim() !== "")
       }, userId, photoUrlToSave);
       
       console.log('Saving profile data:', profileData);
@@ -104,7 +114,7 @@ export function useSpecialistSettingsTab(
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [userId, specialistProfile, photoUrl, services, education, uploadProfilePhoto, processFormData, toast, saveSpecializations]);
 
   return {
     isSubmitting,

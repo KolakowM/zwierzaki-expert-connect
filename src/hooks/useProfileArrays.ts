@@ -5,6 +5,7 @@ export function useProfileArrays() {
   const [services, setServices] = useState<string[]>([""]);
   const [education, setEducation] = useState<string[]>([""]);
 
+  // Log state changes only when the arrays change
   useEffect(() => {
     console.log('useProfileArrays - current state:', {
       services,

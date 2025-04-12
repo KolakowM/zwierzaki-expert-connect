@@ -9,6 +9,7 @@ import { DeleteAccountDialog } from "@/components/account/DeleteAccountDialog";
 import { SpecialistProfileTabWrapper } from "@/components/account/SpecialistProfileTabWrapper";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
+import { useRef, useEffect } from "react";
 
 interface AccountSettingsTabsProps {
   activeTab: string;
@@ -67,8 +68,17 @@ export function AccountSettingsTabs({
   addEducation,
   onPhotoChange
 }: AccountSettingsTabsProps) {
-  console.log("AccountSettingsTabs rendering with accountForm values:", accountForm.getValues());
-  console.log("Account form submission handler:", onAccountSubmit);
+  // Use a ref to track rendering and avoid excessive console.logs
+  const renderCountRef = useRef(0);
+  
+  useEffect(() => {
+    // Only log once every few renders to reduce console spam
+    if (renderCountRef.current % 5 === 0) {
+      console.log("AccountSettingsTabs rendering with accountForm values:", accountForm.getValues());
+      console.log("Account form submission handler:", onAccountSubmit);
+    }
+    renderCountRef.current++;
+  }, [accountForm, onAccountSubmit]);
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

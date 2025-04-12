@@ -31,7 +31,7 @@ export function useProfileForm() {
   
   const { processFormData } = useProfileDataProcessor();
 
-  // Log overall state for debugging
+  // Log overall state for debugging - only when these values change
   useEffect(() => {
     console.log('useProfileForm - current state:', {
       services,

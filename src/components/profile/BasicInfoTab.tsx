@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EducationFieldsArray } from "./EducationFieldsArray";
 import { ProfilePhotoUploader } from "./ProfilePhotoUploader";
 import { UseFormReturn } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface BasicInfoTabProps {
   form: UseFormReturn<any>;
@@ -32,15 +32,36 @@ export function BasicInfoTab({
   onPhotoChange,
   isSubmitting
 }: BasicInfoTabProps) {
-  console.log("BasicInfoTab rendering with education:", education);
-  console.log("Form values:", form.getValues());
+  // Use a ref to track previous props to avoid unnecessary logging
+  const prevEducationRef = useRef(education);
   
-  // Log form values when they change
+  // Log only when education array changes
   useEffect(() => {
-    const subscription = form.watch((value) => {
+    if (prevEducationRef.current !== education) {
+      console.log("BasicInfoTab rendering with education:", education);
+      console.log("Form values:", form.getValues());
+      prevEducationRef.current = education;
+    }
+  }, [education, form]);
+  
+  // Use a separate ref for the form watch subscription
+  const formWatchRef = useRef<any>(null);
+  
+  // Log form values when they change - with cleanup
+  useEffect(() => {
+    if (formWatchRef.current) {
+      formWatchRef.current.unsubscribe();
+    }
+    
+    formWatchRef.current = form.watch((value) => {
       console.log("BasicInfoTab - Form values changed:", value);
     });
-    return () => subscription.unsubscribe();
+    
+    return () => {
+      if (formWatchRef.current) {
+        formWatchRef.current.unsubscribe();
+      }
+    };
   }, [form]);
 
   return (
