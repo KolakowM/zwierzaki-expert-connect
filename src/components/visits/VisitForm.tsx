@@ -70,7 +70,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
           name="notes"
           label="Notatki z wizyty"
           placeholder="Obserwacje, przeprowadzone badania, procedury..."
-          style="height: 124px"
+          
         />
 
         <VisitRichTextField
@@ -78,7 +78,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
           name="recommendations"
           label="Zalecenia"
           placeholder="Zalecenia dla właściciela..."
-          style="height: 124px"
+          
         />
 
         <VisitFollowUpField 
