@@ -37,6 +37,8 @@ export function useAccountSettings() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [specialistActiveTab, setSpecialistActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [isLoadingUserProfile, setIsLoadingUserProfile] = useState(true);
 
   // Initialize forms
   const accountForm = useForm<AccountFormValues>({
@@ -60,12 +62,35 @@ export function useAccountSettings() {
   // Load user data into the form when available
   useEffect(() => {
     if (user) {
-      console.log("Loading user data into account form:", user);
-      accountForm.reset({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || ""
-      });
+      // Fetch user profile data from user_profiles table
+      const fetchUserProfile = async () => {
+        setIsLoadingUserProfile(true);
+        try {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+          if (error) throw error;
+          
+          console.log("Loaded user profile data:", data);
+          setUserProfile(data);
+          
+          // Reset the form with data from both user auth and user_profiles
+          accountForm.reset({
+            firstName: data?.first_name || "",
+            lastName: data?.last_name || "",
+            email: user.email || ""
+          });
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          // Still set the email from auth user
+          accountForm.setValue('email', user.email || "");
+        } finally {
+          setIsLoadingUserProfile(false);
+        }
+      };
       
       // Fetch specialist profile data if user is authenticated
       const fetchSpecialistProfile = async () => {
@@ -95,6 +120,7 @@ export function useAccountSettings() {
         }
       };
       
+      fetchUserProfile();
       fetchSpecialistProfile();
     }
   }, [user, accountForm, toast]);
@@ -175,6 +201,8 @@ export function useAccountSettings() {
     accountForm,
     passwordForm,
     onAccountSubmit,
-    handleLogout
+    handleLogout,
+    userProfile,
+    isLoadingUserProfile
   };
 }

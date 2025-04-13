@@ -1,15 +1,12 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form } from "@/components/ui/form";
-import { UserCircle, Mail, Lock, Award } from "lucide-react";
-import { AccountGeneralTab } from "@/components/account/AccountGeneralTab";
-import { PasswordTab } from "@/components/account/PasswordTab";
-import { SecurityInfo } from "@/components/account/PasswordTab";
-import { DeleteAccountDialog } from "@/components/account/DeleteAccountDialog";
-import { SpecialistProfileTabWrapper } from "@/components/account/SpecialistProfileTabWrapper";
+import React from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { AccountGeneralTab } from "./AccountGeneralTab";
+import { PasswordTab } from "./PasswordTab";
+import { DeleteAccountDialog } from "./DeleteAccountDialog";
+import { SpecialistProfileTabWrapper } from "./SpecialistProfileTabWrapper";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
-import { useRef, useEffect } from "react";
 
 interface AccountSettingsTabsProps {
   activeTab: string;
@@ -22,6 +19,7 @@ interface AccountSettingsTabsProps {
   isPasswordSubmitting: boolean;
   specialistProfile: any;
   isLoadingProfile: boolean;
+  isLoadingUserProfile: boolean;
   profileForm: UseFormReturn<ProfileFormValues>;
   specialistActiveTab: string;
   setSpecialistActiveTab: (tab: string) => void;
@@ -51,6 +49,7 @@ export function AccountSettingsTabs({
   isPasswordSubmitting,
   specialistProfile,
   isLoadingProfile,
+  isLoadingUserProfile,
   profileForm,
   specialistActiveTab,
   setSpecialistActiveTab,
@@ -68,66 +67,40 @@ export function AccountSettingsTabs({
   addEducation,
   onPhotoChange
 }: AccountSettingsTabsProps) {
-  // Use a ref to track rendering and avoid excessive console.logs
-  const renderCountRef = useRef(0);
-  
-  useEffect(() => {
-    // Only log once every few renders to reduce console spam
-    if (renderCountRef.current % 5 === 0) {
-      console.log("AccountSettingsTabs rendering with accountForm values:", accountForm.getValues());
-      console.log("Account form submission handler:", onAccountSubmit);
-    }
-    renderCountRef.current++;
-  }, [accountForm, onAccountSubmit]);
   
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="general">
-          <Mail className="mr-2 h-4 w-4" />
-          Dane podstawowe
-        </TabsTrigger>
-        <TabsTrigger value="password">
-          <Lock className="mr-2 h-4 w-4" />
-          Hasło i bezpieczeństwo
-        </TabsTrigger>
-        <TabsTrigger value="specialist">
-          <Award className="mr-2 h-4 w-4" />
-          Profil specjalisty
-        </TabsTrigger>
+        <TabsTrigger value="general">Dane profilu</TabsTrigger>
+        <TabsTrigger value="password">Hasło i bezpieczeństwo</TabsTrigger>
+        <TabsTrigger value="specialist">Profil specjalisty</TabsTrigger>
       </TabsList>
-
-      {/* General account information tab */}
+      
       <TabsContent value="general">
-        <Form {...accountForm}>
-          <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
-            <AccountGeneralTab
-              form={accountForm}
-              isSubmitting={isPasswordSubmitting}
-              specialistProfile={specialistProfile}
-              isLoadingProfile={isLoadingProfile}
-            />
-          </form>
-        </Form>
+        <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
+          <AccountGeneralTab 
+            form={accountForm}
+            isSubmitting={accountForm.formState.isSubmitting}
+            specialistProfile={specialistProfile}
+            isLoadingProfile={isLoadingProfile}
+            isLoadingUserProfile={isLoadingUserProfile}
+          />
+        </form>
       </TabsContent>
-
-      {/* Password change and security tab */}
+      
       <TabsContent value="password">
-        <Form {...passwordForm}>
-          <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
-            <PasswordTab 
-              form={passwordForm}
-              isSubmitting={isPasswordSubmitting}
-            />
-          </form>
-        </Form>
-
-        <SecurityInfo />
+        <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
+          <PasswordTab 
+            form={passwordForm}
+            isSubmitting={isPasswordSubmitting}
+          />
+        </form>
         
-        <DeleteAccountDialog onDeleteAccount={handleLogout} />
+        <div className="mt-6">
+          <DeleteAccountDialog onConfirm={handleLogout} />
+        </div>
       </TabsContent>
-
-      {/* Specialist profile tab */}
+      
       <TabsContent value="specialist">
         <SpecialistProfileTabWrapper
           profileForm={profileForm}

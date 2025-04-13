@@ -1,6 +1,8 @@
+
 import { useEffect, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
+import { useSpecialistSpecializations } from "@/hooks/useSpecializations";
 
 export function useProfileFormInitialization(
   profileForm: UseFormReturn<ProfileFormValues>,
@@ -17,6 +19,8 @@ export function useProfileFormInitialization(
 ) {
   // Track if the form has been initialized already
   const initialized = useRef(false);
+  // Get the user's specializations
+  const { specializationIds } = useSpecialistSpecializations(user?.id);
 
   // Update profileForm when specialistProfile is loaded - ONLY ONCE
   useEffect(() => {
@@ -116,7 +120,7 @@ export function useProfileFormInitialization(
     profileForm.reset({
       title: specialistProfile.title || "",
       description: specialistProfile.description || "",
-      specializations: specialistProfile.specializations || [],
+      specializations: specializationIds || [], // Use the specialization IDs from the junction table
       services: specialistProfile.services || [],
       education: specialistProfile.education || [],
       experience: specialistProfile.experience || "",
@@ -134,5 +138,13 @@ export function useProfileFormInitialization(
     
     // Mark as initialized to prevent re-running
     initialized.current = true;
-  }, [specialistProfile, isLoadingProfile]);
+  }, [specialistProfile, isLoadingProfile, specializationIds]);
+
+  // Update specializations when they are loaded
+  useEffect(() => {
+    if (initialized.current && specializationIds && specializationIds.length > 0) {
+      console.log("Setting specializations in form:", specializationIds);
+      profileForm.setValue('specializations', specializationIds);
+    }
+  }, [specializationIds, profileForm, initialized.current]);
 }

@@ -8,19 +8,22 @@ import { AlertCircle, Mail } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { PhoneDisplayInfo, LocationDisplayInfo } from "./ProfileDisplayInfo";
 import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AccountGeneralTabProps {
   form: UseFormReturn<any>;
   isSubmitting: boolean;
   specialistProfile: any;
   isLoadingProfile: boolean;
+  isLoadingUserProfile: boolean;
 }
 
 export function AccountGeneralTab({ 
   form, 
   isSubmitting, 
   specialistProfile,
-  isLoadingProfile
+  isLoadingProfile,
+  isLoadingUserProfile
 }: AccountGeneralTabProps) {
   
   // For debugging - log when form values change
@@ -40,54 +43,76 @@ export function AccountGeneralTab({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FormField 
-            control={form.control} 
-            name="firstName" 
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Imię</FormLabel>
-                <FormControl>
-                  <Input placeholder="Imię" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} 
-          />
-          <FormField 
-            control={form.control} 
-            name="lastName" 
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nazwisko</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nazwisko" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} 
-          />
-        </div>
-        
-        <FormField 
-          control={form.control} 
-          name="email" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <div className="flex items-center">
-                  <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Email" {...field} disabled />
-                </div>
-              </FormControl>
-              <FormDescription>
-                Zmiana adresu email wymaga weryfikacji. Skontaktuj się z administratorem.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
+        {isLoadingUserProfile ? (
+          // Loading state for user profile data
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Skeleton className="h-4 w-20 mb-2" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div>
+                <Skeleton className="h-4 w-20 mb-2" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+            <div>
+              <Skeleton className="h-4 w-20 mb-2" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField 
+                control={form.control} 
+                name="firstName" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Imię</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Imię" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+              <FormField 
+                control={form.control} 
+                name="lastName" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nazwisko</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nazwisko" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+            </div>
+            
+            <FormField 
+              control={form.control} 
+              name="email" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center">
+                      <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="Email" {...field} disabled />
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Zmiana adresu email wymaga weryfikacji. Skontaktuj się z administratorem.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+          </>
+        )}
         
         {/* Read-only contact info with referral to specialist tab */}
         {!isLoadingProfile && (
@@ -105,7 +130,7 @@ export function AccountGeneralTab({
         </Alert>
       </CardContent>
       <CardFooter>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || isLoadingUserProfile}>
           {isSubmitting ? "Zapisywanie..." : "Zapisz zmiany"}
         </Button>
       </CardFooter>

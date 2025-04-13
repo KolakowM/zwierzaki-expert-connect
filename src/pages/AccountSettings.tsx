@@ -10,6 +10,7 @@ import { usePasswordSettings } from "@/hooks/usePasswordSettings";
 import { useSpecialistSettingsTab } from "@/hooks/useSpecialistSettingsTab";
 import { useProfileFormInitialization } from "@/hooks/useProfileFormInitialization";
 import { AccountSettingsTabs } from "@/components/account/AccountSettingsTabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AccountSettings() {
   // Get account settings hooks
@@ -25,7 +26,8 @@ export default function AccountSettings() {
     accountForm,
     passwordForm,
     onAccountSubmit,
-    handleLogout
+    handleLogout,
+    isLoadingUserProfile
   } = useAccountSettings();
 
   // Get password settings hook
@@ -111,7 +113,15 @@ export default function AccountSettings() {
   };
 
   if (!isAuthenticated) {
-    return <div />;
+    return (
+      <MainLayout>
+        <div className="container py-12">
+          <div className="flex justify-center">
+            <Skeleton className="h-8 w-48" />
+          </div>
+        </div>
+      </MainLayout>
+    );
   }
   
   return (
@@ -134,6 +144,7 @@ export default function AccountSettings() {
             isPasswordSubmitting={isPasswordSubmitting}
             specialistProfile={specialistProfile}
             isLoadingProfile={isLoadingProfile}
+            isLoadingUserProfile={isLoadingUserProfile}
             profileForm={profileForm}
             specialistActiveTab={specialistActiveTab}
             setSpecialistActiveTab={setSpecialistActiveTab}
