@@ -111,7 +111,7 @@ export default function AccountSettings() {
   };
 
   if (!isAuthenticated) {
-    return <div />;
+    return <div>Loading...</div>;
   }
   
   return (

@@ -26,7 +26,7 @@ export function useProfileFormInitialization(
       form.reset({
         title: specialistProfile.title || "",
         description: specialistProfile.description || "",
-        specializations: specialistProfile.specializationIds || [], // This is now correctly set from the specialized hook
+        specializations: specialistProfile.specializations || [], 
         services: [],
         education: [],
         experience: specialistProfile.experience || "",
@@ -96,7 +96,7 @@ export function useProfileFormInitialization(
         }
       }
     }
-  }, [isLoadingProfile, specialistProfile, user, form]);
+  }, [isLoadingProfile, specialistProfile, user, form, addService, updateService, services, addEducation, updateEducation, education, handlePhotoChange]);
 
   return null;
 }
