@@ -3,6 +3,7 @@ import React from 'react';
 import { SpecialistProfileTab, ProfileFormValues } from '@/components/profile/SpecialistProfileTab';
 import { UseFormReturn } from 'react-hook-form';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Form } from '@/components/ui/form';
 
 interface SpecialistProfileTabWrapperProps {
   profileForm: UseFormReturn<ProfileFormValues>;
@@ -55,23 +56,25 @@ export function SpecialistProfileTabWrapper({
   }
 
   return (
-    <SpecialistProfileTab
-      form={profileForm}
-      activeTab={specialistActiveTab}
-      setActiveTab={setSpecialistActiveTab}
-      onSubmit={onProfileSubmit}
-      photoUrl={photoUrl}
-      userId={userId}
-      services={services}
-      education={education}
-      isSubmitting={isProfileSubmitting}
-      updateService={updateService}
-      removeService={removeService}
-      addService={addService}
-      updateEducation={updateEducation}
-      removeEducation={removeEducation}
-      addEducation={addEducation}
-      onPhotoChange={onPhotoChange}
-    />
+    <Form {...profileForm}>
+      <SpecialistProfileTab
+        form={profileForm}
+        activeTab={specialistActiveTab}
+        setActiveTab={setSpecialistActiveTab}
+        onSubmit={onProfileSubmit}
+        photoUrl={photoUrl}
+        userId={userId}
+        services={services}
+        education={education}
+        isSubmitting={isProfileSubmitting}
+        updateService={updateService}
+        removeService={removeService}
+        addService={addService}
+        updateEducation={updateEducation}
+        removeEducation={removeEducation}
+        addEducation={addEducation}
+        onPhotoChange={onPhotoChange}
+      />
+    </Form>
   );
 }

@@ -7,6 +7,7 @@ import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { SpecialistProfileTabWrapper } from "./SpecialistProfileTabWrapper";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
+import { Form } from "@/components/ui/form";
 
 interface AccountSettingsTabsProps {
   activeTab: string;
@@ -77,24 +78,28 @@ export function AccountSettingsTabs({
       </TabsList>
       
       <TabsContent value="general">
-        <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
-          <AccountGeneralTab 
-            form={accountForm}
-            isSubmitting={accountForm.formState.isSubmitting}
-            specialistProfile={specialistProfile}
-            isLoadingProfile={isLoadingProfile}
-            isLoadingUserProfile={isLoadingUserProfile}
-          />
-        </form>
+        <Form {...accountForm}>
+          <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
+            <AccountGeneralTab 
+              form={accountForm}
+              isSubmitting={accountForm.formState.isSubmitting}
+              specialistProfile={specialistProfile}
+              isLoadingProfile={isLoadingProfile}
+              isLoadingUserProfile={isLoadingUserProfile}
+            />
+          </form>
+        </Form>
       </TabsContent>
       
       <TabsContent value="password">
-        <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
-          <PasswordTab 
-            form={passwordForm}
-            isSubmitting={isPasswordSubmitting}
-          />
-        </form>
+        <Form {...passwordForm}>
+          <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
+            <PasswordTab 
+              form={passwordForm}
+              isSubmitting={isPasswordSubmitting}
+            />
+          </form>
+        </Form>
         
         <div className="mt-6">
           {/* Passing handleLogout function as onDeleteAccount prop which is what DeleteAccountDialog expects */}
