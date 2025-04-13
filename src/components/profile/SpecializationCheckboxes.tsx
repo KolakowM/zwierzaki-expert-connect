@@ -15,13 +15,14 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
   const { user } = useAuth();
   const { specializations, isLoading, error } = useSpecializations();
   
-  // Log when specializations are loaded or form values change
+  // Use an effect to automatically check specializations from user's profile
   useEffect(() => {
-    if (specializations.length > 0) {
-      console.log('SpecializationCheckboxes - Specializations loaded:', specializations.length);
-      console.log('SpecializationCheckboxes - Current form values:', form.getValues('specializations'));
+    if (user?.id && specializations.length > 0) {
+      // This will be handled by parent components that fetch the user's specializations
+      // and pass them to the form
+      console.log('Specializations loaded:', specializations.length);
     }
-  }, [specializations, form]);
+  }, [specializations, user?.id]);
 
   return (
     <FormField
