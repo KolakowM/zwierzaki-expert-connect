@@ -11,6 +11,7 @@ import { useSpecialistSettingsTab } from "@/hooks/useSpecialistSettingsTab";
 import { useProfileFormInitialization } from "@/hooks/useProfileFormInitialization";
 import { AccountSettingsTabs } from "@/components/account/AccountSettingsTabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Form } from "@/components/ui/form";
 
 export default function AccountSettings() {
   // Get account settings hooks

@@ -1,7 +1,8 @@
 
-import { ProfileFormValues, SpecialistProfileTab } from "@/components/profile/SpecialistProfileTab";
-import { UseFormReturn } from "react-hook-form";
-import { useEffect, useRef } from "react";
+import React from 'react';
+import { SpecialistProfileTab, ProfileFormValues } from '@/components/profile/SpecialistProfileTab';
+import { UseFormReturn } from 'react-hook-form';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SpecialistProfileTabWrapperProps {
   profileForm: UseFormReturn<ProfileFormValues>;
@@ -18,7 +19,7 @@ interface SpecialistProfileTabWrapperProps {
   addService: () => void;
   updateEducation: (index: number, value: string) => void;
   removeEducation: (index: number) => void;
-  addEducation: () => void; 
+  addEducation: () => void;
   onPhotoChange: (url: string | null, file: File | null) => void;
   isLoadingProfile: boolean;
 }
@@ -42,70 +43,13 @@ export function SpecialistProfileTabWrapper({
   onPhotoChange,
   isLoadingProfile
 }: SpecialistProfileTabWrapperProps) {
-  // Use a ref to track previous props to avoid unnecessary logging
-  const prevPropsRef = useRef({ specialistActiveTab, services, education, photoUrl, isLoadingProfile });
-  
-  // Log each time component renders with its data - ONLY when relevant props change
-  useEffect(() => {
-    const currentProps = { specialistActiveTab, services, education, photoUrl, isLoadingProfile };
-    const prevProps = prevPropsRef.current;
-    
-    const hasChanged = 
-      prevProps.specialistActiveTab !== specialistActiveTab || 
-      prevProps.services !== services || 
-      prevProps.education !== education || 
-      prevProps.photoUrl !== photoUrl || 
-      prevProps.isLoadingProfile !== isLoadingProfile;
-    
-    if (hasChanged) {
-      console.log("SpecialistProfileTabWrapper rendering with:", {
-        ...currentProps,
-        formValues: profileForm.getValues()
-      });
-      prevPropsRef.current = currentProps;
-    }
-  }, [specialistActiveTab, services, education, photoUrl, isLoadingProfile, profileForm]);
-
-  // Use a separate ref to control subscription to form changes
-  const formWatchRef = useRef<any>(null);
-  
-  // Log form values when they change - with cleanup to prevent memory leaks
-  useEffect(() => {
-    if (formWatchRef.current) {
-      formWatchRef.current.unsubscribe();
-    }
-    
-    formWatchRef.current = profileForm.watch((value) => {
-      console.log("SpecialistProfileTabWrapper - profileForm values changed:", value);
-    });
-    
-    return () => {
-      if (formWatchRef.current) {
-        formWatchRef.current.unsubscribe();
-      }
-    };
-  }, [profileForm]);
-
-  // Ensure form submission is properly triggered
-  const handleSubmit = (values: ProfileFormValues) => {
-    console.log("SpecialistProfileTabWrapper - handleSubmit called with:", values);
-    console.log("Current services and education:", { services, education });
-    
-    // Make sure the form includes current services and education
-    const valuesWithArrays = {
-      ...values,
-      services: services.filter(s => s.trim() !== ""),
-      education: education.filter(e => e.trim() !== "")
-    };
-    
-    onProfileSubmit(valuesWithArrays);
-  };
-
+  // If the profile is still loading, show a skeleton loading state
   if (isLoadingProfile) {
     return (
-      <div className="p-8 text-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Ładowanie profilu specjalisty...</p>
+      <div className="space-y-6">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-24 w-full" />
       </div>
     );
   }
@@ -115,7 +59,7 @@ export function SpecialistProfileTabWrapper({
       form={profileForm}
       activeTab={specialistActiveTab}
       setActiveTab={setSpecialistActiveTab}
-      onSubmit={handleSubmit}
+      onSubmit={onProfileSubmit}
       photoUrl={photoUrl}
       userId={userId}
       services={services}
