@@ -37,7 +37,6 @@ export function useAccountSettings() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [specialistActiveTab, setSpecialistActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
 
   // Initialize forms
   const accountForm = useForm<AccountFormValues>({
@@ -62,48 +61,13 @@ export function useAccountSettings() {
   useEffect(() => {
     if (user) {
       console.log("Loading user data into account form:", user);
+      accountForm.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || ""
+      });
       
-      // Fetch user profile data to get first and last name
-      const fetchUserProfile = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', user.id)
-            .maybeSingle();
-            
-          if (error) throw error;
-          
-          if (data) {
-            console.log("Loaded user profile:", data);
-            setUserProfile(data);
-            
-            // Set the form values with data from user_profiles
-            accountForm.reset({
-              firstName: data.first_name || "",
-              lastName: data.last_name || "",
-              email: user.email || ""
-            });
-          } else {
-            // If no profile found, use values from user object as fallback
-            accountForm.reset({
-              firstName: user.firstName || "",
-              lastName: user.lastName || "",
-              email: user.email || ""
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          // Fallback to using data from user object
-          accountForm.reset({
-            firstName: user.firstName || "",
-            lastName: user.lastName || "",
-            email: user.email || ""
-          });
-        }
-      };
-      
-      // Fetch specialist profile data
+      // Fetch specialist profile data if user is authenticated
       const fetchSpecialistProfile = async () => {
         setIsLoadingProfile(true);
         try {
@@ -131,8 +95,6 @@ export function useAccountSettings() {
         }
       };
       
-      // Fetch both profiles
-      fetchUserProfile();
       fetchSpecialistProfile();
     }
   }, [user, accountForm, toast]);
@@ -213,7 +175,6 @@ export function useAccountSettings() {
     accountForm,
     passwordForm,
     onAccountSubmit,
-    handleLogout,
-    userProfile
+    handleLogout
   };
 }
