@@ -97,8 +97,8 @@ export function AccountSettingsTabs({
         </form>
         
         <div className="mt-6">
-          {/* Passing handleLogout function as onDelete prop which is what DeleteAccountDialog expects */}
-          <DeleteAccountDialog onDelete={handleLogout} />
+          {/* Passing handleLogout function as onDeleteAccount prop which is what DeleteAccountDialog expects */}
+          <DeleteAccountDialog onDeleteAccount={handleLogout} />
         </div>
       </TabsContent>
       
