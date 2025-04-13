@@ -2,13 +2,13 @@
 import { UseFormReturn } from "react-hook-form";
 import { useEffect } from "react";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
-import { User } from "@supabase/supabase-js";
+import { AuthUser } from "@/services/authService";
 
 export function useProfileFormInitialization(
   form: UseFormReturn<ProfileFormValues>,
   specialistProfile: any,
   isLoadingProfile: boolean,
-  user: User | null,
+  user: AuthUser | null,
   addService: () => void,
   updateService: (index: number, value: string) => void,
   services: string[],
