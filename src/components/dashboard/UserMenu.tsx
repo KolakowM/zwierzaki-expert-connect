@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserMenuProps {
   firstName: string | undefined;
@@ -24,18 +25,56 @@ interface UserMenuProps {
 const UserMenu = ({ firstName, lastName, onLogout, photoUrl }: UserMenuProps) => {
   const [displayName, setDisplayName] = useState<string>('');
   const [initials, setInitials] = useState<string>('');
+  const [profileData, setProfileData] = useState<{first_name?: string, last_name?: string} | null>(null);
   
-  // Update initials and display name when props change
+  // Fetch user profile data from user_profiles table
   useEffect(() => {
-    const firstInitial = firstName?.charAt(0) || '';
-    const lastInitial = lastName?.charAt(0) || '';
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user?.id) {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name')
+            .eq('id', user.id)
+            .single();
+            
+          if (data && !error) {
+            setProfileData(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+    
+    fetchUserProfile();
+  }, []);
+  
+  // Update initials and display name when props or profile data change
+  useEffect(() => {
+    // Prioritize data from user_profiles table
+    const firstNameToUse = profileData?.first_name || firstName || '';
+    const lastNameToUse = profileData?.last_name || lastName || '';
+    
+    const firstInitial = firstNameToUse.charAt(0) || '';
+    const lastInitial = lastNameToUse.charAt(0) || '';
     setInitials(firstInitial + lastInitial);
     
-    const name = `${firstName || ''} ${lastName || ''}`.trim();
+    const name = `${firstNameToUse || ''} ${lastNameToUse || ''}`.trim();
     setDisplayName(name || 'Użytkownik');
     
-    console.log('UserMenu updated with:', { firstName, lastName, photoUrl, displayName: name, initials: firstInitial + lastInitial });
-  }, [firstName, lastName]);
+    console.log('UserMenu updated with:', { 
+      profileFirst: profileData?.first_name, 
+      profileLast: profileData?.last_name,
+      propsFirst: firstName, 
+      propsLast: lastName, 
+      photoUrl, 
+      displayName: name, 
+      initials: firstInitial + lastInitial 
+    });
+  }, [firstName, lastName, profileData]);
 
   return (
     <NavigationMenu>

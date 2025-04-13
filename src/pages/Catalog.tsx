@@ -21,39 +21,50 @@ const Catalog = () => {
         setLoading(true);
         console.log('Fetching specialists from database');
         
-        // Get all specialist profiles
-        const { data, error } = await supabase
-          .from('specialist_profiles')
-          .select('*');
-          
-        if (error) throw error;
+        // Get all user accounts that have role="user" and status="active"
+        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
         
-        // For each specialist, fetch their specializations
-        const specialistsWithData = await Promise.all((data || []).map(async (specialist: any) => {
-          // Try to get user's name from user_profiles
-          let name = "Specjalista";
-          try {
-            const { data: userData } = await supabase
-              .from('user_profiles')
-              .select('first_name, last_name')
-              .eq('id', specialist.id)
-              .maybeSingle();
-              
-            if (userData) {
-              name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-              if (!name) name = "Specjalista";
-            }
-          } catch (e) {
-            console.error('Error fetching user profile:', e);
-          }
-          
-          // Fetch specializations for this specialist
+        if (authError) throw authError;
+        
+        // Filter active users
+        const activeUsers = authUsers.users.filter(user => 
+          user.user_metadata?.status === 'active' && 
+          user.user_metadata?.role === 'user'
+        );
+        
+        if (!activeUsers.length) {
+          console.log('No active users found with role="user" and status="active"');
+          setSpecialists([]);
+          setFilteredSpecialists([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Get all specialist profiles
+        let specialistsData: Specialist[] = [];
+        
+        for (const user of activeUsers) {
+          // Get specialist profile if exists
+          const { data: specialistProfile } = await supabase
+            .from('specialist_profiles')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
+            
+          // Get user profile for name
+          const { data: userProfile } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name')
+            .eq('id', user.id)
+            .maybeSingle();
+            
+          // Get specializations
           let specializations: string[] = [];
           try {
             const { data: specData } = await supabase
               .from('specialist_specializations')
               .select('specialization_id')
-              .eq('specialist_id', specialist.id);
+              .eq('specialist_id', user.id);
               
             if (specData && specData.length > 0) {
               specializations = specData.map(item => item.specialization_id);
@@ -62,20 +73,30 @@ const Catalog = () => {
             console.error('Error fetching specializations:', e);
           }
           
-          return {
-            id: specialist.id,
+          // Construct name
+          let name = "Specjalista";
+          if (userProfile) {
+            name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
+            if (!name) name = "Specjalista";
+          } else if (user.user_metadata?.name) {
+            name = user.user_metadata.name;
+          }
+          
+          // Create specialist object
+          specialistsData.push({
+            id: user.id,
             name: name,
-            title: specialist.title || "Specjalista",
+            title: specialistProfile?.title || "Specjalista",
             specializations: specializations,
-            location: specialist.location || "Polska",
-            image: specialist.photo_url || "/placeholder.svg",
+            location: specialistProfile?.location || "Polska",
+            image: specialistProfile?.photo_url || "/placeholder.svg",
             rating: 4.8, // Sample rating
             verified: true, // Sample verification status
-          };
-        }));
+          });
+        }
         
-        setSpecialists(specialistsWithData);
-        setFilteredSpecialists(specialistsWithData);
+        setSpecialists(specialistsData);
+        setFilteredSpecialists(specialistsData);
       } catch (error) {
         console.error('Error fetching specialists:', error);
         // Fallback to empty array

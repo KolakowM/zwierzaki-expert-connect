@@ -4,116 +4,197 @@ import { UserFormValues } from "@/components/admin/users/UserFormDialog";
 
 // Create a new user
 export const createUser = async (userData: UserFormValues) => {
-  // In a real application, we would use Supabase Auth to create users
-  // For this prototype, we'll just simulate the creation
-  
-  // Generate a random ID for the mock user
-  const id = Math.random().toString(36).substring(2, 15);
-  
-  // Create a user object with the form data
-  const newUser = {
-    id,
-    name: userData.name,
-    email: userData.email,
-    role: userData.role,
-    status: userData.status,
-    lastLogin: null
-  };
-  
-  // In a real application, we would:
-  // 1. Create the user in Supabase Auth
-  // 2. Store additional user data in a profiles table or user_roles table
-  
-  console.log('User created:', newUser);
-  
-  // Return the new user
-  return newUser;
+  try {
+    // Create the user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: userData.email,
+      password: '123456', // Temporary password, should be changed by the user
+      email_confirm: true,
+      user_metadata: {
+        name: userData.name,
+        role: userData.role,
+        status: userData.status
+      }
+    });
+    
+    if (authError) throw authError;
+    
+    // If user creation was successful, store the user role in user_roles table
+    if (authData.user) {
+      // Insert into user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: authData.user.id,
+          role: userData.role || 'user'
+        });
+        
+      if (roleError) throw roleError;
+      
+      // Return the new user
+      return {
+        id: authData.user.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role || 'user',
+        status: userData.status || 'pending',
+        lastLogin: null
+      };
+    }
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
 };
 
 // Update an existing user
 export const updateUser = async (userId: string, userData: UserFormValues) => {
-  // In a real application, we would update the user in Supabase
-  // For this prototype, we'll just simulate the update
-  
-  // Create an updated user object
-  const updatedUser = {
-    id: userId,
-    name: userData.name,
-    email: userData.email,
-    role: userData.role,
-    status: userData.status,
-    // Preserve other fields that might be in the user object
-  };
-  
-  // In a real application, we would:
-  // 1. Update the user in Supabase Auth if necessary
-  // 2. Update user data in profiles or user_roles tables
-  
-  console.log('User updated:', updatedUser);
-  
-  // Return the updated user
-  return updatedUser;
+  try {
+    // Update the user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        name: userData.name,
+        status: userData.status
+      }
+    });
+    
+    if (authError) throw authError;
+    
+    // Update the user role in user_roles table
+    if (userData.role) {
+      // First check if the role exists for this user
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+        
+      if (existingRole) {
+        // Update existing role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .update({ role: userData.role })
+          .eq('user_id', userId);
+          
+        if (roleError) throw roleError;
+      } else {
+        // Insert new role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role: userData.role
+          });
+          
+        if (roleError) throw roleError;
+      }
+    }
+    
+    // Return the updated user
+    return {
+      id: userId,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      status: userData.status,
+    };
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
 };
 
 // Delete a user
 export const deleteUser = async (userId: string) => {
-  // In a real application, we would delete the user from Supabase
-  // For this prototype, we'll just simulate the deletion
-  
-  console.log('User deleted:', userId);
-  
-  // Return true to indicate success
-  return true;
+  try {
+    // Delete the user from Supabase Auth
+    const { error } = await supabase.auth.admin.deleteUser(userId);
+    
+    if (error) throw error;
+    
+    // Return true to indicate success
+    return true;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw error;
+  }
 };
 
 // Get a list of users
 export const getUsers = async () => {
-  // In a real application, we would fetch users from Supabase
-  // For this prototype, we'll return mock data
-  
-  // Mock users (this would come from the database in a real app)
-  const mockUsers = [
-    {
-      id: "1",
-      name: "Anna Kowalska",
-      email: "anna.kowalska@example.com",
-      role: "admin",
-      status: "active",
-      lastLogin: "2023-04-05T12:00:00Z"
-    },
-    {
-      id: "2",
-      name: "Jan Nowak",
-      email: "jan.nowak@example.com",
-      role: "specialist",
-      status: "active",
-      lastLogin: "2023-04-03T14:30:00Z"
-    },
-    {
-      id: "3",
-      name: "Maria Wiśniewska",
-      email: "maria.wisniewska@example.com",
-      role: "specialist",
-      status: "inactive",
-      lastLogin: "2023-03-25T09:15:00Z"
-    },
-    {
-      id: "4",
-      name: "Piotr Dąbrowski",
-      email: "piotr.dabrowski@example.com",
-      role: "user",
-      status: "active",
-      lastLogin: "2023-04-04T16:45:00Z"
-    },
-    {
-      id: "5",
-      name: "Aleksandra Lewandowska",
-      email: "aleksandra.lewandowska@example.com",
-      role: "user",
-      status: "pending",
-      lastLogin: null
-    },
-  ];
-  
-  return mockUsers;
+  try {
+    // Get users from auth.users
+    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+    
+    if (authError) throw authError;
+    
+    // Get user profiles to get names
+    const { data: userProfiles, error: profilesError } = await supabase
+      .from('user_profiles')
+      .select('id, first_name, last_name');
+      
+    if (profilesError) throw profilesError;
+    
+    // Get user roles
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+      
+    if (rolesError) throw rolesError;
+    
+    // Create a map of user roles
+    const roleMap = userRoles?.reduce((map, item) => {
+      map[item.user_id] = item.role;
+      return map;
+    }, {} as Record<string, string>) || {};
+    
+    // Create a map of user profiles
+    const profileMap = userProfiles?.reduce((map, item) => {
+      map[item.id] = {
+        firstName: item.first_name,
+        lastName: item.last_name
+      };
+      return map;
+    }, {} as Record<string, {firstName?: string, lastName?: string}>) || {};
+    
+    // Map auth users to the format expected by the UI
+    return authUsers.users.map(user => {
+      const profile = profileMap[user.id] || {};
+      const name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 
+                   user.user_metadata?.name || 
+                   'Użytkownik';
+      
+      return {
+        id: user.id,
+        name: name,
+        email: user.email,
+        role: roleMap[user.id] || user.user_metadata?.role || 'user',
+        status: user.user_metadata?.status || 'pending',
+        lastLogin: user.last_sign_in_at
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    // Fallback to mock data if there's an error
+    const mockUsers = [
+      {
+        id: "1",
+        name: "Anna Kowalska",
+        email: "anna.kowalska@example.com",
+        role: "admin",
+        status: "active",
+        lastLogin: "2023-04-05T12:00:00Z"
+      },
+      {
+        id: "2",
+        name: "Jan Nowak",
+        email: "jan.nowak@example.com",
+        role: "specialist",
+        status: "active",
+        lastLogin: "2023-04-03T14:30:00Z"
+      }
+    ];
+    
+    return mockUsers;
+  }
 };

@@ -101,7 +101,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (credentials: SignUpCredentials) => {
     try {
       setIsLoading(true);
-      await signUp(credentials);
+      // Register user with additional metadata
+      const { data, error } = await supabase.auth.signUp({
+        email: credentials.email,
+        password: credentials.password,
+        options: {
+          data: {
+            first_name: credentials.firstName,
+            last_name: credentials.lastName,
+            role: 'user',
+            status: 'pending'
+          },
+        },
+      });
+      
+      if (error) throw error;
+      
+      // Insert user role into user_roles table
+      if (data.user) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: data.user.id,
+            role: 'user'
+          });
+          
+        if (roleError) {
+          console.error('Error setting user role:', roleError);
+        }
+      }
+      
       toast({
         title: "Rejestracja udana",
         description: "Możesz teraz zalogować się na swoje konto."
