@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -22,8 +23,10 @@ const PetProfile = () => {
   const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Make sure id exists
   const petId = id || "";
 
+  // Fetch pet data
   const { 
     data: pet,
     isLoading: isPetLoading,
@@ -35,6 +38,7 @@ const PetProfile = () => {
     enabled: !!petId && isAuthenticated,
   });
 
+  // Fetch pet visits
   const {
     data: visits = [],
     isLoading: isVisitsLoading,
@@ -117,7 +121,6 @@ const PetProfile = () => {
 
         <PetHeader 
           pet={pet} 
-          clientId={pet.clientId}
           actionButton={
             <ResponsivePetForm 
               clientId={pet.clientId} 
@@ -140,6 +143,7 @@ const PetProfile = () => {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-6">
+                {/* Basic info card */}
                 <div className="bg-card rounded-lg border p-4">
                   <h3 className="font-medium mb-2">Podstawowe informacje</h3>
                   <div className="space-y-2">
@@ -180,6 +184,7 @@ const PetProfile = () => {
               </div>
               
               <div className="space-y-6">
+                {/* Medical info card */}
                 {(pet.medicalHistory || pet.allergies || pet.dietaryRestrictions) && (
                   <div className="bg-card rounded-lg border p-4">
                     <h3 className="font-medium mb-2">Informacje medyczne</h3>
@@ -204,6 +209,7 @@ const PetProfile = () => {
                   </div>
                 )}
                 
+                {/* Behavioral notes card */}
                 {pet.behavioralNotes && (
                   <div className="bg-card rounded-lg border p-4">
                     <h3 className="font-medium mb-2">Zachowanie</h3>
