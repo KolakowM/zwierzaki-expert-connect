@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserFormValues } from "@/components/admin/users/UserFormDialog";
 
-// Define roles but align with the database schema
+// Define roles aligned with the database schema
 type AppRole = 'user' | 'admin';
 
 // Create a new user
@@ -29,7 +29,7 @@ export const createUser = async (userData: UserFormValues) => {
         .from('user_roles')
         .insert({
           user_id: authData.user.id,
-          role: (userData.role as AppRole) || 'user' 
+          role: (userData.role === 'specialist' ? 'user' : userData.role) as AppRole
         });
         
       if (roleError) throw roleError;
@@ -74,7 +74,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
         
       if (existingRole) {
         // Update existing role - ensure we only use valid database roles (user or admin)
-        const dbRole: AppRole = userData.role === 'specialist' ? 'user' : (userData.role as AppRole);
+        const dbRole = userData.role === 'specialist' ? 'user' : userData.role as AppRole;
         const { error: roleError } = await supabase
           .from('user_roles')
           .update({ role: dbRole })
@@ -83,7 +83,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
         if (roleError) throw roleError;
       } else {
         // Insert new role - ensure we only use valid database roles (user or admin)
-        const dbRole: AppRole = userData.role === 'specialist' ? 'user' : (userData.role as AppRole);
+        const dbRole = userData.role === 'specialist' ? 'user' : userData.role as AppRole;
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
@@ -192,26 +192,6 @@ export const getUsers = async () => {
     });
   } catch (error) {
     console.error('Error fetching users:', error);
-    // Fallback to mock data if there's an error
-    const mockUsers = [
-      {
-        id: "1",
-        name: "Anna Kowalska",
-        email: "anna.kowalska@example.com",
-        role: "admin" as AppRole,
-        status: "active",
-        lastLogin: "2023-04-05T12:00:00Z"
-      },
-      {
-        id: "2",
-        name: "Jan Nowak",
-        email: "jan.nowak@example.com",
-        role: "user" as AppRole,
-        status: "active",
-        lastLogin: "2023-04-03T14:30:00Z"
-      }
-    ];
-    
-    return mockUsers;
+    throw error;
   }
 };

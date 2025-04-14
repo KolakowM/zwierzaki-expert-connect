@@ -25,6 +25,7 @@ import {
 import UserFormDialog from "@/components/admin/users/UserFormDialog";
 import DeleteUserButton from "@/components/admin/users/DeleteUserButton";
 import { getUsers } from "@/services/userService";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -32,6 +33,7 @@ const AdminUsers = () => {
   const [sortBy, setSortBy] = useState<string | null>("lastLogin");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   // Load users
   useEffect(() => {
@@ -40,15 +42,20 @@ const AdminUsers = () => {
         setIsLoading(true);
         const fetchedUsers = await getUsers();
         setUsers(fetchedUsers);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error loading users:", error);
+        toast({
+          title: "Błąd podczas ładowania użytkowników",
+          description: error.message || "Spróbuj ponownie później",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
     };
     
     loadUsers();
-  }, []);
+  }, [toast]);
   
   const handleSort = (column: string) => {
     if (sortBy === column) {
