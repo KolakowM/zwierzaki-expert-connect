@@ -1,184 +1,93 @@
+
 import { useState, useEffect } from "react";
-import MainLayout from "@/components/layout/MainLayout";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthProvider";
-import { Pet, Client, Visit, CareProgram } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import MainLayout from "@/components/layout/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  PawPrint,
-  User,
-  Calendar,
-  Weight,
-  FileText,
-  Stethoscope,
-  Edit,
-  Plus,
-  Clipboard,
-  Trash2,
-  Eye
-} from "lucide-react";
-import { getPetById, deletePet } from "@/services/petService";
-import { getClientById } from "@/services/clientService";
-import { getVisitsByPetId } from "@/services/visitService";
-import { getCareProgramsByPetId } from "@/services/careProgramService";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import PetHeader from "@/components/pets/PetHeader";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
-import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
-import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
-import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
-import CareProgramDetailsDialog from "@/components/care-programs/CareProgramDetailsDialog";
+import PetCarePrograms from "@/components/care-programs/PetCarePrograms";
+import PetVisitsList from "@/components/pets/PetVisitsList";
+import { getPetById } from "@/services/petService";
+import { getVisitsByPetId } from "@/services/visitService";
+import { Pet, Visit } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
 const PetProfile = () => {
-  const { toast } = useToast();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { isAuthenticated } = useAuth();
-  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Make sure id exists
+  const petId = id || "";
+
+  // Fetch pet data
+  const { 
+    data: pet,
+    isLoading: isPetLoading,
+    error: petError,
+    refetch: refetchPet 
+  } = useQuery({
+    queryKey: ['pet', petId],
+    queryFn: () => getPetById(petId),
+    enabled: !!petId && isAuthenticated,
+  });
+
+  // Fetch pet visits
+  const {
+    data: visits = [],
+    isLoading: isVisitsLoading,
+    refetch: refetchVisits
+  } = useQuery({
+    queryKey: ['petVisits', petId],
+    queryFn: () => getVisitsByPetId(petId),
+    enabled: !!petId && isAuthenticated,
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
         title: "Brak dostępu",
-        description: "Musisz być zalogowany, aby przeglądać profile zwierząt",
+        description: "Musisz być zalogowany, aby przeglądać dane zwierząt",
         variant: "destructive"
       });
       navigate("/login");
     }
   }, [isAuthenticated, navigate, toast]);
 
-  const { 
-    data: pet, 
-    isLoading: isLoadingPet,
-    isError: isPetError,
-  } = useQuery({
-    queryKey: ['pet', id],
-    queryFn: () => id ? getPetById(id) : null,
-    enabled: !!id && isAuthenticated,
-  });
-
-  const { 
-    data: owner, 
-    isLoading: isLoadingOwner 
-  } = useQuery({
-    queryKey: ['client', pet?.clientId],
-    queryFn: () => pet?.clientId ? getClientById(pet.clientId) : null,
-    enabled: !!pet?.clientId && isAuthenticated,
-  });
-
-  const { 
-    data: visits = [], 
-    isLoading: isLoadingVisits 
-  } = useQuery({
-    queryKey: ['visits', id],
-    queryFn: () => id ? getVisitsByPetId(id) : Promise.resolve([]),
-    enabled: !!id && isAuthenticated,
-  });
-
-  const { 
-    data: carePrograms = [], 
-    isLoading: isLoadingCarePrograms 
-  } = useQuery({
-    queryKey: ['carePrograms', id],
-    queryFn: () => id ? getCareProgramsByPetId(id) : Promise.resolve([]),
-    enabled: !!id && isAuthenticated,
-  });
-
-  const isLoading = isLoadingPet || isLoadingOwner || isLoadingVisits || isLoadingCarePrograms;
-
   useEffect(() => {
-    if (isPetError) {
+    if (petError) {
       toast({
-        title: "Nie znaleziono zwierzęcia",
-        description: "Profil zwierzęcia o podanym identyfikatorze nie istnieje lub wystąpił błąd",
+        title: "Błąd",
+        description: "Nie udało się pobrać danych zwierzęcia",
         variant: "destructive"
       });
-      navigate("/clients");
     }
-  }, [isPetError, navigate, toast]);
-
+  }, [petError, toast]);
+  
   const handlePetUpdated = (updatedPet: Pet) => {
+    refetchPet();
     toast({
-      title: "Dane zwierzęcia zaktualizowane",
-      description: "Zmiany zostały zapisane pomyślnie"
+      title: "Dane zaktualizowane",
+      description: `Dane ${updatedPet.name} zostały pomyślnie zaktualizowane`,
     });
   };
 
-  const handleVisitAdded = (visit: Visit) => {
-    queryClient.invalidateQueries({ queryKey: ['visits', id] });
-    toast({
-      title: "Wizyta dodana pomyślnie",
-      description: "Nowa wizyta została zapisana"
-    });
+  const handleVisitUpdated = (updatedVisit: Visit) => {
+    refetchVisits();
   };
 
-  const handleCareProgramAdded = (careProgram: CareProgram) => {
-    queryClient.invalidateQueries({ queryKey: ['carePrograms', id] });
-    toast({
-      title: "Plan opieki utworzony pomyślnie",
-      description: "Nowy plan opieki został zapisany"
-    });
-  };
-
-  const handleDeletePet = async () => {
-    try {
-      if (!pet?.id) return;
-      
-      await deletePet(pet.id);
-      
-      toast({
-        title: "Zwierzę usunięte",
-        description: `${pet.name} oraz wszystkie powiązane dane zostały pomyślnie usunięte`
-      });
-      
-      if (pet.clientId) {
-        navigate(`/clients/${pet.clientId}`);
-      } else {
-        navigate("/clients");
-      }
-    } catch (error) {
-      console.error("Error deleting pet:", error);
-      toast({
-        title: "Błąd podczas usuwania zwierzęcia",
-        description: "Wystąpił błąd podczas usuwania zwierzęcia. Spróbuj ponownie później.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  if (isLoading) {
+  if (isPetLoading) {
     return (
       <MainLayout>
         <div className="container py-8">
-          <div className="flex items-center space-x-2">
-            <div className="h-6 w-6 rounded-full bg-muted/50 animate-pulse"></div>
-            <div className="h-8 w-48 bg-muted/50 animate-pulse rounded"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-5 w-32 bg-muted/50 rounded"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-4 w-full bg-muted/50 rounded"></div>
-                    <div className="h-4 w-3/4 bg-muted/50 rounded"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </div>
       </MainLayout>
@@ -190,489 +99,138 @@ const PetProfile = () => {
       <MainLayout>
         <div className="container py-8">
           <div className="text-center">
-            <h2 className="text-xl">Nie znaleziono zwierzęcia</h2>
+            <h2 className="text-2xl font-bold">Nie znaleziono zwierzęcia</h2>
+            <p className="text-muted-foreground mt-2">Zwierzę o podanym ID nie istnieje</p>
+            <Button asChild className="mt-4">
+              <Link to="/pets">Wróć do listy zwierząt</Link>
+            </Button>
           </div>
         </div>
       </MainLayout>
     );
   }
 
-  const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
-  const petWeight = pet.weight ? `${pet.weight} kg` : "Nieznana";
-
-  const totalVisits = visits.length;
-  const totalCarePrograms = carePrograms.length;
-  
-  let deleteWarning = '';
-
-  if (totalVisits > 0 || totalCarePrograms > 0) {
-    deleteWarning = `Wraz ze zwierzęciem zostaną również usunięte:
-    ${totalVisits > 0 ? `\n- ${totalVisits} wizyt` : ''}
-    ${totalCarePrograms > 0 ? `\n- ${totalCarePrograms} programów opieki` : ''}`;
-  }
-
   return (
     <MainLayout>
       <div className="container py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <PawPrint className="h-6 w-6 mr-2" />
-            <h1 className="text-2xl font-bold">{pet.name}</h1>
-          </div>
-          <div className="flex space-x-2">
-            {pet.id && pet.clientId && (
-              <ResponsivePetForm
-                clientId={pet.clientId}
-                buttonText="Edytuj profil"
-                buttonVariant="outline"
-                defaultValues={pet}
-                isEditing={true}
-                onPetSaved={handlePetUpdated}
-              />
-            )}
-            
-            <ConfirmDeleteDialog
-              title={`Usuń zwierzę: ${pet.name}`}
-              description="Czy na pewno chcesz usunąć to zwierzę?"
-              additionalWarning={deleteWarning}
-              onConfirm={handleDeletePet}
-              triggerButtonVariant="destructive"
-              triggerButtonText="Usuń zwierzę"
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" size="sm" asChild className="mr-4">
+            <Link to={`/clients/${pet.clientId}`}><ArrowLeft className="mr-2 h-4 w-4" /> Powrót do klienta</Link>
+          </Button>
+        </div>
+
+        <PetHeader 
+          pet={pet} 
+          actionButton={
+            <ResponsivePetForm 
+              clientId={pet.clientId} 
+              defaultValues={pet}
+              isEditing={true}
+              onPetSaved={handlePetUpdated}
+              buttonText="Edytuj dane"
+              title={`Edytuj dane: ${pet.name}`}
             />
-          </div>
-        </div>
+          }
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informacje podstawowe</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Gatunek</p>
-                  <p className="font-medium">{pet.species}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Rasa</p>
-                  <p className="font-medium">{pet.breed || "Nieznana"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Wiek</p>
-                  <p className="font-medium">{petAge}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Waga</p>
-                  <p className="font-medium">{petWeight}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Płeć</p>
-                  <p className="font-medium">{pet.sex || "Nieznana"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Sterylizacja</p>
-                  <p className="font-medium">{pet.neutered ? "Tak" : "Nie"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Właściciel</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {owner ? (
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Link to={`/clients/${owner.id}`} className="font-medium hover:underline">
-                      {owner.firstName} {owner.lastName}
-                    </Link>
-                  </div>
-                  {owner.phone && (
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-2 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                      </svg>
-                      <span>{owner.phone}</span>
-                    </div>
-                  )}
-                  <Button variant="outline" size="sm" className="mt-2" asChild>
-                    <Link to={`/clients/${owner.id}`}>
-                      Profil właściciela
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-muted-foreground">Brak informacji o właścicielu</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Historia zdrowia</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pet.medicalHistory ? (
-                <p className="text-sm">{pet.medicalHistory}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">Brak historii zdrowia</p>
-              )}
-              {pet.allergies && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium">Alergie:</p>
-                  <p className="text-sm">{pet.allergies}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
           <TabsList>
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
-            <TabsTrigger value="visits">Wizyty ({visits.length})</TabsTrigger>
-            <TabsTrigger value="care-plans">Plany opieki ({carePrograms.length})</TabsTrigger>
-            <TabsTrigger value="notes">Notatki</TabsTrigger>
+            <TabsTrigger value="visits">Wizyty</TabsTrigger>
+            <TabsTrigger value="care">Programy opieki</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="overview" className="space-y-4">
+          <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ogólne informacje o zwierzęciu</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {pet.dietaryRestrictions && (
-                    <div>
-                      <h4 className="font-medium mb-1">Ograniczenia dietetyczne:</h4>
-                      <p>{pet.dietaryRestrictions}</p>
+              <div className="space-y-6">
+                {/* Basic info card */}
+                <div className="bg-card rounded-lg border p-4">
+                  <h3 className="font-medium mb-2">Podstawowe informacje</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Gatunek:</span>
+                      <span className="font-medium">{pet.species}</span>
                     </div>
-                  )}
-                  
-                  {pet.behavioralNotes && (
-                    <div>
-                      <h4 className="font-medium mb-1">Notatki behawioralne:</h4>
-                      <p>{pet.behavioralNotes}</p>
+                    {pet.breed && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Rasa:</span>
+                        <span className="font-medium">{pet.breed}</span>
+                      </div>
+                    )}
+                    {pet.age && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Wiek:</span>
+                        <span className="font-medium">{pet.age} lat</span>
+                      </div>
+                    )}
+                    {pet.sex && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Płeć:</span>
+                        <span className="font-medium">{pet.sex === 'male' ? 'Samiec' : 'Samica'}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Kastracja/Sterylizacja:</span>
+                      <span className="font-medium">{pet.neutered ? 'Tak' : 'Nie'}</span>
                     </div>
-                  )}
-                  
-                  {!pet.dietaryRestrictions && !pet.behavioralNotes && (
-                    <p className="text-muted-foreground">Brak dodatkowych informacji o zwierzęciu</p>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  {pet.id && pet.clientId && (
-                    <ResponsivePetForm
-                      clientId={pet.clientId}
-                      buttonText="Edytuj informacje"
-                      buttonVariant="outline"
-                      buttonSize="sm"
-                      defaultValues={pet}
-                      isEditing={true}
-                      onPetSaved={handlePetUpdated}
-                    />
-                  )}
-                </CardFooter>
-              </Card>
+                    {pet.weight && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Waga:</span>
+                        <span className="font-medium">{pet.weight} kg</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>Aktywne plany opieki</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {carePrograms.filter(cp => cp.status === "aktywny").length > 0 ? (
-                    <div className="space-y-4">
-                      {carePrograms
-                        .filter(cp => cp.status === "aktywny")
-                        .map(program => (
-                          <div key={program.id} className="border rounded-md p-3">
-                            <h4 className="font-medium">{program.name}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">{program.goal}</p>
-                            <div className="flex items-center justify-between mt-2">
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                Aktywny
-                              </span>
-                              <CareProgramDetailsDialog programId={program.id}>
-                                <Button variant="ghost" size="sm">Szczegóły</Button>
-                              </CareProgramDetailsDialog>
-                            </div>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  ) : (
-                    <div className="text-center py-4">
-                      <Clipboard className="mx-auto h-8 w-8 text-muted-foreground opacity-50" />
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Brak aktywnych planów opieki
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  {pet.id && (
-                    <ResponsiveCareProgramForm
-                      petId={pet.id}
-                      buttonText="Dodaj plan opieki"
-                      buttonSize="sm"
-                      onCareProgramSaved={handleCareProgramAdded}
-                    />
-                  )}
-                </CardFooter>
-              </Card>
+              <div className="space-y-6">
+                {/* Medical info card */}
+                {(pet.medicalHistory || pet.allergies || pet.dietaryRestrictions) && (
+                  <div className="bg-card rounded-lg border p-4">
+                    <h3 className="font-medium mb-2">Informacje medyczne</h3>
+                    {pet.medicalHistory && (
+                      <div className="mb-3">
+                        <div className="text-muted-foreground mb-1">Historia medyczna:</div>
+                        <div>{pet.medicalHistory}</div>
+                      </div>
+                    )}
+                    {pet.allergies && (
+                      <div className="mb-3">
+                        <div className="text-muted-foreground mb-1">Alergie:</div>
+                        <div>{pet.allergies}</div>
+                      </div>
+                    )}
+                    {pet.dietaryRestrictions && (
+                      <div>
+                        <div className="text-muted-foreground mb-1">Ograniczenia żywieniowe:</div>
+                        <div>{pet.dietaryRestrictions}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Behavioral notes card */}
+                {pet.behavioralNotes && (
+                  <div className="bg-card rounded-lg border p-4">
+                    <h3 className="font-medium mb-2">Zachowanie</h3>
+                    <div>{pet.behavioralNotes}</div>
+                  </div>
+                )}
+              </div>
             </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Ostatnie wizyty</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {visits.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Typ</TableHead>
-                        <TableHead>Notatki</TableHead>
-                        <TableHead className="text-right">Akcje</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {visits.slice(0, 3).map((visit) => (
-                        <TableRow key={visit.id}>
-                          <TableCell className="font-medium">
-                            {new Date(visit.date).toLocaleDateString('pl-PL')}
-                          </TableCell>
-                          <TableCell>{visit.type}</TableCell>
-                          <TableCell>{visit.notes ? visit.notes.substring(0, 30) + '...' : '—'}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              Szczegóły
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-4">
-                    <Calendar className="mx-auto h-8 w-8 text-muted-foreground opacity-50" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Brak wizyt dla tego zwierzęcia
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-              {visits.length > 0 && (
-                <CardFooter>
-                  <Button variant="outline" size="sm" onClick={() => setActiveTab("visits")}>
-                    Zobacz wszystkie wizyty
-                  </Button>
-                </CardFooter>
-              )}
-            </Card>
           </TabsContent>
-          
-          <TabsContent value="visits" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Historia wizyt</CardTitle>
-                  <CardDescription>
-                    Wszystkie wizyty i konsultacje dla {pet.name}
-                  </CardDescription>
-                </div>
-                {pet.id && pet.clientId && (
-                  <ResponsiveVisitForm
-                    petId={pet.id}
-                    clientId={pet.clientId}
-                    buttonText="Dodaj wizytę"
-                    onVisitSaved={handleVisitAdded}
-                  />
-                )}
-              </CardHeader>
-              <CardContent>
-                {visits.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Typ</TableHead>
-                        <TableHead>Notatki</TableHead>
-                        <TableHead>Zalecenia</TableHead>
-                        <TableHead>Kontrola</TableHead>
-                        <TableHead className="text-right">Akcje</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {visits.map((visit) => (
-                        <TableRow key={visit.id}>
-                          <TableCell className="font-medium">
-                            {new Date(visit.date).toLocaleDateString('pl-PL')}
-                          </TableCell>
-                          <TableCell>{visit.type}</TableCell>
-                          <TableCell>{visit.notes ? visit.notes.substring(0, 20) + '...' : '—'}</TableCell>
-                          <TableCell>{visit.recommendations ? visit.recommendations.substring(0, 20) + '...' : '—'}</TableCell>
-                          <TableCell>
-                            {visit.followUpNeeded ? (
-                              <span className="text-amber-600">
-                                {new Date(visit.followUpDate || '').toLocaleDateString('pl-PL')}
-                              </span>
-                            ) : 'Nie wymagana'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              Szczegóły
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                    <h3 className="mt-2 text-lg font-medium">Brak wizyt</h3>
-                    <p className="text-muted-foreground mt-1">
-                      Dla tego zwierzęcia nie ma jeszcze zarejestrowanych wizyt
-                    </p>
-                    {pet.id && pet.clientId && (
-                      <ResponsiveVisitForm
-                        petId={pet.id}
-                        clientId={pet.clientId}
-                        buttonText="Zaplanuj pierwszą wizytę"
-                        className="mt-4"
-                        onVisitSaved={handleVisitAdded}
-                      />
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="care-plans" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Plany opieki</CardTitle>
-                  <CardDescription>
-                    Wszystkie plany opieki dla {pet.name}
-                  </CardDescription>
-                </div>
-                {pet.id && (
-                  <ResponsiveCareProgramForm
-                    petId={pet.id}
-                    buttonText="Nowy plan opieki"
-                    onCareProgramSaved={handleCareProgramAdded}
-                  />
-                )}
-              </CardHeader>
-              <CardContent>
-                {carePrograms.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {carePrograms.map((program) => (
-                      <Card key={program.id}>
-                        <CardHeader className="pb-2">
-                          <div className="flex justify-between items-start">
-                            <CardTitle>{program.name}</CardTitle>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              program.status === "aktywny"
-                                ? "bg-green-100 text-green-800"
-                                : program.status === "zakończony"
-                                ? "bg-gray-100 text-gray-800"
-                                : "bg-red-100 text-red-800"
-                            }`}>
-                              {program.status}
-                            </span>
-                          </div>
-                          <CardDescription className="mt-1">
-                            {new Date(program.startDate).toLocaleDateString('pl-PL')} 
-                            {program.endDate && ` - ${new Date(program.endDate).toLocaleDateString('pl-PL')}`}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <p className="font-medium text-sm mb-1">Cel:</p>
-                          <p className="text-sm mb-4">{program.goal}</p>
-                          
-                          {program.instructions && (
-                            <>
-                              <p className="font-medium text-sm mb-1">Instrukcje:</p>
-                              <p className="text-sm whitespace-pre-line">{program.instructions}</p>
-                            </>
-                          )}
-                        </CardContent>
-                        <CardFooter className="flex justify-between border-t pt-4">
-                          <ResponsiveCareProgramForm
-                            petId={program.petId}
-                            isEditing={true}
-                            defaultValues={program}
-                            onCareProgramSaved={handleCareProgramAdded}
-                            buttonVariant="outline"
-                            buttonSize="sm"
-                          >
-                            <Button variant="outline" size="sm">
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edytuj
-                            </Button>
-                          </ResponsiveCareProgramForm>
 
-                          <CareProgramDetailsDialog programId={program.id}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="mr-2 h-4 w-4" />
-                              Szczegóły
-                            </Button>
-                          </CareProgramDetailsDialog>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Clipboard className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                    <h3 className="mt-2 text-lg font-medium">Brak planów opieki</h3>
-                    <p className="text-muted-foreground mt-1">
-                      Dla tego zwierzęcia nie utworzono jeszcze planów opieki
-                    </p>
-                    {pet.id && (
-                      <ResponsiveCareProgramForm
-                        petId={pet.id}
-                        buttonText="Utwórz pierwszy plan opieki"
-                        className="mt-4"
-                        onCareProgramSaved={handleCareProgramAdded}
-                      />
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="visits">
+            <PetVisitsList 
+              pet={pet} 
+              visits={visits} 
+              clientId={pet.clientId} 
+              onVisitUpdated={handleVisitUpdated}
+            />
           </TabsContent>
           
-          <TabsContent value="notes" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notatki</CardTitle>
-                <CardDescription>
-                  Dodatkowe informacje i uwagi dotyczące {pet.name}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                  <h3 className="mt-2 text-lg font-medium">Brak dodatkowych notatek</h3>
-                  <p className="text-muted-foreground mt-1">
-                    Dodaj notatki dotyczące zachowania, preferencji czy innych ważnych informacji
-                  </p>
-                  <Button className="mt-4">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj notatkę
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="care">
+            <PetCarePrograms petId={petId} />
           </TabsContent>
         </Tabs>
       </div>
