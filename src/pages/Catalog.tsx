@@ -21,16 +21,33 @@ const Catalog = () => {
         setLoading(true);
         console.log('Fetching specialists from database');
         
-        // Get all user accounts that have role="user" and status="active"
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+        // Get users with role="user" and status="active" from user_roles table
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'user');
+          
+        if (!userRoles || userRoles.length === 0) {
+          console.log('No users found with role="user"');
+          setSpecialists([]);
+          setFilteredSpecialists([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Extract user IDs
+        const userIds = userRoles.map(ur => ur.user_id);
+        
+        // Get all user accounts that have status="active"
+        const { data: { users }, error: authError } = await supabase.auth.admin.listUsers();
         
         if (authError) throw authError;
         
-        // Filter active users
-        const activeUsers = authUsers.users.filter(user => 
-          user.user_metadata?.status === 'active' && 
-          user.user_metadata?.role === 'user'
-        );
+        // Filter active users by looking at user_metadata and checking those in userIds list
+        const activeUsers = users.filter(user => {
+          const metadata = user.user_metadata as Record<string, any> || {};
+          return metadata.status === 'active' && userIds.includes(user.id);
+        });
         
         if (!activeUsers.length) {
           console.log('No active users found with role="user" and status="active"');
@@ -78,8 +95,8 @@ const Catalog = () => {
           if (userProfile) {
             name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
             if (!name) name = "Specjalista";
-          } else if (user.user_metadata?.name) {
-            name = user.user_metadata.name;
+          } else if (user.user_metadata && (user.user_metadata as Record<string, any>).name) {
+            name = (user.user_metadata as Record<string, any>).name;
           }
           
           // Create specialist object

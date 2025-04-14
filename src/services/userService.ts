@@ -2,6 +2,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserFormValues } from "@/components/admin/users/UserFormDialog";
 
+type AppRole = 'user' | 'admin' | 'specialist';
+
 // Create a new user
 export const createUser = async (userData: UserFormValues) => {
   try {
@@ -26,7 +28,7 @@ export const createUser = async (userData: UserFormValues) => {
         .from('user_roles')
         .insert({
           user_id: authData.user.id,
-          role: userData.role || 'user'
+          role: (userData.role as AppRole) || 'user' 
         });
         
       if (roleError) throw roleError;
@@ -73,7 +75,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
         // Update existing role
         const { error: roleError } = await supabase
           .from('user_roles')
-          .update({ role: userData.role })
+          .update({ role: userData.role as AppRole })
           .eq('user_id', userId);
           
         if (roleError) throw roleError;
@@ -83,7 +85,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
           .from('user_roles')
           .insert({
             user_id: userId,
-            role: userData.role
+            role: userData.role as AppRole
           });
           
         if (roleError) throw roleError;
@@ -146,7 +148,7 @@ export const getUsers = async () => {
     const roleMap = userRoles?.reduce((map, item) => {
       map[item.user_id] = item.role;
       return map;
-    }, {} as Record<string, string>) || {};
+    }, {} as Record<string, AppRole>) || {};
     
     // Create a map of user profiles
     const profileMap = userProfiles?.reduce((map, item) => {
@@ -161,15 +163,15 @@ export const getUsers = async () => {
     return authUsers.users.map(user => {
       const profile = profileMap[user.id] || {};
       const name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 
-                   user.user_metadata?.name || 
+                   (user.user_metadata && (user.user_metadata as Record<string, any>).name) || 
                    'Użytkownik';
       
       return {
         id: user.id,
         name: name,
         email: user.email,
-        role: roleMap[user.id] || user.user_metadata?.role || 'user',
-        status: user.user_metadata?.status || 'pending',
+        role: roleMap[user.id] || ((user.user_metadata as Record<string, any>)?.role as AppRole) || 'user',
+        status: (user.user_metadata as Record<string, any>)?.status || 'pending',
         lastLogin: user.last_sign_in_at
       };
     });
@@ -181,7 +183,7 @@ export const getUsers = async () => {
         id: "1",
         name: "Anna Kowalska",
         email: "anna.kowalska@example.com",
-        role: "admin",
+        role: "admin" as AppRole,
         status: "active",
         lastLogin: "2023-04-05T12:00:00Z"
       },
@@ -189,7 +191,7 @@ export const getUsers = async () => {
         id: "2",
         name: "Jan Nowak",
         email: "jan.nowak@example.com",
-        role: "specialist",
+        role: "specialist" as AppRole,
         status: "active",
         lastLogin: "2023-04-03T14:30:00Z"
       }
