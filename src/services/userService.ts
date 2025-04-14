@@ -2,7 +2,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserFormValues } from "@/components/admin/users/UserFormDialog";
 
-type AppRole = 'user' | 'admin' | 'specialist';
+// Define roles but align with the database schema
+type AppRole = 'user' | 'admin';
 
 // Create a new user
 export const createUser = async (userData: UserFormValues) => {
@@ -72,20 +73,22 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
         .single();
         
       if (existingRole) {
-        // Update existing role
+        // Update existing role - ensure we only use valid database roles (user or admin)
+        const dbRole: AppRole = userData.role === 'specialist' ? 'user' : (userData.role as AppRole);
         const { error: roleError } = await supabase
           .from('user_roles')
-          .update({ role: userData.role as AppRole })
+          .update({ role: dbRole })
           .eq('user_id', userId);
           
         if (roleError) throw roleError;
       } else {
-        // Insert new role
+        // Insert new role - ensure we only use valid database roles (user or admin)
+        const dbRole: AppRole = userData.role === 'specialist' ? 'user' : (userData.role as AppRole);
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
             user_id: userId,
-            role: userData.role as AppRole
+            role: dbRole
           });
           
         if (roleError) throw roleError;
@@ -162,16 +165,28 @@ export const getUsers = async () => {
     // Map auth users to the format expected by the UI
     return authUsers.users.map(user => {
       const profile = profileMap[user.id] || {};
+      const userMetadata = user.user_metadata as Record<string, any> || {};
       const name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 
-                   (user.user_metadata && (user.user_metadata as Record<string, any>).name) || 
-                   'Użytkownik';
+                  (userMetadata && userMetadata.name) || 
+                  'Użytkownik';
+      
+      // For the UI, we'll continue using 'specialist' for the frontend role
+      // even though the database only stores 'user' or 'admin'
+      const dbRole = roleMap[user.id] || (userMetadata?.role as string) || 'user';
+      let uiRole = dbRole;
+      
+      // If user metadata indicates this is meant to be a specialist and db role is 'user',
+      // we'll present it as 'specialist' to the UI
+      if (dbRole === 'user' && userMetadata?.role === 'specialist') {
+        uiRole = 'specialist';
+      }
       
       return {
         id: user.id,
         name: name,
         email: user.email,
-        role: roleMap[user.id] || ((user.user_metadata as Record<string, any>)?.role as AppRole) || 'user',
-        status: (user.user_metadata as Record<string, any>)?.status || 'pending',
+        role: uiRole as 'user' | 'admin' | 'specialist',
+        status: userMetadata?.status || 'pending',
         lastLogin: user.last_sign_in_at
       };
     });
@@ -191,7 +206,7 @@ export const getUsers = async () => {
         id: "2",
         name: "Jan Nowak",
         email: "jan.nowak@example.com",
-        role: "specialist" as AppRole,
+        role: "user" as AppRole,
         status: "active",
         lastLogin: "2023-04-03T14:30:00Z"
       }

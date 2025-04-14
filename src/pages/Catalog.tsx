@@ -38,13 +38,13 @@ const Catalog = () => {
         // Extract user IDs
         const userIds = userRoles.map(ur => ur.user_id);
         
-        // Get all user accounts that have status="active"
-        const { data: { users }, error: authError } = await supabase.auth.admin.listUsers();
+        // Get all user accounts
+        const { data, error } = await supabase.auth.admin.listUsers();
         
-        if (authError) throw authError;
+        if (error) throw error;
         
         // Filter active users by looking at user_metadata and checking those in userIds list
-        const activeUsers = users.filter(user => {
+        const activeUsers = data.users.filter(user => {
           const metadata = user.user_metadata as Record<string, any> || {};
           return metadata.status === 'active' && userIds.includes(user.id);
         });
@@ -95,8 +95,11 @@ const Catalog = () => {
           if (userProfile) {
             name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
             if (!name) name = "Specjalista";
-          } else if (user.user_metadata && (user.user_metadata as Record<string, any>).name) {
-            name = (user.user_metadata as Record<string, any>).name;
+          } else {
+            const metadata = user.user_metadata as Record<string, any> || {};
+            if (metadata && metadata.name) {
+              name = metadata.name;
+            }
           }
           
           // Create specialist object
