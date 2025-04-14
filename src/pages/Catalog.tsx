@@ -7,6 +7,26 @@ import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistC
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define the user metadata type
+interface UserMetadata {
+  status?: string;
+  name?: string;
+  role?: string;
+}
+
+// Define the User type for admin API response
+interface SupabaseAdminUser {
+  id: string;
+  user_metadata: UserMetadata;
+  email?: string;
+  last_sign_in_at?: string;
+}
+
+// Define the admin API response type
+interface AdminUsersResponse {
+  users: SupabaseAdminUser[];
+}
+
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<any>({});
@@ -21,16 +41,36 @@ const Catalog = () => {
         setLoading(true);
         console.log('Fetching specialists from database');
         
-        // Get all user accounts that have role="user" and status="active"
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+        // Get users with role="user" and status="active" from user_roles table
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'user');
+          
+        if (!userRoles || userRoles.length === 0) {
+          console.log('No users found with role="user"');
+          setSpecialists([]);
+          setFilteredSpecialists([]);
+          setLoading(false);
+          return;
+        }
         
-        if (authError) throw authError;
+        // Extract user IDs
+        const userIds = userRoles.map(ur => ur.user_id);
         
-        // Filter active users
-        const activeUsers = authUsers.users.filter(user => 
-          user.user_metadata?.status === 'active' && 
-          user.user_metadata?.role === 'user'
-        );
+        // Get all user accounts
+        const { data, error } = await supabase.auth.admin.listUsers() as { 
+          data: AdminUsersResponse; 
+          error: any;
+        };
+        
+        if (error) throw error;
+        
+        // Filter active users by looking at user_metadata and checking those in userIds list
+        const activeUsers = data.users.filter(user => {
+          const metadata = user.user_metadata;
+          return metadata.status === 'active' && userIds.includes(user.id);
+        });
         
         if (!activeUsers.length) {
           console.log('No active users found with role="user" and status="active"');
@@ -78,8 +118,11 @@ const Catalog = () => {
           if (userProfile) {
             name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
             if (!name) name = "Specjalista";
-          } else if (user.user_metadata?.name) {
-            name = user.user_metadata.name;
+          } else {
+            const metadata = user.user_metadata;
+            if (metadata && metadata.name) {
+              name = metadata.name;
+            }
           }
           
           // Create specialist object
