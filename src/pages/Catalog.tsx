@@ -7,6 +7,13 @@ import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistC
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define the user metadata type
+interface UserMetadata {
+  status?: string;
+  name?: string;
+  role?: string;
+}
+
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<any>({});
@@ -45,7 +52,7 @@ const Catalog = () => {
         
         // Filter active users by looking at user_metadata and checking those in userIds list
         const activeUsers = data.users.filter(user => {
-          const metadata = user.user_metadata as Record<string, any> || {};
+          const metadata = user.user_metadata as UserMetadata || {};
           return metadata.status === 'active' && userIds.includes(user.id);
         });
         
@@ -96,7 +103,7 @@ const Catalog = () => {
             name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
             if (!name) name = "Specjalista";
           } else {
-            const metadata = user.user_metadata as Record<string, any> || {};
+            const metadata = user.user_metadata as UserMetadata || {};
             if (metadata && metadata.name) {
               name = metadata.name;
             }
