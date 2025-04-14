@@ -7,13 +7,6 @@ import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistC
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define the user metadata type
-interface UserMetadata {
-  status?: string;
-  name?: string;
-  role?: string;
-}
-
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<any>({});
@@ -28,33 +21,16 @@ const Catalog = () => {
         setLoading(true);
         console.log('Fetching specialists from database');
         
-        // Get users with role="user" and status="active" from user_roles table
-        const { data: userRoles } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'user');
-          
-        if (!userRoles || userRoles.length === 0) {
-          console.log('No users found with role="user"');
-          setSpecialists([]);
-          setFilteredSpecialists([]);
-          setLoading(false);
-          return;
-        }
+        // Get all user accounts that have role="user" and status="active"
+        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
         
-        // Extract user IDs
-        const userIds = userRoles.map(ur => ur.user_id);
+        if (authError) throw authError;
         
-        // Get all user accounts
-        const { data, error } = await supabase.auth.admin.listUsers();
-        
-        if (error) throw error;
-        
-        // Filter active users by looking at user_metadata and checking those in userIds list
-        const activeUsers = data.users.filter(user => {
-          const metadata = user.user_metadata as UserMetadata || {};
-          return metadata.status === 'active' && userIds.includes(user.id);
-        });
+        // Filter active users
+        const activeUsers = authUsers.users.filter(user => 
+          user.user_metadata?.status === 'active' && 
+          user.user_metadata?.role === 'user'
+        );
         
         if (!activeUsers.length) {
           console.log('No active users found with role="user" and status="active"');
@@ -102,11 +78,8 @@ const Catalog = () => {
           if (userProfile) {
             name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
             if (!name) name = "Specjalista";
-          } else {
-            const metadata = user.user_metadata as UserMetadata || {};
-            if (metadata && metadata.name) {
-              name = metadata.name;
-            }
+          } else if (user.user_metadata?.name) {
+            name = user.user_metadata.name;
           }
           
           // Create specialist object
