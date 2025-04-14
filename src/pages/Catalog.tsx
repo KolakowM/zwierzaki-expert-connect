@@ -14,19 +14,6 @@ interface UserMetadata {
   role?: string;
 }
 
-// Define the User type for admin API response
-interface SupabaseAdminUser {
-  id: string;
-  user_metadata: UserMetadata;
-  email?: string;
-  last_sign_in_at?: string;
-}
-
-// Define the admin API response type
-interface AdminUsersResponse {
-  users: SupabaseAdminUser[];
-}
-
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<any>({});
@@ -59,16 +46,13 @@ const Catalog = () => {
         const userIds = userRoles.map(ur => ur.user_id);
         
         // Get all user accounts
-        const { data, error } = await supabase.auth.admin.listUsers() as { 
-          data: AdminUsersResponse; 
-          error: any;
-        };
+        const { data, error } = await supabase.auth.admin.listUsers();
         
         if (error) throw error;
         
         // Filter active users by looking at user_metadata and checking those in userIds list
         const activeUsers = data.users.filter(user => {
-          const metadata = user.user_metadata;
+          const metadata = user.user_metadata as UserMetadata || {};
           return metadata.status === 'active' && userIds.includes(user.id);
         });
         
@@ -119,7 +103,7 @@ const Catalog = () => {
             name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
             if (!name) name = "Specjalista";
           } else {
-            const metadata = user.user_metadata;
+            const metadata = user.user_metadata as UserMetadata || {};
             if (metadata && metadata.name) {
               name = metadata.name;
             }
