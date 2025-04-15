@@ -111,24 +111,26 @@ const PetProfile = () => {
       <div className="container py-8">
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="sm" asChild className="mr-4">
-            <Link to={`/clients/${pet.clientId}`}><ArrowLeft className="mr-2 h-4 w-4" /> Powrót do klienta</Link>
+            <Link to={`/clients/${pet?.clientId}`}><ArrowLeft className="mr-2 h-4 w-4" /> Powrót do klienta</Link>
           </Button>
         </div>
 
-        <PetHeader 
-          pet={pet} 
-          clientId={pet.clientId}
-          actionButton={
-            <ResponsivePetForm 
-              clientId={pet.clientId} 
-              defaultValues={pet}
-              isEditing={true}
-              onPetSaved={handlePetUpdated}
-              buttonText="Edytuj dane"
-              title={`Edytuj dane: ${pet.name}`}
-            />
-          }
-        />
+        {pet && (
+          <PetHeader 
+            pet={pet} 
+            clientId={pet.clientId}
+            actionButton={
+              <ResponsivePetForm 
+                clientId={pet.clientId} 
+                defaultValues={pet}
+                isEditing={true}
+                onPetSaved={handlePetUpdated}
+                buttonText="Edytuj dane"
+                title={`Edytuj dane: ${pet.name}`}
+              />
+            }
+          />
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
           <TabsList>
