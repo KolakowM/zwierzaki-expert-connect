@@ -1,7 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +28,8 @@ import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCare
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 import CareProgramDetailsDialog from "@/components/care-programs/CareProgramDetailsDialog";
 import { usePetProfile } from "@/hooks/use-pet-profile";
+import PetProfileLoader from "@/components/pets/PetProfileLoader";
+import PetNotFound from "@/components/pets/PetNotFound";
 
 const PetProfile = () => {
   const {
@@ -46,43 +47,11 @@ const PetProfile = () => {
   } = usePetProfile();
 
   if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="container py-8">
-          <div className="flex items-center space-x-2">
-            <div className="h-6 w-6 rounded-full bg-muted/50 animate-pulse"></div>
-            <div className="h-8 w-48 bg-muted/50 animate-pulse rounded"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-5 w-32 bg-muted/50 rounded"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-4 w-full bg-muted/50 rounded"></div>
-                    <div className="h-4 w-3/4 bg-muted/50 rounded"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </MainLayout>
-    );
+    return <PetProfileLoader />;
   }
 
   if (!pet) {
-    return (
-      <MainLayout>
-        <div className="container py-8">
-          <div className="text-center">
-            <h2 className="text-xl">Nie znaleziono zwierzęcia</h2>
-          </div>
-        </div>
-      </MainLayout>
-    );
+    return <PetNotFound />;
   }
 
   const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
@@ -569,4 +538,3 @@ const PetProfile = () => {
 };
 
 export default PetProfile;
-
