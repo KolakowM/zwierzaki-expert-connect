@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,7 @@ import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
 import ResponsiveCareProgramForm from "@/components/care-programs/ResponsiveCareProgramForm";
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 import CareProgramDetailsDialog from "@/components/care-programs/CareProgramDetailsDialog";
+import VisitDetailsDialog from "@/components/visits/VisitDetailsDialog";
 import { usePetProfile } from "@/hooks/use-pet-profile";
 import PetProfileLoader from "@/components/pets/PetProfileLoader";
 import PetNotFound from "@/components/pets/PetNotFound";
@@ -42,6 +42,7 @@ const PetProfile = () => {
     setActiveTab,
     handlePetUpdated,
     handleVisitAdded,
+    handleVisitUpdated,
     handleCareProgramAdded,
     handleDeletePet
   } = usePetProfile();
@@ -306,9 +307,12 @@ const PetProfile = () => {
                           <TableCell>{visit.type}</TableCell>
                           <TableCell>{visit.notes ? visit.notes.substring(0, 30) + '...' : '—'}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              Szczegóły
-                            </Button>
+                            <VisitDetailsDialog
+                              visit={visit}
+                              petId={pet.id}
+                              clientId={pet.clientId}
+                              onVisitUpdated={handleVisitUpdated}
+                            />
                           </TableCell>
                         </TableRow>
                       ))}
@@ -381,9 +385,12 @@ const PetProfile = () => {
                             ) : 'Nie wymagana'}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              Szczegóły
-                            </Button>
+                            <VisitDetailsDialog
+                              visit={visit}
+                              petId={pet.id}
+                              clientId={pet.clientId}
+                              onVisitUpdated={handleVisitUpdated}
+                            />
                           </TableCell>
                         </TableRow>
                       ))}

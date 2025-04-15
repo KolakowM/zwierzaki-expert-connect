@@ -83,7 +83,7 @@ export const usePetProfile = () => {
   }, [petError, toast]);
 
   const handlePetUpdated = (updatedPet: Pet) => {
-    refetchPet();
+    queryClient.invalidateQueries({ queryKey: ['pet', petId] });
     toast({
       title: "Dane zaktualizowane",
       description: `Dane ${updatedPet.name} zostały pomyślnie zaktualizowane`,
@@ -91,10 +91,18 @@ export const usePetProfile = () => {
   };
 
   const handleVisitAdded = (visit: Visit) => {
-    refetchVisits();
+    queryClient.invalidateQueries({ queryKey: ['visits', petId] });
     toast({
       title: "Wizyta dodana pomyślnie",
       description: "Nowa wizyta została zapisana",
+    });
+  };
+
+  const handleVisitUpdated = (updatedVisit: Visit) => {
+    queryClient.invalidateQueries({ queryKey: ['visits', petId] });
+    toast({
+      title: "Wizyta zaktualizowana",
+      description: "Dane wizyty zostały zaktualizowane",
     });
   };
 
@@ -104,10 +112,6 @@ export const usePetProfile = () => {
       title: "Plan opieki utworzony pomyślnie",
       description: "Nowy plan opieki został zapisany",
     });
-  };
-
-  const handleVisitUpdated = (updatedVisit: Visit) => {
-    refetchVisits();
   };
 
   const handleDeletePet = async () => {
