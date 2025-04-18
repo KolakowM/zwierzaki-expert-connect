@@ -1,0 +1,289 @@
+
+# PetsFlow - Product Requirements Document
+
+## 1. Introduction
+
+PetsFlow to platforma internetowa przeznaczona dla specjalistów weterynarii i opieki nad zwierzętami, umożliwiająca efektywne zarządzanie klientami, ich zwierzętami oraz wizytami. Aplikacja wspiera specjalistów w codziennej pracy, zapewniając funkcjonalności takie jak prowadzenie dokumentacji medycznej, planowanie wizyt oraz tworzenie planów opieki.
+
+## 2. Struktura Aplikacji
+
+### 2.1 Struktura Plików
+
+```
+src/
+├── components/            # Komponenty UI
+│   ├── account/           # Komponenty związane z kontem użytkownika
+│   ├── admin/             # Komponenty panelu administratora
+│   ├── care-programs/     # Komponenty planów opieki
+│   ├── catalog/           # Komponenty katalogu specjalistów
+│   ├── clients/           # Komponenty zarządzania klientami
+│   │   ├── tabs/          # Zakładki szczegółów klienta
+│   ├── dashboard/         # Komponenty panelu głównego
+│   ├── layout/            # Komponenty układu strony (header, footer, sidebar)
+│   ├── pets/              # Komponenty zarządzania zwierzętami
+│   │   ├── form-fields/   # Pola formularzy zwierząt
+│   │   ├── tabs/          # Zakładki profilu zwierzęcia
+│   ├── profile/           # Komponenty profilu specjalisty
+│   ├── specialists/       # Komponenty dla specjalistów
+│   │   ├── profile/       # Komponenty profilu specjalisty
+│   ├── ui/                # Komponenty UI (shadcn/ui)
+│   ├── visits/            # Komponenty wizyt
+│       ├── form-fields/   # Pola formularzy wizyt
+├── contexts/              # Konteksty React (AuthProvider)
+├── data/                  # Dane statyczne (mock, specjalizacje)
+├── hooks/                 # Hooki React
+├── integrations/          # Integracje z zewnętrznymi usługami
+│   ├── supabase/          # Klient Supabase
+├── lib/                   # Biblioteki pomocnicze
+├── pages/                 # Strony aplikacji
+│   ├── admin/             # Strony panelu administratora
+├── services/              # Usługi API
+│   ├── user/              # Usługi użytkownika
+├── types/                 # Definicje typów TypeScript
+```
+
+### 2.2 Struktura Nawigacji
+
+- **Strona główna** (`/`) - Landing page aplikacji
+- **O Platformie** (`/about`) - Informacje o platformie
+- **Kontakt** (`/contact`) - Strona kontaktowa
+- **Cennik** (`/pricing`) - Plany cenowe
+- **Katalog Specjalistów** (`/catalog`) - Lista dostępnych specjalistów
+- **Panel Specjalisty** (`/dashboard`) - Panel dla zalogowanych specjalistów
+- **Klienci** (`/clients`) - Zarządzanie klientami
+- **Zwierzęta** (`/pets`) - Zarządzanie zwierzętami
+- **Profil Specjalisty** (`/profile`) - Edycja profilu specjalisty
+- **Ustawienia Konta** (`/settings`) - Ustawienia konta użytkownika
+- **Panel Administratora** (`/admin`) - Panel administracyjny
+
+## 3. Kluczowe Funkcjonalności
+
+### 3.1 Zarządzanie Kontem
+
+#### 3.1.1 Rejestracja i Logowanie
+- Rejestracja nowego użytkownika (`/register`)
+- Logowanie istniejącego użytkownika (`/login`)
+- Wylogowanie z systemu
+
+#### 3.1.2 Profil Specjalisty
+- Edycja danych podstawowych (imię, nazwisko, tytuł)
+- Dodawanie i edycja specjalizacji
+- Dodawanie i edycja usług
+- Zarządzanie danymi kontaktowymi
+- Zarządzanie zdjęciem profilowym
+- Dodawanie i edycja informacji o wykształceniu i doświadczeniu
+- Zarządzanie linkami do mediów społecznościowych
+
+#### 3.1.3 Ustawienia Konta
+- Zmiana hasła
+- Zarządzanie subskrypcją
+- Usuwanie konta
+
+### 3.2 Panel Specjalisty (Dashboard)
+
+#### 3.2.1 Przegląd
+- Statystyki (liczba klientów, zwierząt, wizyt)
+- Informacje o aktualnym planie
+- Status uzupełnienia profilu
+- Nadchodzące wizyty
+
+#### 3.2.2 Zakładki Panelu
+- Przegląd - ogólne informacje i statystyki
+- Klienci - skrócony widok bazy klientów
+- Zwierzęta - skrócony widok zwierząt
+- Kalendarz - widok zaplanowanych wizyt
+
+### 3.3 Zarządzanie Klientami
+
+#### 3.3.1 Lista Klientów
+- Wyświetlanie wszystkich klientów
+- Wyszukiwanie i filtrowanie klientów
+- Dodawanie nowych klientów
+- Usuwanie klientów
+
+#### 3.3.2 Profil Klienta
+- Dane kontaktowe klienta
+- Lista zwierząt klienta
+- Historia wizyt wszystkich zwierząt klienta
+- Dodawanie notatek do profilu klienta
+
+### 3.4 Zarządzanie Zwierzętami
+
+#### 3.4.1 Lista Zwierząt
+- Wyświetlanie wszystkich zwierząt
+- Wyszukiwanie i filtrowanie zwierząt
+- Dodawanie nowych zwierząt do klientów
+
+#### 3.4.2 Profil Zwierzęcia
+- Informacje podstawowe (gatunek, rasa, wiek, waga)
+- Historia zdrowia
+- Historia wizyt
+- Plany opieki
+- Notatki behawioralne i dietetyczne
+
+### 3.5 Zarządzanie Wizytami
+
+#### 3.5.1 Dodawanie Wizyt
+- Tworzenie nowych wizyt dla zwierząt
+- Wybór typu wizyty
+- Wybór daty i godziny
+- Dodawanie notatek i zaleceń
+- Ustawianie przypomnień o kontroli
+
+#### 3.5.2 Historia Wizyt
+- Wyświetlanie historii wizyt dla zwierzęcia
+- Szczegóły wizyty (notatki, zalecenia)
+- Edycja istniejących wizyt
+
+### 3.6 Plany Opieki
+
+#### 3.6.1 Tworzenie Planów Opieki
+- Definiowanie celu planu
+- Ustawianie statusu (aktywny, zakończony, wstrzymany)
+- Dodawanie instrukcji i zaleceń
+- Określanie dat rozpoczęcia i zakończenia
+
+#### 3.6.2 Zarządzanie Planami Opieki
+- Wyświetlanie planów opieki dla zwierzęcia
+- Edycja istniejących planów
+- Zmiana statusu planu
+
+### 3.7 Funkcje Administracyjne
+
+#### 3.7.1 Panel Administratora
+- Zarządzanie użytkownikami
+- Zarządzanie klientami
+- Zarządzanie zwierzętami
+- Zarządzanie wizytami
+- Zarządzanie planami opieki
+- Ustawienia systemu
+
+## 4. Widoki i Interfejs Użytkownika
+
+### 4.1 Komponenty Wspólne
+
+#### 4.1.1 Nagłówek (Header)
+- Logo aplikacji
+- Menu nawigacyjne
+- Przyciski logowania/wylogowania
+- Menu dla urządzeń mobilnych
+
+#### 4.1.2 Stopka (Footer)
+- Linki do stron informacyjnych
+- Linki do mediów społecznościowych
+- Informacje prawne (regulamin, polityka prywatności)
+
+### 4.2 Formularze
+
+#### 4.2.1 Formularze Klientów
+- Formularze dodawania/edycji klientów
+- Responsywne wersje dla urządzeń mobilnych (drawersy) i desktopowych (dialogi)
+
+#### 4.2.2 Formularze Zwierząt
+- Formularze dodawania/edycji zwierząt
+- Pola podstawowych informacji
+- Pola charakterystyki
+- Pola pomiarów
+- Pola medyczne
+
+#### 4.2.3 Formularze Wizyt
+- Formularze dodawania/edycji wizyt
+- Wybór daty i czasu
+- Wybór typu wizyty
+- Edytor tekstu dla notatek i zaleceń
+- Ustawienia kontroli
+
+#### 4.2.4 Formularze Planów Opieki
+- Formularze dodawania/edycji planów opieki
+- Wybór statusu
+- Wybór dat
+- Definiowanie celu i instrukcji
+
+### 4.3 Widoki Szczegółowe
+
+#### 4.3.1 Profil Zwierzęcia
+- Zakładka przeglądu z podstawowymi informacjami
+- Zakładka wizyt z historią wizyt
+- Zakładka planów opieki
+- Zakładka notatek
+
+#### 4.3.2 Profil Klienta
+- Zakładka przeglądu z danymi kontaktowymi
+- Zakładka zwierząt z listą zwierząt klienta
+- Zakładka wizyt z historią wizyt
+- Zakładka notatek
+
+#### 4.3.3 Szczegóły Wizyty
+- Dialog ze szczegółami wizyty
+- Możliwość edycji wizyty
+
+#### 4.3.4 Szczegóły Planu Opieki
+- Dialog ze szczegółami planu opieki
+- Możliwość edycji planu
+
+## 5. Integracje
+
+### 5.1 Baza Danych (Supabase)
+- Przechowywanie danych użytkowników
+- Przechowywanie danych klientów i zwierząt
+- Przechowywanie danych wizyt i planów opieki
+
+### 5.2 Uwierzytelnianie (Supabase Auth)
+- Rejestracja i logowanie użytkowników
+- Zarządzanie sesją użytkownika
+- Resetowanie hasła
+
+### 5.3 Przechowywanie Plików (Supabase Storage)
+- Przechowywanie zdjęć profilowych specjalistów
+- Przechowywanie dokumentów związanych z klientami i zwierzętami
+
+## 6. Technologie
+
+### 6.1 Frontend
+- React.js + TypeScript
+- React Router (nawigacja)
+- Tanstack Query (zarządzanie stanem)
+- Tailwind CSS (stylowanie)
+- shadcn/ui (komponenty UI)
+- React Hook Form + Zod (walidacja formularzy)
+- Lucide (ikony)
+- Recharts (wykresy i wizualizacje)
+
+### 6.2 Backend
+- Supabase (baza danych, autentykacja, storage)
+
+## 7. Responsywność
+
+Aplikacja jest w pełni responsywna i dostosowana do urządzeń:
+- Desktopowych (komputer stacjonarny, laptop)
+- Tabletów
+- Telefonów komórkowych
+
+Dla urządzeń mobilnych stosowane są specjalne komponenty (Drawer zamiast Dialog).
+
+## 8. Bezpieczeństwo
+
+- Uwierzytelnianie użytkowników
+- Zabezpieczenie endpointów API
+- Autoryzacja na poziomie bazy danych (Row Level Security)
+- Szyfrowanie danych wrażliwych
+- Kontrola dostępu do danych (tylko właściwi użytkownicy mają dostęp do swoich danych)
+
+## 9. Przyszłe Rozszerzenia
+
+### 9.1 Planowane Funkcjonalności
+- System rezerwacji online dla klientów
+- Integracja z systemami płatności
+- Powiadomienia SMS/email dla klientów
+- Generowanie raportów i analiz
+- Integracja z apteką weterynaryjną
+- System wystawiania recept
+
+## 10. Wersjonowanie i Aktualizacje
+
+Aplikacja jest rozwijana w modelu przyrostowym, z regularnymi aktualizacjami wprowadzającymi nowe funkcjonalności i poprawiającymi istniejące.
+
+---
+
+Dokument przygotowany przez zespół PetsFlow
+Data: 18 kwietnia 2025
