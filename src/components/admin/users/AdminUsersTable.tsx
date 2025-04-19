@@ -40,7 +40,7 @@ const AdminUsersTable = ({
   onUserDeleted
 }: AdminUsersTableProps) => {
   // Format date helper
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "Nigdy";
     return new Date(dateString).toLocaleDateString('pl-PL', {
       year: 'numeric',

@@ -4,7 +4,7 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import { Card } from "@/components/ui/card";
 import AdminUsersSearch from "@/components/admin/users/AdminUsersSearch";
 import AdminUsersTable from "@/components/admin/users/AdminUsersTable";
-import { getUsers } from "@/services/userService";
+import { getUsers } from "@/services/user/getUsers";
 import { UserData } from "@/services/userService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,6 +30,8 @@ const AdminUsers = () => {
           description: error.message || "Spróbuj ponownie później",
           variant: "destructive"
         });
+        // Set empty array to prevent undefined error
+        setUsers([]);
       } finally {
         setIsLoading(false);
       }
