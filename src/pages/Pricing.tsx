@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,12 @@ import { Link } from "react-router-dom";
 import { ReactNode } from "react";
 
 export default function Pricing() {
+  // Define billing period state
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  
+  // Calculate the discount factor for yearly plans
+  const yearlyDiscountFactor = 0.75; // 25% discount = pay 75% of original price
+  
   // Explicitly define the feature type to handle both strings and JSX elements
   type Feature = {
     id: string;
@@ -15,7 +22,8 @@ export default function Pricing() {
 
   type PricingTier = {
     name: string;
-    price: string;
+    monthlyPrice: string;
+    yearlyPrice: string;
     description: string;
     features: Feature[];
     cta: string;
@@ -25,7 +33,8 @@ export default function Pricing() {
   const tiers: PricingTier[] = [
     {
       name: "Testowy",
-      price: "0 zł",
+      monthlyPrice: "0 zł",
+      yearlyPrice: "0 zł",
       description: "Dla rozpoczynających działalność",
       features: [
         { id: "t1", content: "Miejsce w katalogu specjalistów" },
@@ -41,7 +50,8 @@ export default function Pricing() {
     },
     {
       name: "Zaawansowany",
-      price: "29 zł / miesiąc",
+      monthlyPrice: "29 zł",
+      yearlyPrice: "21.75 zł",
       description: "Dla rozwijających się praktyk",
       features: [
         { id: "a1", content: "Miejsce w katalogu specjalistów" },
@@ -59,7 +69,8 @@ export default function Pricing() {
     },
     {
       name: "Zawodowiec",
-      price: "49 zł / miesiąc",
+      monthlyPrice: "49 zł",
+      yearlyPrice: "36.75 zł",
       description: "Dla większych praktyków pracy z zwierzętami",
       features: [
         { id: "p1", content: "Miejsce w katalogu specjalistów" },
@@ -88,6 +99,24 @@ export default function Pricing() {
             <p className="mt-4 text-lg text-muted-foreground">
               Wybierz plan odpowiedni dla Twojej praktyki
             </p>
+            
+            {/* Billing period selector */}
+            <div className="mt-6 inline-flex items-center rounded-lg border p-1">
+              <Button
+                variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
+                onClick={() => setBillingPeriod('monthly')}
+                className="relative z-10"
+              >
+                Miesięcznie
+              </Button>
+              <Button
+                variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
+                onClick={() => setBillingPeriod('yearly')}
+                className="relative z-10"
+              >
+                Rocznie (-25%)
+              </Button>
+            </div>
           </div>
 
           <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -101,7 +130,12 @@ export default function Pricing() {
                 <CardHeader>
                   <CardTitle>{tier.name}</CardTitle>
                   <div className="mt-4">
-                    <span className="text-3xl font-bold">{tier.price}</span>
+                    <span className="text-3xl font-bold">
+                      {billingPeriod === 'monthly' ? tier.monthlyPrice : tier.yearlyPrice}
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-1">
+                      {billingPeriod === 'monthly' ? '/ miesiąc' : '/ miesiąc (płatne rocznie)'}
+                    </span>
                   </div>
                   <CardDescription className="mt-2">{tier.description}</CardDescription>
                 </CardHeader>
@@ -143,6 +177,10 @@ export default function Pricing() {
               <div>
                 <h3 className="text-lg font-medium">Jakie formy płatności akceptujecie?</h3>
                 <p className="text-muted-foreground">Akceptujemy karty płatnicze, przelewy bankowe oraz BLIK.</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Czy mogę zapłacić za cały rok?</h3>
+                <p className="text-muted-foreground">Tak, oferujemy płatność roczną z 25% zniżką w porównaniu do płatności miesięcznych.</p>
               </div>
             </div>
           </div>
