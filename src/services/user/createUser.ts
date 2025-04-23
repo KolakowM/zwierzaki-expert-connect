@@ -21,12 +21,13 @@ export const createUser = async (userData: UserFormValues) => {
     
     // If user creation was successful, store the user role in user_roles table
     if (authData.user) {
-      // Insert into user_roles table
+      // Insert into user_roles table with status
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
           user_id: authData.user.id,
-          role: (userData.role === 'specialist' ? 'user' : userData.role) as AppRole
+          role: (userData.role === 'specialist' ? 'user' : userData.role) as AppRole,
+          status: 'niezweryfikowany'
         });
         
       if (roleError) throw roleError;
@@ -37,7 +38,7 @@ export const createUser = async (userData: UserFormValues) => {
         name: userData.name,
         email: userData.email,
         role: userData.role || 'user',
-        status: userData.status || 'pending',
+        status: 'niezweryfikowany',
         lastLogin: null
       };
     }

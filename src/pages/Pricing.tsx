@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -8,13 +7,10 @@ import { Link } from "react-router-dom";
 import { ReactNode } from "react";
 
 export default function Pricing() {
-  // Define billing period state
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   
-  // Calculate the discount factor for yearly plans
-  const yearlyDiscountFactor = 0.75; // 25% discount = pay 75% of original price
-  
-  // Explicitly define the feature type to handle both strings and JSX elements
+  const yearlyDiscountFactor = 0.75;
+
   type Feature = {
     id: string;
     content: ReactNode;
@@ -49,7 +45,7 @@ export default function Pricing() {
       popular: false
     },
     {
-      name: "Zaawansowany",
+      name: "Zaawansowany (Polecany)",
       monthlyPrice: "29 zł",
       yearlyPrice: "21.75 zł",
       description: "Dla rozwijających się praktyk",
@@ -100,7 +96,6 @@ export default function Pricing() {
               Wybierz plan odpowiedni dla Twojej praktyki
             </p>
             
-            {/* Billing period selector */}
             <div className="mt-6 inline-flex items-center rounded-lg border p-1">
               <Button
                 variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}

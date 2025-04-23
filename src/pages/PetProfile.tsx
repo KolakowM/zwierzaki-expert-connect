@@ -30,6 +30,7 @@ import VisitDetailsDialog from "@/components/visits/VisitDetailsDialog";
 import { usePetProfile } from "@/hooks/use-pet-profile";
 import PetProfileLoader from "@/components/pets/PetProfileLoader";
 import PetNotFound from "@/components/pets/PetNotFound";
+import PetNotes from "@/components/pets/PetNotes";
 
 const PetProfile = () => {
   const {
@@ -516,27 +517,7 @@ const PetProfile = () => {
           </TabsContent>
           
           <TabsContent value="notes" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notatki</CardTitle>
-                <CardDescription>
-                  Dodatkowe informacje i uwagi dotyczące {pet.name}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                  <h3 className="mt-2 text-lg font-medium">Brak dodatkowych notatek</h3>
-                  <p className="text-muted-foreground mt-1">
-                    Dodaj notatki dotyczące zachowania, preferencji czy innych ważnych informacji
-                  </p>
-                  <Button className="mt-4">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj notatkę
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <PetNotes pet={pet} />
           </TabsContent>
         </Tabs>
       </div>
