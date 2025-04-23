@@ -251,7 +251,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
               <FormControl>
                 <Textarea
                   placeholder="Szczegółowe instrukcje do programu opieki..."
-                  className="min-h-[150px]"
+                  className="min-h-[250px]"
                   {...field}
                 />
               </FormControl>
@@ -269,7 +269,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
               <FormControl>
                 <Textarea
                   placeholder="Zalecenia dla właściciela zwierzęcia..."
-                  className="min-h-[150px]"
+                  className="min-h-[250px]"
                   {...field}
                 />
               </FormControl>
