@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -17,40 +17,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [notes, setNotes] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-
-  // Fetch existing notes when component mounts
-  useEffect(() => {
-    fetchNotes();
-  }, [pet.id]);
-
-  const fetchNotes = async () => {
-    if (!pet.id) return;
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('pet_notes')
-        .select('*')
-        .eq('pet_id', pet.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setNotes(data || []);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-      toast({
-        title: "Błąd",
-        description: "Nie udało się pobrać notatek",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -78,15 +45,6 @@ const PetNotes = ({ pet }: PetNotesProps) => {
   };
 
   const handleSaveNote = async () => {
-    if (!content.trim()) {
-      toast({
-        title: "Brak treści",
-        description: "Wprowadź treść notatki przed zapisaniem",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       setIsSaving(true);
 
@@ -130,11 +88,8 @@ const PetNotes = ({ pet }: PetNotesProps) => {
         description: "Notatka została pomyślnie zapisana"
       });
 
-      // Reset form and fetch updated notes
       setIsEditing(false);
-      setContent("");
       setFiles([]);
-      fetchNotes();
     } catch (error: any) {
       console.error("Error saving note:", error);
       toast({
@@ -220,25 +175,8 @@ const PetNotes = ({ pet }: PetNotesProps) => {
               </div>
             )}
           </div>
-        ) : isLoading ? (
-          <p className="text-muted-foreground">Ładowanie notatek...</p>
-        ) : notes.length > 0 ? (
-          <div className="space-y-6">
-            {notes.map((note) => (
-              <div key={note.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                <p className="whitespace-pre-line">{note.content}</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {new Date(note.created_at).toLocaleDateString('pl-PL', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </div>
-            ))}
-          </div>
+        ) : content ? (
+          <p>{content}</p>
         ) : (
           <p className="text-muted-foreground">Brak notatek dla tego zwierzęcia.</p>
         )}
