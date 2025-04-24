@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthProvider"; // Updated import path
+import { useAuth } from "@/contexts/AuthProvider";
 import { Link, Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +65,7 @@ const Login = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Hasło</Label>
-                    <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    <Link to="/reset-password" className="text-sm text-primary hover:underline">
                       Zapomniałeś hasła?
                     </Link>
                   </div>
