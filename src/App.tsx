@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -87,111 +86,110 @@ const AdminRoute = ({ children }: { children: JSX.Element }) => {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <DatabaseSetupChecker>
-        <Router>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="*" element={<NotFound />} />
+      <DatabaseSetupChecker />
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="*" element={<NotFound />} />
 
-            {/* Protected routes */}
-            <Route 
-              path="/dashboard" 
-              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
-            />
-            
-            <Route 
-              path="/clients" 
-              element={<ProtectedRoute><Clients /></ProtectedRoute>}
-            />
-            
-            <Route 
-              path="/clients/:id" 
-              element={<ProtectedRoute><ClientDetails /></ProtectedRoute>}
-            />
-            
-            <Route 
-              path="/pets" 
-              element={<ProtectedRoute><Pets /></ProtectedRoute>}
-            />
-            
-            <Route 
-              path="/pets/:id" 
-              element={<ProtectedRoute><PetProfile /></ProtectedRoute>}
-            />
+          {/* Protected routes */}
+          <Route 
+            path="/dashboard" 
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
+          
+          <Route 
+            path="/clients" 
+            element={<ProtectedRoute><Clients /></ProtectedRoute>}
+          />
+          
+          <Route 
+            path="/clients/:id" 
+            element={<ProtectedRoute><ClientDetails /></ProtectedRoute>}
+          />
+          
+          <Route 
+            path="/pets" 
+            element={<ProtectedRoute><Pets /></ProtectedRoute>}
+          />
+          
+          <Route 
+            path="/pets/:id" 
+            element={<ProtectedRoute><PetProfile /></ProtectedRoute>}
+          />
 
-            <Route 
-              path="/catalog" 
-              element={<Catalog />}
-            />
+          <Route 
+            path="/catalog" 
+            element={<Catalog />}
+          />
 
-            <Route 
-              path="/specialist/:id" 
-              element={<SpecialistProfile />}
-            />
+          <Route 
+            path="/specialist/:id" 
+            element={<SpecialistProfile />}
+          />
 
-            <Route 
-              path="/profile/edit" 
-              element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>}
-            />
-            
-            <Route 
-              path="/account" 
-              element={<ProtectedRoute><AccountSettings /></ProtectedRoute>}
-            />
-            
-            <Route 
-              path="/become-specialist" 
-              element={<ProtectedRoute><BecomeSpecialist /></ProtectedRoute>}
-            />
+          <Route 
+            path="/profile/edit" 
+            element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>}
+          />
+          
+          <Route 
+            path="/account" 
+            element={<ProtectedRoute><AccountSettings /></ProtectedRoute>}
+          />
+          
+          <Route 
+            path="/become-specialist" 
+            element={<ProtectedRoute><BecomeSpecialist /></ProtectedRoute>}
+          />
 
-            {/* Admin routes */}
-            <Route 
-              path="/admin" 
-              element={<AdminRoute><AdminDashboard /></AdminRoute>}
-            />
-            
-            <Route 
-              path="/admin/clients" 
-              element={<AdminRoute><AdminClients /></AdminRoute>}
-            />
-            
-            <Route 
-              path="/admin/pets" 
-              element={<AdminRoute><AdminPets /></AdminRoute>}
-            />
-            
-            <Route 
-              path="/admin/visits" 
-              element={<AdminRoute><AdminVisits /></AdminRoute>}
-            />
-            
-            <Route 
-              path="/admin/users" 
-              element={<AdminRoute><AdminUsers /></AdminRoute>}
-            />
-            
-            <Route 
-              path="/admin/care-programs" 
-              element={<AdminRoute><AdminCarePrograms /></AdminRoute>}
-            />
-            
-            <Route 
-              path="/admin/settings" 
-              element={<AdminRoute><AdminSettings /></AdminRoute>}
-            />
-          </Routes>
-        </Router>
+          {/* Admin routes */}
+          <Route 
+            path="/admin" 
+            element={<AdminRoute><AdminDashboard /></AdminRoute>}
+          />
+          
+          <Route 
+            path="/admin/clients" 
+            element={<AdminRoute><AdminClients /></AdminRoute>}
+          />
+          
+          <Route 
+            path="/admin/pets" 
+            element={<AdminRoute><AdminPets /></AdminRoute>}
+          />
+          
+          <Route 
+            path="/admin/visits" 
+            element={<AdminRoute><AdminVisits /></AdminRoute>}
+          />
+          
+          <Route 
+            path="/admin/users" 
+            element={<AdminRoute><AdminUsers /></AdminRoute>}
+          />
+          
+          <Route 
+            path="/admin/care-programs" 
+            element={<AdminRoute><AdminCarePrograms /></AdminRoute>}
+          />
+          
+          <Route 
+            path="/admin/settings" 
+            element={<AdminRoute><AdminSettings /></AdminRoute>}
+          />
+        </Routes>
         <Toaster />
-      </DatabaseSetupChecker>
+      </Router>
     </QueryClientProvider>
   );
 }
