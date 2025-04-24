@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +6,7 @@ import { Save, Edit, Upload, File, X, Paperclip } from "lucide-react";
 import { Pet } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthProvider";
 
 interface PetNotesProps {
   pet: Pet;
@@ -27,6 +27,7 @@ interface PetNote {
 }
 
 const PetNotes = ({ pet }: PetNotesProps) => {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -35,9 +36,13 @@ const PetNotes = ({ pet }: PetNotesProps) => {
   const [notes, setNotes] = useState<PetNote[]>([]);
   const { toast } = useToast();
 
-  // Fetch notes when component mounts
   useEffect(() => {
     const fetchNotes = async () => {
+      if (!user) {
+        console.error('No authenticated user found');
+        return;
+      }
+
       try {
         setIsLoading(true);
         const { data, error } = await supabase
@@ -62,7 +67,6 @@ const PetNotes = ({ pet }: PetNotesProps) => {
         
         setNotes(data || []);
         
-        // If we have notes, use the most recent one to set the content
         if (data && data.length > 0) {
           setContent(data[0].content);
         }
@@ -81,7 +85,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
     if (pet.id) {
       fetchNotes();
     }
-  }, [pet.id, toast]);
+  }, [pet.id, toast, user]);
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -109,6 +113,15 @@ const PetNotes = ({ pet }: PetNotesProps) => {
   };
 
   const handleSaveNote = async () => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby zapisać notatkę",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       if (!content.trim()) {
         toast({
@@ -121,16 +134,17 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
       setIsSaving(true);
 
-      // Create the note
       const { data: noteData, error: noteError } = await supabase
         .from('pet_notes')
-        .insert([{ pet_id: pet.id, content }])
+        .insert([{ 
+          pet_id: pet.id, 
+          content 
+        }])
         .select()
         .single();
 
       if (noteError) throw noteError;
 
-      // Upload files
       const attachments = [];
       
       for (const file of files) {
@@ -144,7 +158,6 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
         if (uploadError) throw uploadError;
 
-        // Create attachment record
         const { data: attachmentData, error: attachmentError } = await supabase
           .from('pet_note_attachments')
           .insert([{
@@ -162,7 +175,6 @@ const PetNotes = ({ pet }: PetNotesProps) => {
         attachments.push(attachmentData);
       }
 
-      // Add the new note to the state
       setNotes(prevNotes => [{
         id: noteData.id,
         content: noteData.content,
@@ -178,6 +190,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
       setIsEditing(false);
       setFiles([]);
+      setContent("");
     } catch (error: any) {
       console.error("Error saving note:", error);
       toast({
@@ -215,15 +228,20 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
   const handleDownload = async (filePath: string, fileName: string) => {
     try {
-      const publicUrl = await getDownloadUrl(filePath);
-      
-      // Create a temporary link element and trigger download
+      const { data, error } = await supabase.storage
+        .from('pet_attachments')
+        .download(filePath);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
       const link = document.createElement('a');
-      link.href = publicUrl;
+      link.href = url;
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading file:", error);
       toast({
