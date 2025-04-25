@@ -12,6 +12,7 @@ import VisitTypeField from "./form-fields/VisitTypeField";
 import VisitRichTextField from "./form-fields/VisitRichTextField";
 import VisitFollowUpField from "./form-fields/VisitFollowUpField";
 import { supabase } from "@/integrations/supabase/client";
+import { mapDbVisitToVisit } from "@/types";
 
 // Define the schema for visit validation
 const visitFormSchema = z.object({
@@ -75,7 +76,9 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
           
         if (error) throw error;
         
-        setExistingVisits(data || []);
+        // Map database visit format to application Visit format
+        const mappedVisits = data ? data.map(visit => mapDbVisitToVisit(visit)) : [];
+        setExistingVisits(mappedVisits);
       } catch (error) {
         console.error('Error fetching visits:', error);
       } finally {
