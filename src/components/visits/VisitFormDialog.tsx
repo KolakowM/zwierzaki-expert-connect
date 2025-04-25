@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { CalendarPlus, Edit } from "lucide-react";
 import { Visit } from "@/types";
 import { createVisit, updateVisit } from "@/services/visitService";
 import { ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthProvider";
 
 interface VisitFormDialogProps {
   petId: string;
@@ -43,6 +44,7 @@ const VisitFormDialog = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Use external or internal state based on what's provided
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -58,7 +60,23 @@ const VisitFormDialog = ({
     followUpDate: defaultValues.followUpDate ? (typeof defaultValues.followUpDate === 'string' ? new Date(defaultValues.followUpDate) : defaultValues.followUpDate) : null,
   } : undefined;
 
+  useEffect(() => {
+    // If the dialog is closed and there are validation errors, reset them
+    if (!open) {
+      setIsSubmitting(false);
+    }
+  }, [open]);
+
   const handleSubmit = async (formData: any) => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby zapisać wizytę",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
       console.log("Saving visit:", formData);
@@ -98,11 +116,11 @@ const VisitFormDialog = ({
 
       // Close the dialog
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving visit:", error);
       toast({
         title: isEditing ? "Błąd podczas aktualizacji wizyty" : "Błąd podczas dodawania wizyty",
-        description: "Spróbuj ponownie później",
+        description: error.message || "Spróbuj ponownie później",
         variant: "destructive",
       });
     } finally {

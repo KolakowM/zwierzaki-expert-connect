@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Save, Edit } from "lucide-react";
 import { Client } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthProvider";
 
 interface ClientNotesProps {
   client: Client;
@@ -17,17 +18,36 @@ const ClientNotes = ({ client }: ClientNotesProps) => {
   const [notes, setNotes] = useState(client.notes || "");
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Update local state if client prop changes
+  useEffect(() => {
+    setNotes(client.notes || "");
+  }, [client.notes]);
 
   const handleSaveNotes = async () => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby zapisać notatki",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setIsSaving(true);
       
       const { error } = await supabase
         .from('clients')
         .update({ notes: notes })
-        .eq('id', client.id);
+        .eq('id', client.id)
+        .eq('user_id', user.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error saving notes:", error);
+        throw error;
+      }
       
       toast({
         title: "Notatki zapisane",
@@ -39,7 +59,7 @@ const ClientNotes = ({ client }: ClientNotesProps) => {
       console.error("Error saving notes:", error);
       toast({
         title: "Błąd",
-        description: "Nie udało się zapisać notatek",
+        description: "Nie udało się zapisać notatek: " + (error.message || "Nieznany błąd"),
         variant: "destructive"
       });
     } finally {
@@ -75,7 +95,7 @@ const ClientNotes = ({ client }: ClientNotesProps) => {
             placeholder="Wprowadź notatki dotyczące klienta..."
           />
         ) : client.notes ? (
-          <p>{client.notes}</p>
+          <p className="whitespace-pre-wrap">{client.notes}</p>
         ) : (
           <p className="text-muted-foreground">Brak notatek dla tego klienta.</p>
         )}

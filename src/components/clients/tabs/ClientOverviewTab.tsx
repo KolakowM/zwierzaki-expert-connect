@@ -22,6 +22,13 @@ const ClientOverviewTab = ({
   onPetSaved,
   onVisitAdded,
 }: ClientOverviewTabProps) => {
+  // Sort visits by date (most recent first)
+  const sortedVisits = [...visits].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA;
+  });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -80,9 +87,9 @@ const ClientOverviewTab = ({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {visits.length > 0 ? (
+          {sortedVisits.length > 0 ? (
             <div className="space-y-2">
-              {visits.slice(0, 3).map(visit => {
+              {sortedVisits.slice(0, 3).map(visit => {
                 const pet = pets.find(p => p.id === visit.petId);
                 return (
                   <div key={visit.id} className="flex items-center justify-between py-2 border-b last:border-0">
