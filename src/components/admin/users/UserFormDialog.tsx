@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -25,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import { createUser, updateUser } from "@/services/userService";
 
-// Define schema for user form
 const userFormSchema = z.object({
   name: z.string().min(2, { message: "Imię i nazwisko jest wymagane" }),
   email: z.string().email({ message: "Nieprawidłowy adres email" }),
@@ -59,7 +57,6 @@ const UserFormDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  // Initialize form with default values or user data for editing
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: user
@@ -77,13 +74,11 @@ const UserFormDialog = ({
         },
   });
 
-  // Handle form submission
   const onSubmit = async (values: UserFormValues) => {
     try {
       setIsSubmitting(true);
       
       if (isEditing && user?.id) {
-        // Update existing user
         const updatedUser = await updateUser(user.id, values);
         toast({
           title: "Użytkownik zaktualizowany",
@@ -94,7 +89,6 @@ const UserFormDialog = ({
           onUserSaved(updatedUser);
         }
       } else {
-        // Create new user
         const newUser = await createUser(values);
         toast({
           title: "Użytkownik dodany",
@@ -160,8 +154,8 @@ const UserFormDialog = ({
                       placeholder="jan.kowalski@example.com" 
                       type="email"
                       {...field}
-                      readOnly={isEditing} // Email cannot be changed when editing
-                      className={isEditing ? "bg-gray-100" : ""}
+                      readOnly={isEditing && !user?.id}
+                      className={isEditing && !user?.id ? "bg-gray-100" : ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -208,6 +202,7 @@ const UserFormDialog = ({
                       <SelectItem value="active">Aktywny</SelectItem>
                       <SelectItem value="inactive">Nieaktywny</SelectItem>
                       <SelectItem value="pending">Oczekujący</SelectItem>
+                      <SelectItem value="niezweryfikowany">Niezweryfikowany</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

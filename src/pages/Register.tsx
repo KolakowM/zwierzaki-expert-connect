@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SignUpCredentials } from "@/services/authService";
+import { useToast } from "@/hooks/use-toast";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -20,6 +21,7 @@ const Register = () => {
   const [error, setError] = useState("");
   
   const { register, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +48,18 @@ const Register = () => {
       };
       
       await register(credentials);
+      
+      toast({
+        title: "Konto utworzone",
+        description: "Twoje konto zostało pomyślnie utworzone.",
+      });
     } catch (err: any) {
       setError(err.message || "Błąd rejestracji. Spróbuj ponownie później.");
+      toast({
+        title: "Błąd rejestracji",
+        description: err.message || "Nie udało się utworzyć konta. Spróbuj ponownie później.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

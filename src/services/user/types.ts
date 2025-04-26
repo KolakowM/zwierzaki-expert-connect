@@ -1,5 +1,6 @@
 
-export type AppRole = 'user' | 'admin';
+// Definicje typów dla użytkowników i ról w systemie
+export type AppRole = 'admin' | 'user';
 
 export interface UserData {
   id: string;
@@ -10,8 +11,10 @@ export interface UserData {
   lastLogin?: string | null;
 }
 
-export interface UserMetadata {
-  name?: string;
-  role?: string;
-  status?: string;
+export interface UserRoleData {
+  id?: string;
+  user_id: string;
+  role: AppRole;
+  status: string;
+  created_at?: string | null;
 }

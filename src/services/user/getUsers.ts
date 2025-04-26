@@ -4,42 +4,42 @@ import { AppRole, UserData } from "./types";
 
 export const getUsers = async (): Promise<UserData[]> => {
   try {
-    // Get user profiles from the database
+    // Pobierz profile użytkowników z bazy danych
     const { data: userProfiles, error: profilesError } = await supabase
       .from('user_profiles')
-      .select('id, first_name, last_name, updated_at');
+      .select('id, first_name, last_name, updated_at, email');
       
     if (profilesError) throw profilesError;
     
-    // Get user roles
+    // Pobierz role użytkowników
     const { data: userRoles, error: rolesError } = await supabase
       .from('user_roles')
-      .select('user_id, role');
+      .select('user_id, role, status');
       
     if (rolesError) throw rolesError;
     
-    // Create a map of user roles
+    // Utwórz mapę ról użytkowników
     const roleMap = userRoles?.reduce((map, item) => {
-      map[item.user_id] = item.role;
+      map[item.user_id] = { role: item.role, status: item.status };
       return map;
-    }, {} as Record<string, AppRole>) || {};
+    }, {} as Record<string, { role: AppRole, status: string }>) || {};
     
-    // Map user profiles to the format expected by the UI
+    // Mapuj profile użytkowników do formatu oczekiwanego przez UI
     return (userProfiles || []).map(profile => {
       const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Użytkownik';
-      const role = roleMap[profile.id] || 'user';
+      const roleData = roleMap[profile.id] || { role: 'user' as AppRole, status: 'niezweryfikowany' };
       
       return {
         id: profile.id,
         name: name,
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`, // Generate a placeholder email
-        role: role === 'admin' ? 'admin' : 'user', // Simplify roles to just admin or user
-        status: 'active', // Default status since we can't access metadata
-        lastLogin: profile.updated_at // Use updated_at as proxy for last login
+        email: profile.email || `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`, // Użyj rzeczywistego maila jeśli jest dostępny
+        role: roleData.role,
+        status: roleData.status || 'niezweryfikowany',
+        lastLogin: profile.updated_at // Użyj updated_at jako przybliżenie ostatniego logowania
       };
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Błąd podczas pobierania użytkowników:', error);
     throw error;
   }
 };

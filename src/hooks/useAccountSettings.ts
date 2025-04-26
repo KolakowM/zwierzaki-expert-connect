@@ -145,22 +145,35 @@ export function useAccountSettings() {
         throw new Error("Musisz być zalogowany, aby edytować profil");
       }
       
-      // Update user profile in Supabase
-      const { error } = await supabase
+      // Zaktualizuj profil użytkownika w Supabase
+      const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({
           id: user.id,
           first_name: values.firstName,
           last_name: values.lastName,
+          email: values.email,
           updated_at: new Date().toISOString()
         });
         
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
+      if (profileError) {
+        console.error("Supabase error:", profileError);
+        throw profileError;
       }
       
-      // Refresh user data to show updated information
+      // Zaktualizuj email użytkownika w Auth, jeśli się zmienił
+      if (values.email !== user.email) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: values.email
+        });
+        
+        if (emailError) {
+          console.error("Email update error:", emailError);
+          throw emailError;
+        }
+      }
+      
+      // Odśwież dane użytkownika, aby pokazać zaktualizowane informacje
       await refreshUserData();
       
       toast({
@@ -174,7 +187,7 @@ export function useAccountSettings() {
         description: error.message || "Wystąpił błąd podczas aktualizacji danych.",
         variant: "destructive"
       });
-      throw error; // Re-throw to trigger form error handling
+      throw error; // Ponownie rzuć, aby uruchomić obsługę błędów formularza
     } finally {
       setIsSubmitting(false);
     }

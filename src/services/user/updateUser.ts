@@ -5,8 +5,9 @@ import { AppRole } from "./types";
 
 export const updateUser = async (userId: string, userData: UserFormValues) => {
   try {
-    // Update the user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.updateUserById(userId, {
+    // Aktualizuj metadane użytkownika w Supabase Auth
+    const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
+      email: userData.email, // Dodajemy możliwość aktualizacji emaila
       user_metadata: {
         name: userData.name,
         status: userData.status
@@ -14,10 +15,27 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
     });
     
     if (authError) throw authError;
+
+    // Aktualizuj profil użytkownika w tabeli user_profiles
+    const names = userData.name.split(' ');
+    const firstName = names[0] || '';
+    const lastName = names.slice(1).join(' ') || '';
     
-    // Update the user role in user_roles table
+    const { error: profileError } = await supabase
+      .from('user_profiles')
+      .upsert({
+        id: userId,
+        first_name: firstName,
+        last_name: lastName,
+        email: userData.email,
+        updated_at: new Date().toISOString()
+      });
+      
+    if (profileError) throw profileError;
+    
+    // Aktualizuj rolę użytkownika w tabeli user_roles
     if (userData.role) {
-      // First check if the role exists for this user
+      // Najpierw sprawdź, czy rola istnieje dla tego użytkownika
       const { data: existingRole } = await supabase
         .from('user_roles')
         .select('*')
@@ -25,29 +43,33 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
         .single();
         
       if (existingRole) {
-        // Update existing role - ensure we only use valid database roles (user or admin)
+        // Aktualizuj istniejącą rolę - upewnij się, że używamy tylko poprawnych ról w bazie danych
         const dbRole = userData.role === 'specialist' ? 'user' : userData.role as AppRole;
         const { error: roleError } = await supabase
           .from('user_roles')
-          .update({ role: dbRole })
+          .update({ 
+            role: dbRole,
+            status: userData.status
+          })
           .eq('user_id', userId);
           
         if (roleError) throw roleError;
       } else {
-        // Insert new role - ensure we only use valid database roles (user or admin)
+        // Wstaw nową rolę - upewnij się, że używamy tylko poprawnych ról w bazie danych
         const dbRole = userData.role === 'specialist' ? 'user' : userData.role as AppRole;
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
             user_id: userId,
-            role: dbRole
+            role: dbRole,
+            status: userData.status || 'niezweryfikowany'
           });
           
         if (roleError) throw roleError;
       }
     }
     
-    // Return the updated user
+    // Zwróć zaktualizowanego użytkownika
     return {
       id: userId,
       name: userData.name,
@@ -56,7 +78,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
       status: userData.status,
     };
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error('Błąd podczas aktualizacji użytkownika:', error);
     throw error;
   }
 };

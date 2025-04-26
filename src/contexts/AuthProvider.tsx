@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Function to refresh user data from the server
   const refreshUserData = async () => {
     try {
       const currentUser = await getCurrentUser();
@@ -48,7 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     loadUser();
 
-    // Set up auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
@@ -67,7 +64,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     return () => {
-      // Clean up the subscription
       if (authListener && authListener.subscription) {
         authListener.subscription.unsubscribe();
       }
@@ -101,7 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (credentials: SignUpCredentials) => {
     try {
       setIsLoading(true);
-      // Register user with additional metadata
       const { data, error } = await supabase.auth.signUp({
         email: credentials.email,
         password: credentials.password,
@@ -117,25 +112,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       
-      // Insert user role into user_roles table
       if (data.user) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: data.user.id,
-            role: 'user'
-          });
-          
-        if (roleError) {
-          console.error('Error setting user role:', roleError);
+        try {
+          const { createUserRole } = await import('@/services/user/createRole');
+          await createUserRole(data.user.id, 'user', 'niezweryfikowany');
+        } catch (roleError) {
+          console.error("Błąd podczas tworzenia roli użytkownika:", roleError);
         }
+        
+        setUser({
+          id: data.user.id,
+          email: data.user.email || "",
+          firstName: credentials.firstName || "",
+          lastName: credentials.lastName || "",
+        });
+        setIsAuthenticated(true);
+        return data.user as unknown as User;
       }
-      
-      toast({
-        title: "Rejestracja udana",
-        description: "Możesz teraz zalogować się na swoje konto."
-      });
-      navigate("/login");
+      return null;
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
