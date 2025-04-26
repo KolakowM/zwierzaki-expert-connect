@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -139,15 +138,18 @@ export function useAccountSettings() {
 
   // Form submission handlers
   async function onAccountSubmit(values: AccountFormValues) {
-    console.log("Submitting account form with values:", values);
     try {
       setIsSubmitting(true);
+      
+      if (!user?.id) {
+        throw new Error("Musisz być zalogowany, aby edytować profil");
+      }
       
       // Update user profile in Supabase
       const { error } = await supabase
         .from('user_profiles')
         .upsert({
-          id: user?.id,
+          id: user.id,
           first_name: values.firstName,
           last_name: values.lastName,
           updated_at: new Date().toISOString()
@@ -162,8 +164,8 @@ export function useAccountSettings() {
       await refreshUserData();
       
       toast({
-        title: "Zaktualizowano dane",
-        description: "Twoje dane zostały pomyślnie zaktualizowane."
+        title: "Profil zaktualizowany",
+        description: "Twoje dane zostały pomyślnie zapisane."
       });
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -172,6 +174,7 @@ export function useAccountSettings() {
         description: error.message || "Wystąpił błąd podczas aktualizacji danych.",
         variant: "destructive"
       });
+      throw error; // Re-throw to trigger form error handling
     } finally {
       setIsSubmitting(false);
     }

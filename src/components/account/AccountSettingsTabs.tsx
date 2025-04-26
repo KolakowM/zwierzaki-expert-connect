@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AccountGeneralTab } from "./AccountGeneralTab";
@@ -8,6 +7,9 @@ import { SpecialistProfileTabWrapper } from "./SpecialistProfileTabWrapper";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
 import { Form } from "@/components/ui/form";
+import { TabErrorIndicator } from "@/components/ui/tab-error-indicator";
+import { ErrorToast } from "@/components/ui/error-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface AccountSettingsTabsProps {
   activeTab: string;
@@ -68,18 +70,78 @@ export function AccountSettingsTabs({
   addEducation,
   onPhotoChange
 }: AccountSettingsTabsProps) {
+  const { toast } = useToast();
+
+  const getTabErrors = (formName: string) => {
+    switch (formName) {
+      case "account":
+        return Object.keys(accountForm.formState.errors).length;
+      case "password":
+        return Object.keys(passwordForm.formState.errors).length;
+      case "specialist":
+        return Object.keys(profileForm.formState.errors).length;
+      default:
+        return 0;
+    }
+  };
+
+  const handleFormError = (form: UseFormReturn<any>) => {
+    const errors = Object.entries(form.formState.errors).map(([field, error]) => ({
+      field,
+      message: error.message as string,
+      tabName: activeTab
+    }));
+
+    if (errors.length > 0) {
+      toast({
+        title: "Formularz zawiera błędy",
+        description: <ErrorToast errors={errors} onErrorClick={handleErrorClick} />,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleErrorClick = (error: { field: string; tabName: string }) => {
+    // Switch to the appropriate tab
+    setActiveTab(error.tabName);
+    
+    // Focus the field with error
+    const element = document.getElementById(error.field);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.focus();
+    }
+  };
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="general">Dane profilu</TabsTrigger>
-        <TabsTrigger value="password">Hasło i bezpieczeństwo</TabsTrigger>
-        <TabsTrigger value="specialist">Profil specjalisty</TabsTrigger>
+        <TabsTrigger value="general" className="relative">
+          Dane profilu
+          <TabErrorIndicator 
+            count={getTabErrors("account")} 
+            className="absolute -right-1 -top-1" 
+          />
+        </TabsTrigger>
+        <TabsTrigger value="password" className="relative">
+          Hasło i bezpieczeństwo
+          <TabErrorIndicator 
+            count={getTabErrors("password")} 
+            className="absolute -right-1 -top-1" 
+          />
+        </TabsTrigger>
+        <TabsTrigger value="specialist" className="relative">
+          Profil specjalisty
+          <TabErrorIndicator 
+            count={getTabErrors("specialist")} 
+            className="absolute -right-1 -top-1" 
+          />
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="general">
         <Form {...accountForm}>
-          <form onSubmit={accountForm.handleSubmit(onAccountSubmit)}>
+          <form onSubmit={accountForm.handleSubmit(onAccountSubmit, () => handleFormError(accountForm))}>
             <AccountGeneralTab 
               form={accountForm}
               isSubmitting={accountForm.formState.isSubmitting}
@@ -93,7 +155,7 @@ export function AccountSettingsTabs({
       
       <TabsContent value="password">
         <Form {...passwordForm}>
-          <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
+          <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit, () => handleFormError(passwordForm))}>
             <PasswordTab 
               form={passwordForm}
               isSubmitting={isPasswordSubmitting}
