@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AccountGeneralTab } from "./AccountGeneralTab";
@@ -8,7 +9,7 @@ import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
 import { Form } from "@/components/ui/form";
 import { TabErrorIndicator } from "@/components/ui/tab-error-indicator";
-import { ErrorToast } from "@/components/ui/error-toast";
+import { ErrorToast, FormError } from "@/components/ui/error-toast";
 import { useToast } from "@/hooks/use-toast";
 
 interface AccountSettingsTabsProps {
@@ -101,9 +102,11 @@ export function AccountSettingsTabs({
     }
   };
 
-  const handleErrorClick = (error: { field: string; tabName: string }) => {
-    // Switch to the appropriate tab
-    setActiveTab(error.tabName);
+  const handleErrorClick = (error: FormError) => {
+    // Switch to the appropriate tab if tabName is provided
+    if (error.tabName) {
+      setActiveTab(error.tabName);
+    }
     
     // Focus the field with error
     const element = document.getElementById(error.field);

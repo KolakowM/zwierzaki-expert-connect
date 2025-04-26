@@ -3,7 +3,7 @@ import { XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-interface FormError {
+export interface FormError {
   field: string;
   message: string;
   tabName?: string;
