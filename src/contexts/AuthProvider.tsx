@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -126,8 +127,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           firstName: credentials.firstName || "",
           lastName: credentials.lastName || "",
         });
-        setIsAuthenticated(true);
-        return data.user as unknown as User;
+        
+        // Użytkownik jest teraz zalogowany
+        toast({
+          title: "Rejestracja pomyślna",
+          description: "Twoje konto zostało utworzone!"
+        });
+        
+        navigate("/dashboard");
+        return data.user;
       }
       return null;
     } catch (error: any) {
