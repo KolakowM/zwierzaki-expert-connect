@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -95,7 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (credentials: SignUpCredentials) => {
+  const register = async (credentials: SignUpCredentials): Promise<void> => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -103,8 +102,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password: credentials.password,
         options: {
           data: {
-            first_name: credentials.firstName,
-            last_name: credentials.lastName,
+            firstName: credentials.firstName,
+            lastName: credentials.lastName,
             role: 'user',
             status: 'pending'
           },
@@ -114,30 +113,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
       
       if (data.user) {
-        try {
-          const { createUserRole } = await import('@/services/user/createRole');
-          await createUserRole(data.user.id, 'user', 'niezweryfikowany');
-        } catch (roleError) {
-          console.error("Błąd podczas tworzenia roli użytkownika:", roleError);
-        }
-        
         setUser({
           id: data.user.id,
           email: data.user.email || "",
           firstName: credentials.firstName || "",
           lastName: credentials.lastName || "",
+          role: 'user'
         });
         
-        // Użytkownik jest teraz zalogowany
         toast({
           title: "Rejestracja pomyślna",
           description: "Twoje konto zostało utworzone!"
         });
         
         navigate("/dashboard");
-        return data.user;
       }
-      return null;
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({

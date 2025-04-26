@@ -341,6 +341,7 @@ export type Database = {
       user_profiles: {
         Row: {
           city: string | null
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -349,6 +350,7 @@ export type Database = {
         }
         Insert: {
           city?: string | null
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -357,6 +359,7 @@ export type Database = {
         }
         Update: {
           city?: string | null
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
