@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: {
             firstName: credentials.firstName,
             lastName: credentials.lastName,
-            role: 'user',
+            role: 'specialist',
             status: 'pending'
           },
         },
@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email: data.user.email || "",
           firstName: credentials.firstName || "",
           lastName: credentials.lastName || "",
-          role: 'user'
+          role: 'specialist'
         });
         
         toast({

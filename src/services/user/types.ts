@@ -1,6 +1,5 @@
-
 // Definicje typów dla użytkowników i ról w systemie
-export type AppRole = 'admin' | 'user';
+export type AppRole = 'admin' | 'user' | 'specialist';
 
 export interface UserData {
   id: string;

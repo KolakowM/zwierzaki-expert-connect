@@ -20,7 +20,7 @@ export const getUsers = async (): Promise<UserData[]> => {
     
     // Utwórz mapę ról użytkowników
     const roleMap = userRoles?.reduce((map, item) => {
-      map[item.user_id] = { role: item.role, status: item.status };
+      map[item.user_id] = { role: item.role as AppRole, status: item.status };
       return map;
     }, {} as Record<string, { role: AppRole, status: string }>) || {};
     
