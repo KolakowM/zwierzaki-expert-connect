@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -161,7 +160,7 @@ const DatabaseAuditReport = () => {
 
           {fixResults && (
             <div className="mb-6">
-              <Alert variant={fixResults.errors.length > 0 ? "warning" : "default"}>
+              <Alert variant={fixResults.errors.length > 0 ? "destructive" : "default"}>
                 <Wrench className="h-4 w-4" />
                 <AlertTitle>Wynik naprawy</AlertTitle>
                 <AlertDescription>

@@ -6,8 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const createCustomFunction = async (sql: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.rpc('execute_sql', {
-      sql_query: sql
+    // Metoda niestandardowa - używamy fetch bezpośrednio zamiast klienta Supabase
+    // ponieważ typowanie w Supabase nie uwzględnia funkcji niestandardowych
+    const { data, error } = await supabase.functions.invoke('execute-sql', {
+      body: { sql_query: sql }
     });
 
     if (error) {
@@ -42,17 +44,21 @@ export const setupExecuteSqlFunction = async (): Promise<boolean> => {
       GRANT EXECUTE ON FUNCTION public.execute_sql TO authenticated;
     `;
     
-    // Korzystamy z bezpośredniego wywołania SQL przez supabase
-    const { error } = await supabase.rpc('create_function', {
-      sql: createFunctionSql
-    });
+    // Korzystamy z bezpośredniego wywołania funkcji pomocniczej
+    const result = await createCustomFunction(createFunctionSql);
     
-    if (error) {
-      if (error.message.includes('create_function') && error.message.includes('does not exist')) {
-        // Potrzebujemy utworzyć funkcję create_function
-        const { error: rawError } = await supabase
-          .from('_raw_sql')
-          .rpc('sql', {
+    if (!result) {
+      // Próbujemy utworzyć funkcję create_function
+      try {
+        // Wywołujemy bezpośrednio z REST API
+        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/sql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          },
+          body: JSON.stringify({
             query: `
               CREATE OR REPLACE FUNCTION public.create_function(sql text)
               RETURNS void
@@ -67,24 +73,23 @@ export const setupExecuteSqlFunction = async (): Promise<boolean> => {
               -- Grant execute permissions
               GRANT EXECUTE ON FUNCTION public.create_function TO authenticated;
             `
-          });
-          
-        if (rawError) {
-          console.error('Błąd podczas tworzenia funkcji create_function:', rawError);
+          })
+        });
+        
+        if (!response.ok) {
+          console.error('Błąd podczas tworzenia funkcji create_function:', await response.text());
           return false;
         }
         
         // Spróbuj ponownie utworzyć execute_sql po utworzeniu create_function
-        const { error: retryError } = await supabase.rpc('create_function', {
-          sql: createFunctionSql
-        });
+        const retryResult = await createCustomFunction(createFunctionSql);
         
-        if (retryError) {
-          console.error('Błąd podczas ponownej próby tworzenia funkcji execute_sql:', retryError);
+        if (!retryResult) {
+          console.error('Błąd podczas ponownej próby tworzenia funkcji execute_sql');
           return false;
         }
-      } else {
-        console.error('Błąd podczas tworzenia funkcji execute_sql:', error);
+      } catch (error) {
+        console.error('Błąd podczas tworzenia funkcji create_function:', error);
         return false;
       }
     }
@@ -95,4 +100,3 @@ export const setupExecuteSqlFunction = async (): Promise<boolean> => {
     return false;
   }
 };
-

@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { createCustomFunction } from "./createCustomFunction";
 
 export interface TableDetails {
   exists: boolean;
@@ -74,163 +75,265 @@ export const auditDatabase = async (): Promise<AuditResult> => {
     ];
 
     for (const tableName of expectedTables) {
-      const { data: columns, error: columnsError } = await supabase
-        .from(tableName)
-        .select('*')
-        .limit(0);
+      try {
+        // Używamy metody SELECT z limitem 0 aby sprawdzić czy tabela istnieje
+        const { error: tableError } = await supabase
+          .from(tableName)
+          .select('*')
+          .limit(0);
 
-      result.tables[tableName] = {
-        exists: !columnsError,
-        name: tableName,
-        description: getTableDescription(tableName),
-      };
+        result.tables[tableName] = {
+          exists: !tableError,
+          name: tableName,
+          description: getTableDescription(tableName),
+        };
 
-      if (columnsError) {
-        result.recommendations.push(`Tabela '${tableName}' nie istnieje. Należy ją utworzyć.`);
-      } else {
-        // Pobierz informacje o kolumnach
-        const { data: tableInfo } = await supabase.rpc('get_table_info', {
-          table_name: tableName
-        });
-        
-        if (tableInfo && tableInfo.length > 0) {
-          result.tables[tableName].columns = {};
-          tableInfo.forEach((column: any) => {
-            result.tables[tableName].columns![column.column_name] = column.data_type;
+        if (tableError) {
+          result.recommendations.push(`Tabela '${tableName}' nie istnieje. Należy ją utworzyć.`);
+        } else {
+          // Pobierz informacje o kolumnach za pomocą REST API
+          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_table_info`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabase.supabaseKey,
+              'Authorization': `Bearer ${supabase.supabaseKey}`
+            },
+            body: JSON.stringify({ table_name: tableName })
           });
+          
+          if (response.ok) {
+            const tableInfo = await response.json();
+            
+            if (tableInfo && Array.isArray(tableInfo) && tableInfo.length > 0) {
+              result.tables[tableName].columns = {};
+              tableInfo.forEach((column: any) => {
+                if (result.tables[tableName].columns) {
+                  result.tables[tableName].columns![column.column_name] = column.data_type;
+                }
+              });
+            }
+          }
         }
+      } catch (error) {
+        console.error(`Błąd sprawdzania tabeli ${tableName}:`, error);
+        result.tables[tableName] = {
+          exists: false,
+          name: tableName,
+          description: getTableDescription(tableName)
+        };
+        result.recommendations.push(`Tabela '${tableName}' nie istnieje lub jest niedostępna. Należy ją utworzyć.`);
       }
     }
 
     // 2. Sprawdź role użytkowników
-    const { data: roleTypes } = await supabase.rpc('get_enum_values', {
-      enum_name: 'app_role'
-    });
-
-    if (roleTypes) {
-      result.roles.validRoleTypes = roleTypes;
-      if (!roleTypes.includes('specialist')) {
-        result.recommendations.push("Typ enum 'app_role' nie zawiera wartości 'specialist'.");
+    try {
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_enum_values`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        },
+        body: JSON.stringify({ enum_name: 'app_role' })
+      });
+      
+      if (response.ok) {
+        const roleTypes = await response.json();
+        
+        if (roleTypes && Array.isArray(roleTypes)) {
+          result.roles.validRoleTypes = roleTypes;
+          if (!roleTypes.includes('specialist')) {
+            result.recommendations.push("Typ enum 'app_role' nie zawiera wartości 'specialist'.");
+          }
+        }
       }
+    } catch (error) {
+      console.error("Błąd podczas pobierania typów ról:", error);
+      result.recommendations.push("Nie udało się pobrać typów ról. Sprawdź czy typ enum 'app_role' istnieje.");
     }
 
     // 3. Sprawdź triggery
-    const { data: triggers } = await supabase.rpc('get_triggers');
-    
-    if (triggers) {
-      const specialistTrigger = triggers.find((t: any) => 
-        t.trigger_name === 'create_specialist_profile' && 
-        t.event_object_table === 'user_profiles'
-      );
+    try {
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_triggers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        }
+      });
       
-      result.specialistProfiles.triggerExists = !!specialistTrigger;
-      
-      if (!specialistTrigger) {
-        result.recommendations.push("Brak triggera 'create_specialist_profile' dla tabeli 'user_profiles'.");
-      }
+      if (response.ok) {
+        const triggers = await response.json();
+        
+        if (triggers && Array.isArray(triggers)) {
+          const specialistTrigger = triggers.find((t: any) => 
+            t.trigger_name === 'create_specialist_profile' && 
+            t.event_object_table === 'user_profiles'
+          );
+          
+          result.specialistProfiles.triggerExists = !!specialistTrigger;
+          
+          if (!specialistTrigger) {
+            result.recommendations.push("Brak triggera 'create_specialist_profile' dla tabeli 'user_profiles'.");
+          }
 
-      const newUserTrigger = triggers.find((t: any) => 
-        t.trigger_name === 'on_auth_user_created'
-      );
-      
-      result.roles.rolesTriggerExists = !!newUserTrigger;
-      
-      if (!newUserTrigger) {
-        result.recommendations.push("Brak triggera 'on_auth_user_created' dla obsługi nowych użytkowników.");
+          const newUserTrigger = triggers.find((t: any) => 
+            t.trigger_name === 'on_auth_user_created'
+          );
+          
+          result.roles.rolesTriggerExists = !!newUserTrigger;
+          
+          if (!newUserTrigger) {
+            result.recommendations.push("Brak triggera 'on_auth_user_created' dla obsługi nowych użytkowników.");
+          }
+        }
       }
+    } catch (error) {
+      console.error("Błąd podczas pobierania triggerów:", error);
+      result.recommendations.push("Nie udało się pobrać triggerów. Sprawdź konfigurację bazy danych.");
     }
 
     // 4. Sprawdź indeksy
-    const { data: indexes } = await supabase.rpc('get_table_indexes');
-    
-    if (indexes) {
-      // Sprawdź brakujące indeksy
-      const requiredIndexes = [
-        { table: 'user_roles', column: 'user_id' },
-        { table: 'clients', column: 'user_id' },
-        { table: 'specialist_specializations', columns: ['specialist_id', 'specialization_id'] }
-      ];
+    try {
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_table_indexes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        }
+      });
       
-      for (const required of requiredIndexes) {
-        let indexExists = false;
+      if (response.ok) {
+        const indexes = await response.json();
         
-        if ('column' in required) {
-          indexExists = indexes.some((idx: any) => 
-            idx.table_name === required.table && 
-            idx.column_names.includes(required.column)
-          );
+        if (indexes && Array.isArray(indexes)) {
+          // Sprawdź brakujące indeksy
+          const requiredIndexes = [
+            { table: 'user_roles', column: 'user_id' },
+            { table: 'clients', column: 'user_id' },
+            { table: 'specialist_specializations', columns: ['specialist_id', 'specialization_id'] }
+          ];
           
-          if (!indexExists) {
-            result.recommendations.push(`Brakujący indeks dla kolumny '${required.column}' w tabeli '${required.table}'.`);
-          }
-        } else if ('columns' in required) {
-          // Złożony indeks
-          const columnsSet = new Set(required.columns);
-          indexExists = indexes.some((idx: any) => 
-            idx.table_name === required.table && 
-            required.columns.every(col => idx.column_names.includes(col))
-          );
-          
-          if (!indexExists) {
-            result.recommendations.push(`Brakujący złożony indeks dla kolumn '${required.columns.join(', ')}' w tabeli '${required.table}'.`);
+          for (const required of requiredIndexes) {
+            let indexExists = false;
+            
+            if ('column' in required) {
+              indexExists = indexes.some((idx: any) => 
+                idx.table_name === required.table && 
+                idx.column_names.includes(required.column)
+              );
+              
+              if (!indexExists) {
+                result.recommendations.push(`Brakujący indeks dla kolumny '${required.column}' w tabeli '${required.table}'.`);
+              }
+            } else if ('columns' in required) {
+              // Złożony indeks
+              const columnsSet = new Set(required.columns);
+              indexExists = indexes.some((idx: any) => 
+                idx.table_name === required.table && 
+                required.columns.every(col => idx.column_names.includes(col))
+              );
+              
+              if (!indexExists) {
+                result.recommendations.push(`Brakujący złożony indeks dla kolumn '${required.columns.join(', ')}' w tabeli '${required.table}'.`);
+              }
+            }
           }
         }
       }
+    } catch (error) {
+      console.error("Błąd podczas pobierania indeksów:", error);
+      result.recommendations.push("Nie udało się pobrać informacji o indeksach. Sprawdź konfigurację bazy danych.");
     }
 
     // 5. Sprawdź polityki bezpieczeństwa (RLS)
-    const { data: policies } = await supabase.rpc('get_rls_policies');
-    
-    if (policies) {
-      const tableNeedingRLS = [
-        'clients', 'pets', 'visits', 'care_programs', 
-        'specialist_profiles', 'pet_notes', 'pet_note_attachments'
-      ];
+    try {
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_rls_policies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        }
+      });
       
-      for (const table of tableNeedingRLS) {
-        const hasRLS = policies.some((p: any) => p.table_name === table);
-        result.security.rlsPoliciesExist[table] = hasRLS;
+      if (response.ok) {
+        const policies = await response.json();
         
-        if (!hasRLS) {
-          result.recommendations.push(`Brak polityk RLS dla tabeli '${table}'.`);
+        if (policies && Array.isArray(policies)) {
+          const tableNeedingRLS = [
+            'clients', 'pets', 'visits', 'care_programs', 
+            'specialist_profiles', 'pet_notes', 'pet_note_attachments'
+          ];
+          
+          for (const table of tableNeedingRLS) {
+            const hasRLS = policies.some((p: any) => p.table_name === table);
+            result.security.rlsPoliciesExist[table] = hasRLS;
+            
+            if (!hasRLS) {
+              result.recommendations.push(`Brak polityk RLS dla tabeli '${table}'.`);
+            }
+          }
         }
       }
+    } catch (error) {
+      console.error("Błąd podczas pobierania polityk RLS:", error);
+      result.recommendations.push("Nie udało się pobrać informacji o politykach RLS. Sprawdź konfigurację bazy danych.");
     }
 
     // 6. Sprawdź relacje między tabelami
-    const { data: relations } = await supabase.rpc('get_foreign_keys');
-    
-    if (relations) {
-      const expectedRelations = [
-        { table: 'pets', column: 'clientid', referencedTable: 'clients', referencedColumn: 'id' },
-        { table: 'visits', column: 'petid', referencedTable: 'pets', referencedColumn: 'id' },
-        { table: 'visits', column: 'clientid', referencedTable: 'clients', referencedColumn: 'id' },
-        { table: 'care_programs', column: 'petid', referencedTable: 'pets', referencedColumn: 'id' },
-        { table: 'pet_notes', column: 'pet_id', referencedTable: 'pets', referencedColumn: 'id' },
-        { table: 'pet_note_attachments', column: 'note_id', referencedTable: 'pet_notes', referencedColumn: 'id' },
-        { table: 'specialist_specializations', column: 'specialist_id', referencedTable: 'specialist_profiles', referencedColumn: 'id' },
-        { table: 'specialist_specializations', column: 'specialization_id', referencedTable: 'specializations', referencedColumn: 'id' }
-      ];
+    try {
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_foreign_keys`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        }
+      });
       
-      result.relationships = relations.map((r: any) => ({
-        table: r.table_name,
-        column: r.column_name,
-        referencedTable: r.foreign_table_name,
-        referencedColumn: r.foreign_column_name
-      }));
-      
-      for (const expected of expectedRelations) {
-        const relationExists = relations.some((r: any) => 
-          r.table_name === expected.table && 
-          r.column_name === expected.column &&
-          r.foreign_table_name === expected.referencedTable &&
-          r.foreign_column_name === expected.referencedColumn
-        );
+      if (response.ok) {
+        const relations = await response.json();
         
-        if (!relationExists) {
-          result.recommendations.push(`Brakująca relacja: ${expected.table}.${expected.column} -> ${expected.referencedTable}.${expected.referencedColumn}`);
+        if (relations && Array.isArray(relations)) {
+          const expectedRelations = [
+            { table: 'pets', column: 'clientid', referencedTable: 'clients', referencedColumn: 'id' },
+            { table: 'visits', column: 'petid', referencedTable: 'pets', referencedColumn: 'id' },
+            { table: 'visits', column: 'clientid', referencedTable: 'clients', referencedColumn: 'id' },
+            { table: 'care_programs', column: 'petid', referencedTable: 'pets', referencedColumn: 'id' },
+            { table: 'pet_notes', column: 'pet_id', referencedTable: 'pets', referencedColumn: 'id' },
+            { table: 'pet_note_attachments', column: 'note_id', referencedTable: 'pet_notes', referencedColumn: 'id' },
+            { table: 'specialist_specializations', column: 'specialist_id', referencedTable: 'specialist_profiles', referencedColumn: 'id' },
+            { table: 'specialist_specializations', column: 'specialization_id', referencedTable: 'specializations', referencedColumn: 'id' }
+          ];
+          
+          result.relationships = relations.map((r: any) => ({
+            table: r.table_name,
+            column: r.column_name,
+            referencedTable: r.foreign_table_name,
+            referencedColumn: r.foreign_column_name
+          }));
+          
+          for (const expected of expectedRelations) {
+            const relationExists = relations.some((r: any) => 
+              r.table_name === expected.table && 
+              r.column_name === expected.column &&
+              r.foreign_table_name === expected.referencedTable &&
+              r.foreign_column_name === expected.referencedColumn
+            );
+            
+            if (!relationExists) {
+              result.recommendations.push(`Brakująca relacja: ${expected.table}.${expected.column} -> ${expected.referencedTable}.${expected.referencedColumn}`);
+            }
+          }
         }
       }
+    } catch (error) {
+      console.error("Błąd podczas pobierania relacji między tabelami:", error);
+      result.recommendations.push("Nie udało się pobrać informacji o relacjach między tabelami. Sprawdź konfigurację bazy danych.");
     }
 
     return result;
@@ -395,23 +498,15 @@ export const setupAuditFunctions = async (): Promise<void> => {
   
   for (const func of functions) {
     try {
-      // Sprawdź czy funkcja już istnieje
-      const { data, error } = await supabase.rpc(func.name);
-      if (error && error.message.includes('function does not exist')) {
-        // Wykonaj SQL aby utworzyć funkcję pomocniczą
-        const { error: createError } = await supabase.rpc('create_function', {
-          sql: func.sql
-        });
-        
-        if (createError) {
-          console.error(`Błąd podczas tworzenia funkcji ${func.name}:`, createError);
-        } else {
-          console.log(`Funkcja ${func.name} została utworzona`);
-        }
+      // Sprawdź czy funkcja już istnieje - używamy bezpośrednio REST API
+      const response = await createCustomFunction(func.sql);
+      if (response) {
+        console.log(`Funkcja ${func.name} została utworzona lub już istnieje`);
+      } else {
+        console.error(`Błąd podczas tworzenia funkcji ${func.name}`);
       }
     } catch (error) {
       console.error(`Błąd podczas sprawdzania funkcji ${func.name}:`, error);
     }
   }
 };
-

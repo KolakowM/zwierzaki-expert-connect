@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { createCustomFunction } from "./createCustomFunction";
 
 /**
  * Tworzy podstawowe polityki RLS dla wybranej tabeli
@@ -16,7 +17,7 @@ export const setupTableRLSPolicies = async (
     // 1. Włącz RLS dla tabeli
     if (enableRLS) {
       const rlsEnableSql = `ALTER TABLE public.${tableName} ENABLE ROW LEVEL SECURITY;`;
-      await supabase.rpc('execute_sql', { sql_query: rlsEnableSql });
+      await createCustomFunction(rlsEnableSql);
     }
     
     // 2. Polityka SELECT - użytkownicy mogą widzieć tylko swoje dane
@@ -27,7 +28,7 @@ export const setupTableRLSPolicies = async (
       USING (auth.uid() = ${userIdColumn} OR 
             (SELECT role FROM public.user_roles WHERE user_id = auth.uid()) = 'admin');
     `;
-    await supabase.rpc('execute_sql', { sql_query: selectPolicySql });
+    await createCustomFunction(selectPolicySql);
     
     // 3. Polityka INSERT - użytkownicy mogą dodawać tylko swoje dane
     const insertPolicySql = `
@@ -37,7 +38,7 @@ export const setupTableRLSPolicies = async (
       WITH CHECK (auth.uid() = ${userIdColumn} OR 
                  (SELECT role FROM public.user_roles WHERE user_id = auth.uid()) = 'admin');
     `;
-    await supabase.rpc('execute_sql', { sql_query: insertPolicySql });
+    await createCustomFunction(insertPolicySql);
     
     // 4. Polityka UPDATE - użytkownicy mogą aktualizować tylko swoje dane
     const updatePolicySql = `
@@ -47,7 +48,7 @@ export const setupTableRLSPolicies = async (
       USING (auth.uid() = ${userIdColumn} OR 
             (SELECT role FROM public.user_roles WHERE user_id = auth.uid()) = 'admin');
     `;
-    await supabase.rpc('execute_sql', { sql_query: updatePolicySql });
+    await createCustomFunction(updatePolicySql);
     
     // 5. Polityka DELETE - użytkownicy mogą usuwać tylko swoje dane
     const deletePolicySql = `
@@ -57,7 +58,7 @@ export const setupTableRLSPolicies = async (
       USING (auth.uid() = ${userIdColumn} OR 
             (SELECT role FROM public.user_roles WHERE user_id = auth.uid()) = 'admin');
     `;
-    await supabase.rpc('execute_sql', { sql_query: deletePolicySql });
+    await createCustomFunction(deletePolicySql);
     
     return true;
   } catch (error) {
@@ -84,7 +85,7 @@ export const addTableIndex = async (
       ON public.${tableName} (${columnName});
     `;
     
-    await supabase.rpc('execute_sql', { sql_query: createIndexSql });
+    await createCustomFunction(createIndexSql);
     return true;
   } catch (error) {
     console.error(`Błąd podczas dodawania indeksu dla kolumny ${columnName} w tabeli ${tableName}:`, error);
@@ -110,9 +111,7 @@ export const fixCommonDatabaseIssues = async (): Promise<{
   try {
     // 1. Sprawdź i dodaj wartość 'specialist' do typu enum app_role, jeśli nie istnieje
     try {
-      await supabase.rpc('execute_sql', { 
-        sql_query: "ALTER TYPE app_role ADD VALUE IF NOT EXISTS 'specialist';" 
-      });
+      await createCustomFunction("ALTER TYPE app_role ADD VALUE IF NOT EXISTS 'specialist';");
       result.fixedIssues.push("Dodano wartość 'specialist' do typu enum app_role");
     } catch (error: any) {
       result.errors.push("Nie udało się dodać wartości 'specialist' do enum app_role: " + error.message);
@@ -162,7 +161,7 @@ export const fixCommonDatabaseIssues = async (): Promise<{
         EXECUTE FUNCTION public.handle_specialist_profile();
       `;
       
-      await supabase.rpc('execute_sql', { sql_query: createTriggerSql });
+      await createCustomFunction(createTriggerSql);
       result.fixedIssues.push("Utworzono trigger 'create_specialist_profile' dla tabeli 'user_profiles'");
     } catch (error: any) {
       result.errors.push("Nie udało się utworzyć triggera dla profili specjalistów: " + error.message);
@@ -182,7 +181,7 @@ export const fixCommonDatabaseIssues = async (): Promise<{
         CREATE INDEX IF NOT EXISTS idx_spec_specializations_composite
         ON public.specialist_specializations (specialist_id, specialization_id);
       `;
-      await supabase.rpc('execute_sql', { sql_query: compoundIndexSql });
+      await createCustomFunction(compoundIndexSql);
       result.fixedIssues.push("Dodano złożony indeks dla kolumn 'specialist_id, specialization_id' w tabeli 'specialist_specializations'");
     } catch (error: any) {
       result.errors.push("Wystąpił problem podczas dodawania indeksów: " + error.message);
