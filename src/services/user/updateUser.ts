@@ -5,9 +5,9 @@ import { AppRole } from "./types";
 
 export const updateUser = async (userId: string, userData: UserFormValues) => {
   try {
-    // Aktualizuj metadane użytkownika w Supabase Auth
+    // Update user metadata in Supabase Auth
     const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
-      email: userData.email, // Dodajemy możliwość aktualizacji emaila
+      email: userData.email, // Add ability to update email
       user_metadata: {
         name: userData.name,
         status: userData.status
@@ -16,7 +16,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
     
     if (authError) throw authError;
 
-    // Aktualizuj profil użytkownika w tabeli user_profiles
+    // Update user profile in user_profiles table
     const names = userData.name.split(' ');
     const firstName = names[0] || '';
     const lastName = names.slice(1).join(' ') || '';
@@ -33,9 +33,9 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
       
     if (profileError) throw profileError;
     
-    // Aktualizuj rolę użytkownika w tabeli user_roles
+    // Update user role in user_roles table
     if (userData.role) {
-      // Najpierw sprawdź, czy rola istnieje dla tego użytkownika
+      // First check if the role exists for this user
       const { data: existingRole } = await supabase
         .from('user_roles')
         .select('*')
@@ -43,8 +43,8 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
         .single();
         
       if (existingRole) {
-        // Aktualizuj istniejącą rolę - upewnij się, że używamy tylko poprawnych ról w bazie danych
-        const dbRole = userData.role === 'specialist' ? 'user' : userData.role as AppRole;
+        // Update existing role - don't convert 'specialist' to 'user'
+        const dbRole = userData.role as AppRole;
         const { error: roleError } = await supabase
           .from('user_roles')
           .update({ 
@@ -55,8 +55,8 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
           
         if (roleError) throw roleError;
       } else {
-        // Wstaw nową rolę - upewnij się, że używamy tylko poprawnych ról w bazie danych
-        const dbRole = userData.role === 'specialist' ? 'user' : userData.role as AppRole;
+        // Insert new role - don't convert 'specialist' to 'user'
+        const dbRole = userData.role as AppRole;
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
@@ -69,7 +69,7 @@ export const updateUser = async (userId: string, userData: UserFormValues) => {
       }
     }
     
-    // Zwróć zaktualizowanego użytkownika
+    // Return updated user
     return {
       id: userId,
       name: userData.name,
