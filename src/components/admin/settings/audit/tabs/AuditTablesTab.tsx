@@ -1,8 +1,8 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Table2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Table2 } from "lucide-react";
 import { TableDetails } from "@/services/audit/databaseAudit";
 
 interface AuditTablesTabProps {

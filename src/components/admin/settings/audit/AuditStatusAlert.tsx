@@ -1,5 +1,6 @@
 
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { AuditResult } from "@/services/audit/databaseAudit";
 
 interface AuditStatusAlertProps {

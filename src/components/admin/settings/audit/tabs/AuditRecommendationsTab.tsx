@@ -1,5 +1,6 @@
 
-import { Alert, AlertCircle, AlertDescription, AlertTitle, CheckCircle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AuditRecommendationsTabProps {
