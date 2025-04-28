@@ -1,50 +1,97 @@
 
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 export function useProfileDataProcessor() {
-  // Process form data for saving to database
-  const processFormData = (formData: any, userId: string | undefined, photoUrl: string | null = null) => {
-    if (!userId) {
-      throw new Error("User ID is required");
-    }
-    
-    console.log("Processing form data:", formData);
-    
-    // Filter out empty strings from services and education
-    const cleanedServices = Array.isArray(formData.services) 
-      ? formData.services.filter((service: string) => service.trim() !== "")
-      : [];
+  const [processingError, setProcessingError] = useState<string | null>(null);
+
+  // Process form data - convert and sanitize for database
+  const processFormData = async (formData: any, specializations: string[]) => {
+    try {
+      console.log("Processing form data with specializations:", specializations);
       
-    const cleanedEducation = Array.isArray(formData.education)
-      ? formData.education.filter((edu: string) => edu.trim() !== "")
-      : [];
-    
-    // Filter out empty social media links
-    const socialMedia: Record<string, string> = {};
-    if (formData.socialMedia) {
-      Object.entries(formData.socialMedia).forEach(([key, value]) => {
-        if (value && typeof value === 'string' && value.trim() !== '') {
-          socialMedia[key] = value.trim();
-        }
-      });
+      // Clear any previous errors
+      setProcessingError(null);
+      
+      // Process specialist data
+      const processedData = {
+        title: formData.title?.trim() || "Specjalista",
+        description: formData.description?.trim() || "",
+        experience: formData.experience?.trim() || "",
+        location: formData.location?.trim() || "Polska",
+        phone_number: formData.phoneNumber?.trim() || null,
+        website: formData.website?.trim() || null,
+        // We'll handle specializations through the join table instead
+        social_media: processedSocialMedia(formData),
+      };
+
+      console.log("Processed form data:", processedData);
+      
+      return processedData;
+    } catch (error) {
+      console.error("Error processing form data:", error);
+      setProcessingError("Wystąpił błąd podczas przetwarzania danych formularza");
+      throw error;
     }
+  };
+
+  // Process social media data
+  const processedSocialMedia = (formData: any) => {
+    const socialMedia: Record<string, string> = {};
     
-    // Create the payload without specializations (they're now in the junction table)
-    return {
-      id: userId,
-      title: formData.title,
-      description: formData.description,
-      services: cleanedServices,
-      education: cleanedEducation,
-      experience: formData.experience,
-      location: formData.location,
-      phone_number: formData.phoneNumber,
-      website: formData.website,
-      social_media: socialMedia,
-      photo_url: photoUrl,
-      updated_at: new Date().toISOString()
-    };
+    if (formData.facebook?.trim()) socialMedia.facebook = formData.facebook.trim();
+    if (formData.instagram?.trim()) socialMedia.instagram = formData.instagram.trim();
+    if (formData.linkedin?.trim()) socialMedia.linkedin = formData.linkedin.trim();
+    if (formData.twitter?.trim()) socialMedia.twitter = formData.twitter.trim();
+    
+    return socialMedia;
+  };
+
+  // Correctly save specialization IDs to the join table
+  const saveSpecializations = async (userId: string, specializationIds: string[]) => {
+    try {
+      console.log("Saving specializations for user:", userId, specializationIds);
+      
+      // First delete existing specializations
+      const { error: deleteError } = await supabase
+        .from('specialist_specializations')
+        .delete()
+        .eq('specialist_id', userId);
+        
+      if (deleteError) throw deleteError;
+      
+      // Only insert if we have valid specialization IDs
+      if (specializationIds && specializationIds.length > 0) {
+        // Prepare data for insert
+        const specializations = specializationIds.map(specId => ({
+          specialist_id: userId,
+          specialization_id: specId,
+        }));
+        
+        console.log("Inserting specializations:", specializations);
+        
+        // Insert new specializations
+        const { error: insertError } = await supabase
+          .from('specialist_specializations')
+          .insert(specializations);
+          
+        if (insertError) {
+          console.error("Error inserting specializations:", insertError);
+          throw insertError;
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error saving specializations:", error);
+      setProcessingError("Wystąpił błąd podczas zapisywania specjalizacji");
+      throw error;
+    }
   };
 
   return {
-    processFormData
+    processFormData,
+    processingError,
+    saveSpecializations,
   };
 }

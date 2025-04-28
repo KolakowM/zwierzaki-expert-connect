@@ -6,6 +6,7 @@ import { useProfileDataProcessor } from "./useProfileDataProcessor";
 
 export function useProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   
   // Import and use the specialized hooks
   const {
@@ -36,9 +37,25 @@ export function useProfileForm() {
     console.log('useProfileForm - current state:', {
       services,
       education,
-      photoUrl
+      photoUrl,
+      validationErrors
     });
-  }, [services, education, photoUrl]);
+  }, [services, education, photoUrl, validationErrors]);
+
+  // Helper function to validate form data
+  const validateForm = (formData: any) => {
+    const errors: string[] = [];
+    
+    // Basic required field validation
+    if (!formData.title?.trim()) {
+      errors.push("Tytuł jest wymagany");
+    }
+    
+    // Clear any previous errors
+    setValidationErrors(errors);
+    
+    return errors.length === 0;
+  };
 
   return {
     services,
@@ -47,6 +64,7 @@ export function useProfileForm() {
     photoFile,
     isSubmitting,
     isUploading,
+    validationErrors,
     setIsSubmitting,
     setServices,
     setEducation,
@@ -59,5 +77,7 @@ export function useProfileForm() {
     removeEducation,
     handlePhotoChange,
     processFormData,
+    validateForm,
+    setValidationErrors,
   };
 }

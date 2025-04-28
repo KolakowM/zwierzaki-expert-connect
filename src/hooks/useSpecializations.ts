@@ -6,91 +6,111 @@ export interface Specialization {
   id: string;
   code: string;
   name: string;
-  description: string | null;
+  description?: string;
 }
 
-export const useSpecializations = () => {
+export function useSpecializations() {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSpecializations = async () => {
-      try {
-        setIsLoading(true);
+  // Fetch all available specializations
+  const fetchSpecializations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error } = await supabase
+        .from('specializations')
+        .select('id, code, name, description');
         
-        const { data, error } = await supabase
-          .from('specializations')
-          .select('*')
-          .order('name');
-          
-        if (error) throw error;
-        
-        setSpecializations(data || []);
-        console.log('Fetched specializations:', data);
-      } catch (err) {
-        console.error('Error fetching specializations:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      if (error) throw error;
+      
+      console.log("Fetched specializations:", data);
+      setSpecializations(data || []);
+      
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching specializations:", error);
+      setError(error.message || "Nie udało się pobrać specjalizacji");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Fetch specializations for a specific specialist
+  const fetchSpecialistSpecializations = async (specialistId: string) => {
+    if (!specialistId) return [];
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get specialization IDs for the specialist
+      const { data: specialistSpecs, error } = await supabase
+        .from('specialist_specializations')
+        .select('specialization_id')
+        .eq('specialist_id', specialistId);
+        
+      if (error) throw error;
+      
+      if (!specialistSpecs || specialistSpecs.length === 0) {
+        setSelectedSpecializations([]);
+        return [];
+      }
+      
+      const specIds = specialistSpecs.map(spec => spec.specialization_id);
+      console.log("Specialization IDs:", specIds);
+      
+      setSelectedSpecializations(specIds);
+      
+      // Get the actual specialization details
+      const { data: specs, error: specsError } = await supabase
+        .from('specializations')
+        .select('id, code, name, description')
+        .in('id', specIds);
+        
+      if (specsError) throw specsError;
+      
+      console.log("Fetched specialist specializations:", specs);
+      
+      return specs || [];
+    } catch (error: any) {
+      console.error("Error fetching specialist specializations:", error);
+      setError(error.message || "Nie udało się pobrać specjalizacji specjalisty");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle selection changes
+  const handleSpecializationChange = (specializationId: string, checked: boolean) => {
+    setSelectedSpecializations(prevSelected => {
+      if (checked && !prevSelected.includes(specializationId)) {
+        return [...prevSelected, specializationId];
+      } else if (!checked) {
+        return prevSelected.filter(id => id !== specializationId);
+      }
+      return prevSelected;
+    });
+  };
+
+  // Initialize specializations
+  useEffect(() => {
     fetchSpecializations();
   }, []);
 
-  return { specializations, isLoading, error };
-};
-
-// Hook to fetch specialist's specializations from the junction table
-export const useSpecialistSpecializations = (specialistId: string | undefined) => {
-  const [specializations, setSpecializations] = useState<Specialization[]>([]);
-  const [specializationIds, setSpecializationIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSpecialistSpecializations = async () => {
-      if (!specialistId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        
-        // Get the specializations related to this specialist via the junction table
-        const { data, error } = await supabase
-          .from('specialist_specializations')
-          .select(`
-            specialization_id,
-            specializations:specialization_id (
-              id, code, name, description
-            )
-          `)
-          .eq('specialist_id', specialistId);
-          
-        if (error) throw error;
-        
-        // Extract specialization objects and their IDs
-        const specs = data?.map(item => item.specializations) || [];
-        const specIds = specs.map(spec => spec.id);
-        
-        console.log('Fetched specialist specializations:', specs);
-        console.log('Specialization IDs:', specIds);
-        
-        setSpecializations(specs);
-        setSpecializationIds(specIds);
-      } catch (err) {
-        console.error('Error fetching specialist specializations:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSpecialistSpecializations();
-  }, [specialistId]);
-
-  return { specializations, specializationIds, isLoading, error };
-};
+  return {
+    specializations,
+    selectedSpecializations,
+    setSelectedSpecializations,
+    handleSpecializationChange,
+    fetchSpecializations,
+    fetchSpecialistSpecializations,
+    loading,
+    error
+  };
+}

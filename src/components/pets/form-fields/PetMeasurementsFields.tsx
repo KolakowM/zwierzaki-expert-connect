@@ -19,12 +19,17 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
             <FormLabel>Wiek (lata)</FormLabel>
             <FormControl>
               <Input 
-                type="number" 
-                inputMode="decimal"
-                min="0" 
-                step="1" 
-                placeholder="np. 3" 
-                {...field} 
+                type="text" 
+                inputMode="numeric"
+                placeholder="np. 3"
+                {...field}
+                onChange={(e) => {
+                  // Allow empty value or numbers only
+                  const value = e.target.value;
+                  if (value === '' || /^[0-9]+$/.test(value)) {
+                    field.onChange(value);
+                  }
+                }}
               />
             </FormControl>
             <FormMessage />
@@ -39,12 +44,17 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
             <FormLabel>Waga (kg)</FormLabel>
             <FormControl>
               <Input 
-                type="number" 
+                type="text" 
                 inputMode="decimal"
-                min="0" 
-                step="0.1" 
                 placeholder="np. 15" 
-                {...field} 
+                {...field}
+                onChange={(e) => {
+                  // Allow empty value or decimal numbers
+                  const value = e.target.value;
+                  if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                    field.onChange(value);
+                  }
+                }}
               />
             </FormControl>
             <FormMessage />

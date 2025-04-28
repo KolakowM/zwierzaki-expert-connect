@@ -13,22 +13,26 @@ export const petFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   species: z.enum(PET_SPECIES),
   breed: z.string().optional(),
-  // Parse age as a number (integer)
-  age: z.string()
-    .optional()
-    .transform((val) => (val ? Number(val) : undefined))
-    .refine(
-      (val) => val === undefined || !isNaN(val),
-      { message: "Wiek musi być liczbą" }
-    ),
-  // Parse weight as a number (can be decimal)
-  weight: z.string()
-    .optional()
-    .transform((val) => (val ? Number(val) : undefined))
-    .refine(
-      (val) => val === undefined || !isNaN(val),
-      { message: "Waga musi być liczbą" }
-    ),
+  // Improve age handling - parse as a number and allow empty string
+  age: z.union([
+    z.string().trim().transform(val => val === "" ? undefined : Number(val)),
+    z.number().optional(),
+    z.undefined()
+  ])
+  .refine(
+    (val) => val === undefined || (typeof val === "number" && !isNaN(val)),
+    { message: "Wiek musi być liczbą" }
+  ),
+  // Improve weight handling - parse as a number and allow empty string
+  weight: z.union([
+    z.string().trim().transform(val => val === "" ? undefined : Number(val)),
+    z.number().optional(),
+    z.undefined()
+  ])
+  .refine(
+    (val) => val === undefined || (typeof val === "number" && !isNaN(val)),
+    { message: "Waga musi być liczbą" }
+  ),
   sex: z.enum(PET_SEX).optional(),
   neutered: z.boolean().optional(),
   medicalHistory: z.string().optional(),
