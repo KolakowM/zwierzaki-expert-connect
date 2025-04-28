@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // Hook to use specializations data
 export function useSpecializationsData() {
-  const { specializations, isLoading, error } = useSpecializations();
+  const { specializations, loading: isLoading, error } = useSpecializations();
   
   return {
     specializations,
@@ -16,7 +16,7 @@ export function useSpecializationsData() {
 
 // Hook to manage specialist specializations
 export function useSpecialistSpecializationsManager(specialistId?: string) {
-  const { specializations: allSpecializations, isLoading: isLoadingAll } = useSpecializations();
+  const { specializations: allSpecializations, loading: isLoadingAll } = useSpecializations();
   const { 
     specializations: specialistSpecializations, 
     specializationIds,

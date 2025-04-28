@@ -6,21 +6,23 @@ export function useProfileDataProcessor() {
   const [processingError, setProcessingError] = useState<string | null>(null);
 
   // Process form data - convert and sanitize for database
-  const processFormData = async (formData: any, specializations: string[]) => {
+  const processFormData = async (formData: any, userId?: string, photoUrl?: string | null) => {
     try {
-      console.log("Processing form data with specializations:", specializations);
+      console.log("Processing form data for user:", userId, "with photo:", photoUrl);
       
       // Clear any previous errors
       setProcessingError(null);
       
       // Process specialist data
       const processedData = {
+        id: userId, // Make sure we include the user ID
         title: formData.title?.trim() || "Specjalista",
         description: formData.description?.trim() || "",
         experience: formData.experience?.trim() || "",
         location: formData.location?.trim() || "Polska",
         phone_number: formData.phoneNumber?.trim() || null,
         website: formData.website?.trim() || null,
+        photo_url: photoUrl || null,
         // We'll handle specializations through the join table instead
         social_media: processedSocialMedia(formData),
       };

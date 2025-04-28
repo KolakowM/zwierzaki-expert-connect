@@ -111,6 +111,65 @@ export function useSpecializations() {
     fetchSpecializations,
     fetchSpecialistSpecializations,
     loading,
-    error
+    error,
+    isLoading: loading // Added alias for compatibility
+  };
+}
+
+// Export useSpecialistSpecializations hook
+export function useSpecialistSpecializations(specialistId?: string) {
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [specializationIds, setSpecializationIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSpecialistSpecializations = async () => {
+      if (!specialistId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        
+        // Get the specializations related to this specialist via the junction table
+        const { data, error } = await supabase
+          .from('specialist_specializations')
+          .select(`
+            specialization_id,
+            specializations:specialization_id (
+              id, code, name, description
+            )
+          `)
+          .eq('specialist_id', specialistId);
+          
+        if (error) throw error;
+        
+        // Extract specialization objects and IDs
+        const specIds = data?.map(item => item.specialization_id) || [];
+        const specs = data?.map(item => item.specializations) || [];
+        
+        setSpecializations(specs);
+        setSpecializationIds(specIds);
+        
+        console.log('Current user specializations:', specs);
+        console.log('Current user specialization IDs:', specIds);
+      } catch (err: any) {
+        console.error('Error fetching specialist specializations:', err);
+        setError(err.message || 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSpecialistSpecializations();
+  }, [specialistId]);
+
+  return { 
+    specializations, 
+    specializationIds, 
+    isLoading: loading, 
+    error 
   };
 }

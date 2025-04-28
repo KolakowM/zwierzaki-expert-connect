@@ -18,7 +18,7 @@ interface UseProfileFormSubmitProps {
   setSaveSuccess: (value: boolean) => void;
   setSaveError: (value: string | null) => void;
   uploadProfilePhoto: (userId: string) => Promise<string | null>;
-  processFormData: (formData: any, userId: string | undefined, photoUrl?: string | null) => any;
+  processFormData: (formData: any, userId?: string, photoUrl?: string | null) => any;
 }
 
 export const useProfileFormSubmit = ({

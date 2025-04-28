@@ -12,7 +12,7 @@ export function useSpecialistSettingsTab(
   photoUrl: string | null,
   services: string[],
   education: string[],
-  processFormData: (formData: any, userId: string | undefined, photoUrl?: string | null) => any
+  processFormData: (formData: any, userId?: string, photoUrl?: string | null) => any
 ) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
