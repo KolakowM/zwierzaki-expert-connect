@@ -1,11 +1,16 @@
 
+import { ReactNode } from "react";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthProvider";
 import AdminSidebar from "./AdminSidebar";
 
-const AdminLayout = () => {
+interface AdminLayoutProps {
+  children?: ReactNode;
+}
+
+const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -31,7 +36,7 @@ const AdminLayout = () => {
     <div className="flex min-h-screen">
       <AdminSidebar />
       <main className="flex-1 overflow-auto p-6 bg-gray-50">
-        <Outlet />
+        {children || <Outlet />}
       </main>
     </div>
   );
