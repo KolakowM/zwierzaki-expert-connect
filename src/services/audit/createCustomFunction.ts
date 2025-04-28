@@ -1,6 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+// Get Supabase URL from the environment or the client
+const SUPABASE_URL = "https://wrftbhmnqrdogomhvomr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyZnRiaG1ucXJkb2dvbWh2b21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5MzYzNDcsImV4cCI6MjA1OTUxMjM0N30.S7MaDuJnQcXXTZBKbYYeo2jrknbB3eejGn3Z6Fkxarc";
+
 /**
  * Funkcja pomocnicza do tworzenia funkcji SQL w bazie danych
  */
@@ -51,12 +55,12 @@ export const setupExecuteSqlFunction = async (): Promise<boolean> => {
       // Próbujemy utworzyć funkcję create_function
       try {
         // Wywołujemy bezpośrednio z REST API
-        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/sql`, {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/sql`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
           },
           body: JSON.stringify({
             query: `

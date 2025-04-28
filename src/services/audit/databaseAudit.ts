@@ -2,6 +2,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createCustomFunction } from "./createCustomFunction";
 
+// Get Supabase URL and key for direct API access
+const SUPABASE_URL = "https://wrftbhmnqrdogomhvomr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyZnRiaG1ucXJkb2dvbWh2b21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5MzYzNDcsImV4cCI6MjA1OTUxMjM0N30.S7MaDuJnQcXXTZBKbYYeo2jrknbB3eejGn3Z6Fkxarc";
+
 export interface TableDetails {
   exists: boolean;
   name: string;
@@ -77,8 +81,9 @@ export const auditDatabase = async (): Promise<AuditResult> => {
     for (const tableName of expectedTables) {
       try {
         // Używamy metody SELECT z limitem 0 aby sprawdzić czy tabela istnieje
+        // Bezpośrednie użycie known table names z typowanego klienta
         const { error: tableError } = await supabase
-          .from(tableName)
+          .from(tableName as any)
           .select('*')
           .limit(0);
 
@@ -92,12 +97,12 @@ export const auditDatabase = async (): Promise<AuditResult> => {
           result.recommendations.push(`Tabela '${tableName}' nie istnieje. Należy ją utworzyć.`);
         } else {
           // Pobierz informacje o kolumnach za pomocą REST API
-          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_table_info`, {
+          const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_table_info`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'apikey': supabase.supabaseKey,
-              'Authorization': `Bearer ${supabase.supabaseKey}`
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
             },
             body: JSON.stringify({ table_name: tableName })
           });
@@ -128,12 +133,12 @@ export const auditDatabase = async (): Promise<AuditResult> => {
 
     // 2. Sprawdź role użytkowników
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_enum_values`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_enum_values`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({ enum_name: 'app_role' })
       });
@@ -155,12 +160,12 @@ export const auditDatabase = async (): Promise<AuditResult> => {
 
     // 3. Sprawdź triggery
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_triggers`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_triggers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         }
       });
       
@@ -197,12 +202,12 @@ export const auditDatabase = async (): Promise<AuditResult> => {
 
     // 4. Sprawdź indeksy
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_table_indexes`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_table_indexes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         }
       });
       
@@ -231,7 +236,6 @@ export const auditDatabase = async (): Promise<AuditResult> => {
               }
             } else if ('columns' in required) {
               // Złożony indeks
-              const columnsSet = new Set(required.columns);
               indexExists = indexes.some((idx: any) => 
                 idx.table_name === required.table && 
                 required.columns.every(col => idx.column_names.includes(col))
@@ -251,12 +255,12 @@ export const auditDatabase = async (): Promise<AuditResult> => {
 
     // 5. Sprawdź polityki bezpieczeństwa (RLS)
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_rls_policies`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_rls_policies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         }
       });
       
@@ -286,12 +290,12 @@ export const auditDatabase = async (): Promise<AuditResult> => {
 
     // 6. Sprawdź relacje między tabelami
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/get_foreign_keys`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_foreign_keys`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         }
       });
       
@@ -498,13 +502,8 @@ export const setupAuditFunctions = async (): Promise<void> => {
   
   for (const func of functions) {
     try {
-      // Sprawdź czy funkcja już istnieje - używamy bezpośrednio REST API
-      const response = await createCustomFunction(func.sql);
-      if (response) {
-        console.log(`Funkcja ${func.name} została utworzona lub już istnieje`);
-      } else {
-        console.error(`Błąd podczas tworzenia funkcji ${func.name}`);
-      }
+      await createCustomFunction(func.sql);
+      console.log(`Funkcja ${func.name} została utworzona lub już istnieje`);
     } catch (error) {
       console.error(`Błąd podczas sprawdzania funkcji ${func.name}:`, error);
     }
