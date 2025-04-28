@@ -3,8 +3,8 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { cn } from "@/lib/utils";
 
-// Import the Database icon
-import { Users, Home, Clipboard, Calendar, Cog, Pet, Brain, Database } from "lucide-react";
+// Import the correct icon names
+import { Users, Home, Clipboard, Calendar, Cog, PawPrint, Brain, Database } from "lucide-react";
 
 interface SidebarItemProps {
   href: string;
@@ -38,7 +38,7 @@ const AdminSidebar = () => {
     {
       href: "/admin/pets",
       label: "Zwierzęta",
-      icon: <Pet className="h-5 w-5" />,
+      icon: <PawPrint className="h-5 w-5" />,
       admin: true,
     },
     {
@@ -59,7 +59,6 @@ const AdminSidebar = () => {
       icon: <Cog className="h-5 w-5" />,
       admin: true,
     },
-    // Add the new database audit link to the sidebar items
     {
       href: "/admin/database-audit",
       label: "Audyt bazy danych",
