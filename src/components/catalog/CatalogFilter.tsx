@@ -7,9 +7,10 @@ import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppRole } from "@/services/user/types";
+import { CatalogFilters } from "@/hooks/useCatalogData";
 
 interface CatalogFilterProps {
-  onFilterChange: (filters: any) => void;
+  onFilterChange: (filters: CatalogFilters) => void;
 }
 
 export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
