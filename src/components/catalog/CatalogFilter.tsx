@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AppRole } from "@/services/user/types";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: any) => void;
@@ -14,6 +15,7 @@ interface CatalogFilterProps {
 export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [location, setLocation] = useState("");
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
   const { specializations, isLoading, error } = useSpecializationsData();
 
   const handleSpecializationChange = (id: string) => {
@@ -26,16 +28,28 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
     });
   };
 
+  const handleRoleChange = (role: AppRole) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(role)) {
+        return prev.filter(item => item !== role);
+      } else {
+        return [...prev, role];
+      }
+    });
+  };
+
   const handleApplyFilter = () => {
     onFilterChange({
       location,
-      specializations: selectedSpecializations
+      specializations: selectedSpecializations,
+      roles: selectedRoles
     });
   };
 
   const handleReset = () => {
     setLocation("");
     setSelectedSpecializations([]);
+    setSelectedRoles([]);
     onFilterChange({});
   };
 
@@ -53,6 +67,28 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
               onChange={(e) => setLocation(e.target.value)}
             />
           </div>
+          
+          <div className="space-y-3">
+            <Label>Typ użytkownika</Label>
+            <div className="space-y-2">
+              {(['user', 'specialist', 'admin'] as AppRole[]).map((role) => (
+                <div className="flex items-center space-x-2" key={role}>
+                  <Checkbox 
+                    id={`role-${role}`}
+                    checked={selectedRoles.includes(role)}
+                    onCheckedChange={() => handleRoleChange(role)}
+                  />
+                  <label
+                    htmlFor={`role-${role}`}
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {role === 'user' ? 'Użytkownik' : role === 'specialist' ? 'Specjalista' : 'Administrator'}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          
           <div className="space-y-3">
             <Label>Specjalizacje</Label>
             <div className="space-y-2">

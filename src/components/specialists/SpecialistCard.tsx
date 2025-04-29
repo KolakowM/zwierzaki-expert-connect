@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Camera } from "lucide-react";
+import { Camera, Users, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Specialization } from "@/hooks/useSpecializations";
+import { AppRole } from "@/services/user/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface Specialist {
   id: string;
@@ -17,6 +19,7 @@ export interface Specialist {
   image: string;
   rating?: number;
   verified: boolean;
+  role: AppRole;
 }
 
 interface SpecialistCardProps {
@@ -57,6 +60,32 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
     fetchSpecializations();
   }, [specialist.specializations]);
 
+  // Get role-specific display information
+  const getRoleInfo = () => {
+    switch (specialist.role) {
+      case 'specialist':
+        return {
+          badge: 'Specjalista',
+          badgeVariant: 'primary' as const,
+          icon: <Users className="h-12 w-12 text-muted-foreground" />
+        };
+      case 'admin':
+        return {
+          badge: 'Administrator',
+          badgeVariant: 'destructive' as const,
+          icon: <UserRound className="h-12 w-12 text-muted-foreground" />
+        };
+      default:
+        return {
+          badge: 'Użytkownik',
+          badgeVariant: 'secondary' as const,
+          icon: <UserRound className="h-12 w-12 text-muted-foreground" />
+        };
+    }
+  };
+
+  const roleInfo = getRoleInfo();
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="p-0">
@@ -72,12 +101,17 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
-              <Camera className="h-12 w-12 text-muted-foreground" />
+              {roleInfo.icon}
             </div>
           )}
+          <div className="absolute right-2 top-2">
+            <Badge className={`bg-${roleInfo.badgeVariant}/90 hover:bg-${roleInfo.badgeVariant}`}>
+              {roleInfo.badge}
+            </Badge>
+          </div>
           {specialist.verified && (
-            <div className="absolute right-2 top-2">
-              <Badge className="bg-primary/90 hover:bg-primary">Zweryfikowany</Badge>
+            <div className="absolute left-2 top-2">
+              <Badge className="bg-green-500/90 hover:bg-green-500">Zweryfikowany</Badge>
             </div>
           )}
         </div>
@@ -87,26 +121,28 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         <CardDescription className="mb-2 text-sm text-muted-foreground">
           {specialist.title}
         </CardDescription>
-        <div className="mb-3 flex flex-wrap gap-1">
-          {loading ? (
-            <Badge variant="outline" className="text-xs">Ładowanie...</Badge>
-          ) : specializations.length > 0 ? (
-            <>
-              {specializations.slice(0, 3).map((spec) => (
-                <Badge key={spec.id} variant="secondary" className="text-xs">
-                  {spec.name}
-                </Badge>
-              ))}
-              {specializations.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{specializations.length - 3}
-                </Badge>
-              )}
-            </>
-          ) : (
-            <Badge variant="outline" className="text-xs">Brak specjalizacji</Badge>
-          )}
-        </div>
+        {specialist.role === 'specialist' && (
+          <div className="mb-3 flex flex-wrap gap-1">
+            {loading ? (
+              <Badge variant="outline" className="text-xs">Ładowanie...</Badge>
+            ) : specializations.length > 0 ? (
+              <>
+                {specializations.slice(0, 3).map((spec) => (
+                  <Badge key={spec.id} variant="secondary" className="text-xs">
+                    {spec.name}
+                  </Badge>
+                ))}
+                {specializations.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{specializations.length - 3}
+                  </Badge>
+                )}
+              </>
+            ) : (
+              <Badge variant="outline" className="text-xs">Brak specjalizacji</Badge>
+            )}
+          </div>
+        )}
         <div className="flex items-center text-sm text-muted-foreground">
           <svg
             xmlns="http://www.w3.org/2000/svg"

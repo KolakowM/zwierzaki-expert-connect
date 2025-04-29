@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistC
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AppRole } from "@/services/user/types";
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,14 +18,15 @@ const Catalog = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchSpecialists = async () => {
+    const fetchAllUsers = async () => {
       try {
         setLoading(true);
         console.log('Fetching all users from database');
         
+        // Get all user profiles
         const { data: userProfiles, error: profileError } = await supabase
           .from('user_profiles')
-          .select('id, first_name, last_name');
+          .select('id, first_name, last_name, email, city');
           
         if (profileError) {
           throw profileError;
@@ -39,21 +42,45 @@ const Catalog = () => {
         
         const userIds = userProfiles.map(profile => profile.id);
         
-        let specialistsData: Specialist[] = [];
+        // Get user roles
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role, status')
+          .in('user_id', userIds);
+          
+        if (rolesError) {
+          throw rolesError;
+        }
+
+        // Create a map of user roles
+        const roleMap = userRoles?.reduce((map, item) => {
+          map[item.user_id] = {
+            role: item.role as AppRole,
+            status: item.status
+          };
+          return map;
+        }, {} as Record<string, { role: AppRole, status: string }>) || {};
         
-        const { data: specialistProfiles, error: profilesError } = await supabase
+        // Get specialist profiles for those who have them
+        const { data: specialistProfiles, error: specialistsError } = await supabase
           .from('specialist_profiles')
           .select('*')
           .in('id', userIds);
           
-        if (profilesError) {
-          throw profilesError;
+        if (specialistsError) {
+          throw specialistsError;
         }
         
+        // Map specialist profiles
+        const specialistMap = specialistProfiles?.reduce((map, profile) => {
+          map[profile.id] = profile;
+          return map;
+        }, {} as Record<string, any>) || {};
+        
+        // Get specializations for each specialist
         const { data: specialistSpecs, error: specsError } = await supabase
           .from('specialist_specializations')
-          .select('specialist_id, specialization_id')
-          .in('specialist_id', userIds);
+          .select('specialist_id, specialization_id');
           
         if (specsError) {
           throw specsError;
@@ -67,30 +94,29 @@ const Catalog = () => {
           specializationsBySpecialist[spec.specialist_id].push(spec.specialization_id);
         });
         
-        for (const userProfile of userProfiles) {
+        // Transform the data into the format needed for UI display
+        const usersData: Specialist[] = userProfiles.map(userProfile => {
           const userId = userProfile.id;
-          const specialistProfile = specialistProfiles?.find(p => p.id === userId);
+          const roleData = roleMap[userId] || { role: 'user' as AppRole, status: 'niezweryfikowany' };
+          const specialistProfile = specialistMap[userId];
           
-          let name = "Użytkownik";
-          if (userProfile) {
-            name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
-            if (!name) name = "Użytkownik";
-          }
+          const name = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || "Użytkownik";
           
-          specialistsData.push({
+          return {
             id: userId,
             name: name,
-            title: specialistProfile?.title || "Użytkownik systemu",
+            title: specialistProfile?.title || (roleData.role === 'admin' ? 'Administrator' : 'Użytkownik systemu'),
             specializations: specializationsBySpecialist[userId] || [],
-            location: specialistProfile?.location || "Polska",
+            location: specialistProfile?.location || userProfile.city || "Polska",
             image: specialistProfile?.photo_url || "/placeholder.svg",
-            rating: 4.5,
-            verified: true,
-          });
-        }
+            rating: 0,
+            verified: roleData.status === 'zweryfikowany',
+            role: roleData.role
+          };
+        });
         
-        setSpecialists(specialistsData);
-        setFilteredSpecialists(specialistsData);
+        setSpecialists(usersData);
+        setFilteredSpecialists(usersData);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast({
@@ -105,7 +131,7 @@ const Catalog = () => {
       }
     };
     
-    fetchSpecialists();
+    fetchAllUsers();
   }, [toast]);
 
   const handleSearch = () => {
@@ -141,6 +167,12 @@ const Catalog = () => {
         Array.isArray(specialist.specializations) && specialist.specializations.some(specId =>
           filters.specializations.includes(specId)
         )
+      );
+    }
+    
+    if (filters.roles && filters.roles.length > 0) {
+      filtered = filtered.filter(
+        specialist => filters.roles.includes(specialist.role)
       );
     }
 
