@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
@@ -14,6 +13,7 @@ const featuredSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=2376&auto=format&fit=crop",
     rating: 4.9,
     verified: true,
+    role: "specialist"
   },
   {
     id: "2",
@@ -24,6 +24,7 @@ const featuredSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2369&auto=format&fit=crop",
     rating: 5.0,
     verified: true,
+    role: "specialist"
   },
   {
     id: "3",
@@ -34,6 +35,7 @@ const featuredSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=2374&auto=format&fit=crop",
     rating: 4.8,
     verified: true,
+    role: "specialist"
   },
   {
     id: "4",
@@ -44,6 +46,7 @@ const featuredSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2368&auto=format&fit=crop",
     rating: 4.7,
     verified: true,
+    role: "specialist"
   }
 ];
 
@@ -85,8 +88,7 @@ const benefitsData = [
       >
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        <path d="M22 21v-2a4 4 0 0 1 0 7.75" />
       </svg>
     ),
     title: "Doświadczeni profesjonaliści",
