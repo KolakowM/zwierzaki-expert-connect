@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AppRole } from "@/services/userService";
+import { Filter } from "lucide-react";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: any) => void;
@@ -51,7 +51,10 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   return (
     <div className="space-y-6 rounded-lg border p-4">
       <div>
-        <h3 className="mb-4 font-medium">Filtruj według</h3>
+        <h3 className="mb-4 font-medium flex items-center">
+          <Filter className="mr-2 h-4 w-4" />
+          Filtruj według
+        </h3>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="role">Rola użytkownika</Label>
