@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { AppRole } from "@/services/userService";
+import { AppRole } from "@/services/user/types";
 
 export interface CatalogUser {
   id: string;
@@ -13,7 +13,7 @@ export interface CatalogUser {
   image: string;
   rating?: number;
   verified: boolean;
-  role: AppRole;
+  role: AppRole; // Updated from string to AppRole
 }
 
 export function useCatalogData() {
@@ -95,7 +95,7 @@ export function useCatalogData() {
         // 6. Combine all data for each user
         const catalogUsers: CatalogUser[] = userProfiles.map(userProfile => {
           const userId = userProfile.id;
-          const userRole = roleMap.get(userId) || { role: 'user', status: 'niezweryfikowany' };
+          const userRole = roleMap.get(userId) || { role: 'user' as AppRole, status: 'niezweryfikowany' };
           const specialistProfile = specialistProfiles?.find(p => p.id === userId);
           
           let name = "Użytkownik";

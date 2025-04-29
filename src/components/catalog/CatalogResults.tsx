@@ -1,5 +1,6 @@
 
 import { SpecialistCard } from "@/components/specialists/SpecialistCard";
+import { AppRole } from "@/services/user/types";
 
 interface CatalogUser {
   id: string;
@@ -10,7 +11,7 @@ interface CatalogUser {
   image: string;
   rating?: number;
   verified: boolean;
-  role: string;
+  role: AppRole; // Updated from string to AppRole
 }
 
 interface CatalogResultsProps {
