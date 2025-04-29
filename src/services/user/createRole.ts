@@ -4,7 +4,7 @@ import { AppRole, UserRoleData } from "./types";
 
 export const createUserRole = async (userId: string, role: AppRole = 'user', status: string = 'niezweryfikowany'): Promise<UserRoleData | null> => {
   try {
-    // Sprawdź, czy rola już istnieje dla tego użytkownika
+    // Check if role already exists for this user
     const { data: existingRole } = await supabase
       .from('user_roles')
       .select('*')
@@ -12,11 +12,11 @@ export const createUserRole = async (userId: string, role: AppRole = 'user', sta
       .single();
       
     if (existingRole) {
-      console.log('Rola już istnieje dla tego użytkownika', existingRole);
+      console.log('Role already exists for this user', existingRole);
       return existingRole as UserRoleData;
     }
     
-    // Utwórz nową rolę dla użytkownika
+    // Create new role for the user
     const { data, error } = await supabase
       .from('user_roles')
       .insert({
@@ -28,14 +28,14 @@ export const createUserRole = async (userId: string, role: AppRole = 'user', sta
       .single();
       
     if (error) {
-      console.error('Błąd podczas tworzenia roli użytkownika:', error);
+      console.error('Error creating user role:', error);
       throw error;
     }
     
-    console.log('Utworzono rolę użytkownika:', data);
+    console.log('Created user role:', data);
     return data as UserRoleData;
   } catch (error) {
-    console.error('Błąd podczas tworzenia roli użytkownika:', error);
+    console.error('Error creating user role:', error);
     return null;
   }
 };
