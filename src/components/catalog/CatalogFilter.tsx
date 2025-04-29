@@ -6,6 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AppRole } from "@/services/userService";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: any) => void;
@@ -14,6 +16,7 @@ interface CatalogFilterProps {
 export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [location, setLocation] = useState("");
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [role, setRole] = useState<string>("all");
   const { specializations, isLoading, error } = useSpecializationsData();
 
   const handleSpecializationChange = (id: string) => {
@@ -26,16 +29,22 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
     });
   };
 
+  const handleRoleChange = (value: string) => {
+    setRole(value);
+  };
+
   const handleApplyFilter = () => {
     onFilterChange({
       location,
-      specializations: selectedSpecializations
+      specializations: selectedSpecializations,
+      role
     });
   };
 
   const handleReset = () => {
     setLocation("");
     setSelectedSpecializations([]);
+    setRole("all");
     onFilterChange({});
   };
 
@@ -45,6 +54,21 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
         <h3 className="mb-4 font-medium">Filtruj według</h3>
         <div className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="role">Rola użytkownika</Label>
+            <Select value={role} onValueChange={handleRoleChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Wszystkie role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Wszystkie role</SelectItem>
+                <SelectItem value="specialist">Specjaliści</SelectItem>
+                <SelectItem value="user">Użytkownicy</SelectItem>
+                <SelectItem value="admin">Administratorzy</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="location">Lokalizacja</Label>
             <Input
               id="location"
@@ -53,38 +77,42 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
               onChange={(e) => setLocation(e.target.value)}
             />
           </div>
-          <div className="space-y-3">
-            <Label>Specjalizacje</Label>
-            <div className="space-y-2">
-              {isLoading ? (
-                // Show loading skeletons while data is being fetched
-                Array.from({ length: 5 }).map((_, index) => (
-                  <div className="flex items-center space-x-2" key={index}>
-                    <Skeleton className="h-4 w-4" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                ))
-              ) : error ? (
-                <p className="text-sm text-destructive">Error loading specializations</p>
-              ) : (
-                specializations.map((specialization) => (
-                  <div className="flex items-center space-x-2" key={specialization.id}>
-                    <Checkbox 
-                      id={specialization.id} 
-                      checked={selectedSpecializations.includes(specialization.id)}
-                      onCheckedChange={() => handleSpecializationChange(specialization.id)}
-                    />
-                    <label
-                      htmlFor={specialization.id}
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {specialization.name}
-                    </label>
-                  </div>
-                ))
-              )}
+          
+          {/* Only show specializations filter when specialists are included */}
+          {(role === 'all' || role === 'specialist') && (
+            <div className="space-y-3">
+              <Label>Specjalizacje</Label>
+              <div className="space-y-2">
+                {isLoading ? (
+                  // Show loading skeletons while data is being fetched
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <div className="flex items-center space-x-2" key={index}>
+                      <Skeleton className="h-4 w-4" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  ))
+                ) : error ? (
+                  <p className="text-sm text-destructive">Error loading specializations</p>
+                ) : (
+                  specializations.map((specialization) => (
+                    <div className="flex items-center space-x-2" key={specialization.id}>
+                      <Checkbox 
+                        id={specialization.id} 
+                        checked={selectedSpecializations.includes(specialization.id)}
+                        onCheckedChange={() => handleSpecializationChange(specialization.id)}
+                      />
+                      <label
+                        htmlFor={specialization.id}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {specialization.name}
+                      </label>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       <div className="flex flex-col space-y-2">

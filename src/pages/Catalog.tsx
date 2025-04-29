@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
@@ -6,24 +7,39 @@ import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistC
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AppRole } from "@/services/userService";
+
+// Define a more comprehensive user type to handle all user types
+interface CatalogUser {
+  id: string;
+  name: string;
+  title: string;
+  specializations: string[];
+  location: string;
+  image: string;
+  rating?: number;
+  verified: boolean;
+  role: AppRole;
+}
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<any>({});
-  const [specialists, setSpecialists] = useState<Specialist[]>([]);
-  const [filteredSpecialists, setFilteredSpecialists] = useState<Specialist[]>([]);
+  const [users, setUsers] = useState<CatalogUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<CatalogUser[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchSpecialists = async () => {
+    const fetchUsers = async () => {
       try {
         setLoading(true);
         console.log('Fetching all users from database');
         
+        // 1. Fetch all user profiles
         const { data: userProfiles, error: profileError } = await supabase
           .from('user_profiles')
-          .select('id, first_name, last_name');
+          .select('id, first_name, last_name, email');
           
         if (profileError) {
           throw profileError;
@@ -31,25 +47,36 @@ const Catalog = () => {
         
         if (!userProfiles || userProfiles.length === 0) {
           console.log('No users found');
-          setSpecialists([]);
-          setFilteredSpecialists([]);
+          setUsers([]);
+          setFilteredUsers([]);
           setLoading(false);
           return;
         }
         
+        // 2. Get all user IDs to fetch related data
         const userIds = userProfiles.map(profile => profile.id);
         
-        let specialistsData: Specialist[] = [];
+        // 3. Fetch user roles to identify specialists, admins, etc.
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role, status')
+          .in('user_id', userIds);
+          
+        if (rolesError) {
+          throw rolesError;
+        }
         
-        const { data: specialistProfiles, error: profilesError } = await supabase
+        // 4. Fetch specialist profiles for users with specialist role
+        const { data: specialistProfiles, error: specialistsError } = await supabase
           .from('specialist_profiles')
           .select('*')
           .in('id', userIds);
           
-        if (profilesError) {
-          throw profilesError;
+        if (specialistsError) {
+          throw specialistsError;
         }
         
+        // 5. Fetch specialist specializations
         const { data: specialistSpecs, error: specsError } = await supabase
           .from('specialist_specializations')
           .select('specialist_id, specialization_id')
@@ -59,6 +86,12 @@ const Catalog = () => {
           throw specsError;
         }
         
+        // Create maps for easier lookup
+        const roleMap = new Map();
+        userRoles?.forEach(role => {
+          roleMap.set(role.user_id, {role: role.role, status: role.status});
+        });
+        
         const specializationsBySpecialist: Record<string, string[]> = {};
         specialistSpecs?.forEach(spec => {
           if (!specializationsBySpecialist[spec.specialist_id]) {
@@ -67,8 +100,10 @@ const Catalog = () => {
           specializationsBySpecialist[spec.specialist_id].push(spec.specialization_id);
         });
         
-        for (const userProfile of userProfiles) {
+        // 6. Combine all data for each user
+        const catalogUsers: CatalogUser[] = userProfiles.map(userProfile => {
           const userId = userProfile.id;
+          const userRole = roleMap.get(userId) || { role: 'user', status: 'niezweryfikowany' };
           const specialistProfile = specialistProfiles?.find(p => p.id === userId);
           
           let name = "Użytkownik";
@@ -77,20 +112,30 @@ const Catalog = () => {
             if (!name) name = "Użytkownik";
           }
           
-          specialistsData.push({
+          // Define title based on role and specialist profile
+          let title = "Użytkownik systemu";
+          if (userRole.role === 'specialist' && specialistProfile?.title) {
+            title = specialistProfile.title;
+          } else if (userRole.role === 'admin') {
+            title = "Administrator";
+          }
+          
+          return {
             id: userId,
             name: name,
-            title: specialistProfile?.title || "Użytkownik systemu",
-            specializations: specializationsBySpecialist[userId] || [],
+            title: title,
+            specializations: userRole.role === 'specialist' ? 
+              specializationsBySpecialist[userId] || [] : [],
             location: specialistProfile?.location || "Polska",
             image: specialistProfile?.photo_url || "/placeholder.svg",
-            rating: 4.5,
-            verified: true,
-          });
-        }
+            rating: 4.5, // Default rating
+            verified: userRole.status === 'verified',
+            role: userRole.role as AppRole
+          };
+        });
         
-        setSpecialists(specialistsData);
-        setFilteredSpecialists(specialistsData);
+        setUsers(catalogUsers);
+        setFilteredUsers(catalogUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast({
@@ -98,53 +143,63 @@ const Catalog = () => {
           description: "Nie udało się pobrać listy użytkowników",
           variant: "destructive"
         });
-        setSpecialists([]);
-        setFilteredSpecialists([]);
+        setUsers([]);
+        setFilteredUsers([]);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchSpecialists();
+    fetchUsers();
   }, [toast]);
 
   const handleSearch = () => {
-    filterSpecialists({ searchTerm, ...activeFilters });
+    filterUsers({ searchTerm, ...activeFilters });
   };
 
   const handleFilterChange = (filters: any) => {
     setActiveFilters(filters);
-    filterSpecialists({ searchTerm, ...filters });
+    filterUsers({ searchTerm, ...filters });
   };
 
-  const filterSpecialists = (filters: any) => {
-    let filtered = [...specialists];
+  const filterUsers = (filters: any) => {
+    let filtered = [...users];
 
+    // Filter by search term
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(
-        specialist =>
-          specialist.name.toLowerCase().includes(term) ||
-          specialist.title.toLowerCase().includes(term)
+        user =>
+          user.name.toLowerCase().includes(term) ||
+          user.title.toLowerCase().includes(term)
       );
     }
 
+    // Filter by user role if specified
+    if (filters.role && filters.role !== 'all') {
+      filtered = filtered.filter(user => user.role === filters.role);
+    }
+
+    // Filter by location (mainly for specialists)
     if (filters.location) {
       const location = filters.location.toLowerCase();
       filtered = filtered.filter(
-        specialist => specialist.location.toLowerCase().includes(location)
+        user => user.location.toLowerCase().includes(location)
       );
     }
 
+    // Filter by specializations (only applicable to specialists)
     if (filters.specializations && filters.specializations.length > 0) {
-      filtered = filtered.filter(specialist =>
-        Array.isArray(specialist.specializations) && specialist.specializations.some(specId =>
+      filtered = filtered.filter(user =>
+        user.role === 'specialist' && 
+        Array.isArray(user.specializations) && 
+        user.specializations.some(specId =>
           filters.specializations.includes(specId)
         )
       );
     }
 
-    setFilteredSpecialists(filtered);
+    setFilteredUsers(filtered);
   };
 
   return (
@@ -174,7 +229,7 @@ const Catalog = () => {
           <div className="md:col-span-3">
             <div className="mb-4">
               <p className="text-muted-foreground">
-                {loading ? "Ładowanie użytkowników..." : `Znaleziono ${filteredSpecialists.length} użytkowników`}
+                {loading ? "Ładowanie użytkowników..." : `Znaleziono ${filteredUsers.length} użytkowników`}
               </p>
             </div>
             
@@ -184,10 +239,10 @@ const Catalog = () => {
                   <div key={i} className="h-[300px] w-full animate-pulse rounded-lg bg-gray-200"></div>
                 ))}
               </div>
-            ) : filteredSpecialists.length > 0 ? (
+            ) : filteredUsers.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredSpecialists.map(specialist => (
-                  <SpecialistCard specialist={specialist} key={specialist.id} />
+                {filteredUsers.map(user => (
+                  <SpecialistCard specialist={user} key={user.id} />
                 ))}
               </div>
             ) : (
