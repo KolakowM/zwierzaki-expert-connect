@@ -18,14 +18,14 @@ export function useCatalogData() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fetch all users
+  // Fetch all users - now accessible to guest users due to updated RLS policies
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
         setLoading(true);
         console.log('Fetching all users from database');
         
-        // Get all user profiles
+        // Get all user profiles - now publicly accessible
         const { data: userProfiles, error: profileError } = await supabase
           .from('user_profiles')
           .select('id, first_name, last_name, email, city');
@@ -44,7 +44,7 @@ export function useCatalogData() {
         
         const userIds = userProfiles.map(profile => profile.id);
         
-        // Get user roles
+        // Get user roles - now publicly accessible
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
           .select('user_id, role, status')
@@ -63,7 +63,7 @@ export function useCatalogData() {
           return map;
         }, {} as Record<string, { role: AppRole, status: string }>) || {};
         
-        // Get specialist profiles for those who have them
+        // Get specialist profiles - now publicly accessible
         const { data: specialistProfiles, error: specialistsError } = await supabase
           .from('specialist_profiles')
           .select('*')
@@ -79,7 +79,7 @@ export function useCatalogData() {
           return map;
         }, {} as Record<string, any>) || {};
         
-        // Get specializations for each specialist
+        // Get specializations for each specialist - now publicly accessible
         const { data: specialistSpecs, error: specsError } = await supabase
           .from('specialist_specializations')
           .select('specialist_id, specialization_id');
