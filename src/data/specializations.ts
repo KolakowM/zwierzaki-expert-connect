@@ -36,3 +36,62 @@ export function useSpecializationsData() {
 
   return { specializations, isLoading, error };
 }
+
+// Add the missing function that's being imported in other files
+export function useSpecialistSpecializationsManager(specialistId?: string) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Function to save specialist specializations
+  const saveSpecializations = async (specializationIds: string[]) => {
+    if (!specialistId) {
+      return { success: false, error: "No specialist ID provided" };
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+      
+      console.log('Saving specializations for specialist:', specialistId);
+      console.log('Specialization IDs to save:', specializationIds);
+      
+      // First delete existing specialization associations
+      const { error: deleteError } = await supabase
+        .from('specialist_specializations')
+        .delete()
+        .eq('specialist_id', specialistId);
+        
+      if (deleteError) throw deleteError;
+      
+      // Then insert new associations if we have any specializations to add
+      if (specializationIds.length > 0) {
+        // Create array of objects for insert
+        const specializationsToInsert = specializationIds.map(specId => ({
+          specialist_id: specialistId,
+          specialization_id: specId
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('specialist_specializations')
+          .insert(specializationsToInsert);
+          
+        if (insertError) throw insertError;
+      }
+      
+      console.log('Specializations saved successfully');
+      return { success: true, error: null };
+    } catch (err: any) {
+      console.error('Error saving specializations:', err);
+      setError(err.message || 'Unknown error');
+      return { success: false, error: err.message || 'Unknown error' };
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return {
+    saveSpecializations,
+    saving,
+    error
+  };
+}
