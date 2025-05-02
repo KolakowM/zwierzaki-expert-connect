@@ -77,8 +77,8 @@ export const useProfileFormSubmit = ({
         
       if (error) throw error;
       
-      // Save specializations if we're on the specializations tab
-      if (values.specializations && activeTab === "specializations") {
+      // Save specializations regardless of which tab we're on
+      if (values.specializations && values.specializations.length > 0) {
         console.log('Saving specializations:', values.specializations);
         const { success, error: specError } = await saveSpecializations(values.specializations);
         
@@ -112,14 +112,40 @@ export const useProfileFormSubmit = ({
     } catch (error) {
       console.error('Error saving profile:', error);
       setSaveError(error instanceof Error ? error.message : "Nieznany błąd podczas zapisywania profilu");
+      
+      // Show more detailed error message
       toast({
         title: "Błąd",
-        description: "Nie udało się zapisać profilu",
+        description: <ErrorToastWithDetails 
+          message="Nie udało się zapisać profilu"
+          error={error instanceof Error ? error.message : "Nieznany błąd"}
+          fields={Object.keys(form.formState.errors)}
+        />,
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Create a component to display error details
+  const ErrorToastWithDetails = ({ message, error, fields }: { message: string, error: string, fields: string[] }) => {
+    return (
+      <div className="space-y-2">
+        <p>{message}</p>
+        {fields.length > 0 && (
+          <div>
+            <p className="font-semibold">Pola z błędami:</p>
+            <ul className="list-disc pl-4">
+              {fields.map((field) => (
+                <li key={field}>{field}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <p className="text-sm text-red-300">{error}</p>
+      </div>
+    );
   };
 
   return {

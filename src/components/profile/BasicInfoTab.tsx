@@ -1,13 +1,13 @@
 
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EducationFieldsArray } from "./EducationFieldsArray";
-import { ProfilePhotoUploader } from "./ProfilePhotoUploader";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
-import { useEffect, useRef } from "react";
+import { ProfilePhotoUpload } from "./ProfilePhotoUpload";
+import { EducationFieldsArray } from "./EducationFieldsArray";
+import { useEffect } from "react";
 
 interface BasicInfoTabProps {
   form: UseFormReturn<any>;
@@ -32,36 +32,12 @@ export function BasicInfoTab({
   onPhotoChange,
   isSubmitting
 }: BasicInfoTabProps) {
-  // Use a ref to track previous props to avoid unnecessary logging
-  const prevEducationRef = useRef(education);
-  
-  // Log only when education array changes
+  // Log form values when they change
   useEffect(() => {
-    if (prevEducationRef.current !== education) {
-      console.log("BasicInfoTab rendering with education:", education);
-      console.log("Form values:", form.getValues());
-      prevEducationRef.current = education;
-    }
-  }, [education, form]);
-  
-  // Use a separate ref for the form watch subscription
-  const formWatchRef = useRef<any>(null);
-  
-  // Log form values when they change - with cleanup
-  useEffect(() => {
-    if (formWatchRef.current) {
-      formWatchRef.current.unsubscribe();
-    }
-    
-    formWatchRef.current = form.watch((value) => {
+    const subscription = form.watch((value) => {
       console.log("BasicInfoTab - Form values changed:", value);
     });
-    
-    return () => {
-      if (formWatchRef.current) {
-        formWatchRef.current.unsubscribe();
-      }
-    };
+    return () => subscription.unsubscribe();
   }, [form]);
 
   return (
@@ -69,32 +45,32 @@ export function BasicInfoTab({
       <CardHeader>
         <CardTitle>Dane podstawowe</CardTitle>
         <CardDescription>
-          Przedstaw się swoim potencjalnym klientom.
+          Uzupełnij podstawowe informacje o sobie
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Profile photo */}
-        <ProfilePhotoUploader 
-          initialPhotoUrl={photoUrl} 
+      <CardContent className="space-y-6">
+        {/* Profile Photo */}
+        <ProfilePhotoUpload 
+          photoUrl={photoUrl}
           userId={userId}
           onPhotoChange={onPhotoChange}
         />
-
+        
         {/* Title */}
         <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tytuł zawodowy</FormLabel>
+              <FormLabel>Tytuł zawodowy / specjalizacja</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="np. Dietetyk zwierzęcy, Behawiorysta psów" 
+                  placeholder="np. Psycholog, Dietetyk, Trener personalny" 
                   {...field} 
                 />
               </FormControl>
               <FormDescription>
-                Tytuł zawodowy, który będzie widoczny w twoim profilu
+                Tytuł który najlepiej opisuje Twoją specjalizację
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -107,22 +83,37 @@ export function BasicInfoTab({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Opis</FormLabel>
+              <FormLabel>O mnie</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Opisz swoją specjalizację, doświadczenie i podejście do pracy..." 
-                  className="min-h-[150px]"
-                  {...field} 
+                <Textarea
+                  placeholder="Napisz kilka słów o sobie, swoim doświadczeniu i ofercie"
+                  className="min-h-32"
+                  {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Szczegółowy opis Twojej działalności, doświadczenia i metod pracy
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
+        {/* Location */}
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Lokalizacja</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="np. Warszawa, Kraków, Poznań" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         {/* Experience */}
         <FormField
           control={form.control}
@@ -131,15 +122,11 @@ export function BasicInfoTab({
             <FormItem>
               <FormLabel>Doświadczenie</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Opisz swoje doświadczenie zawodowe..." 
-                  className="min-h-[100px]"
-                  {...field} 
+                <Textarea
+                  placeholder="Opisz swoje doświadczenie zawodowe"
+                  {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Opisz swoje doświadczenie zawodowe, np. lata praktyki, współpraca z klinikami
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

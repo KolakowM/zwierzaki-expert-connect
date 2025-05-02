@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AccountGeneralTab } from "./AccountGeneralTab";
@@ -11,6 +10,8 @@ import { Form } from "@/components/ui/form";
 import { TabErrorIndicator } from "@/components/ui/tab-error-indicator";
 import { ErrorToast, FormError } from "@/components/ui/error-toast";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface AccountSettingsTabsProps {
   activeTab: string;
@@ -94,6 +95,7 @@ export function AccountSettingsTabs({
     }));
 
     if (errors.length > 0) {
+      // Display more visible error alert
       toast({
         title: "Formularz zawiera błędy",
         description: <ErrorToast errors={errors} onErrorClick={handleErrorClick} />,
@@ -115,6 +117,9 @@ export function AccountSettingsTabs({
       element.focus();
     }
   };
+  
+  // Display validation errors for specialist tab
+  const specialistTabHasErrors = Object.keys(profileForm.formState.errors).length > 0;
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -167,12 +172,26 @@ export function AccountSettingsTabs({
         </Form>
         
         <div className="mt-6">
-          {/* Passing handleLogout function as onDeleteAccount prop which is what DeleteAccountDialog expects */}
           <DeleteAccountDialog onDeleteAccount={handleLogout} />
         </div>
       </TabsContent>
       
       <TabsContent value="specialist">
+        {specialistTabHasErrors && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Formularz zawiera błędy</AlertTitle>
+            <AlertDescription>
+              <ul className="list-disc pl-4 mt-2">
+                {Object.entries(profileForm.formState.errors).map(([field, error]) => (
+                  <li key={field}>
+                    <strong>{field}:</strong> {error.message as string}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
         <SpecialistProfileTabWrapper
           profileForm={profileForm}
           specialistActiveTab={specialistActiveTab}

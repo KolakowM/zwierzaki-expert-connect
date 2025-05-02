@@ -13,11 +13,11 @@ export const profileFormSchema = z.object({
   title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki"),
   description: z.string().min(10, "Opis musi mieć co najmniej 10 znaków"),
   specializations: z.array(z.string()).min(1, "Wybierz co najmniej jedną specjalizację"),
-  services: z.array(z.string()).min(1, "Dodaj co najmniej jedną usługę"),
+  services: z.array(z.string()).optional(), // Changed from required to optional
   education: z.array(z.string()),
   experience: z.string(),
   location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki"),
-  phoneNumber: z.string().optional(), // Changed from required to optional
+  phoneNumber: z.string().optional(), // Already optional
   email: z.string().email("Wprowadź poprawny adres email"),
   website: z.string().optional(),
   socialMedia: z.object({

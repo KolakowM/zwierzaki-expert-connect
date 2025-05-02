@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { SpecialistProfileTab, ProfileFormValues } from '@/components/profile/SpecialistProfileTab';
 import { UseFormReturn } from 'react-hook-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form } from '@/components/ui/form';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
 
 interface SpecialistProfileTabWrapperProps {
   profileForm: UseFormReturn<ProfileFormValues>;
@@ -55,26 +55,54 @@ export function SpecialistProfileTabWrapper({
     );
   }
 
+  // Custom submission handler with error logging
+  const handleSubmit = (values: ProfileFormValues) => {
+    // Log form values for debugging
+    console.log("Form values being submitted:", values);
+    
+    // Check if required fields are filled
+    const requiredFields = ['title', 'description', 'specializations', 'location', 'email'];
+    const missingFields = requiredFields.filter(field => {
+      if (field === 'specializations') {
+        return !values.specializations || values.specializations.length === 0;
+      }
+      return !values[field as keyof ProfileFormValues];
+    });
+    
+    if (missingFields.length > 0) {
+      console.warn("Missing required fields:", missingFields);
+    }
+    
+    // Proceed with submission
+    onProfileSubmit(values);
+  };
+
   return (
     <Form {...profileForm}>
-      <SpecialistProfileTab
-        form={profileForm}
-        activeTab={specialistActiveTab}
-        setActiveTab={setSpecialistActiveTab}
-        onSubmit={onProfileSubmit}
-        photoUrl={photoUrl}
-        userId={userId}
-        services={services}
-        education={education}
-        isSubmitting={isProfileSubmitting}
-        updateService={updateService}
-        removeService={removeService}
-        addService={addService}
-        updateEducation={updateEducation}
-        removeEducation={removeEducation}
-        addEducation={addEducation}
-        onPhotoChange={onPhotoChange}
-      />
+      <FormErrorSummary form={profileForm} />
+      
+      <form onSubmit={profileForm.handleSubmit(handleSubmit, (errors) => {
+        console.error("Form validation errors:", errors);
+      })}>
+        <SpecialistProfileTab
+          form={profileForm}
+          activeTab={specialistActiveTab}
+          setActiveTab={setSpecialistActiveTab}
+          onSubmit={handleSubmit}
+          photoUrl={photoUrl}
+          userId={userId}
+          services={services}
+          education={education}
+          isSubmitting={isProfileSubmitting}
+          updateService={updateService}
+          removeService={removeService}
+          addService={addService}
+          updateEducation={updateEducation}
+          removeEducation={removeEducation}
+          addEducation={addEducation}
+          onPhotoChange={onPhotoChange}
+        />
+      </form>
     </Form>
   );
 }

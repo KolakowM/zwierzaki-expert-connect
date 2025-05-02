@@ -55,6 +55,17 @@ export function useSpecialistSettingsTab(
       console.log('Current services array:', services);
       console.log('Current education array:', education);
       
+      // Display form validation errors for debugging
+      const formErrors = Object.entries(values).filter(([key, value]) => {
+        if (Array.isArray(value) && value.length === 0) return true;
+        if (value === "" || value === undefined || value === null) return true;
+        return false;
+      });
+      
+      if (formErrors.length > 0) {
+        console.log('Potential form validation issues:', formErrors);
+      }
+      
       // Upload profile photo if changed
       let photoUrlToSave = specialistProfile?.photo_url || null;
       if (photoUrl && photoUrl !== specialistProfile?.photo_url) {
@@ -97,6 +108,8 @@ export function useSpecialistSettingsTab(
           console.error("Error saving specializations:", specError);
           throw new Error(specError || "Error saving specializations");
         }
+      } else {
+        console.warn("No specializations to save - this might cause validation errors");
       }
       
       toast({
@@ -106,9 +119,16 @@ export function useSpecialistSettingsTab(
       
     } catch (error: any) {
       console.error("Error updating specialist profile:", error);
+      
+      // Show more detailed toast with error information
       toast({
         title: "Błąd aktualizacji",
-        description: error.message || "Wystąpił błąd podczas aktualizacji profilu specjalisty.",
+        description: (
+          <div>
+            <p>Wystąpił błąd podczas aktualizacji profilu specjalisty.</p>
+            <p className="text-sm font-medium text-red-300 mt-2">{error.message || "Nieznany błąd"}</p>
+          </div>
+        ),
         variant: "destructive"
       });
     } finally {
