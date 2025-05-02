@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SpecialistProfileTab, ProfileFormValues } from '@/components/profile/SpecialistProfileTab';
 import { UseFormReturn } from 'react-hook-form';
@@ -55,40 +56,35 @@ export function SpecialistProfileTabWrapper({
     );
   }
 
-  // Custom submission handler with error logging
-  const handleSubmit = (values: ProfileFormValues) => {
+  // Custom submission handler that prevents default form submission
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Zapobiega domyślnemu odświeżeniu strony
+    
+    const values = profileForm.getValues();
+    
     // Log form values for debugging
     console.log("Form values being submitted:", values);
     
-    // Check if required fields are filled
-    const requiredFields = ['title', 'description', 'specializations', 'location', 'email'];
-    const missingFields = requiredFields.filter(field => {
-      if (field === 'specializations') {
-        return !values.specializations || values.specializations.length === 0;
+    // Ręczne walidowanie formularza
+    profileForm.trigger().then(isValid => {
+      if (isValid) {
+        onProfileSubmit(values);
+      } else {
+        console.error("Form validation errors:", profileForm.formState.errors);
       }
-      return !values[field as keyof ProfileFormValues];
     });
-    
-    if (missingFields.length > 0) {
-      console.warn("Missing required fields:", missingFields);
-    }
-    
-    // Proceed with submission
-    onProfileSubmit(values);
   };
 
   return (
     <Form {...profileForm}>
       <FormErrorSummary form={profileForm} />
       
-      <form onSubmit={profileForm.handleSubmit(handleSubmit, (errors) => {
-        console.error("Form validation errors:", errors);
-      })}>
+      <form onSubmit={handleSubmit}>
         <SpecialistProfileTab
           form={profileForm}
           activeTab={specialistActiveTab}
           setActiveTab={setSpecialistActiveTab}
-          onSubmit={handleSubmit}
+          onSubmit={onProfileSubmit}
           photoUrl={photoUrl}
           userId={userId}
           services={services}
