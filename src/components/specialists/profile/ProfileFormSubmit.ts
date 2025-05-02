@@ -113,39 +113,18 @@ export const useProfileFormSubmit = ({
       console.error('Error saving profile:', error);
       setSaveError(error instanceof Error ? error.message : "Nieznany błąd podczas zapisywania profilu");
       
-      // Show more detailed error message
+      // Show error message without JSX
+      const errorFields = Object.keys(form.formState.errors);
+      const errorMsg = error instanceof Error ? error.message : "Nieznany błąd";
+      
       toast({
         title: "Błąd",
-        description: <ErrorToastWithDetails 
-          message="Nie udało się zapisać profilu"
-          error={error instanceof Error ? error.message : "Nieznany błąd"}
-          fields={Object.keys(form.formState.errors)}
-        />,
+        description: `Nie udało się zapisać profilu. ${errorMsg}. ${errorFields.length > 0 ? 'Pola z błędami: ' + errorFields.join(', ') : ''}`,
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Create a component to display error details
-  const ErrorToastWithDetails = ({ message, error, fields }: { message: string, error: string, fields: string[] }) => {
-    return (
-      <div className="space-y-2">
-        <p>{message}</p>
-        {fields.length > 0 && (
-          <div>
-            <p className="font-semibold">Pola z błędami:</p>
-            <ul className="list-disc pl-4">
-              {fields.map((field) => (
-                <li key={field}>{field}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <p className="text-sm text-red-300">{error}</p>
-      </div>
-    );
   };
 
   return {

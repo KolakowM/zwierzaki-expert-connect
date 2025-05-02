@@ -123,12 +123,7 @@ export function useSpecialistSettingsTab(
       // Show more detailed toast with error information
       toast({
         title: "Błąd aktualizacji",
-        description: (
-          <div>
-            <p>Wystąpił błąd podczas aktualizacji profilu specjalisty.</p>
-            <p className="text-sm font-medium text-red-300 mt-2">{error.message || "Nieznany błąd"}</p>
-          </div>
-        ),
+        description: error.message || "Nieznany błąd podczas aktualizacji profilu specjalisty",
         variant: "destructive"
       });
     } finally {
