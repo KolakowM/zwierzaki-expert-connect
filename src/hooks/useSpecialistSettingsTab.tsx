@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
 import { useSpecialistSpecializationsManager } from "@/data/specializations";
+import { ErrorToastDetails } from "@/components/ui/error-toast-detail";
 
 export function useSpecialistSettingsTab(
   userId: string | undefined,
@@ -123,7 +124,7 @@ export function useSpecialistSettingsTab(
       // Show more detailed toast with error information
       toast({
         title: "Błąd aktualizacji",
-        description: `Wystąpił błąd podczas aktualizacji profilu specjalisty. ${error.message || "Nieznany błąd"}`,
+        description: error.message || "Nieznany błąd podczas aktualizacji profilu specjalisty",
         variant: "destructive"
       });
     } finally {

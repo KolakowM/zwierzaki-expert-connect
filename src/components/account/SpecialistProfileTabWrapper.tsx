@@ -57,29 +57,30 @@ export function SpecialistProfileTabWrapper({
   }
 
   // Custom submission handler that prevents default form submission
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Zapobiega domyślnemu odświeżeniu strony
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default page refresh
     
     const values = profileForm.getValues();
     
     // Log form values for debugging
     console.log("Form values being submitted:", values);
     
-    // Ręczne walidowanie formularza
-    profileForm.trigger().then(isValid => {
-      if (isValid) {
-        onProfileSubmit(values);
-      } else {
-        console.error("Form validation errors:", profileForm.formState.errors);
-      }
-    });
+    // Manually trigger validation
+    const isValid = await profileForm.trigger();
+    
+    if (isValid) {
+      console.log("Form validation passed, submitting values:", values);
+      onProfileSubmit(values);
+    } else {
+      console.error("Form validation errors:", profileForm.formState.errors);
+    }
   };
 
   return (
     <Form {...profileForm}>
       <FormErrorSummary form={profileForm} />
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <SpecialistProfileTab
           form={profileForm}
           activeTab={specialistActiveTab}

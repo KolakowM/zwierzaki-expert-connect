@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProfileFormValues } from "@/components/profile/SpecialistProfileTab";
 import { UseFormReturn } from "react-hook-form";
 import { useSpecialistSpecializationsManager } from "@/data/specializations";
-import { ErrorToastDetails } from "@/components/ui/error-toast-detail";
 
 interface UseProfileFormSubmitProps {
   form: UseFormReturn<ProfileFormValues>;
@@ -110,7 +109,7 @@ export const useProfileFormSubmit = ({
         setSaveSuccess(false);
       }, 5000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving profile:', error);
       setSaveError(error instanceof Error ? error.message : "Nieznany błąd podczas zapisywania profilu");
       

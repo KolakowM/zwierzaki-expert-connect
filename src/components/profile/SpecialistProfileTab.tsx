@@ -14,12 +14,12 @@ export const profileFormSchema = z.object({
   description: z.string().min(10, "Opis musi mieć co najmniej 10 znaków"),
   specializations: z.array(z.string()).min(1, "Wybierz co najmniej jedną specjalizację"),
   services: z.array(z.string()).optional(), // Changed from required to optional
-  education: z.array(z.string()),
-  experience: z.string(),
+  education: z.array(z.string()).optional(), // Also make education optional
+  experience: z.string().optional(), // Make experience optional
   location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki"),
-  phoneNumber: z.string().optional(), // Already optional
+  phoneNumber: z.string().optional(),
   email: z.string().email("Wprowadź poprawny adres email"),
-  website: z.string().optional(),
+  website: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
   socialMedia: z.object({
     facebook: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
     instagram: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
@@ -71,56 +71,54 @@ export function SpecialistProfileTab({
   onPhotoChange
 }: SpecialistProfileTabProps) {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="basic">Dane podstawowe</TabsTrigger>
-            <TabsTrigger value="specializations">Specjalizacje</TabsTrigger>
-            <TabsTrigger value="contact">Kontakt</TabsTrigger>
-            <TabsTrigger value="social">Social Media</TabsTrigger>
-          </TabsList>
+    <div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="basic">Dane podstawowe</TabsTrigger>
+          <TabsTrigger value="specializations">Specjalizacje</TabsTrigger>
+          <TabsTrigger value="contact">Kontakt</TabsTrigger>
+          <TabsTrigger value="social">Social Media</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="basic">
-            <BasicInfoTab
-              form={form}
-              photoUrl={photoUrl}
-              education={education}
-              userId={userId}
-              updateEducation={updateEducation}
-              removeEducation={removeEducation}
-              addEducation={addEducation}
-              onPhotoChange={onPhotoChange}
-              isSubmitting={isSubmitting}
-            />
-          </TabsContent>
-          
-          <TabsContent value="specializations">
-            <SpecializationsTab
-              form={form}
-              services={services}
-              updateService={updateService}
-              removeService={removeService}
-              addService={addService}
-              isSubmitting={isSubmitting}
-            />
-          </TabsContent>
+        <TabsContent value="basic">
+          <BasicInfoTab
+            form={form}
+            photoUrl={photoUrl}
+            education={education}
+            userId={userId}
+            updateEducation={updateEducation}
+            removeEducation={removeEducation}
+            addEducation={addEducation}
+            onPhotoChange={onPhotoChange}
+            isSubmitting={isSubmitting}
+          />
+        </TabsContent>
+        
+        <TabsContent value="specializations">
+          <SpecializationsTab
+            form={form}
+            services={services}
+            updateService={updateService}
+            removeService={removeService}
+            addService={addService}
+            isSubmitting={isSubmitting}
+          />
+        </TabsContent>
 
-          <TabsContent value="contact">
-            <ContactInfoTab
-              form={form}
-              isSubmitting={isSubmitting}
-            />
-          </TabsContent>
+        <TabsContent value="contact">
+          <ContactInfoTab
+            form={form}
+            isSubmitting={isSubmitting}
+          />
+        </TabsContent>
 
-          <TabsContent value="social">
-            <ProfileSocialMediaTab
-              form={form}
-              isSubmitting={isSubmitting}
-            />
-          </TabsContent>
-        </Tabs>
-      </form>
-    </Form>
+        <TabsContent value="social">
+          <ProfileSocialMediaTab
+            form={form}
+            isSubmitting={isSubmitting}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

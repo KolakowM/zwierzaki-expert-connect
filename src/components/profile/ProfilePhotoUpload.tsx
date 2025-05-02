@@ -1,8 +1,8 @@
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 
 interface ProfilePhotoUploadProps {
   photoUrl: string | null;
@@ -11,68 +11,76 @@ interface ProfilePhotoUploadProps {
 }
 
 export function ProfilePhotoUpload({ photoUrl, userId, onPhotoChange }: ProfilePhotoUploadProps) {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Create a preview URL
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      console.error('Nieprawidłowy format pliku');
+      return;
+    }
+
+    // Create a temporary URL for preview
     const previewUrl = URL.createObjectURL(file);
     onPhotoChange(previewUrl, file);
   };
 
-  const handleButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+  const handleRemovePhoto = () => {
+    onPhotoChange(null, null);
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-medium">Zdjęcie profilowe</h3>
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <div
-            className={`h-24 w-24 rounded-full flex items-center justify-center overflow-hidden border-2 ${
-              photoUrl ? "border-primary" : "border-dashed border-gray-300"
-            }`}
-          >
-            {photoUrl ? (
-              <img
-                src={photoUrl}
-                alt="Zdjęcie profilowe"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Camera className="h-8 w-8 text-gray-400" />
-            )}
+    <div className="flex flex-col items-center space-y-4">
+      <div 
+        className="relative cursor-pointer group"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <Avatar className="w-24 h-24 border-2 border-gray-200">
+          <AvatarImage src={photoUrl || undefined} alt="Zdjęcie profilowe" />
+          <AvatarFallback className="bg-primary/10 text-primary text-xl">
+            {userId?.charAt(0).toUpperCase() || "?"}
+          </AvatarFallback>
+        </Avatar>
+        
+        {isHovering && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+            <label htmlFor="photo-upload" className="cursor-pointer">
+              <Upload className="w-6 h-6 text-white" />
+            </label>
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="space-y-2">
-          <div>
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={handleButtonClick}
-            >
-              <Upload className="h-4 w-4" />
-              {photoUrl ? "Zmień zdjęcie" : "Dodaj zdjęcie"}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Zalecany format JPG lub PNG, maksymalny rozmiar 2MB
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <label htmlFor="photo-upload" className="cursor-pointer">
+            {photoUrl ? 'Zmień zdjęcie' : 'Dodaj zdjęcie'}
+          </label>
+        </Button>
+        
+        {photoUrl && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-red-500" 
+            onClick={handleRemovePhoto}
+          >
+            <X className="w-4 h-4 mr-1" />
+            Usuń
+          </Button>
+        )}
+        
+        <input
+          id="photo-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
     </div>
   );
