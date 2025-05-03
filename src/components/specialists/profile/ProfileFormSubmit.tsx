@@ -133,15 +133,14 @@ export const useProfileFormSubmit = ({
       // Pokaż powiadomienie o błędzie
       const errorFields = Object.keys(form.formState.errors);
       
+      // Fix: Zamiast funkcji zwracającej JSX, tworzymy element React bezpośrednio
       toast({
         title: "Błąd",
-        description: () => (
-          <ErrorToastDetails 
-            message="Nie udało się zapisać profilu"
-            error={error instanceof Error ? error.message : "Nieznany błąd"}
-            fields={errorFields}
-          />
-        ),
+        description: <ErrorToastDetails 
+          message="Nie udało się zapisać profilu"
+          error={error instanceof Error ? error.message : "Nieznany błąd"}
+          fields={errorFields}
+        />,
         variant: "destructive"
       });
     } finally {
