@@ -57,6 +57,7 @@ export const useProfileFormSubmit = ({
       setSaveSuccess(false);
       setIsSubmitting(true);
       console.log('Zapisywanie profilu z wartościami:', values);
+      console.log('ID użytkownika:', userId);
       console.log('Aktualna tablica usług:', services);
       console.log('Aktualna tablica edukacji:', education);
       
@@ -86,13 +87,27 @@ export const useProfileFormSubmit = ({
       
       console.log('Zapisywanie danych profilu:', profileData);
       
+      // Sprawdź czy ID użytkownika jest poprawnie przypisane
+      if (profileData.id !== userId) {
+        console.error('Niezgodność ID użytkownika:', { profileId: profileData.id, userId });
+        throw new Error('Identyfikator profilu jest niezgodny z ID zalogowanego użytkownika');
+      }
+      
       // Zapisz do Supabase
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('specialist_profiles')
         .upsert(profileData)
         .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        if (error.message.includes('row-level security policy')) {
+          throw new Error('Brak uprawnień do edycji profilu. Sprawdź czy jesteś zalogowany jako właściciel profilu.');
+        }
+        throw error;
+      }
+      
+      console.log('Odpowiedź po zapisie profilu:', data);
       
       // Zapisz specjalizacje niezależnie od aktywnej zakładki
       if (values.specializations && values.specializations.length > 0) {
@@ -133,7 +148,6 @@ export const useProfileFormSubmit = ({
       // Pokaż powiadomienie o błędzie
       const errorFields = Object.keys(form.formState.errors);
       
-      // Fix: Zamiast funkcji zwracającej JSX, tworzymy element React bezpośrednio
       toast({
         title: "Błąd",
         description: <ErrorToastDetails 
