@@ -17,21 +17,21 @@ export function useProfileFormInitialization(
   education: string[],
   handlePhotoChange: (url: string | null, file: File | null) => void
 ) {
-  // Track if the form has been initialized already
+  // Śledzimy, czy formularz został już zainicjalizowany
   const initialized = useRef(false);
-  // Get the user's specializations
+  // Pobierz specjalizacje użytkownika
   const { specializationIds } = useSpecialistSpecializations(user?.id);
 
-  // Update profileForm when specialistProfile is loaded - ONLY ONCE
+  // Aktualizuj formularz, gdy dane profilu zostaną załadowane - TYLKO RAZ
   useEffect(() => {
-    // Skip if already initialized or if profile is still loading or not available
+    // Pomijamy inicjalizację jeśli już wykonana lub jeśli profil jest wciąż ładowany lub niedostępny
     if (initialized.current || isLoadingProfile || !specialistProfile) {
       return;
     }
     
-    console.log("Initializing profile form with data:", specialistProfile);
+    console.log("Inicjalizacja formularza profilu danymi:", specialistProfile);
     
-    // Initialize a default empty social media object
+    // Przygotuj obiekt socialMedia z domyślnymi pustymi wartościami
     const socialMedia = {
       facebook: "",
       instagram: "",
@@ -42,7 +42,7 @@ export function useProfileFormInitialization(
       twitch: ""
     };
     
-    // Safely extract social media data
+    // Bezpiecznie pobierz dane social media
     if (specialistProfile.social_media && typeof specialistProfile.social_media === 'object') {
       const sm = specialistProfile.social_media;
       if (typeof sm.facebook === 'string') socialMedia.facebook = sm.facebook;
@@ -54,73 +54,67 @@ export function useProfileFormInitialization(
       if (typeof sm.twitch === 'string') socialMedia.twitch = sm.twitch;
     }
     
-    // Update services array
+    // Zaktualizuj tablicę usług
     if (Array.isArray(specialistProfile.services)) {
-      console.log("Setting up services array:", specialistProfile.services);
+      console.log("Ustawianie tablicy usług:", specialistProfile.services);
       
-      // Clear existing services and add new ones from profile
-      const svcs = [...specialistProfile.services];
-      
-      // Reset services state
-      if (svcs.length === 0) {
-        // Just keep the empty service field if none exist
-        if (services.length === 0) {
-          addService();
-        }
-      } else {
-        // Set all services from profile
-        svcs.forEach((svc: string, index: number) => {
+      // Jeśli mamy jakieś usługi w profilu
+      if (specialistProfile.services.length > 0) {
+        // Zainicjalizuj usługi z danymi z profilu
+        specialistProfile.services.forEach((svc: string, index: number) => {
           if (index < services.length) {
             updateService(index, svc);
           } else {
-            updateService(services.length, svc);
             addService();
+            updateService(index, svc);
           }
         });
+      } else {
+        // Upewnij się, że jest przynajmniej jedno puste pole
+        if (services.length === 0) {
+          addService();
+        }
       }
     } else {
-      // Ensure at least one empty service field
+      // Jeśli nie ma tablicy usług, dodaj jedno puste pole
       if (services.length === 0) {
         addService();
       }
     }
     
-    // Update education array
+    // Zaktualizuj tablicę edukacji
     if (Array.isArray(specialistProfile.education)) {
-      console.log("Setting up education array:", specialistProfile.education);
+      console.log("Ustawianie tablicy edukacji:", specialistProfile.education);
       
-      // Add education from profile
-      const edu = [...specialistProfile.education];
-      
-      // Reset education state
-      if (edu.length === 0) {
-        // Just keep the empty education field if none exist
-        if (education.length === 0) {
-          addEducation();
-        }
-      } else {
-        // Set all education entries from profile
-        edu.forEach((item: string, index: number) => {
+      // Jeśli mamy jakieś wpisy edukacji w profilu
+      if (specialistProfile.education.length > 0) {
+        // Zainicjalizuj edukację z danymi z profilu
+        specialistProfile.education.forEach((item: string, index: number) => {
           if (index < education.length) {
             updateEducation(index, item);
           } else {
-            updateEducation(education.length, item);
             addEducation();
+            updateEducation(index, item);
           }
         });
+      } else {
+        // Upewnij się, że jest przynajmniej jedno puste pole
+        if (education.length === 0) {
+          addEducation();
+        }
       }
     } else {
-      // Ensure at least one empty education field
+      // Jeśli nie ma tablicy edukacji, dodaj jedno puste pole
       if (education.length === 0) {
         addEducation();
       }
     }
     
-    // Reset form with specialist profile data
+    // Resetuj formularz z danymi profilu specjalisty
     profileForm.reset({
       title: specialistProfile.title || "",
       description: specialistProfile.description || "",
-      specializations: specializationIds || [], // Use the specialization IDs from the junction table
+      specializations: specializationIds || [], // Użyj ID specjalizacji z tabeli łączącej
       services: specialistProfile.services || [],
       education: specialistProfile.education || [],
       experience: specialistProfile.experience || "",
@@ -131,19 +125,19 @@ export function useProfileFormInitialization(
       socialMedia
     });
     
-    // Set photo URL if available
+    // Ustaw URL zdjęcia jeśli dostępne
     if (specialistProfile.photo_url) {
       handlePhotoChange(specialistProfile.photo_url, null);
     }
     
-    // Mark as initialized to prevent re-running
+    // Oznacz jako zainicjalizowane aby zapobiec ponownemu wykonaniu
     initialized.current = true;
-  }, [specialistProfile, isLoadingProfile, specializationIds]);
+  }, [specialistProfile, isLoadingProfile, specializationIds, services, education, addService, updateService, addEducation, updateEducation, profileForm, user?.email, handlePhotoChange]);
 
-  // Update specializations when they are loaded
+  // Aktualizuj specjalizacje gdy zostaną załadowane
   useEffect(() => {
     if (initialized.current && specializationIds && specializationIds.length > 0) {
-      console.log("Setting specializations in form:", specializationIds);
+      console.log("Ustawianie specjalizacji w formularzu:", specializationIds);
       profileForm.setValue('specializations', specializationIds);
     }
   }, [specializationIds, profileForm, initialized.current]);

@@ -1,6 +1,5 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form } from "@/components/ui/form";
 import { BasicInfoTab } from "./BasicInfoTab";
 import { SpecializationsTab } from "./SpecializationsTab";
 import { ContactInfoTab } from "./ContactInfoTab";
@@ -8,16 +7,16 @@ import { ProfileSocialMediaTab } from "./ProfileSocialMediaTab";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
 
-// Schema for specialist profile
+// Schemat walidacji dla profilu specjalisty
 export const profileFormSchema = z.object({
   title: z.string().min(2, "Tytuł musi mieć co najmniej 2 znaki"),
   description: z.string().min(10, "Opis musi mieć co najmniej 10 znaków"),
-  specializations: z.array(z.string()).min(1, "Wybierz co najmniej jedną specjalizację"),
-  services: z.array(z.string()).optional(), // Changed from required to optional
-  education: z.array(z.string()).optional(), // Also make education optional
-  experience: z.string().optional(), // Make experience optional
+  specializations: z.array(z.string()).optional().default([]),
+  services: z.array(z.string()).optional().default([]),
+  education: z.array(z.string()).optional().default([]),
+  experience: z.string().optional().default(""),
   location: z.string().min(2, "Lokalizacja musi mieć co najmniej 2 znaki"),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.string().optional().default(""),
   email: z.string().email("Wprowadź poprawny adres email"),
   website: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
   socialMedia: z.object({
@@ -28,7 +27,15 @@ export const profileFormSchema = z.object({
     youtube: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
     tiktok: z.string().url("Wprowadź poprawny URL").optional().or(z.literal("")),
     twitch: z.string().url("Wprowadź poprawny URL").optional().or(z.literal(""))
-  }).optional(),
+  }).optional().default({
+    facebook: "",
+    instagram: "",
+    twitter: "",
+    linkedin: "",
+    youtube: "",
+    tiktok: "",
+    twitch: ""
+  }),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

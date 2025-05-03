@@ -462,6 +462,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      initialize_missing_specialist_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "specialist"

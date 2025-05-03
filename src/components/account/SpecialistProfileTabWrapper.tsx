@@ -56,24 +56,21 @@ export function SpecialistProfileTabWrapper({
     );
   }
 
-  // Custom submission handler that prevents default form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default page refresh
+  // Obsługa submitu przez react-hook-form, zapobiega domyślnej akcji formularza
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Zapobiega przeładowaniu strony
     
     const values = profileForm.getValues();
     
-    // Log form values for debugging
-    console.log("Form values being submitted:", values);
-    
-    // Manually trigger validation
-    const isValid = await profileForm.trigger();
-    
-    if (isValid) {
-      console.log("Form validation passed, submitting values:", values);
-      onProfileSubmit(values);
-    } else {
-      console.error("Form validation errors:", profileForm.formState.errors);
-    }
+    // Walidacja formularza
+    profileForm.trigger().then(isValid => {
+      if (isValid) {
+        console.log("Walidacja formularza poprawna, przesyłanie danych:", values);
+        onProfileSubmit(values);
+      } else {
+        console.error("Błędy walidacji formularza:", profileForm.formState.errors);
+      }
+    });
   };
 
   return (
