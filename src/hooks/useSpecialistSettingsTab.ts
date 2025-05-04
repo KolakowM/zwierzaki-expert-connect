@@ -105,7 +105,7 @@ export function useSpecialistSettingsTab(
       
       console.log('Profile saved successfully, response:', data);
       
-      // Save specializations
+      // Save specializations using our updated manager
       if (values.specializations && values.specializations.length > 0) {
         console.log('Saving specializations:', values.specializations);
         const { success, error: specError } = await saveSpecializations(values.specializations);
@@ -116,6 +116,12 @@ export function useSpecialistSettingsTab(
         }
       } else {
         console.warn("No specializations to save - this might cause validation errors");
+        // Update all specializations as inactive by passing an empty array
+        const { success, error: specError } = await saveSpecializations([]);
+        
+        if (!success) {
+          console.error("Error updating specializations:", specError);
+        }
       }
       
       toast({

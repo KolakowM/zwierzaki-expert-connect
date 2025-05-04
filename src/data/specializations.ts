@@ -37,7 +37,7 @@ export function useSpecializationsData() {
   return { specializations, isLoading, error };
 }
 
-// Manager specjalizacji specjalisty - POPRAWIONA LOGIKA
+// Manager specjalizacji specjalisty - POPRAWIONA LOGIKA - TYLKO UPDATE
 export function useSpecialistSpecializationsManager(specialistId?: string) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,12 +55,12 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
       console.log('Updating specializations for specialist:', specialistId);
       console.log('Selected specialization IDs:', selectedSpecializationIds);
       
-      // CRITICAL FIX: Double-check specialist_id matches the logged-in user
+      // CRITICAL FIX: Verify specialist_id matches the logged-in user
       if (!specialistId) {
         throw new Error("Missing specialist ID - please log in again");
       }
       
-      // Pobierz wszystkie rekordy specialist_specializations dla użytkownika
+      // Fetch all existing specialist_specializations records for the user
       const { data: existingEntries, error: fetchError } = await supabase
         .from('specialist_specializations')
         .select('id, specialization_id, active')
@@ -75,34 +75,27 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
         return { success: false, error: "No specialization mappings found for this specialist" };
       }
       
-      // Przygotuj aktualizacje dla każdej specjalizacji
-      const updates = [];
-      
+      // Prepare updates for each specialization
       for (const entry of existingEntries) {
         const isSelected = selectedSpecializationIds.includes(entry.specialization_id);
         const newActiveStatus = isSelected ? 'yes' : 'no';
         
-        // Sprawdź czy status się zmienił i tylko wtedy aktualizuj
+        // Only update if status has changed
         if (entry.active !== newActiveStatus) {
-          updates.push({
-            id: entry.id, // Używamy ID rekordu, aby jednoznacznie go zidentyfikować
-            active: newActiveStatus,
-            // Nie zmieniamy specialist_id ani specialization_id - te wartości są stałe
-          });
-        }
-      }
-      
-      console.log('Specialization status updates to save:', updates);
-      
-      // Zapisz zmiany, jeśli są jakieś
-      if (updates.length > 0) {
-        const { error: updateError } = await supabase
-          .from('specialist_specializations')
-          .upsert(updates);
+          console.log(`Updating specialization ${entry.specialization_id} to ${newActiveStatus}`);
           
-        if (updateError) throw updateError;
-      } else {
-        console.log('No specialization status changes detected');
+          // CRITICAL FIX: Use UPDATE instead of UPSERT, and ensure we filter by both specialist_id and id
+          const { error: updateError } = await supabase
+            .from('specialist_specializations')
+            .update({ active: newActiveStatus })
+            .eq('id', entry.id)
+            .eq('specialist_id', specialistId);
+            
+          if (updateError) {
+            console.error('Error updating specialization:', updateError);
+            throw updateError;
+          }
+        }
       }
       
       console.log('Specializations updated successfully');

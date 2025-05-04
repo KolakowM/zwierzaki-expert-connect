@@ -21,7 +21,7 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
   const [userSpecializations, setUserSpecializations] = useState<any[]>([]);
   const [loadingUserSpecializations, setLoadingUserSpecializations] = useState(true);
   
-  // Pobierz wszystkie specjalizacje użytkownika wraz z informacją active
+  // Fetch all user specializations with their active status
   useEffect(() => {
     const fetchUserSpecializations = async () => {
       if (!user?.id) return;
@@ -43,29 +43,30 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
           
         if (error) throw error;
         
-        // Pobierz tylko aktywne specjalizacje do wyświetlenia
-        const activeSpecs = data?.filter(item => item.active === 'yes') || [];
-        
-        // Utwórz mapowanie specjalizacji do statusu active
+        // Create mapping of specializations to active status
         const specializationMapping = data?.reduce((acc: Record<string, string>, item) => {
           acc[item.specialization_id] = item.active;
           return acc;
         }, {}) || {};
         
-        // Pobierz ID wszystkich aktywnych specjalizacji
-        const activeSpecIds = activeSpecs.map(item => item.specialization_id);
+        // Get IDs of all active specializations
+        const activeSpecIds = data
+          ?.filter(item => item.active === 'yes')
+          .map(item => item.specialization_id) || [];
         
-        // Ustaw wartość pola formularza, aby zawierało wszystkie ID aktywnych specjalizacji
+        // Set the form field value to contain all active specialization IDs
         form.setValue('specializations', activeSpecIds);
         
-        setUserSpecializations(activeSpecs.map(item => ({
-          id: item.specialization_id,
-          name: item.specializations.name,
-          active: item.active
-        })));
+        setUserSpecializations(data
+          ?.filter(item => item.active === 'yes')
+          .map(item => ({
+            id: item.specialization_id,
+            name: item.specializations.name,
+            active: item.active
+          })) || []);
         
         console.log('User specializations loaded:', data);
-        console.log('Active user specializations:', activeSpecs);
+        console.log('Active user specializations:', activeSpecIds);
         console.log('Setting form specializations value:', activeSpecIds);
       } catch (error) {
         console.error('Error fetching user specializations:', error);

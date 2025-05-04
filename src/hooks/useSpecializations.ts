@@ -49,7 +49,7 @@ export function useSpecializations() {
       setLoading(true);
       setError(null);
       
-      // Pobierz wszystkie specjalizacje dla specjalisty wraz z informacją active
+      // Fetch all specializations for the specialist with their active status
       const { data: specialistSpecs, error } = await supabase
         .from('specialist_specializations')
         .select(`
@@ -69,7 +69,7 @@ export function useSpecializations() {
         return [];
       }
       
-      // Pobierz tylko aktywne specjalizacje do stanu selectedSpecializations
+      // Get only active specialization IDs for the selected state
       const activeSpecIds = specialistSpecs
         .filter(spec => spec.active === 'yes')
         .map(spec => spec.specialization_id);
@@ -78,7 +78,7 @@ export function useSpecializations() {
       
       setSelectedSpecializations(activeSpecIds);
       
-      // Mapuj dane do formatu Specialization z dodanym polem active
+      // Map data to Specialization format with added active status
       const specs = specialistSpecs.map(item => ({
         id: item.specialization_id,
         ...item.specializations,
@@ -144,7 +144,7 @@ export function useSpecialistSpecializations(specialistId?: string) {
       try {
         setLoading(true);
         
-        // Pobierz specjalizacje związane z tym specjalistą wraz z informacją active
+        // Fetch specializations for this specialist along with their active status
         const { data, error } = await supabase
           .from('specialist_specializations')
           .select(`
@@ -159,7 +159,7 @@ export function useSpecialistSpecializations(specialistId?: string) {
           
         if (error) throw error;
         
-        // Ekstrahuj obiekty specjalizacji i ID tylko dla aktywnych specjalizacji
+        // Extract specialization objects and IDs for active specializations only
         const activeEntries = data?.filter(item => item.active === 'yes') || [];
         const specIds = activeEntries.map(item => item.specialization_id);
         const specs = activeEntries.map(item => ({
