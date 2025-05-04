@@ -42,7 +42,7 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Funkcja do zapisywania aktywnych specjalizacji specjalisty
+  // Funkcja do aktualizacji statusu aktywności specjalizacji specjalisty
   const saveSpecializations = async (selectedSpecializationIds: string[]) => {
     if (!specialistId) {
       return { success: false, error: "No specialist ID provided" };
@@ -52,7 +52,7 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
       setSaving(true);
       setError(null);
       
-      console.log('Saving specializations for specialist:', specialistId);
+      console.log('Updating specializations for specialist:', specialistId);
       console.log('Selected specialization IDs:', selectedSpecializationIds);
       
       // CRITICAL FIX: Double-check specialist_id matches the logged-in user
@@ -60,34 +60,39 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
         throw new Error("Missing specialist ID - please log in again");
       }
       
-      // Pobierz wszystkie obecne rekordy specialist_specializations dla użytkownika
+      // Pobierz wszystkie rekordy specialist_specializations dla użytkownika
       const { data: existingEntries, error: fetchError } = await supabase
         .from('specialist_specializations')
-        .select('specialization_id, active')
+        .select('id, specialization_id, active')
         .eq('specialist_id', specialistId);
         
       if (fetchError) throw fetchError;
       
       console.log('Existing specialist_specializations entries:', existingEntries);
       
-      // Zaktualizuj status active dla wszystkich specjalizacji
+      if (!existingEntries || existingEntries.length === 0) {
+        console.warn('No existing specialist_specializations found. They should be created by DB trigger.');
+        return { success: false, error: "No specialization mappings found for this specialist" };
+      }
+      
+      // Przygotuj aktualizacje dla każdej specjalizacji
       const updates = [];
       
-      for (const entry of existingEntries || []) {
+      for (const entry of existingEntries) {
         const isSelected = selectedSpecializationIds.includes(entry.specialization_id);
-        const newActive = isSelected ? 'yes' : 'no';
+        const newActiveStatus = isSelected ? 'yes' : 'no';
         
-        // Sprawdź czy status się zmienił
-        if (entry.active !== newActive) {
+        // Sprawdź czy status się zmienił i tylko wtedy aktualizuj
+        if (entry.active !== newActiveStatus) {
           updates.push({
-            specialist_id: specialistId,  // Zawsze używaj ID zalogowanego użytkownika
-            specialization_id: entry.specialization_id,
-            active: newActive
+            id: entry.id, // Używamy ID rekordu, aby jednoznacznie go zidentyfikować
+            active: newActiveStatus,
+            // Nie zmieniamy specialist_id ani specialization_id - te wartości są stałe
           });
         }
       }
       
-      console.log('Specialization updates to save:', updates);
+      console.log('Specialization status updates to save:', updates);
       
       // Zapisz zmiany, jeśli są jakieś
       if (updates.length > 0) {
@@ -96,6 +101,8 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
           .upsert(updates);
           
         if (updateError) throw updateError;
+      } else {
+        console.log('No specialization status changes detected');
       }
       
       console.log('Specializations updated successfully');

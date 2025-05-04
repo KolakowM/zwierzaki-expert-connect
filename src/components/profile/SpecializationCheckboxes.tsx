@@ -32,6 +32,7 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
         const { data, error } = await supabase
           .from('specialist_specializations')
           .select(`
+            id,
             specialization_id,
             active,
             specializations:specialization_id (
@@ -45,12 +46,17 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
         // Pobierz tylko aktywne specjalizacje do wyświetlenia
         const activeSpecs = data?.filter(item => item.active === 'yes') || [];
         
-        // Pobierz wszystkie ID specjalizacji, aby zaznaczyć checkboxy
-        const allSpecIds = data?.map(item => item.specialization_id) || [];
+        // Utwórz mapowanie specjalizacji do statusu active
+        const specializationMapping = data?.reduce((acc: Record<string, string>, item) => {
+          acc[item.specialization_id] = item.active;
+          return acc;
+        }, {}) || {};
         
-        // Ustaw wartość pola formularza, aby zawierało wszystkie ID specjalizacji
-        // które powinny być aktywne
-        form.setValue('specializations', activeSpecs.map(spec => spec.specialization_id));
+        // Pobierz ID wszystkich aktywnych specjalizacji
+        const activeSpecIds = activeSpecs.map(item => item.specialization_id);
+        
+        // Ustaw wartość pola formularza, aby zawierało wszystkie ID aktywnych specjalizacji
+        form.setValue('specializations', activeSpecIds);
         
         setUserSpecializations(activeSpecs.map(item => ({
           id: item.specialization_id,
@@ -58,7 +64,9 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
           active: item.active
         })));
         
-        console.log('Active user specializations loaded:', activeSpecs);
+        console.log('User specializations loaded:', data);
+        console.log('Active user specializations:', activeSpecs);
+        console.log('Setting form specializations value:', activeSpecIds);
       } catch (error) {
         console.error('Error fetching user specializations:', error);
       } finally {
@@ -104,7 +112,7 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
           )}
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {isLoading ? (
+            {isLoading || loadingUserSpecializations ? (
               // Loading state
               Array.from({ length: 6 }).map((_, index) => (
                 <FormItem key={index} className="flex flex-row items-start space-x-3 space-y-0">

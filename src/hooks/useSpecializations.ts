@@ -53,6 +53,7 @@ export function useSpecializations() {
       const { data: specialistSpecs, error } = await supabase
         .from('specialist_specializations')
         .select(`
+          id, 
           specialization_id,
           active,
           specializations:specialization_id (
@@ -79,6 +80,7 @@ export function useSpecializations() {
       
       // Mapuj dane do formatu Specialization z dodanym polem active
       const specs = specialistSpecs.map(item => ({
+        id: item.specialization_id,
         ...item.specializations,
         active: item.active
       }));
@@ -146,6 +148,7 @@ export function useSpecialistSpecializations(specialistId?: string) {
         const { data, error } = await supabase
           .from('specialist_specializations')
           .select(`
+            id,
             specialization_id,
             active,
             specializations:specialization_id (
@@ -160,6 +163,7 @@ export function useSpecialistSpecializations(specialistId?: string) {
         const activeEntries = data?.filter(item => item.active === 'yes') || [];
         const specIds = activeEntries.map(item => item.specialization_id);
         const specs = activeEntries.map(item => ({
+          id: item.specialization_id,
           ...item.specializations,
           active: item.active
         }));
