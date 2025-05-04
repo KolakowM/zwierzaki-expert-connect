@@ -37,7 +37,7 @@ export function useSpecializationsData() {
   return { specializations, isLoading, error };
 }
 
-// Manager specjalizacji specjalisty
+// Manager specjalizacji specjalisty - POPRAWIONA LOGIKA
 export function useSpecialistSpecializationsManager(specialistId?: string) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
