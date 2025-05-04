@@ -6,16 +6,21 @@ export function useProfileDataProcessor() {
   const [processingError, setProcessingError] = useState<string | null>(null);
 
   // Process form data - convert and sanitize for database
-  const processFormData = async (formData: any, userId?: string, photoUrl?: string | null) => {
+  const processFormData = (formData: any, userId?: string, photoUrl?: string | null) => {
     try {
       console.log("Processing form data for user:", userId, "with photo:", photoUrl);
       
       // Clear any previous errors
       setProcessingError(null);
       
-      // Process specialist data
+      if (!userId) {
+        console.error("Missing user ID when processing form data");
+        throw new Error("Brak identyfikatora użytkownika - zaloguj się ponownie");
+      }
+      
+      // Process specialist data - IMPORTANT: Make sure id is set to userId
       const processedData = {
-        id: userId, // Make sure we include the user ID
+        id: userId, // ID musi być zgodne z ID zalogowanego użytkownika
         title: formData.title?.trim() || "Specjalista",
         description: formData.description?.trim() || "",
         experience: formData.experience?.trim() || "",
@@ -25,6 +30,8 @@ export function useProfileDataProcessor() {
         photo_url: photoUrl || null,
         // We'll handle specializations through the join table instead
         social_media: processedSocialMedia(formData),
+        services: Array.isArray(formData.services) ? formData.services.filter((s: string) => s.trim() !== "") : [],
+        education: Array.isArray(formData.education) ? formData.education.filter((e: string) => e.trim() !== "") : []
       };
 
       console.log("Processed form data:", processedData);
@@ -41,59 +48,24 @@ export function useProfileDataProcessor() {
   const processedSocialMedia = (formData: any) => {
     const socialMedia: Record<string, string> = {};
     
-    if (formData.facebook?.trim()) socialMedia.facebook = formData.facebook.trim();
-    if (formData.instagram?.trim()) socialMedia.instagram = formData.instagram.trim();
-    if (formData.linkedin?.trim()) socialMedia.linkedin = formData.linkedin.trim();
-    if (formData.twitter?.trim()) socialMedia.twitter = formData.twitter.trim();
+    if (formData.socialMedia) {
+      if (formData.socialMedia.facebook?.trim()) socialMedia.facebook = formData.socialMedia.facebook.trim();
+      if (formData.socialMedia.instagram?.trim()) socialMedia.instagram = formData.socialMedia.instagram.trim();
+      if (formData.socialMedia.linkedin?.trim()) socialMedia.linkedin = formData.socialMedia.linkedin.trim();
+      if (formData.socialMedia.twitter?.trim()) socialMedia.twitter = formData.socialMedia.twitter.trim();
+    } else {
+      // Handle legacy structure
+      if (formData.facebook?.trim()) socialMedia.facebook = formData.facebook.trim();
+      if (formData.instagram?.trim()) socialMedia.instagram = formData.instagram.trim();
+      if (formData.linkedin?.trim()) socialMedia.linkedin = formData.linkedin.trim();
+      if (formData.twitter?.trim()) socialMedia.twitter = formData.twitter.trim();
+    }
     
     return socialMedia;
-  };
-
-  // Correctly save specialization IDs to the join table
-  const saveSpecializations = async (userId: string, specializationIds: string[]) => {
-    try {
-      console.log("Saving specializations for user:", userId, specializationIds);
-      
-      // First delete existing specializations
-      const { error: deleteError } = await supabase
-        .from('specialist_specializations')
-        .delete()
-        .eq('specialist_id', userId);
-        
-      if (deleteError) throw deleteError;
-      
-      // Only insert if we have valid specialization IDs
-      if (specializationIds && specializationIds.length > 0) {
-        // Prepare data for insert
-        const specializations = specializationIds.map(specId => ({
-          specialist_id: userId,
-          specialization_id: specId,
-        }));
-        
-        console.log("Inserting specializations:", specializations);
-        
-        // Insert new specializations
-        const { error: insertError } = await supabase
-          .from('specialist_specializations')
-          .insert(specializations);
-          
-        if (insertError) {
-          console.error("Error inserting specializations:", insertError);
-          throw insertError;
-        }
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Error saving specializations:", error);
-      setProcessingError("Wystąpił błąd podczas zapisywania specjalizacji");
-      throw error;
-    }
   };
 
   return {
     processFormData,
     processingError,
-    saveSpecializations,
   };
 }

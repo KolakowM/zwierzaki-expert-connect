@@ -86,6 +86,12 @@ export function useSpecialistSettingsTab(
       
       console.log('Saving profile data:', profileData);
       
+      // CRITICAL FIX: Ensure the ID is properly set and never overwritten
+      if (profileData.id !== userId) {
+        console.error('ID mismatch detected. Setting correct user ID:', userId);
+        profileData.id = userId;
+      }
+      
       // Update specialist profile in Supabase
       const { error, data } = await supabase
         .from('specialist_profiles')

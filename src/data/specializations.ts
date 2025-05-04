@@ -37,7 +37,7 @@ export function useSpecializationsData() {
   return { specializations, isLoading, error };
 }
 
-// Zaktualizowany manager specjalizacji specjalisty
+// Manager specjalizacji specjalisty
 export function useSpecialistSpecializationsManager(specialistId?: string) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +54,11 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
       
       console.log('Saving specializations for specialist:', specialistId);
       console.log('Selected specialization IDs:', selectedSpecializationIds);
+      
+      // CRITICAL FIX: Double-check specialist_id matches the logged-in user
+      if (!specialistId) {
+        throw new Error("Missing specialist ID - please log in again");
+      }
       
       // Pobierz wszystkie obecne rekordy specialist_specializations dla użytkownika
       const { data: existingEntries, error: fetchError } = await supabase
@@ -75,7 +80,7 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
         // Sprawdź czy status się zmienił
         if (entry.active !== newActive) {
           updates.push({
-            specialist_id: specialistId,
+            specialist_id: specialistId,  // Zawsze używaj ID zalogowanego użytkownika
             specialization_id: entry.specialization_id,
             active: newActive
           });

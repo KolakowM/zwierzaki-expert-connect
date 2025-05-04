@@ -87,10 +87,10 @@ export const useProfileFormSubmit = ({
       
       console.log('Zapisywanie danych profilu:', profileData);
       
-      // Sprawdź czy ID użytkownika jest poprawnie przypisane
+      // CRITICAL FIX: Upewnij się, że ID jest poprawnie ustawione
       if (profileData.id !== userId) {
-        console.error('Niezgodność ID użytkownika:', { profileId: profileData.id, userId });
-        throw new Error('Identyfikator profilu jest niezgodny z ID zalogowanego użytkownika');
+        console.error('Niezgodność ID wykryta. Ustawianie poprawnego ID użytkownika:', userId);
+        profileData.id = userId;
       }
       
       // Zapisz do Supabase
