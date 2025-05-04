@@ -37,13 +37,13 @@ export function useSpecializationsData() {
   return { specializations, isLoading, error };
 }
 
-// Add the missing function that's being imported in other files
+// Zaktualizowany manager specjalizacji specjalisty
 export function useSpecialistSpecializationsManager(specialistId?: string) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to save specialist specializations
-  const saveSpecializations = async (specializationIds: string[]) => {
+  // Funkcja do zapisywania aktywnych specjalizacji specjalisty
+  const saveSpecializations = async (selectedSpecializationIds: string[]) => {
     if (!specialistId) {
       return { success: false, error: "No specialist ID provided" };
     }
@@ -53,32 +53,47 @@ export function useSpecialistSpecializationsManager(specialistId?: string) {
       setError(null);
       
       console.log('Saving specializations for specialist:', specialistId);
-      console.log('Specialization IDs to save:', specializationIds);
+      console.log('Selected specialization IDs:', selectedSpecializationIds);
       
-      // First delete existing specialization associations
-      const { error: deleteError } = await supabase
+      // Pobierz wszystkie obecne rekordy specialist_specializations dla użytkownika
+      const { data: existingEntries, error: fetchError } = await supabase
         .from('specialist_specializations')
-        .delete()
+        .select('specialization_id, active')
         .eq('specialist_id', specialistId);
         
-      if (deleteError) throw deleteError;
+      if (fetchError) throw fetchError;
       
-      // Then insert new associations if we have any specializations to add
-      if (specializationIds.length > 0) {
-        // Create array of objects for insert
-        const specializationsToInsert = specializationIds.map(specId => ({
-          specialist_id: specialistId,
-          specialization_id: specId
-        }));
+      console.log('Existing specialist_specializations entries:', existingEntries);
+      
+      // Zaktualizuj status active dla wszystkich specjalizacji
+      const updates = [];
+      
+      for (const entry of existingEntries || []) {
+        const isSelected = selectedSpecializationIds.includes(entry.specialization_id);
+        const newActive = isSelected ? 'yes' : 'no';
         
-        const { error: insertError } = await supabase
-          .from('specialist_specializations')
-          .insert(specializationsToInsert);
-          
-        if (insertError) throw insertError;
+        // Sprawdź czy status się zmienił
+        if (entry.active !== newActive) {
+          updates.push({
+            specialist_id: specialistId,
+            specialization_id: entry.specialization_id,
+            active: newActive
+          });
+        }
       }
       
-      console.log('Specializations saved successfully');
+      console.log('Specialization updates to save:', updates);
+      
+      // Zapisz zmiany, jeśli są jakieś
+      if (updates.length > 0) {
+        const { error: updateError } = await supabase
+          .from('specialist_specializations')
+          .upsert(updates);
+          
+        if (updateError) throw updateError;
+      }
+      
+      console.log('Specializations updated successfully');
       return { success: true, error: null };
     } catch (err: any) {
       console.error('Error saving specializations:', err);

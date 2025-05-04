@@ -7,6 +7,7 @@ export interface Specialization {
   code: string;
   name: string;
   description?: string;
+  active?: 'yes' | 'no'; // Dodane pole active
 }
 
 export function useSpecializations() {
@@ -48,10 +49,16 @@ export function useSpecializations() {
       setLoading(true);
       setError(null);
       
-      // Get specialization IDs for the specialist
+      // Pobierz wszystkie specjalizacje dla specjalisty wraz z informacją active
       const { data: specialistSpecs, error } = await supabase
         .from('specialist_specializations')
-        .select('specialization_id')
+        .select(`
+          specialization_id,
+          active,
+          specializations:specialization_id (
+            id, code, name, description
+          )
+        `)
         .eq('specialist_id', specialistId);
         
       if (error) throw error;
@@ -61,20 +68,22 @@ export function useSpecializations() {
         return [];
       }
       
-      const specIds = specialistSpecs.map(spec => spec.specialization_id);
-      console.log("Specialization IDs:", specIds);
+      // Pobierz tylko aktywne specjalizacje do stanu selectedSpecializations
+      const activeSpecIds = specialistSpecs
+        .filter(spec => spec.active === 'yes')
+        .map(spec => spec.specialization_id);
       
-      setSelectedSpecializations(specIds);
+      console.log("Active specialization IDs:", activeSpecIds);
       
-      // Get the actual specialization details
-      const { data: specs, error: specsError } = await supabase
-        .from('specializations')
-        .select('id, code, name, description')
-        .in('id', specIds);
-        
-      if (specsError) throw specsError;
+      setSelectedSpecializations(activeSpecIds);
       
-      console.log("Fetched specialist specializations:", specs);
+      // Mapuj dane do formatu Specialization z dodanym polem active
+      const specs = specialistSpecs.map(item => ({
+        ...item.specializations,
+        active: item.active
+      }));
+      
+      console.log("Fetched specialist specializations with active status:", specs);
       
       return specs || [];
     } catch (error: any) {
@@ -133,11 +142,12 @@ export function useSpecialistSpecializations(specialistId?: string) {
       try {
         setLoading(true);
         
-        // Get the specializations related to this specialist via the junction table
+        // Pobierz specjalizacje związane z tym specjalistą wraz z informacją active
         const { data, error } = await supabase
           .from('specialist_specializations')
           .select(`
             specialization_id,
+            active,
             specializations:specialization_id (
               id, code, name, description
             )
@@ -146,15 +156,19 @@ export function useSpecialistSpecializations(specialistId?: string) {
           
         if (error) throw error;
         
-        // Extract specialization objects and IDs
-        const specIds = data?.map(item => item.specialization_id) || [];
-        const specs = data?.map(item => item.specializations) || [];
+        // Ekstrahuj obiekty specjalizacji i ID tylko dla aktywnych specjalizacji
+        const activeEntries = data?.filter(item => item.active === 'yes') || [];
+        const specIds = activeEntries.map(item => item.specialization_id);
+        const specs = activeEntries.map(item => ({
+          ...item.specializations,
+          active: item.active
+        }));
         
         setSpecializations(specs);
         setSpecializationIds(specIds);
         
-        console.log('Current user specializations:', specs);
-        console.log('Current user specialization IDs:', specIds);
+        console.log('Current active user specializations:', specs);
+        console.log('Current active user specialization IDs:', specIds);
       } catch (err: any) {
         console.error('Error fetching specialist specializations:', err);
         setError(err.message || 'Unknown error');

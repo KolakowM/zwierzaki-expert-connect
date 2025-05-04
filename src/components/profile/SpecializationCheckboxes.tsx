@@ -5,10 +5,11 @@ import { UseFormReturn } from "react-hook-form";
 import { useSpecializations, useSpecialistSpecializations } from "@/hooks/useSpecializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthProvider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SpecializationCheckboxesProps {
   form: UseFormReturn<any>;
@@ -17,19 +18,56 @@ interface SpecializationCheckboxesProps {
 export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps) {
   const { user } = useAuth();
   const { specializations, loading: isLoading, error } = useSpecializations();
-  const { 
-    specializations: currentSpecializations, 
-    isLoading: isLoadingUserSpecializations 
-  } = useSpecialistSpecializations(user?.id);
+  const [userSpecializations, setUserSpecializations] = useState<any[]>([]);
+  const [loadingUserSpecializations, setLoadingUserSpecializations] = useState(true);
   
-  // Use an effect to automatically check specializations from user's profile
+  // Pobierz wszystkie specjalizacje użytkownika wraz z informacją active
   useEffect(() => {
-    if (user?.id && specializations.length > 0) {
-      // This will be handled by parent components that fetch the user's specializations
-      // and pass them to the form
-      console.log('Specializations loaded:', specializations.length);
-    }
-  }, [specializations, user?.id]);
+    const fetchUserSpecializations = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoadingUserSpecializations(true);
+        
+        const { data, error } = await supabase
+          .from('specialist_specializations')
+          .select(`
+            specialization_id,
+            active,
+            specializations:specialization_id (
+              id, code, name, description
+            )
+          `)
+          .eq('specialist_id', user.id);
+          
+        if (error) throw error;
+        
+        // Pobierz tylko aktywne specjalizacje do wyświetlenia
+        const activeSpecs = data?.filter(item => item.active === 'yes') || [];
+        
+        // Pobierz wszystkie ID specjalizacji, aby zaznaczyć checkboxy
+        const allSpecIds = data?.map(item => item.specialization_id) || [];
+        
+        // Ustaw wartość pola formularza, aby zawierało wszystkie ID specjalizacji
+        // które powinny być aktywne
+        form.setValue('specializations', activeSpecs.map(spec => spec.specialization_id));
+        
+        setUserSpecializations(activeSpecs.map(item => ({
+          id: item.specialization_id,
+          name: item.specializations.name,
+          active: item.active
+        })));
+        
+        console.log('Active user specializations loaded:', activeSpecs);
+      } catch (error) {
+        console.error('Error fetching user specializations:', error);
+      } finally {
+        setLoadingUserSpecializations(false);
+      }
+    };
+    
+    fetchUserSpecializations();
+  }, [user?.id, form]);
 
   return (
     <FormField
@@ -45,11 +83,11 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
           </div>
 
           {/* Display current specializations */}
-          {!isLoadingUserSpecializations && currentSpecializations.length > 0 && (
+          {!loadingUserSpecializations && userSpecializations.length > 0 && (
             <div className="mb-4">
               <h4 className="text-sm font-medium mb-2">Twoje obecne specjalizacje:</h4>
               <div className="flex flex-wrap gap-2 mb-2">
-                {currentSpecializations.map((spec) => (
+                {userSpecializations.map((spec) => (
                   <Badge key={spec.id} variant="secondary">
                     {spec.name}
                   </Badge>
@@ -58,7 +96,8 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
               <Alert className="mb-4">
                 <InfoIcon className="h-4 w-4" />
                 <AlertDescription>
-                  Aby zaktualizować swoje specjalizacje, zaznacz wszystkie, które chcesz mieć przypisane do profilu (również te, które już posiadasz) i kliknij przycisk "Zapisz profil". Tylko zaznaczone specjalizacje będą przypisane do Twojego profilu.
+                  Zaznacz specjalizacje, w których się specjalizujesz i kliknij przycisk "Zapisz profil". 
+                  Zaznaczone specjalizacje będą wyświetlane na Twoim profilu jako aktywne.
                 </AlertDescription>
               </Alert>
             </div>

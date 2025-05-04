@@ -111,12 +111,20 @@ export const useProfileFormSubmit = ({
       
       // Zapisz specjalizacje niezależnie od aktywnej zakładki
       if (values.specializations && values.specializations.length > 0) {
-        console.log('Zapisywanie specjalizacji:', values.specializations);
+        console.log('Aktualizacja aktywnych specjalizacji:', values.specializations);
         const { success, error: specError } = await saveSpecializations(values.specializations);
         
         if (!success) {
           console.error('Błąd zapisywania specjalizacji:', specError);
           throw new Error(specError || 'Błąd zapisywania specjalizacji');
+        }
+      } else {
+        console.warn("Brak zaznaczonych aktywnych specjalizacji");
+        // Aktualizuj wszystkie specjalizacje jako nieaktywne
+        const { success, error: specError } = await saveSpecializations([]);
+        
+        if (!success) {
+          console.error('Błąd aktualizowania specjalizacji:', specError);
         }
       }
       

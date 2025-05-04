@@ -280,18 +280,21 @@ export type Database = {
       }
       specialist_specializations: {
         Row: {
+          active: Database["public"]["Enums"]["specialist_specializations_inactive"]
           created_at: string
           id: string
           specialist_id: string
           specialization_id: string
         }
         Insert: {
+          active?: Database["public"]["Enums"]["specialist_specializations_inactive"]
           created_at?: string
           id?: string
           specialist_id: string
           specialization_id: string
         }
         Update: {
+          active?: Database["public"]["Enums"]["specialist_specializations_inactive"]
           created_at?: string
           id?: string
           specialist_id?: string
@@ -316,6 +319,7 @@ export type Database = {
       }
       specializations: {
         Row: {
+          active: Database["public"]["Enums"]["specializations_inactive"]
           code: string
           created_at: string
           description: string | null
@@ -323,6 +327,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          active?: Database["public"]["Enums"]["specializations_inactive"]
           code: string
           created_at?: string
           description?: string | null
@@ -330,6 +335,7 @@ export type Database = {
           name: string
         }
         Update: {
+          active?: Database["public"]["Enums"]["specializations_inactive"]
           code?: string
           created_at?: string
           description?: string | null
@@ -466,10 +472,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      initialize_specialist_specializations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "specialist"
       app_status_user: "active"
+      specialist_specializations_inactive: "yes" | "no"
+      specializations_inactive: "yes" | "no"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -587,6 +599,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user", "specialist"],
       app_status_user: ["active"],
+      specialist_specializations_inactive: ["yes", "no"],
+      specializations_inactive: ["yes", "no"],
     },
   },
 } as const
