@@ -1,7 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
 import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
+import { useTranslation } from "react-i18next";
 
 const featuredSpecialists: Specialist[] = [
   {
@@ -50,76 +52,78 @@ const featuredSpecialists: Specialist[] = [
   }
 ];
 
-const benefitsData = [
-  {
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-12 w-12 text-primary"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <path d="m9 12 2 2 4-4" />
-      </svg>
-    ),
-    title: "Zweryfikowani specjaliści",
-    description: "Współpracujemy tylko ze sprawdzonymi profesjonalistami z odpowiednimi kwalifikacjami i doświadczeniem."
-  },
-  {
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-12 w-12 text-primary"
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-    title: "Doświadczeni profesjonaliści",
-    description: "Znajdź specjalistę, który zna się na zdrowiu i dobrostanie zwierząt różnych gatunków."
-  },
-  {
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-12 w-12 text-primary"
-      >
-        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-        <line x1="16" x2="16" y1="2" y2="6" />
-        <line x1="8" x2="8" y1="2" y2="6" />
-        <line x1="3" x2="21" y1="10" y2="10" />
-      </svg>
-    ),
-    title: "Łatwe umawianie spotkań",
-    description: "Kontaktuj się bezpośrednio ze specjalistami i umawiaj wizyty bez pośredników."
-  }
-];
-
 const Index = () => {
+  const { t } = useTranslation();
+
+  const benefitsData = [
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-12 w-12 text-primary"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      ),
+      title: t("benefits.verified_specialists_title"),
+      description: t("benefits.verified_specialists_desc")
+    },
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-12 w-12 text-primary"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+      title: t("benefits.experienced_professionals_title"),
+      description: t("benefits.experienced_professionals_desc")
+    },
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-12 w-12 text-primary"
+        >
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+          <line x1="16" x2="16" y1="2" y2="6" />
+          <line x1="8" x2="8" y1="2" y2="6" />
+          <line x1="3" x2="21" y1="10" y2="10" />
+        </svg>
+      ),
+      title: t("benefits.easy_appointments_title"),
+      description: t("benefits.easy_appointments_desc")
+    }
+  ];
+
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -128,21 +132,22 @@ const Index = () => {
           <div className="grid items-center gap-8 md:grid-cols-2">
             <div className="space-y-6">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                Znajdź <span className="text-primary">najlepszego specjalistę</span> dla Twojego zwierzaka
+                <span dangerouslySetInnerHTML={{
+                  __html: t('home.hero_title').replace('najlepszego specjalistę', '<span class="text-primary">najlepszego specjalistę</span>')
+                }} />
               </h1>
               <p className="text-lg text-muted-foreground">
-                Dietetycy, fizjoterapeuci, behawiorysci i inni profesjonaliści w jednym miejscu, 
-                gotowi pomóc Tobie i Twojemu zwierzęciu.
+                {t('home.hero_description')}
               </p>
               <div className="flex flex-col space-y-3 sm:flex-row sm:space-x-4 sm:space-y-0">
                 <Link to="/catalog">
                   <Button size="lg" className="w-full sm:w-auto">
-                    Przeglądaj specjalistów
+                    {t('home.browse_specialists')}
                   </Button>
                 </Link>
                 <Link to="/register">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                    Dołącz jako specjalista
+                    {t('home.join_specialist')}
                   </Button>
                 </Link>
               </div>
@@ -171,10 +176,9 @@ const Index = () => {
       <section className="py-16">
         <div className="container">
           <div className="mb-12 text-center">
-            <h2 className="mb-3 text-3xl font-bold md:text-4xl">Polecani specjaliści</h2>
+            <h2 className="mb-3 text-3xl font-bold md:text-4xl">{t('home.featured_specialists')}</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground">
-              Poznaj naszych najlepiej ocenianych profesjonalistów, którzy pomogą 
-              Twojemu pupilowi cieszyć się zdrowiem i dobrym samopoczuciem.
+              {t('home.featured_description')}
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -185,7 +189,7 @@ const Index = () => {
           <div className="mt-10 text-center">
             <Link to="/catalog">
               <Button variant="outline" size="lg">
-                Zobacz wszystkich specjalistów
+                {t('home.view_all_specialists')}
               </Button>
             </Link>
           </div>
@@ -196,10 +200,9 @@ const Index = () => {
       <section className="bg-muted/30 py-16">
         <div className="container">
           <div className="mb-12 text-center">
-            <h2 className="mb-3 text-3xl font-bold md:text-4xl">Dlaczego warto korzystać z naszej platformy?</h2>
+            <h2 className="mb-3 text-3xl font-bold md:text-4xl">{t('home.why_platform')}</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground">
-              ExpertZwierzaki łączy właścicieli zwierząt z najlepszymi specjalistami w Polsce,
-              gwarantując profesjonalną opiekę dla Twojego pupila.
+              {t('home.platform_description')}
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
@@ -220,21 +223,20 @@ const Index = () => {
           <div className="rounded-xl bg-primary/10 p-8 md:p-12">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-                Jesteś specjalistą ds. zwierząt?
+                {t('home.are_you_specialist')}
               </h2>
               <p className="mb-6 text-lg text-muted-foreground">
-                Dołącz do naszej platformy, by zyskać dostęp do nowych klientów
-                i wygodnego narzędzia CRM dopasowanego do Twojej praktyki.
+                {t('home.specialist_cta')}
               </p>
               <div className="flex flex-col space-y-3 sm:flex-row sm:justify-center sm:space-x-4 sm:space-y-0">
                 <Link to="/register">
                   <Button size="lg" className="w-full sm:w-auto">
-                    Zarejestruj się
+                    {t('auth.register_title')}
                   </Button>
                 </Link>
                 <Link to="/pricing">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                    Zobacz cennik
+                    {t('header.pricing')}
                   </Button>
                 </Link>
               </div>

@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, signIn, signOut, signUp, AuthUser, SignInCredentials, SignUpCredentials } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -22,6 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const refreshUserData = async () => {
     try {
@@ -77,8 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
       toast({
-        title: "Zalogowano pomyślnie",
-        description: "Witamy z powrotem w systemie!"
+        title: t("auth.login_success"),
+        description: t("auth.login_welcome")
       });
       navigate("/dashboard");
     } catch (error: any) {
@@ -122,8 +125,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         
         toast({
-          title: "Rejestracja pomyślna",
-          description: "Twoje konto zostało utworzone!"
+          title: t("auth.register_success"),
+          description: t("auth.register_welcome")
         });
         
         navigate("/dashboard");
@@ -147,8 +150,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signOut();
       setUser(null);
       toast({
-        title: "Wylogowano pomyślnie",
-        description: "Dziękujemy za korzystanie z systemu."
+        title: t("auth.logout_success"),
+        description: t("auth.logout_goodbye")
       });
       navigate("/login");
     } catch (error: any) {

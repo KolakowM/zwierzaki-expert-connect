@@ -1,0 +1,98 @@
+
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "loading": "Wird geladen...",
+    "search": "Suchen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "yes": "Ja",
+    "no": "Nein",
+    "submit": "Absenden",
+    "close": "Schließen",
+    "language": "Sprache"
+  },
+  "header": {
+    "catalog": "Spezialistenkatalog",
+    "about": "Über die Plattform",
+    "pricing": "Preise",
+    "contact": "Kontakt",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "dashboard": "Spezialistenpanel",
+    "settings": "Kontoeinstellungen",
+    "logout": "Abmelden"
+  },
+  "auth": {
+    "login_title": "Anmeldung",
+    "login_description": "Geben Sie Ihre Daten ein, um sich bei Ihrem Konto anzumelden",
+    "email": "Email",
+    "password": "Passwort",
+    "forgot_password": "Passwort vergessen?",
+    "no_account": "Noch kein Konto?",
+    "register": "Registrieren",
+    "register_title": "Registrierung",
+    "register_description": "Erstellen Sie ein neues Konto im System",
+    "first_name": "Vorname",
+    "last_name": "Nachname",
+    "confirm_password": "Passwort bestätigen",
+    "accept_terms": "Ich akzeptiere die",
+    "terms": "Nutzungsbedingungen",
+    "privacy_policy": "Datenschutzrichtlinie",
+    "have_account": "Haben Sie bereits ein Konto?",
+    "login_success": "Anmeldung erfolgreich",
+    "login_welcome": "Willkommen zurück im System!",
+    "logout_success": "Abmeldung erfolgreich",
+    "logout_goodbye": "Vielen Dank für die Nutzung des Systems.",
+    "register_success": "Registrierung erfolgreich",
+    "register_welcome": "Ihr Konto wurde erstellt!"
+  },
+  "footer": {
+    "platform": "Plattform",
+    "about": "Über die Plattform",
+    "pricing": "Preise",
+    "catalog": "Spezialistenkatalog",
+    "become_specialist": "Werden Sie Spezialist",
+    "support": "Unterstützung",
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "privacy": "Datenschutzrichtlinie",
+    "terms": "Nutzungsbedingungen",
+    "regulations": "Vorschriften",
+    "contact_info": "Kontakt",
+    "phone": "+48 123 456 789",
+    "email": "kontakt@expertzwierzaki.pl",
+    "location": "Warschau, Polen",
+    "copyright": "© 2025 ExpertZwierzaki. Alle Rechte vorbehalten."
+  },
+  "home": {
+    "hero_title": "Finden Sie den besten Spezialisten für Ihr Haustier",
+    "hero_description": "Ernährungsberater, Physiotherapeuten, Verhaltensberater und andere Fachleute an einem Ort, bereit, Ihnen und Ihrem Tier zu helfen.",
+    "browse_specialists": "Spezialisten durchsuchen",
+    "join_specialist": "Als Spezialist beitreten",
+    "featured_specialists": "Empfohlene Spezialisten",
+    "featured_description": "Lernen Sie unsere bestbewerteten Fachleute kennen, die Ihrem Haustier zu Gesundheit und Wohlbefinden verhelfen.",
+    "view_all_specialists": "Alle Spezialisten anzeigen",
+    "why_platform": "Warum unsere Plattform nutzen?",
+    "platform_description": "ExpertZwierzaki verbindet Tierbesitzer mit den besten Spezialisten in Polen und garantiert professionelle Pflege für Ihr Haustier.",
+    "are_you_specialist": "Sind Sie ein Tierspezialist?",
+    "specialist_cta": "Treten Sie unserer Plattform bei, um Zugang zu neuen Kunden und einem praktischen CRM-Tool zu erhalten, das auf Ihre Praxis zugeschnitten ist."
+  },
+  "benefits": {
+    "verified_specialists_title": "Verifizierte Spezialisten",
+    "verified_specialists_desc": "Wir arbeiten nur mit bewährten Fachleuten mit entsprechender Qualifikation und Erfahrung zusammen.",
+    "experienced_professionals_title": "Erfahrene Fachleute",
+    "experienced_professionals_desc": "Finden Sie einen Spezialisten, der sich mit der Gesundheit und dem Wohlbefinden von Tieren verschiedener Arten auskennt.",
+    "easy_appointments_title": "Einfache Terminvereinbarung",
+    "easy_appointments_desc": "Kontaktieren Sie Spezialisten direkt und vereinbaren Sie Termine ohne Vermittler."
+  },
+  "languages": {
+    "pl": "Polnisch",
+    "en": "Englisch",
+    "de": "Deutsch",
+    "uk": "Ukrainisch"
+  }
+}

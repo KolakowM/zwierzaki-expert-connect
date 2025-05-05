@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -6,43 +7,56 @@ import { useNavigate } from "react-router-dom";
 import { Menu, UserCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+
 export default function Header() {
-  const {
-    isAuthenticated,
-    logout
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
+
   const handleLogout = () => {
     logout();
     toast({
-      title: "Wylogowano pomyślnie",
-      description: "Do zobaczenia wkrótce!"
+      title: t("auth.logout_success"),
+      description: t("auth.logout_goodbye")
     });
     navigate("/");
   };
-  const navigationLinks = [{
-    to: "/catalog",
-    label: "Katalog Specjalistów"
-  }, {
-    to: "/about",
-    label: "O Platformie"
-  }, {
-    to: "/pricing",
-    label: "Cennik"
-  }, {
-    to: "/contact",
-    label: "Kontakt"
-  }];
-  const renderDesktopNavigation = () => <nav className="hidden gap-6 md:flex">
-      {navigationLinks.map(link => <Link key={link.to} to={link.to} className="text-sm font-medium hover:text-primary">
+
+  const navigationLinks = [
+    {
+      to: "/catalog",
+      label: t("header.catalog")
+    },
+    {
+      to: "/about",
+      label: t("header.about")
+    },
+    {
+      to: "/pricing",
+      label: t("header.pricing")
+    },
+    {
+      to: "/contact",
+      label: t("header.contact")
+    }
+  ];
+
+  const renderDesktopNavigation = () => (
+    <nav className="hidden gap-6 md:flex">
+      {navigationLinks.map(link => (
+        <Link key={link.to} to={link.to} className="text-sm font-medium hover:text-primary">
           {link.label}
-        </Link>)}
-    </nav>;
-  const renderMobileNavigation = () => <Sheet>
+        </Link>
+      ))}
+    </nav>
+  );
+
+  const renderMobileNavigation = () => (
+    <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="md:hidden">
           <Menu className="h-5 w-5" />
@@ -51,31 +65,43 @@ export default function Header() {
       </SheetTrigger>
       <SheetContent side="right">
         <nav className="flex flex-col gap-4 mt-8">
-          {navigationLinks.map(link => <Link key={link.to} to={link.to} className="text-base font-medium hover:text-primary py-2">
+          {navigationLinks.map(link => (
+            <Link key={link.to} to={link.to} className="text-base font-medium hover:text-primary py-2">
               {link.label}
-            </Link>)}
-          {isAuthenticated ? <>
+            </Link>
+          ))}
+          {isAuthenticated ? (
+            <>
               <Link to="/dashboard" className="text-base font-medium hover:text-primary py-2">
-                Panel Specjalisty
+                {t("header.dashboard")}
               </Link>
               <Link to="/settings" className="text-base font-medium hover:text-primary py-2">
-                Ustawienia Konta
+                {t("header.settings")}
               </Link>
               <Button variant="ghost" onClick={handleLogout} className="justify-start px-0">
-                Wyloguj
+                {t("header.logout")}
               </Button>
-            </> : <>
+            </>
+          ) : (
+            <>
               <Link to="/login" className="text-base font-medium hover:text-primary py-2">
-                Logowanie
+                {t("header.login")}
               </Link>
               <Link to="/register" className="text-base font-medium hover:text-primary py-2">
-                Zarejestruj się
+                {t("header.register")}
               </Link>
-            </>}
+            </>
+          )}
+          <div className="pt-2">
+            <LanguageSwitcher />
+          </div>
         </nav>
       </SheetContent>
-    </Sheet>;
-  return <header className="w-full border-b">
+    </Sheet>
+  );
+
+  return (
+    <header className="w-full border-b">
       <div className="container flex items-center justify-between py-4">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
@@ -87,30 +113,40 @@ export default function Header() {
         {renderDesktopNavigation()}
         
         <div className="flex items-center gap-2">
-          {isMobile ? renderMobileNavigation() : <>
-              {isAuthenticated ? <>
+          {isMobile ? (
+            renderMobileNavigation()
+          ) : (
+            <>
+              <LanguageSwitcher />
+              {isAuthenticated ? (
+                <>
                   <Link to="/dashboard">
-                    <Button variant="outline">Panel Specjalisty</Button>
+                    <Button variant="outline">{t("header.dashboard")}</Button>
                   </Link>
                   <Link to="/settings">
                     <Button variant="outline">
                       <UserCircle className="mr-2 h-4 w-4" />
-                      Ustawienia Konta
+                      {t("header.settings")}
                     </Button>
                   </Link>
                   <Button variant="ghost" onClick={handleLogout}>
-                    Wyloguj
+                    {t("header.logout")}
                   </Button>
-                </> : <>
+                </>
+              ) : (
+                <>
                   <Link to="/login">
-                    <Button variant="ghost">Logowanie</Button>
+                    <Button variant="ghost">{t("header.login")}</Button>
                   </Link>
                   <Link to="/register">
-                    <Button>Zarejestruj się</Button>
+                    <Button>{t("header.register")}</Button>
                   </Link>
-                </>}
-            </>}
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 }

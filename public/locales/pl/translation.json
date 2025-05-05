@@ -1,0 +1,98 @@
+
+{
+  "common": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "loading": "Ładowanie...",
+    "search": "Szukaj",
+    "back": "Powrót",
+    "next": "Dalej",
+    "yes": "Tak",
+    "no": "Nie",
+    "submit": "Wyślij",
+    "close": "Zamknij",
+    "language": "Język"
+  },
+  "header": {
+    "catalog": "Katalog Specjalistów",
+    "about": "O Platformie",
+    "pricing": "Cennik",
+    "contact": "Kontakt",
+    "login": "Logowanie",
+    "register": "Zarejestruj się",
+    "dashboard": "Panel Specjalisty",
+    "settings": "Ustawienia Konta",
+    "logout": "Wyloguj"
+  },
+  "auth": {
+    "login_title": "Logowanie",
+    "login_description": "Wprowadź dane, aby zalogować się na swoje konto",
+    "email": "Email",
+    "password": "Hasło",
+    "forgot_password": "Zapomniałeś hasła?",
+    "no_account": "Nie masz jeszcze konta?",
+    "register": "Zarejestruj się",
+    "register_title": "Rejestracja",
+    "register_description": "Utwórz nowe konto w systemie",
+    "first_name": "Imię",
+    "last_name": "Nazwisko",
+    "confirm_password": "Potwierdź hasło",
+    "accept_terms": "Akceptuję",
+    "terms": "regulamin",
+    "privacy_policy": "politykę prywatności",
+    "have_account": "Masz już konto?",
+    "login_success": "Zalogowano pomyślnie",
+    "login_welcome": "Witamy z powrotem w systemie!",
+    "logout_success": "Wylogowano pomyślnie",
+    "logout_goodbye": "Dziękujemy za korzystanie z systemu.",
+    "register_success": "Rejestracja pomyślna",
+    "register_welcome": "Twoje konto zostało utworzone!"
+  },
+  "footer": {
+    "platform": "Platforma",
+    "about": "O Platformie",
+    "pricing": "Cennik",
+    "catalog": "Katalog Specjalistów",
+    "become_specialist": "Zostań Specjalistą",
+    "support": "Wsparcie",
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "privacy": "Polityka Prywatności",
+    "terms": "Warunki Korzystania",
+    "regulations": "Regulamin",
+    "contact_info": "Kontakt",
+    "phone": "+48 123 456 789",
+    "email": "kontakt@expertzwierzaki.pl",
+    "location": "Warszawa, Polska",
+    "copyright": "© 2025 ExpertZwierzaki. Wszelkie prawa zastrzeżone."
+  },
+  "home": {
+    "hero_title": "Znajdź najlepszego specjalistę dla Twojego zwierzaka",
+    "hero_description": "Dietetycy, fizjoterapeuci, behawiorysci i inni profesjonaliści w jednym miejscu, gotowi pomóc Tobie i Twojemu zwierzęciu.",
+    "browse_specialists": "Przeglądaj specjalistów",
+    "join_specialist": "Dołącz jako specjalista",
+    "featured_specialists": "Polecani specjaliści",
+    "featured_description": "Poznaj naszych najlepiej ocenianych profesjonalistów, którzy pomogą Twojemu pupilowi cieszyć się zdrowiem i dobrym samopoczuciem.",
+    "view_all_specialists": "Zobacz wszystkich specjalistów",
+    "why_platform": "Dlaczego warto korzystać z naszej platformy?",
+    "platform_description": "ExpertZwierzaki łączy właścicieli zwierząt z najlepszymi specjalistami w Polsce, gwarantując profesjonalną opiekę dla Twojego pupila.",
+    "are_you_specialist": "Jesteś specjalistą ds. zwierząt?",
+    "specialist_cta": "Dołącz do naszej platformy, by zyskać dostęp do nowych klientów i wygodnego narzędzia CRM dopasowanego do Twojej praktyki."
+  },
+  "benefits": {
+    "verified_specialists_title": "Zweryfikowani specjaliści",
+    "verified_specialists_desc": "Współpracujemy tylko ze sprawdzonymi profesjonalistami z odpowiednimi kwalifikacjami i doświadczeniem.",
+    "experienced_professionals_title": "Doświadczeni profesjonaliści",
+    "experienced_professionals_desc": "Znajdź specjalistę, który zna się na zdrowiu i dobrostanie zwierząt różnych gatunków.",
+    "easy_appointments_title": "Łatwe umawianie spotkań",
+    "easy_appointments_desc": "Kontaktuj się bezpośrednio ze specjalistami i umawiaj wizyty bez pośredników."
+  },
+  "languages": {
+    "pl": "Polski",
+    "en": "Angielski",
+    "de": "Niemiecki",
+    "uk": "Ukraiński"
+  }
+}

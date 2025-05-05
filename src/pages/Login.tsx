@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthProvider"; // Updated import path
+import { useAuth } from "@/contexts/AuthProvider";
 import { Link, Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SignInCredentials } from "@/services/authService";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ const Login = () => {
   const [error, setError] = useState("");
   
   const { login, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,15 +45,15 @@ const Login = () => {
         <div className="w-full max-w-md">
           <Card>
             <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-3xl">Logowanie</CardTitle>
-              <CardDescription>Wprowadź dane, aby zalogować się na swoje konto</CardDescription>
+              <CardTitle className="text-3xl">{t('auth.login_title')}</CardTitle>
+              <CardDescription>{t('auth.login_description')}</CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 {error && <div className="bg-red-50 text-red-500 px-4 py-2 rounded-md text-sm">{error}</div>}
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <Input 
                     id="email"
                     type="email"
@@ -64,9 +66,9 @@ const Login = () => {
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Hasło</Label>
+                    <Label htmlFor="password">{t('auth.password')}</Label>
                     <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                      Zapomniałeś hasła?
+                      {t('auth.forgot_password')}
                     </Link>
                   </div>
                   <Input 
@@ -82,13 +84,13 @@ const Login = () => {
               
               <CardFooter className="flex flex-col space-y-4">
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Logowanie..." : "Zaloguj się"}
+                  {isLoading ? t('common.loading') : t('auth.login_title')}
                 </Button>
                 
                 <div className="text-center text-sm">
-                  Nie masz jeszcze konta?{" "}
+                  {t('auth.no_account')}{" "}
                   <Link to="/register" className="text-primary hover:underline">
-                    Zarejestruj się
+                    {t('auth.register')}
                   </Link>
                 </div>
               </CardFooter>

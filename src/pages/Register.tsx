@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Link, Navigate } from "react-router-dom";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SignUpCredentials } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -22,6 +24,7 @@ const Register = () => {
   
   const { register, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +53,8 @@ const Register = () => {
       await register(credentials);
       
       toast({
-        title: "Konto utworzone",
-        description: "Twoje konto zostało pomyślnie utworzone.",
+        title: t("auth.register_success"),
+        description: t("auth.register_welcome"),
       });
     } catch (err: any) {
       setError(err.message || "Błąd rejestracji. Spróbuj ponownie później.");
@@ -75,8 +78,8 @@ const Register = () => {
         <div className="w-full max-w-md">
           <Card>
             <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-3xl">Rejestracja</CardTitle>
-              <CardDescription>Utwórz nowe konto w systemie</CardDescription>
+              <CardTitle className="text-3xl">{t('auth.register_title')}</CardTitle>
+              <CardDescription>{t('auth.register_description')}</CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
@@ -84,7 +87,7 @@ const Register = () => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Imię</Label>
+                    <Label htmlFor="firstName">{t('auth.first_name')}</Label>
                     <Input 
                       id="firstName"
                       value={firstName}
@@ -94,7 +97,7 @@ const Register = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Nazwisko</Label>
+                    <Label htmlFor="lastName">{t('auth.last_name')}</Label>
                     <Input 
                       id="lastName"
                       value={lastName}
@@ -105,7 +108,7 @@ const Register = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <Input 
                     id="email"
                     type="email"
@@ -117,7 +120,7 @@ const Register = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Hasło</Label>
+                  <Label htmlFor="password">{t('auth.password')}</Label>
                   <Input 
                     id="password"
                     type="password"
@@ -129,7 +132,7 @@ const Register = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Potwierdź hasło</Label>
+                  <Label htmlFor="confirmPassword">{t('auth.confirm_password')}</Label>
                   <Input 
                     id="confirmPassword"
                     type="password"
@@ -147,13 +150,13 @@ const Register = () => {
                     onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
                   />
                   <label htmlFor="terms" className="text-sm">
-                    Akceptuję{" "}
+                    {t('auth.accept_terms')}{" "}
                     <Link to="/terms" className="text-primary hover:underline">
-                      regulamin
+                      {t('auth.terms')}
                     </Link>{" "}
-                    i{" "}
+                    {t('common.and')}{" "}
                     <Link to="/privacy" className="text-primary hover:underline">
-                      politykę prywatności
+                      {t('auth.privacy_policy')}
                     </Link>
                   </label>
                 </div>
@@ -161,13 +164,13 @@ const Register = () => {
               
               <CardFooter className="flex flex-col space-y-4">
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Rejestrowanie..." : "Zarejestruj się"}
+                  {isLoading ? t('common.loading') : t('auth.register_title')}
                 </Button>
                 
                 <div className="text-center text-sm">
-                  Masz już konto?{" "}
+                  {t('auth.have_account')}{" "}
                   <Link to="/login" className="text-primary hover:underline">
-                    Zaloguj się
+                    {t('auth.login_title')}
                   </Link>
                 </div>
               </CardFooter>

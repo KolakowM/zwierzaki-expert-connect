@@ -1,0 +1,98 @@
+
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "submit": "Submit",
+    "close": "Close",
+    "language": "Language"
+  },
+  "header": {
+    "catalog": "Specialists Catalog",
+    "about": "About Platform",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Specialist Dashboard",
+    "settings": "Account Settings",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login_title": "Login",
+    "login_description": "Enter your details to log in to your account",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account yet?",
+    "register": "Register",
+    "register_title": "Registration",
+    "register_description": "Create a new account in the system",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "confirm_password": "Confirm Password",
+    "accept_terms": "I accept the",
+    "terms": "terms of service",
+    "privacy_policy": "privacy policy",
+    "have_account": "Already have an account?",
+    "login_success": "Login successful",
+    "login_welcome": "Welcome back to the system!",
+    "logout_success": "Logout successful",
+    "logout_goodbye": "Thank you for using the system.",
+    "register_success": "Registration successful",
+    "register_welcome": "Your account has been created!"
+  },
+  "footer": {
+    "platform": "Platform",
+    "about": "About Platform",
+    "pricing": "Pricing",
+    "catalog": "Specialists Catalog",
+    "become_specialist": "Become a Specialist",
+    "support": "Support",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "regulations": "Regulations",
+    "contact_info": "Contact",
+    "phone": "+48 123 456 789",
+    "email": "contact@expertzwierzaki.pl",
+    "location": "Warsaw, Poland",
+    "copyright": "© 2025 ExpertZwierzaki. All rights reserved."
+  },
+  "home": {
+    "hero_title": "Find the best specialist for your pet",
+    "hero_description": "Dietitians, physiotherapists, behaviorists and other professionals in one place, ready to help you and your animal.",
+    "browse_specialists": "Browse specialists",
+    "join_specialist": "Join as a specialist",
+    "featured_specialists": "Featured specialists",
+    "featured_description": "Meet our best-rated professionals who will help your pet enjoy health and well-being.",
+    "view_all_specialists": "View all specialists",
+    "why_platform": "Why use our platform?",
+    "platform_description": "ExpertZwierzaki connects pet owners with the best specialists in Poland, guaranteeing professional care for your pet.",
+    "are_you_specialist": "Are you an animal specialist?",
+    "specialist_cta": "Join our platform to gain access to new clients and a convenient CRM tool tailored to your practice."
+  },
+  "benefits": {
+    "verified_specialists_title": "Verified specialists",
+    "verified_specialists_desc": "We work only with proven professionals with appropriate qualifications and experience.",
+    "experienced_professionals_title": "Experienced professionals",
+    "experienced_professionals_desc": "Find a specialist who knows about the health and welfare of animals of various species.",
+    "easy_appointments_title": "Easy appointment scheduling",
+    "easy_appointments_desc": "Contact specialists directly and make appointments without intermediaries."
+  },
+  "languages": {
+    "pl": "Polish",
+    "en": "English",
+    "de": "German",
+    "uk": "Ukrainian"
+  }
+}
