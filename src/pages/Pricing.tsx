@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -5,12 +6,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Pricing() {
+  const { t } = useTranslation();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   
-  const yearlyDiscountFactor = 0.75;
-
   type Feature = {
     id: string;
     content: ReactNode;
@@ -31,54 +32,57 @@ export default function Pricing() {
       name: "Testowy",
       monthlyPrice: "0 zł",
       yearlyPrice: "0 zł",
-      description: "Dla rozpoczynających działalność",
+      description: "Wersja do testowania podstawowej funkcjonalności CRM",
       features: [
-        { id: "t1", content: "Miejsce w katalogu specjalistów" },
-        { id: "t2", content: "Możliwość wskazania 1 specjalizacji zawodowych " },
-        { id: "t3", content: <del>"Podstawowy profil"</del> },
-        { id: "t4", content: "Do 5 klientów" },
-        { id: "t5", content: "Do 10 zwierząt" },
-        { id: "t6", content: "Pomoc mailowa" },
-        { id: "t7", content: <del>"Kalendarz podstawowy"</del> }
+        { id: "t1", content: "Status: Niezweryfikowany" },
+        { id: "t2", content: <strong>Brak widoczności w katalogu specjalistów</strong> },
+        { id: "t3", content: "Do 5 klientów" },
+        { id: "t4", content: "Do 10 zwierząt" },
+        { id: "t5", content: "1 specjalizacja / 3 usługi" },
+        { id: "t6", content: "Podstawowy profil specjalisty" },
+        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
       ],
       cta: "Rozpocznij za darmo",
       popular: false
     },
     {
-      name: "Zaawansowany (Polecany)",
+      name: "Zaawansowany",
       monthlyPrice: "29 zł",
-      yearlyPrice: "21.75 zł",
-      description: "Dla rozwijających się praktyk",
+      yearlyPrice: "490 zł",
+      description: "Idealny dla rozwijających się praktyk",
       features: [
-        { id: "a1", content: "Miejsce w katalogu specjalistów" },
-        { id: "a2", content: "Możliwość wskazania 3 specjalizacji zawodowych " },
-        { id: "a3", content: "Do 15 klientów" },
-        { id: "a4", content: "Do 30 zwierząt" },
-        { id: "a5", content: "Piorytetowa pomoc" },
-        { id: "a6", content: <del>"Dokumenty i załączniki"</del> },
-        { id: "a7", content: <del>"Automatyczne powiadomienia"</del> },
-        { id: "a8", content: <del>"Historia leczenia"</del> },
-        { id: "a9", content: <del>"Eksport danych"</del> }
+        { id: "a1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
+        { id: "a2", content: <strong>Standardowa widoczność w katalogu specjalistów</strong> },
+        { id: "a3", content: "Do 25 klientów" },
+        { id: "a4", content: "Do 40 zwierząt" },
+        { id: "a5", content: "Do 3 specjalizacji / 6 usług" },
+        { id: "a6", content: "Pełny profil specjalisty" },
+        { id: "a7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
+        { id: "a8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" },
+        { id: "a9", content: <del>Analityka i raporty</del> },
+        { id: "a10", content: <del>Historia leczenia z załącznikami</del> }
       ],
-      cta: "Wybierz plan",
+      cta: "Wybierz plan Zaawansowany",
       popular: true
     },
     {
       name: "Zawodowiec",
       monthlyPrice: "49 zł",
-      yearlyPrice: "36.75 zł",
-      description: "Dla większych praktyków pracy z zwierzętami",
+      yearlyPrice: "990 zł",
+      description: "Dla profesjonalnych praktyk",
       features: [
-        { id: "p1", content: "Miejsce w katalogu specjalistów" },
-        { id: "p2", content: "Możliwość wskazania 5 specjalizacji zawodowych " },
-        { id: "p3", content: "Nieograniczeni klienci" },
-        { id: "p4", content: "Nieograniczona liczba zwierząt" },
-        { id: "p5", content: <del>"Analityka i raporty"</del> },
-        { id: "p6", content: <del>"Płatności online"</del> },
-        { id: "p7", content: <del>"Integracja z zewnętrznymi systemami"</del> },
-        { id: "p8", content: <del>"Dedykowane wsparcie"</del> }
+        { id: "p1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
+        { id: "p2", content: <strong>Wyróżniona widoczność w katalogu specjalistów</strong> },
+        { id: "p3", content: "Do 50 klientów" },
+        { id: "p4", content: "Do 75 zwierząt" },
+        { id: "p5", content: "Wszystkie specjalizacje / 15 usług" },
+        { id: "p6", content: "Priorytetowy profil specjalisty" },
+        { id: "p7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
+        { id: "p8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" },
+        { id: "p9", content: <del>Integracja z zewnętrznymi systemami</del> },
+        { id: "p10", content: <del>Dedykowane wsparcie 24/7</del> }
       ],
-      cta: "Wybierz plan",
+      cta: "Wybierz plan Zawodowiec",
       popular: false
     }
   ];
@@ -109,7 +113,7 @@ export default function Pricing() {
                 onClick={() => setBillingPeriod('yearly')}
                 className="relative z-10"
               >
-                Rocznie (-25%)
+                Rocznie (~25% rabatu)
               </Button>
             </div>
           </div>
@@ -129,7 +133,7 @@ export default function Pricing() {
                       {billingPeriod === 'monthly' ? tier.monthlyPrice : tier.yearlyPrice}
                     </span>
                     <span className="text-sm text-muted-foreground ml-1">
-                      {billingPeriod === 'monthly' ? '/ miesiąc' : '/ miesiąc (płatne rocznie)'}
+                      {billingPeriod === 'monthly' ? '/ miesiąc' : '/ rok'}
                     </span>
                   </div>
                   <CardDescription className="mt-2">{tier.description}</CardDescription>
@@ -162,20 +166,46 @@ export default function Pricing() {
             <h2 className="text-2xl font-bold">Często zadawane pytania o cennik</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-medium">Czy mogę zmienić plan w dowolnym momencie?</h3>
-                <p className="text-muted-foreground">Tak, możesz zmienić lub anulować plan w dowolnym momencie.</p>
+                <h3 className="text-lg font-medium">Czym różnią się poszczególne plany?</h3>
+                <p className="text-muted-foreground">
+                  Plany różnią się przede wszystkim limitami CRM (klienci/zwierzęta), liczbą dostępnych specjalizacji/usług oraz widocznością w katalogu specjalistów. Plan Testowy nie daje widoczności w katalogu, Zaawansowany oferuje standardową widoczność, a Zawodowiec - wyróżnioną.
+                </p>
               </div>
               <div>
-                <h3 className="text-lg font-medium">Czy jest dostępny okres próbny?</h3>
-                <p className="text-muted-foreground">Tak, oferujemy 14-dniowy okres próbny na planach Profesjonalny i Klinika.</p>
+                <h3 className="text-lg font-medium">Jak działa status weryfikacji?</h3>
+                <p className="text-muted-foreground">
+                  Status "Zweryfikowany" otrzymujesz automatycznie po pierwszym zakupie planu płatnego (Zaawansowany lub Zawodowiec). Ten status jest warunkiem koniecznym do widoczności Twojego profilu w katalogu specjalistów.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Co się dzieje, gdy przestanę płacić za subskrypcję?</h3>
+                <p className="text-muted-foreground">
+                  Po zakończeniu opłaconego okresu, Twoje konto zostanie zdegradowane do planu Testowego. Zachowasz dostęp tylko do 5 najnowszych klientów i 10 najnowszych zwierząt, a Twój profil przestanie być widoczny w katalogu specjalistów.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Czy mogę rozszerzyć limit klientów i zwierząt?</h3>
+                <p className="text-muted-foreground">
+                  Tak, oferujemy dodatek (+20 zł miesięcznie), który zwiększa limit o dodatkowych 10 klientów i 10 zwierząt. Możesz dokupić tyle dodatków, ile potrzebujesz.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Na czym polega rabat dla nowych użytkowników?</h3>
+                <p className="text-muted-foreground">
+                  Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 10 zł przy płatności miesięcznej lub 100 zł przy płatności rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Czy mogę zmienić plan w dowolnym momencie?</h3>
+                <p className="text-muted-foreground">
+                  Tak, możesz zmienić plan w każdej chwili. Jeśli przejdziesz na plan wyższy, różnica zostanie obliczona proporcjonalnie. Jeśli przejdziesz na plan niższy, zmiana nastąpi po zakończeniu bieżącego okresu rozliczeniowego.
+                </p>
               </div>
               <div>
                 <h3 className="text-lg font-medium">Jakie formy płatności akceptujecie?</h3>
-                <p className="text-muted-foreground">Akceptujemy karty płatnicze, przelewy bankowe oraz BLIK.</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Czy mogę zapłacić za cały rok?</h3>
-                <p className="text-muted-foreground">Tak, oferujemy płatność roczną z 25% zniżką w porównaniu do płatności miesięcznych.</p>
+                <p className="text-muted-foreground">
+                  Akceptujemy płatności kartami kredytowymi, Blik, przelewem bankowym oraz poprzez popularne bramki płatności.
+                </p>
               </div>
             </div>
           </div>
