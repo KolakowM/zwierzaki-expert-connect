@@ -3,11 +3,12 @@ import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Save, Edit, Upload, File, X, Paperclip } from "lucide-react";
+import { Save, Edit, Upload, File, X, Paperclip, Trash2 } from "lucide-react";
 import { Pet } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthProvider";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 
 interface PetNotesProps {
   pet: Pet;
@@ -30,11 +31,13 @@ interface PetNote {
 const PetNotes = ({ pet }: PetNotesProps) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingNoteId, setIsEditingNoteId] = useState<string | null>(null);
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [notes, setNotes] = useState<PetNote[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -135,7 +138,44 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
       setIsSaving(true);
 
-      // Explicitly include user_id when inserting a new note
+      // If we're editing a note, update it instead of creating a new one
+      if (isEditingNoteId) {
+        const { data: updatedNoteData, error: updateError } = await supabase
+          .from('pet_notes')
+          .update({ 
+            content,
+            updated_at: new Date().toISOString(),
+            user_id: user.id 
+          })
+          .eq('id', isEditingNoteId)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+
+        // Update the note in state
+        setNotes(prevNotes => 
+          prevNotes.map(note => 
+            note.id === isEditingNoteId 
+              ? {...updatedNoteData, attachments: note.attachments} 
+              : note
+          )
+        );
+
+        toast({
+          title: "Notatka zaktualizowana",
+          description: "Zmiany zostały pomyślnie zapisane"
+        });
+
+        setIsEditing(false);
+        setIsEditingNoteId(null);
+        setContent("");
+        setFiles([]);
+        return;
+      }
+
+      // Creating a new note
       const { data: noteData, error: noteError } = await supabase
         .from('pet_notes')
         .insert([{ 
@@ -210,6 +250,92 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
   const handleEdit = () => {
     setIsEditing(true);
+    setIsEditingNoteId(null);
+    setContent("");
+    setFiles([]);
+  };
+
+  const handleEditNote = (note: PetNote) => {
+    setIsEditing(true);
+    setIsEditingNoteId(note.id);
+    setContent(note.content);
+    setFiles([]);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setIsEditingNoteId(null);
+    setContent("");
+    setFiles([]);
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby usunąć notatkę",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+
+      // First get attachments to delete from storage later
+      const { data: attachments } = await supabase
+        .from('pet_note_attachments')
+        .select('file_path')
+        .eq('note_id', noteId);
+
+      // Delete attachments from the database
+      const { error: attachmentsError } = await supabase
+        .from('pet_note_attachments')
+        .delete()
+        .eq('note_id', noteId);
+
+      if (attachmentsError) throw attachmentsError;
+
+      // Delete note from database
+      const { error: noteError } = await supabase
+        .from('pet_notes')
+        .delete()
+        .eq('id', noteId)
+        .eq('user_id', user.id);
+
+      if (noteError) throw noteError;
+
+      // Delete attachment files from storage if any
+      if (attachments && attachments.length > 0) {
+        const filePaths = attachments.map(attachment => attachment.file_path);
+        
+        const { error: storageError } = await supabase.storage
+          .from('pet_attachments')
+          .remove(filePaths);
+
+        if (storageError) {
+          console.error("Error deleting files from storage:", storageError);
+          // Continue execution even if file deletion fails
+        }
+      }
+
+      // Update state to remove the deleted note
+      setNotes(prevNotes => prevNotes.filter(note => note.id !== noteId));
+
+      toast({
+        title: "Notatka usunięta",
+        description: "Notatka została pomyślnie usunięta"
+      });
+    } catch (error: any) {
+      console.error("Error deleting note:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się usunąć notatki: " + (error.message || "Nieznany błąd"),
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -266,15 +392,24 @@ const PetNotes = ({ pet }: PetNotesProps) => {
             <Edit className="h-4 w-4" />
           </Button>
         ) : (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSaveNote} 
-            disabled={isSaving}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Zapisz
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCancelEdit}
+            >
+              Anuluj
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSaveNote} 
+              disabled={isSaving}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isEditingNoteId ? 'Aktualizuj' : 'Zapisz'}
+            </Button>
+          </div>
         )}
       </CardHeader>
       <CardContent>
@@ -338,8 +473,37 @@ const PetNotes = ({ pet }: PetNotesProps) => {
           <div className="space-y-6">
             {notes.map((note) => (
               <div key={note.id} className="border-b pb-4 last:pb-0 last:border-b-0">
-                <div className="text-sm text-muted-foreground mb-1">
-                  {formatDate(note.created_at)}
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm text-muted-foreground">
+                    {formatDate(note.created_at)}
+                    {note.updated_at !== note.created_at && (
+                      <span className="text-xs ml-2 italic">(edytowano: {formatDate(note.updated_at)})</span>
+                    )}
+                  </div>
+                  <div className="flex space-x-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditNote(note)}
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <ConfirmDeleteDialog
+                      title="Usuń notatkę"
+                      description="Czy na pewno chcesz usunąć tę notatkę? Ta operacja jest nieodwracalna."
+                      onConfirm={() => handleDeleteNote(note.id)}
+                      triggerButtonSize="sm"
+                      triggerButtonVariant="ghost"
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isDeleting}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                      </Button>
+                    </ConfirmDeleteDialog>
+                  </div>
                 </div>
                 <p className="whitespace-pre-wrap">{note.content}</p>
                 
