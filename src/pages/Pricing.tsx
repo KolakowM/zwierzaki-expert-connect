@@ -40,10 +40,10 @@ export default function Pricing() {
         { id: "t4", content: "Do 10 zwierząt" },
         { id: "t5", content: "1 specjalizacja / 3 usługi" },
         { id: "t6", content: "Podstawowy profil specjalisty" },
-        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" },
-        { id: "p8", content: ""},
+        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+   /*  , { id: "p8", content: ""},
         { id: "p9", content: ""},
-        { id: "p10", content:  ""}
+        { id: "p10", content:  ""} */
       ],
       cta: "Rozpocznij za darmo",
       popular: false
@@ -61,9 +61,9 @@ export default function Pricing() {
         { id: "a5", content: "Do 3 specjalizacji / 6 usług" },
         { id: "a6", content: "Pełny profil specjalisty" },
         { id: "a7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
-        { id: "a8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" },
-        { id: "p9", content: ""},
-        { id: "p10", content: "" }
+        { id: "a8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+       /* ,{ id: "p9", content: ""},
+        { id: "p10", content: "" } */
       ],
       cta: "Wybierz plan Zaawansowany",
       popular: true
@@ -81,9 +81,9 @@ export default function Pricing() {
         { id: "p5", content: "Wszystkie specjalizacje / 15 usług" },
         { id: "p6", content: "Priorytetowy profil specjalisty" },
         { id: "p7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
-        { id: "p8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" },
-        { id: "p9", content: ""},
-        { id: "p10", content:  ""}
+        { id: "p8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+       /* ,{ id: "p9", content: ""},
+        { id: "p10", content: "" } */
       ],
       cta: "Wybierz plan Zawodowiec",
       popular: false
