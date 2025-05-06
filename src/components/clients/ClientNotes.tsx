@@ -40,9 +40,12 @@ const ClientNotes = ({ client }: ClientNotesProps) => {
       
       const { error } = await supabase
         .from('clients')
-        .update({ notes: notes })
+        .update({ 
+          notes: notes,
+          user_id: user.id // Explicitly set user_id to ensure it's properly tracked
+        })
         .eq('id', client.id)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id); // Make sure we're only updating if the user owns the record
         
       if (error) {
         console.error("Error saving notes:", error);

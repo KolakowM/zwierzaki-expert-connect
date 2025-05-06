@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,7 +83,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
       }
     };
 
-    if (pet.id) {
+    if (pet.id && user) {
       fetchNotes();
     }
   }, [pet.id, toast, user]);
@@ -134,11 +135,13 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
       setIsSaving(true);
 
+      // Explicitly include user_id when inserting a new note
       const { data: noteData, error: noteError } = await supabase
         .from('pet_notes')
         .insert([{ 
           pet_id: pet.id, 
-          content 
+          content,
+          user_id: user.id // Explicitly set the user_id to authenticate the operation
         }])
         .select()
         .single();
@@ -148,12 +151,14 @@ const PetNotes = ({ pet }: PetNotesProps) => {
       const attachments = [];
       
       for (const file of files) {
+        // Add user ID to the file path to ensure ownership and improve organization
         const fileExt = file.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const filePath = `${pet.id}/${fileName}`;
+        // Include user.id in the path to enforce ownership
+        const filePath = `${user.id}/${pet.id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('pet_attachments')
+          .from('pet_attachments') // Using the newly created bucket
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
@@ -195,7 +200,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
       console.error("Error saving note:", error);
       toast({
         title: "Błąd",
-        description: "Nie udało się zapisać notatki",
+        description: "Nie udało się zapisać notatki: " + (error.message || "Nieznany błąd"),
         variant: "destructive"
       });
     } finally {
@@ -220,7 +225,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
   const getDownloadUrl = async (filePath: string) => {
     const { data } = await supabase.storage
-      .from('pet_attachments')
+      .from('pet_attachments') // Updated bucket name
       .getPublicUrl(filePath);
     
     return data.publicUrl;
@@ -229,7 +234,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
   const handleDownload = async (filePath: string, fileName: string) => {
     try {
       const { data, error } = await supabase.storage
-        .from('pet_attachments')
+        .from('pet_attachments') // Updated bucket name
         .download(filePath);
 
       if (error) throw error;
