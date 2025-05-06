@@ -40,7 +40,7 @@ export default function Pricing() {
         { id: "t4", content: "Do 10 zwierząt" },
         { id: "t5", content: "1 specjalizacja / 3 usługi" },
         { id: "t6", content: "Podstawowy profil specjalisty" },
-        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" },
         { id: "p8", content: },
         { id: "p9", content: },
         { id: "p10", content:  }
