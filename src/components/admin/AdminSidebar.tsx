@@ -97,7 +97,10 @@ const AdminSidebar = () => {
                 )
               }
             >
-              {item.icon}
+              {/* Fix: Explicitly render the icon with a flex layout and ensure it has a minimum width */}
+              <span className="flex items-center justify-center min-w-[20px] text-current">
+                {item.icon}
+              </span>
               <span className="ml-3">{item.label}</span>
             </NavLink>
           );
