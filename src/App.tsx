@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/sonner";
@@ -34,7 +35,6 @@ import AdminVisits from './pages/admin/AdminVisits';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCarePrograms from './pages/admin/AdminCarePrograms';
-import AdminDatabaseAudit from "./pages/admin/AdminDatabaseAudit";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -77,7 +77,6 @@ function App() {
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="care-programs" element={<AdminCarePrograms />} />
-                <Route path="database-audit" element={<AdminDatabaseAudit />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />

@@ -1,10 +1,20 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { cn } from "@/lib/utils";
 
 // Import the correct icon names
-import { Users, Home, Clipboard, Calendar, Cog, PawPrint, Brain, Database } from "lucide-react";
+import { 
+  Users, 
+  Home, 
+  ClipboardList, 
+  Calendar, 
+  Settings, 
+  PawPrint, 
+  Brain, 
+  ShieldAlert 
+} from "lucide-react";
 
 interface SidebarItemProps {
   href: string;
@@ -32,7 +42,7 @@ const AdminSidebar = () => {
     {
       href: "/admin/clients",
       label: "Klienci",
-      icon: <Clipboard className="h-5 w-5" />,
+      icon: <ClipboardList className="h-5 w-5" />,
       admin: true,
     },
     {
@@ -56,15 +66,9 @@ const AdminSidebar = () => {
     {
       href: "/admin/settings",
       label: "Ustawienia",
-      icon: <Cog className="h-5 w-5" />,
+      icon: <Settings className="h-5 w-5" />,
       admin: true,
-    },
-    {
-      href: "/admin/database-audit",
-      label: "Audyt bazy danych",
-      icon: <Database className="h-5 w-5" />,
-      admin: true,
-    },
+    }
   ];
 
   return (
