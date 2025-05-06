@@ -26,50 +26,44 @@ export const usePetNotes = (pet: Pet) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchNotes = async () => {
-      if (!user) {
-        console.error('No authenticated user found');
-        return;
-      }
+  const fetchNotes = useCallback(async () => {
+    if (!user) {
+      console.error('No authenticated user found');
+      return;
+    }
 
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('pet_notes')
-          .select(`
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('pet_notes')
+        .select(`
+          id, 
+          content, 
+          created_at, 
+          updated_at,
+          pet_note_attachments (
             id, 
-            content, 
-            created_at, 
-            updated_at,
-            pet_note_attachments (
-              id, 
-              file_name, 
-              file_path, 
-              file_type, 
-              file_size
-            )
-          `)
-          .eq('pet_id', pet.id)
-          .order('created_at', { ascending: false });
+            file_name, 
+            file_path, 
+            file_type, 
+            file_size
+          )
+        `)
+        .eq('pet_id', pet.id)
+        .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        
-        setNotes(data || []);
-      } catch (error: any) {
-        console.error('Error fetching notes:', error);
-        toast({
-          title: "Błąd",
-          description: "Nie udało się pobrać notatek",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (pet.id && user) {
-      fetchNotes();
+      if (error) throw error;
+      
+      setNotes(data || []);
+    } catch (error: any) {
+      console.error('Error fetching notes:', error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się pobrać notatek",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   }, [pet.id, toast, user]);
 
@@ -176,6 +170,13 @@ export const usePetNotes = (pet: Pet) => {
     }
   };
 
+  // Use useEffect instead of useState for initial fetch
+  useEffect(() => {
+    if (pet.id && user) {
+      fetchNotes();
+    }
+  }, [pet.id, user, fetchNotes]);
+
   return {
     notes,
     isLoading,
@@ -183,6 +184,7 @@ export const usePetNotes = (pet: Pet) => {
     handleDeleteNote,
     getDownloadUrl,
     handleDownload,
-    setNotes
+    setNotes,
+    fetchNotes
   };
 };

@@ -1,12 +1,11 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Pet } from "@/types";
 import { usePetNotes, PetNote } from "@/hooks/usePetNotes";
 import PetNoteEditor from "./notes/PetNoteEditor";
 import PetNoteItem from "./notes/PetNoteItem";
+import PetNotesHeader from "./notes/PetNotesHeader";
 
 interface PetNotesProps {
   pet: Pet;
@@ -67,14 +66,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Notatki</CardTitle>
-        {!isEditing ? (
-          <Button variant="ghost" size="sm" onClick={handleEdit}>
-            <Edit className="h-4 w-4" />
-          </Button>
-        ) : null}
-      </CardHeader>
+      <PetNotesHeader isEditing={isEditing} onEdit={handleEdit} />
       <CardContent>
         {isLoading ? (
           <div className="flex items-center justify-center py-8">

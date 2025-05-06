@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Paperclip } from "lucide-react";
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 import { PetNote } from "@/hooks/usePetNotes";
+import { formatDate } from "@/utils/formatters";
 
 interface PetNoteItemProps {
   note: PetNote;
@@ -20,17 +21,6 @@ const PetNoteItem: React.FC<PetNoteItemProps> = ({
   onDownload,
   isDeleting
 }) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pl-PL', { 
-      day: '2-digit', 
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
-
   return (
     <div className="border-b pb-4 last:pb-0 last:border-b-0">
       <div className="flex justify-between items-start mb-2">
