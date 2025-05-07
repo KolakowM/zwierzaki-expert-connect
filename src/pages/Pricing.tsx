@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,19 @@ import { Link } from "react-router-dom";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+// Dodane importy dla komponentów akordeonu
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+
+
 export default function Pricing() {
   const { t } = useTranslation();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
-  
+
   type Feature = {
     id: string;
     content: ReactNode;
@@ -41,9 +49,9 @@ export default function Pricing() {
         { id: "t5", content: "1 specjalizacja / 3 usługi" },
         { id: "t6", content: "Podstawowy profil specjalisty" },
         { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
-   /*  , { id: "p8", content: ""},
-        { id: "p9", content: ""},
-        { id: "p10", content:  ""} */
+        /* , { id: "p8", content: ""},
+           { id: "p9", content: ""},
+           { id: "p10", content:  ""} */
       ],
       cta: "Rozpocznij za darmo",
       popular: false
@@ -51,7 +59,7 @@ export default function Pricing() {
     {
       name: "Zaawansowany",
       monthlyPrice: "29 zł",
-      yearlyPrice: "490 zł",
+      yearlyPrice: "490 zł", // Changed from "21.75 zł" to match the agreed 490 zł / rok
       description: "Idealny dla rozwijających się praktyk",
       features: [
         { id: "a1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
@@ -62,8 +70,8 @@ export default function Pricing() {
         { id: "a6", content: "Pełny profil specjalisty" },
         { id: "a7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
         { id: "a8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
-       /* ,{ id: "p9", content: ""},
-        { id: "p10", content: "" } */
+        /* ,{ id: "p9", content: ""},
+           { id: "p10", content: "" } */
       ],
       cta: "Wybierz plan Zaawansowany",
       popular: true
@@ -71,19 +79,19 @@ export default function Pricing() {
     {
       name: "Zawodowiec",
       monthlyPrice: "49 zł",
-      yearlyPrice: "990 zł",
+      yearlyPrice: "990 zł", // Changed from "36.75 zł" to match the agreed 990 zł / rok
       description: "Dla profesjonalnych praktyk",
       features: [
         { id: "p1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
         { id: "p2", content: <strong>Wyróżniona widoczność w katalogu specjalistów</strong> },
         { id: "p3", content: "Do 50 klientów" },
-        { id: "p4", content: "Do 75 zwierząt" },
+        { id: "p4", content: "Do 75 zwierząt" }, // Updated limit
         { id: "p5", content: "Wszystkie specjalizacje / 15 usług" },
         { id: "p6", content: "Priorytetowy profil specjalisty" },
         { id: "p7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
         { id: "p8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
-       /* ,{ id: "p9", content: ""},
-        { id: "p10", content: "" } */
+        /* ,{ id: "p9", content: ""},
+           { id: "p10", content: "" } */
       ],
       cta: "Wybierz plan Zawodowiec",
       popular: false
@@ -102,7 +110,7 @@ export default function Pricing() {
             <p className="mt-4 text-lg text-muted-foreground">
               Wybierz plan odpowiedni dla Twojej praktyki
             </p>
-            
+
             <div className="mt-6 inline-flex items-center rounded-lg border p-1">
               <Button
                 variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
@@ -136,7 +144,7 @@ export default function Pricing() {
                       {billingPeriod === 'monthly' ? tier.monthlyPrice : tier.yearlyPrice}
                     </span>
                     <span className="text-sm text-muted-foreground ml-1">
-                      {billingPeriod === 'monthly' ? '/ miesiąc' : '/ rok'}
+                      {billingPeriod === 'monthly' ? '/ miesiąc' : '/ rok'} {/* Corrected '/ miesiąc (płatne rocznie)' to '/ rok' */}
                     </span>
                   </div>
                   <CardDescription className="mt-2">{tier.description}</CardDescription>
@@ -153,8 +161,8 @@ export default function Pricing() {
                 </CardContent>
                 <CardFooter>
                   <Link to="/register" className="w-full">
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       variant={tier.popular ? "default" : "outline"}
                     >
                       {tier.cta}
@@ -165,53 +173,64 @@ export default function Pricing() {
             ))}
           </div>
 
+          {/* Sekcja FAQ przekształcona na Akordeon */}
           <div className="mt-12 space-y-6 rounded-lg border bg-background p-8">
             <h2 className="text-2xl font-bold">Często zadawane pytania o cennik</h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Czym różnią się poszczególne plany?</h3>
-                <p className="text-muted-foreground">
+            {/* Akordeon zaczyna się tutaj */}
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="faq-1">
+                <AccordionTrigger>Czym różnią się poszczególne plany?</AccordionTrigger>
+                <AccordionContent>
                   Plany różnią się przede wszystkim limitami CRM (klienci/zwierzęta), liczbą dostępnych specjalizacji/usług oraz widocznością w katalogu specjalistów. Plan Testowy nie daje widoczności w katalogu, Zaawansowany oferuje standardową widoczność, a Zawodowiec - wyróżnioną.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Jak działa status weryfikacji?</h3>
-                <p className="text-muted-foreground">
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="faq-2">
+                <AccordionTrigger>Jak działa status weryfikacji?</AccordionTrigger>
+                <AccordionContent>
                   Status "Zweryfikowany" otrzymujesz automatycznie po pierwszym zakupie planu płatnego (Zaawansowany lub Zawodowiec). Ten status jest warunkiem koniecznym do widoczności Twojego profilu w katalogu specjalistów.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Co się dzieje, gdy przestanę płacić za subskrypcję?</h3>
-                <p className="text-muted-foreground">
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="faq-3">
+                <AccordionTrigger>Co się dzieje, gdy przestanę płacić za subskrypcję?</AccordionTrigger>
+                <AccordionContent>
                   Po zakończeniu opłaconego okresu, Twoje konto zostanie zdegradowane do planu Testowego. Zachowasz dostęp tylko do 5 najnowszych klientów i 10 najnowszych zwierząt, a Twój profil przestanie być widoczny w katalogu specjalistów.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Czy mogę rozszerzyć limit klientów i zwierząt?</h3>
-                <p className="text-muted-foreground">
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="faq-4">
+                <AccordionTrigger>Czy mogę rozszerzyć limit klientów i zwierząt?</AccordionTrigger>
+                <AccordionContent>
                   Tak, oferujemy dodatek (+20 zł miesięcznie), który zwiększa limit o dodatkowych 10 klientów i 10 zwierząt. Możesz dokupić tyle dodatków, ile potrzebujesz.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Na czym polega rabat dla nowych użytkowników?</h3>
-                <p className="text-muted-foreground">
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="faq-5">
+                <AccordionTrigger>Na czym polega rabat dla nowych użytkowników?</AccordionTrigger>
+                <AccordionContent>
                   Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 10 zł przy płatności miesięcznej lub 100 zł przy płatności rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Czy mogę zmienić plan w dowolnym momencie?</h3>
-                <p className="text-muted-foreground">
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="faq-6">
+                <AccordionTrigger>Czy mogę zmienić plan w dowolnym momencie?</AccordionTrigger>
+                <AccordionContent>
                   Tak, możesz zmienić plan w każdej chwili. Jeśli przejdziesz na plan wyższy, różnica zostanie obliczona proporcjonalnie. Jeśli przejdziesz na plan niższy, zmiana nastąpi po zakończeniu bieżącego okresu rozliczeniowego.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Jakie formy płatności akceptujecie?</h3>
-                <p className="text-muted-foreground">
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="faq-7">
+                <AccordionTrigger>Jakie formy płatności akceptujecie?</AccordionTrigger>
+                <AccordionContent>
                   Akceptujemy płatności kartami kredytowymi, Blik, przelewem bankowym oraz poprzez popularne bramki płatności.
-                </p>
-              </div>
-            </div>
+                </AccordionContent>
+              </AccordionItem>
+
+            </Accordion>
+            {/* Akordeon kończy się tutaj */}
           </div>
+
         </div>
       </div>
     </MainLayout>
