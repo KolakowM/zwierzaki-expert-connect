@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 // Define types for the modules and formats
 type QuillModules = {
   toolbar: (string | { 
-    [key: string]: string | boolean | string[] | number[] | (string | number | boolean)[]
+    [key: string]: string | boolean | string[] | number[] | (number | boolean)[]
   })[][];
 };
 

@@ -10,6 +10,7 @@ export interface SaveNoteParams {
   pet: Pet;
   userId: string;
   isEditingNoteId: string | null;
+  toastFn: ReturnType<typeof useToast>["toast"];
 }
 
 export const validateNoteContent = (content: string, files: File[] = [], toast: ReturnType<typeof useToast>["toast"]): boolean => {
@@ -25,7 +26,7 @@ export const validateNoteContent = (content: string, files: File[] = [], toast: 
 };
 
 export const updateExistingNote = async (
-  params: SaveNoteParams & { toastFn: ReturnType<typeof useToast>["toast"] }
+  params: SaveNoteParams
 ) => {
   const { content, files = [], userId, isEditingNoteId, pet, toastFn } = params;
   
@@ -114,7 +115,7 @@ export const updateExistingNote = async (
 };
 
 export const createNewNote = async (
-  params: SaveNoteParams & { toastFn: ReturnType<typeof useToast>["toast"] }
+  params: SaveNoteParams
 ) => {
   const { content, files = [], pet, userId, toastFn } = params;
   
