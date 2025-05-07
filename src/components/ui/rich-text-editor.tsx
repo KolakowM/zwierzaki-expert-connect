@@ -2,6 +2,14 @@
 import { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { cn } from '@/lib/utils';
+
+// Define types for the modules and formats
+type QuillModules = {
+  toolbar: (string | { [key: string]: boolean | string[] })[][];
+};
+
+type QuillFormats = string[];
 
 interface RichTextEditorProps {
   value: string;
@@ -17,10 +25,18 @@ export function RichTextEditor({
   className = "" 
 }: RichTextEditorProps) {
   // Track mounted state to avoid hydration issues
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+    
+    // Clean up when component unmounts (optional)
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
 
-  const modules = {
+  const modules: QuillModules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
@@ -32,7 +48,7 @@ export function RichTextEditor({
     ],
   };
 
-  const formats = [
+  const formats: QuillFormats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
     'list', 'bullet',
@@ -40,9 +56,10 @@ export function RichTextEditor({
     'table', 'script'
   ];
 
-  if (!mounted) {
+  // Display a fallback during SSR or when component isn't mounted
+  if (!isMounted) {
     return (
-      <div className="border rounded p-3 min-h-[150px]">
+      <div className={cn("border rounded p-3 min-h-[150px]", className)}>
         {value || placeholder}
       </div>
     );
@@ -56,7 +73,7 @@ export function RichTextEditor({
       placeholder={placeholder}
       modules={modules}
       formats={formats}
-      className={`bg-background ${className}`}
+      className={cn("bg-background", className)}
     />
   );
 }
