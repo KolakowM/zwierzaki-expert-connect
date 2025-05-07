@@ -10,17 +10,8 @@ export const fetchPetNotes = async (petId: string) => {
   const { data, error } = await supabase
     .from('pet_notes')
     .select(`
-      id, 
-      content, 
-      created_at, 
-      updated_at,
-      pet_note_attachments (
-        id, 
-        file_name, 
-        file_path, 
-        file_type, 
-        file_size
-      )
+      *,
+      pet_note_attachments (*)
     `)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });

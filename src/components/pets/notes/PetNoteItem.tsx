@@ -21,6 +21,9 @@ const PetNoteItem: React.FC<PetNoteItemProps> = ({
   onDownload,
   isDeleting
 }) => {
+  // Verify if attachments exists and has length
+  const hasAttachments = note.attachments && note.attachments.length > 0;
+  
   return (
     <div className="border-b pb-4 last:pb-0 last:border-b-0">
       <div className="flex justify-between items-start mb-2">
@@ -57,7 +60,7 @@ const PetNoteItem: React.FC<PetNoteItemProps> = ({
       </div>
       <p className="whitespace-pre-wrap">{note.content}</p>
       
-      {note.attachments && note.attachments.length > 0 && (
+      {hasAttachments && (
         <div className="mt-2 space-y-1">
           <p className="text-sm font-medium">Załączniki:</p>
           {note.attachments.map((attachment) => (

@@ -15,13 +15,20 @@ export interface PetNote {
   content: string;
   created_at: string;
   updated_at: string;
-  attachments?: {
+  pet_note_attachments?: Array<{
     id: string;
     file_name: string;
     file_path: string;
     file_type: string;
     file_size: number;
-  }[];
+  }>;
+  attachments?: Array<{
+    id: string;
+    file_name: string;
+    file_path: string;
+    file_type: string;
+    file_size: number;
+  }>;
 }
 
 export const usePetNotes = (pet: Pet) => {
@@ -40,7 +47,14 @@ export const usePetNotes = (pet: Pet) => {
     try {
       setIsLoading(true);
       const notesData = await fetchPetNotes(pet.id);
-      setNotes(notesData || []);
+      
+      // Transform notes to ensure they have consistent structure
+      const transformedNotes = notesData.map((note) => ({
+        ...note,
+        attachments: note.pet_note_attachments || []
+      }));
+      
+      setNotes(transformedNotes || []);
     } catch (error: any) {
       console.error('Error fetching notes:', error);
       toast({

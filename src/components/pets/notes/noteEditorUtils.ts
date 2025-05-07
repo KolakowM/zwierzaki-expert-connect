@@ -92,6 +92,12 @@ export const updateExistingNote = async (
 
     if (fetchError) throw fetchError;
 
+    // Transform response to match PetNote structure 
+    const transformedNote: PetNote = {
+      ...completeNote,
+      attachments: completeNote.pet_note_attachments
+    };
+
     // Handle any attachment errors
     if (attachmentErrors.length > 0) {
       toastFn({
@@ -107,7 +113,7 @@ export const updateExistingNote = async (
       });
     }
 
-    return completeNote;
+    return transformedNote;
   } catch (error: any) {
     console.error("Error updating note:", error);
     throw error;
@@ -182,6 +188,12 @@ export const createNewNote = async (
 
     if (fetchError) throw fetchError;
     
+    // Transform response to match PetNote structure
+    const transformedNote: PetNote = {
+      ...completeNote,
+      attachments: completeNote.pet_note_attachments
+    };
+    
     // Handle any attachment errors
     if (attachmentErrors.length > 0) {
       toastFn({
@@ -197,7 +209,7 @@ export const createNewNote = async (
       });
     }
     
-    return completeNote;
+    return transformedNote;
   } catch (error: any) {
     console.error("Error saving note:", error);
     throw error;
