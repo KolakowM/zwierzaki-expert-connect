@@ -93,11 +93,22 @@ const PetNoteEditor: React.FC<PetNoteEditorProps> = ({
 
         if (updateError) throw updateError;
 
-        // Update the note in state
-        onSave({
+        // Get existing attachments for this note to include in the response
+        const { data: existingAttachments, error: attachmentsError } = await supabase
+          .from('pet_note_attachments')
+          .select('id, file_name, file_path, file_type, file_size')
+          .eq('note_id', isEditingNoteId);
+
+        if (attachmentsError) throw attachmentsError;
+
+        // Create a complete note object with existing attachments
+        const completeNote: PetNote = {
           ...updatedNoteData,
-          attachments: [] // Will be populated by the parent component
-        });
+          attachments: existingAttachments || []
+        };
+
+        // Update the note in state
+        onSave(completeNote);
 
         toast({
           title: "Notatka zaktualizowana",
@@ -152,13 +163,16 @@ const PetNoteEditor: React.FC<PetNoteEditorProps> = ({
         attachments.push(attachmentData);
       }
 
-      onSave({
+      // Create a complete note object with attachments
+      const completeNote: PetNote = {
         id: noteData.id,
         content: noteData.content,
         created_at: noteData.created_at,
         updated_at: noteData.updated_at,
         attachments: attachments
-      });
+      };
+
+      onSave(completeNote);
 
       toast({
         title: "Notatka zapisana",
