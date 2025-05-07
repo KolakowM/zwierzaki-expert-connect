@@ -46,17 +46,15 @@ const PetNotes = ({ pet }: PetNotesProps) => {
   const handleSaveNote = (savedNote: PetNote) => {
     if (isEditingNoteId) {
       // Update existing note in the notes array
-      // Replace the whole note object, not just content and updated_at
       setNotes(prevNotes => 
         prevNotes.map(note => 
           note.id === isEditingNoteId 
-            ? savedNote // Use the complete savedNote object with attachments
+            ? {...note, content: savedNote.content, updated_at: savedNote.updated_at} 
             : note
         )
       );
     } else {
       // Add new note to the beginning of the notes array
-      // The savedNote already contains the complete note data including attachments
       setNotes(prevNotes => [savedNote, ...prevNotes]);
     }
     
