@@ -84,7 +84,7 @@ src/
 #### 3.2.1 Przegląd
 - Statystyki (liczba klientów, zwierząt, wizyt)
 - Informacje o aktualnym planie
-- Status uzupełnienia profilu
+- Baner promocyjny zachęcający do wykupienia planu płatnego w celu uzyskania widoczności w katalogu specjalistów, zawierający przycisk "Edytuj profil" kierujący do ustawień
 - Nadchodzące wizyty
 
 #### 3.2.2 Zakładki Panelu
@@ -120,18 +120,19 @@ src/
 - Historia wizyt
 - Plany opieki
 - Notatki behawioralne i dietetyczne
+- Zakładka "Notatki" z możliwością dodawania, edycji i usuwania notatek oraz zarządzania załącznikami (zdjęcia, pliki PDF)
 
 ### 3.5 Zarządzanie Wizytami
 
 #### 3.5.1 Dodawanie Wizyt
-- Tworzenie nowych wizyt dla zwierząt
-- Wybór typu wizyty
+- Tworzenie nowych wizyt dla zwierząt z zapisem do bazy danych
+- Wybór typu wizyty z predefiniowanej listy (dropdown)
 - Wybór daty i godziny
 - Dodawanie notatek i zaleceń
 - Ustawianie przypomnień o kontroli
 
 #### 3.5.2 Historia Wizyt
-- Wyświetlanie historii wizyt dla zwierzęcia
+- Wyświetlanie historii wizyt dla zwierzęcia pobieranych z bazy danych
 - Szczegóły wizyty (notatki, zalecenia)
 - Edycja istniejących wizyt
 
@@ -205,7 +206,7 @@ src/
 - Zakładka przeglądu z podstawowymi informacjami
 - Zakładka wizyt z historią wizyt
 - Zakładka planów opieki
-- Zakładka notatek
+- Zakładka notatek z załącznikami
 
 #### 4.3.2 Profil Klienta
 - Zakładka przeglądu z danymi kontaktowymi
@@ -278,12 +279,40 @@ Dla urządzeń mobilnych stosowane są specjalne komponenty (Drawer zamiast Dial
 - Generowanie raportów i analiz
 - Integracja z apteką weterynaryjną
 - System wystawiania recept
+- Eksport karty pacjenta do PDF
+- Obsługa wielu walut dla cennika (PLN, USD, EUR)
 
-## 10. Wersjonowanie i Aktualizacje
+## 10. Internationalization (i18n) / Wielojęzyczność
+
+### 10.1 Podejścia do Tłumaczenia
+
+#### 10.1.1 Tłumaczenie Elementów Interfejsu (UI)
+- Stałe teksty (etykiety, przyciski, nagłówki, komunikaty) są tłumaczone za pomocą biblioteki i18n frontendu (react-i18next)
+- Wykorzystywane są pliki tłumaczeń w formacie JSON dla każdego wspieranego języka
+- Teksty interfejsu są przyporządkowane do kluczy tłumaczeń, co umożliwia łatwe przełączanie między językami bez przeładowania aplikacji
+
+#### 10.1.2 Tłumaczenie Danych z Bazy Danych
+- Dynamiczne dane wymagające tłumaczenia (nazwy specjalizacji, typy wizyt) są przechowywane w bazie danych
+- Tłumaczenia mogą być przechowywane w osobnych tabelach tłumaczeń lub w kolumnach JSONB
+- Warstwa danych odpowiada za pobieranie odpowiedniej wersji językowej w zależności od preferencji użytkownika
+
+### 10.2 Wspierane Języki
+- Polski (domyślny)
+- Angielski
+- Niemiecki
+- Ukraiński
+
+### 10.3 Przełączanie Języków
+- Komponent przełącznika języków dostępny w nagłówku aplikacji
+- Zapamiętywanie wybranego języka w localStorage przeglądarki
+- Automatyczne wykrywanie preferencji językowych użytkownika przy pierwszej wizycie
+
+## 11. Wersjonowanie i Aktualizacje
 
 Aplikacja jest rozwijana w modelu przyrostowym, z regularnymi aktualizacjami wprowadzającymi nowe funkcjonalności i poprawiającymi istniejące.
 
 ---
 
 Dokument przygotowany przez zespół PetsFlow
-Data: 18 kwietnia 2025
+Data: 7 maja 2025
+
