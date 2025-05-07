@@ -12,7 +12,7 @@ import {
   validateNoteContent, 
   createNewNote, 
   updateExistingNote 
-} from "./noteEditorUtils";
+} from "./utils/noteEditorUtils";
 
 interface PetNoteEditorProps {
   pet: Pet;
