@@ -71,7 +71,7 @@ const PetNoteEditor: React.FC<PetNoteEditorProps> = ({
     }
 
     // Validate content
-    if (!validateNoteContent(content, toast)) {
+    if (!validateNoteContent(content, files, toast)) {
       return;
     }
 
@@ -84,6 +84,7 @@ const PetNoteEditor: React.FC<PetNoteEditorProps> = ({
       if (isEditingNoteId) {
         savedNote = await updateExistingNote({
           content,
+          files,
           userId: user.id,
           isEditingNoteId,
           pet,
@@ -101,6 +102,10 @@ const PetNoteEditor: React.FC<PetNoteEditorProps> = ({
         });
       }
 
+      // Reset files state
+      setFiles([]);
+      
+      // Pass the complete note with attachments to parent
       onSave(savedNote);
     } catch (error: any) {
       console.error("Error saving note:", error);
