@@ -49,7 +49,7 @@ const PetNotes = ({ pet }: PetNotesProps) => {
       setNotes(prevNotes => 
         prevNotes.map(note => 
           note.id === isEditingNoteId 
-            ? {...note, content: savedNote.content, updated_at: savedNote.updated_at} 
+            ? savedNote
             : note
         )
       );
