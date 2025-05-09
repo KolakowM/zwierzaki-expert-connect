@@ -94,6 +94,9 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
   if (pet.allergies !== undefined) dbPetUpdate.allergies = pet.allergies;
   if (pet.dietaryRestrictions !== undefined) dbPetUpdate.dietaryrestrictions = pet.dietaryRestrictions;
   if (pet.behavioralNotes !== undefined) dbPetUpdate.behavioralnotes = pet.behavioralNotes;
+  if (pet.hasMicrochip !== undefined) dbPetUpdate.has_microchip = pet.hasMicrochip;
+  if (pet.microchipNumber !== undefined) dbPetUpdate.microchip_number = pet.microchipNumber;
+  if (pet.vaccinationDescription !== undefined) dbPetUpdate.vaccination_description = pet.vaccinationDescription;
 
   const { data, error } = await supabase
     .from('pets')

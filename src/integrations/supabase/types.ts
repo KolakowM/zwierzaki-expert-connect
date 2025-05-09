@@ -183,12 +183,15 @@ export type Database = {
           clientid: string
           createdat: string
           dietaryrestrictions: string | null
+          has_microchip: boolean
           id: string
           medicalhistory: string | null
+          microchip_number: string | null
           name: string
           neutered: boolean | null
           sex: string | null
           species: string
+          vaccination_description: string | null
           weight: number | null
         }
         Insert: {
@@ -199,12 +202,15 @@ export type Database = {
           clientid: string
           createdat?: string
           dietaryrestrictions?: string | null
+          has_microchip?: boolean
           id?: string
           medicalhistory?: string | null
+          microchip_number?: string | null
           name: string
           neutered?: boolean | null
           sex?: string | null
           species: string
+          vaccination_description?: string | null
           weight?: number | null
         }
         Update: {
@@ -215,12 +221,15 @@ export type Database = {
           clientid?: string
           createdat?: string
           dietaryrestrictions?: string | null
+          has_microchip?: boolean
           id?: string
           medicalhistory?: string | null
+          microchip_number?: string | null
           name?: string
           neutered?: boolean | null
           sex?: string | null
           species?: string
+          vaccination_description?: string | null
           weight?: number | null
         }
         Relationships: [

@@ -1,6 +1,7 @@
 
 import { Pet } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { Microchip } from "lucide-react";
 
 interface PetOverviewTabProps {
   pet: Pet;
@@ -45,11 +46,24 @@ const PetOverviewTab = ({ pet }: PetOverviewTabProps) => {
               <span className="text-muted-foreground">Sterylizacja:</span>
               <span className="font-medium">{pet.neutered ? 'Tak' : 'Nie'}</span>
             </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Mikrochip:</span>
+              <div className="flex items-center">
+                {pet.hasMicrochip ? (
+                  <>
+                    <Microchip className="h-4 w-4 mr-1 text-green-600" />
+                    <span className="font-medium">{pet.microchipNumber || 'Tak'}</span>
+                  </>
+                ) : (
+                  <span className="font-medium">Nie</span>
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {(pet.medicalHistory || pet.allergies || pet.dietaryRestrictions) && (
+      {(pet.medicalHistory || pet.allergies || pet.dietaryRestrictions || pet.vaccinationDescription) && (
         <Card className="col-span-2">
           <CardContent className="p-6">
             <h3 className="font-medium text-lg mb-4">Historia zdrowia</h3>
@@ -63,6 +77,12 @@ const PetOverviewTab = ({ pet }: PetOverviewTabProps) => {
               <div className="mb-4">
                 <div className="text-muted-foreground mb-1">Alergie:</div>
                 <div className="whitespace-pre-wrap">{pet.allergies}</div>
+              </div>
+            )}
+            {pet.vaccinationDescription && (
+              <div className="mb-4">
+                <div className="text-muted-foreground mb-1">Historia szczepień:</div>
+                <div className="whitespace-pre-wrap">{pet.vaccinationDescription}</div>
               </div>
             )}
             {pet.dietaryRestrictions && (

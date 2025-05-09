@@ -35,6 +35,14 @@ export const petFormSchema = z.object({
   ),
   sex: z.enum(PET_SEX).optional(),
   neutered: z.boolean().optional(),
+  hasMicrochip: z.boolean().default(false),
+  microchipNumber: z.string().max(15, "Numer mikrochipa może mieć maksymalnie 15 znaków")
+    .optional()
+    .refine(
+      val => val === undefined || val === "" || /^[0-9]+$/.test(val),
+      { message: "Numer mikrochipa powinien zawierać tylko cyfry" }
+    ),
+  vaccinationDescription: z.string().optional(),
   medicalHistory: z.string().optional(),
   allergies: z.string().optional(),
   dietaryRestrictions: z.string().optional(),

@@ -7,6 +7,7 @@ import { petFormSchema, PetFormValues, PetFormOutput } from "./PetFormSchema";
 import PetBasicInfoFields from "./form-fields/PetBasicInfoFields";
 import PetMeasurementsFields from "./form-fields/PetMeasurementsFields";
 import PetCharacteristicsFields from "./form-fields/PetCharacteristicsFields";
+import VaccinationAndChipFields from "./form-fields/VaccinationAndChipFields";
 import PetMedicalFields from "./form-fields/PetMedicalFields";
 
 interface PetFormProps {
@@ -27,6 +28,9 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
       weight: "",
       sex: undefined,
       neutered: false,
+      hasMicrochip: false,
+      microchipNumber: "",
+      vaccinationDescription: "",
       medicalHistory: "",
       allergies: "",
       dietaryRestrictions: "",
@@ -54,6 +58,9 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
         
         {/* Characteristics fields */}
         <PetCharacteristicsFields control={form.control} />
+        
+        {/* Vaccination and Microchip fields */}
+        <VaccinationAndChipFields control={form.control} />
         
         {/* Medical information fields */}
         <PetMedicalFields control={form.control} />
