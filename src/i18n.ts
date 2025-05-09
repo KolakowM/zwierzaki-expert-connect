@@ -4,15 +4,22 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
 
-// This declaration fixes the type compatibility issue between React and i18next
+// Fix for TypeScript compatibility between React and i18next
 declare module 'i18next' {
   interface CustomTypeOptions {
     returnNull: false;
   }
 }
 
+// This declaration extends React types to accept i18next children
+declare module 'react' {
+  interface ReactI18NextChildrenProps {
+    children: React.ReactNode;
+  }
+}
+
 i18n
-  // Load translation using http -> see /public/locales (i.e. https://github.com/i18next/react-i18next/tree/master/example/react/public/locales)
+  // Load translation using http -> see /public/locales
   .use(Backend)
   // Detect user language
   .use(LanguageDetector)
