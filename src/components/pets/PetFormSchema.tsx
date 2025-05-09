@@ -39,6 +39,20 @@ export const petFormSchema = z.object({
   allergies: z.string().optional(),
   dietaryRestrictions: z.string().optional(),
   behavioralNotes: z.string().optional(),
+  // New fields for vaccination and microchip
+  vaccinationDescription: z.string().optional(),
+  hasMicrochip: z.boolean().default(false),
+  microchipNumber: z.union([
+    z.string().trim()
+      .refine(val => val === "" || /^\d*$/.test(val), {
+        message: "Numer mikrochipa może zawierać tylko cyfry"
+      })
+      .refine(val => val === "" || val.length <= 15, {
+        message: "Numer mikrochipa nie może przekraczać 15 znaków"
+      })
+      .transform(val => val === "" ? undefined : val),
+    z.undefined()
+  ])
 });
 
 // Define the actual form values type (before transformation)
