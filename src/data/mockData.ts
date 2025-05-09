@@ -59,6 +59,9 @@ export const mockPets: Pet[] = [
     dietaryRestrictions: "Dieta niskokaloryczna",
     behavioralNotes: "Przyjazny, dobrze socjalizowany",
     createdAt: "2023-01-15T10:35:00Z"
+    hasMicrochip: false,
+    microchipNumber: null, // lub undefined
+    vaccinationDescription: null, // lub undefined
   },
   {
     id: "2",
@@ -75,6 +78,9 @@ export const mockPets: Pet[] = [
     dietaryRestrictions: "Dieta bez kurczaka, suplementacja olejem rybim",
     behavioralNotes: "Lekko lękliwy przy nowych sytuacjach",
     createdAt: "2023-02-20T14:20:00Z"
+    hasMicrochip: false,
+    microchipNumber: null, // lub undefined
+    vaccinationDescription: null, // lub undefined
   },
   {
     id: "3",
@@ -91,6 +97,9 @@ export const mockPets: Pet[] = [
     dietaryRestrictions: "Standardowa dieta",
     behavioralNotes: "Bardzo energiczna, potrzebuje dużo ruchu",
     createdAt: "2023-02-20T14:25:00Z"
+    hasMicrochip: false,
+    microchipNumber: null, // lub undefined
+    vaccinationDescription: null, // lub undefined
   },
   {
     id: "4",
@@ -107,6 +116,9 @@ export const mockPets: Pet[] = [
     dietaryRestrictions: "Specjalna karma nerkowa",
     behavioralNotes: "Spokojny, domator",
     createdAt: "2023-02-20T14:30:00Z"
+    hasMicrochip: false,
+    microchipNumber: null, // lub undefined
+    vaccinationDescription: null, // lub undefined
   },
   {
     id: "5",
@@ -123,6 +135,9 @@ export const mockPets: Pet[] = [
     dietaryRestrictions: "Dieta bez ryb morskich",
     behavioralNotes: "Towarzyski, lubi zabawę",
     createdAt: "2023-03-05T09:10:00Z"
+    hasMicrochip: false,
+    microchipNumber: null, // lub undefined
+    vaccinationDescription: null, // lub undefined
   }
 ];
 
