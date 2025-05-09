@@ -11,7 +11,6 @@ export const mockClients: Client[] = [
     address: "ul. Kwiatowa 1",
     city: "Warszawa",
     postCode: "00-001",
-    // Fix: Convert string to Date object
     createdAt: new Date("2023-01-15T10:30:00Z"),
     notes: "Regularny klient, przychodzi co miesiąc."
   },
@@ -24,7 +23,6 @@ export const mockClients: Client[] = [
     address: "ul. Słoneczna 5",
     city: "Kraków",
     postCode: "30-001",
-    // Fix: Convert string to Date object
     createdAt: new Date("2023-02-20T14:15:00Z"),
     notes: "Dwóch psów i jeden kot."
   },
@@ -37,7 +35,6 @@ export const mockClients: Client[] = [
     address: "ul. Lipowa 8",
     city: "Wrocław",
     postCode: "50-001",
-    // Fix: Convert string to Date object
     createdAt: new Date("2023-03-05T09:00:00Z"),
     notes: "Alergiczny na niektóre karmy dla psów. Kot ma specjalną dietę."
   }
@@ -58,10 +55,10 @@ export const mockPets: Pet[] = [
     allergies: "Brak",
     dietaryRestrictions: "Dieta niskokaloryczna",
     behavioralNotes: "Przyjazny, dobrze socjalizowany",
-    createdAt: "2023-01-15T10:35:00Z"
+    createdAt: "2023-01-15T10:35:00Z",
     hasMicrochip: false,
-    microchipNumber: null, // lub undefined
-    vaccinationDescription: null // lub undefined
+    microchipNumber: null,
+    vaccinationDescription: null
   },
   {
     id: "2",
@@ -77,10 +74,10 @@ export const mockPets: Pet[] = [
     allergies: "Kurczak",
     dietaryRestrictions: "Dieta bez kurczaka, suplementacja olejem rybim",
     behavioralNotes: "Lekko lękliwy przy nowych sytuacjach",
-    createdAt: "2023-02-20T14:20:00Z"
+    createdAt: "2023-02-20T14:20:00Z",
     hasMicrochip: false,
-    microchipNumber: null, // lub undefined
-    vaccinationDescription: null // lub undefined
+    microchipNumber: null,
+    vaccinationDescription: null
   },
   {
     id: "3",
@@ -96,10 +93,10 @@ export const mockPets: Pet[] = [
     allergies: "Brak",
     dietaryRestrictions: "Standardowa dieta",
     behavioralNotes: "Bardzo energiczna, potrzebuje dużo ruchu",
-    createdAt: "2023-02-20T14:25:00Z"
+    createdAt: "2023-02-20T14:25:00Z",
     hasMicrochip: false,
-    microchipNumber: null, // lub undefined
-    vaccinationDescription: null // lub undefined
+    microchipNumber: null,
+    vaccinationDescription: null
   },
   {
     id: "4",
@@ -115,10 +112,10 @@ export const mockPets: Pet[] = [
     allergies: "Brak",
     dietaryRestrictions: "Specjalna karma nerkowa",
     behavioralNotes: "Spokojny, domator",
-    createdAt: "2023-02-20T14:30:00Z"
+    createdAt: "2023-02-20T14:30:00Z",
     hasMicrochip: false,
-    microchipNumber: null, // lub undefined
-    vaccinationDescription: null // lub undefined
+    microchipNumber: null,
+    vaccinationDescription: null
   },
   {
     id: "5",
@@ -134,10 +131,10 @@ export const mockPets: Pet[] = [
     allergies: "Ryby morskie",
     dietaryRestrictions: "Dieta bez ryb morskich",
     behavioralNotes: "Towarzyski, lubi zabawę",
-    createdAt: "2023-03-05T09:10:00Z"
+    createdAt: "2023-03-05T09:10:00Z",
     hasMicrochip: false,
-    microchipNumber: null, // lub undefined
-    vaccinationDescription: null // lub undefined
+    microchipNumber: null,
+    vaccinationDescription: null
   }
 ];
 
