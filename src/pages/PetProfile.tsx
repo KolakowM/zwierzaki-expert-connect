@@ -19,7 +19,8 @@ import {
   Clipboard,
   Edit,
   Plus,
-  Eye
+  Eye,
+  Microchip
 } from "lucide-react";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 import ResponsiveVisitForm from "@/components/visits/ResponsiveVisitForm";
@@ -132,6 +133,19 @@ const PetProfile = () => {
                   <p className="text-sm text-muted-foreground">Sterylizacja</p>
                   <p className="font-medium">{pet.neutered ? "Tak" : "Nie"}</p>
                 </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Mikrochip</p>
+                  <div className="flex items-center">
+                    {pet.hasMicrochip ? (
+                      <>
+                        <Microchip className="h-4 w-4 mr-2 text-green-600" />
+                        <p className="font-medium">{pet.microchipNumber || "Tak (brak numeru)"}</p>
+                      </>
+                    ) : (
+                      <p className="font-medium">Nie</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -183,6 +197,12 @@ const PetProfile = () => {
                 <div className="mt-4">
                   <p className="text-sm font-medium">Alergie:</p>
                   <p className="text-sm">{pet.allergies}</p>
+                </div>
+              )}
+              {pet.vaccinationDescription && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium">Historia szczepień:</p>
+                  <p className="text-sm">{pet.vaccinationDescription}</p>
                 </div>
               )}
             </CardContent>

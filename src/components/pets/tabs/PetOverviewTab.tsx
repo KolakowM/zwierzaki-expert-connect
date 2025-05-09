@@ -39,7 +39,7 @@ const PetOverviewTab = ({ pet }: PetOverviewTabProps) => {
             {pet.sex && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Płeć:</span>
-                <span className="font-medium">{pet.sex === 'male' ? 'Samiec' : 'Samica'}</span>
+                <span className="font-medium">{pet.sex}</span>
               </div>
             )}
             <div className="flex justify-between">
