@@ -4,6 +4,13 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
 
+// This declaration fixes the type compatibility issue between React and i18next
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    returnNull: false;
+  }
+}
+
 i18n
   // Load translation using http -> see /public/locales (i.e. https://github.com/i18next/react-i18next/tree/master/example/react/public/locales)
   .use(Backend)
@@ -33,11 +40,16 @@ i18n
     
     react: {
       useSuspense: true,
+      transSupportBasicHtmlNodes: true, // Allow basic HTML elements in translations
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p', 'span'] // List of HTML elements to keep
     },
     
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
+
+    // This setting helps with TypeScript compatibility
+    returnNull: false,
   });
 
 export default i18n;
