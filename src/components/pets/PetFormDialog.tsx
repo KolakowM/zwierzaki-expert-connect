@@ -90,7 +90,10 @@ const PetFormDialog = ({
           medicalHistory: formData.medicalHistory,
           allergies: formData.allergies,
           dietaryRestrictions: formData.dietaryRestrictions,
-          behavioralNotes: formData.behavioralNotes
+          behavioralNotes: formData.behavioralNotes,
+          hasMicrochip: formData.hasMicrochip || false,
+          microchipNumber: formData.microchipNumber,
+          vaccinationDescription: formData.vaccinationDescription
         });
         
         toast({
