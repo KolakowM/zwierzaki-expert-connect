@@ -15,9 +15,6 @@ export interface DbPet {
   dietaryrestrictions?: string | null;
   behavioralnotes?: string | null;
   createdat?: string;
-  vaccination_description?: string | null;
-  has_microchip: boolean;
-  microchip_number?: string | null;
 }
 
 export interface Pet {
@@ -35,9 +32,6 @@ export interface Pet {
   dietaryRestrictions?: string | null;
   behavioralNotes?: string | null;
   createdAt?: string;
-  vaccinationDescription?: string | null;
-  hasMicrochip: boolean;
-  microchipNumber?: string | null;
 }
 
 // Mapping functions for pets
@@ -56,9 +50,6 @@ export const mapDbPetToPet = (dbPet: DbPet): Pet => ({
   dietaryRestrictions: dbPet.dietaryrestrictions,
   behavioralNotes: dbPet.behavioralnotes,
   createdAt: dbPet.createdat,
-  vaccinationDescription: dbPet.vaccination_description,
-  hasMicrochip: dbPet.has_microchip,
-  microchipNumber: dbPet.microchip_number,
 });
 
 export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
@@ -78,7 +69,4 @@ export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
   allergies: pet.allergies,
   dietaryrestrictions: pet.dietaryRestrictions,
   behavioralnotes: pet.behavioralNotes,
-  vaccination_description: pet.vaccinationDescription,
-  has_microchip: pet.hasMicrochip || false,
-  microchip_number: pet.microchipNumber,
 });

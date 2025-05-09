@@ -97,11 +97,7 @@ const PetFormDrawer = ({
           medicalHistory: formData.medicalHistory,
           allergies: formData.allergies,
           dietaryRestrictions: formData.dietaryRestrictions,
-          behavioralNotes: formData.behavioralNotes,
-          // Add the new fields
-          vaccinationDescription: formData.vaccinationDescription,
-          hasMicrochip: formData.hasMicrochip || false, 
-          microchipNumber: formData.microchipNumber
+          behavioralNotes: formData.behavioralNotes
         });
         
         toast({
