@@ -3,26 +3,112 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Loader2 } from "lucide-react";
 import { format, isToday, parseISO } from "date-fns";
 import { Visit, Client, Pet } from "@/types";
-import { mockClients, mockPets, mockVisits } from "@/data/mockData";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { getVisits, createVisit, deleteVisit } from "@/services/visitService";
+import { getClients } from "@/services/clientService"; 
+import { getPets, getPetsByClientId } from "@/services/petService";
 
 const CalendarTab = () => {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [visits, setVisits] = useState<Visit[]>(mockVisits);
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showVisitDetails, setShowVisitDetails] = useState(false);
+  const queryClient = useQueryClient();
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  
+  // Fetch data
+  const { 
+    data: visits = [], 
+    isLoading: isLoadingVisits,
+    error: visitsError
+  } = useQuery({
+    queryKey: ['visits'],
+    queryFn: getVisits,
+  });
+
+  const { 
+    data: clients = [], 
+    isLoading: isLoadingClients,
+  } = useQuery({
+    queryKey: ['clients'],
+    queryFn: getClients,
+  });
+
+  const { 
+    data: allPets = [], 
+    isLoading: isLoadingPets,
+  } = useQuery({
+    queryKey: ['pets'],
+    queryFn: getPets,
+  });
+
+  const {
+    data: clientPets = [],
+    isLoading: isLoadingClientPets,
+  } = useQuery({
+    queryKey: ['pets', selectedClientId],
+    queryFn: () => getPetsByClientId(selectedClientId),
+    enabled: !!selectedClientId,
+  });
+
+  // Create visit mutation
+  const createVisitMutation = useMutation({
+    mutationFn: (newVisit: Omit<Visit, 'id'>) => {
+      return createVisit(newVisit);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['visits'] });
+      toast({
+        title: "Wizyta dodana",
+        description: "Wizyta została pomyślnie zaplanowana",
+      });
+      setShowNewAppointment(false);
+      form.reset();
+    },
+    onError: (error) => {
+      console.error("Error creating visit:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się dodać wizyty",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete visit mutation
+  const deleteVisitMutation = useMutation({
+    mutationFn: (visitId: string) => {
+      return deleteVisit(visitId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['visits'] });
+      toast({
+        title: "Wizyta anulowana",
+        description: "Wizyta została usunięta z kalendarza",
+      });
+      setShowVisitDetails(false);
+    },
+    onError: (error) => {
+      console.error("Error deleting visit:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się usunąć wizyty",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Filter visits for the selected date
   const visitsForSelectedDate = date 
@@ -85,31 +171,25 @@ const CalendarTab = () => {
     appointmentDateTime.setHours(hours, minutes);
 
     // Create new visit
-    const newVisit: Visit = {
-      id: `visit-${Date.now()}`,
+    const newVisit: Omit<Visit, 'id'> = {
       petId: data.petId,
       clientId: data.clientId,
       date: appointmentDateTime.toISOString(),
+      time: data.time,
       type: data.type,
-      notes: data.notes,
+      notes: data.notes || null,
+      recommendations: null,
+      followUpNeeded: false,
+      followUpDate: null
     };
 
-    // Add to visits
-    setVisits([...visits, newVisit]);
-    
-    toast({
-      title: "Wizyta dodana",
-      description: `Wizyta została zaplanowana na ${format(appointmentDateTime, "dd.MM.yyyy")} o ${data.time}`,
-    });
-    
-    setShowNewAppointment(false);
-    form.reset();
+    createVisitMutation.mutate(newVisit);
   };
 
   // Find client and pet for a visit
   const getVisitDetails = (visit: Visit) => {
-    const client = mockClients.find(c => c.id === visit.clientId);
-    const pet = mockPets.find(p => p.id === visit.petId);
+    const client = clients.find(c => c.id === visit.clientId);
+    const pet = allPets.find(p => p.id === visit.petId);
     return { client, pet };
   };
 
@@ -117,6 +197,22 @@ const CalendarTab = () => {
   const formatVisitDate = (dateValue: string | Date) => {
     return format(typeof dateValue === 'string' ? parseISO(dateValue) : dateValue, "HH:mm");
   };
+
+  // Handle client selection in the form
+  const handleClientChange = (clientId: string) => {
+    setSelectedClientId(clientId);
+    // Reset pet selection when changing client
+    form.setValue('petId', '');
+  };
+
+  if (visitsError) {
+    console.error("Error fetching visits:", visitsError);
+    toast({
+      title: "Błąd",
+      description: "Nie udało się pobrać danych wizyt",
+      variant: "destructive",
+    });
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -144,9 +240,22 @@ const CalendarTab = () => {
               }}
             />
           </div>
-          <Button className="w-full" onClick={() => setShowNewAppointment(true)}>
-            <Plus size={16} className="mr-2" />
-            Nowa wizyta
+          <Button 
+            className="w-full" 
+            onClick={() => setShowNewAppointment(true)}
+            disabled={isLoadingClients || isLoadingPets}
+          >
+            {isLoadingClients || isLoadingPets ? (
+              <>
+                <Loader2 size={16} className="mr-2 animate-spin" />
+                Ładowanie...
+              </>
+            ) : (
+              <>
+                <Plus size={16} className="mr-2" />
+                Nowa wizyta
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -157,19 +266,31 @@ const CalendarTab = () => {
             Wizyty na {date ? format(date, "dd.MM.yyyy") : "wybrany dzień"}
           </CardTitle>
           <CardDescription>
-            {visitsForSelectedDate.length > 0
-              ? `${visitsForSelectedDate.length} ${
-                  visitsForSelectedDate.length === 1 ? "wizyta" : "wizyty"
-                } zaplanowane`
-              : "Brak wizyt na ten dzień"}
+            {isLoadingVisits ? (
+              <div className="flex items-center">
+                <Loader2 size={14} className="mr-2 animate-spin" />
+                Ładowanie wizyt...
+              </div>
+            ) : (
+              visitsForSelectedDate.length > 0
+                ? `${visitsForSelectedDate.length} ${
+                    visitsForSelectedDate.length === 1 ? "wizyta" : "wizyty"
+                  } zaplanowane`
+                : "Brak wizyt na ten dzień"
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {visitsForSelectedDate.length > 0 ? (
+          {isLoadingVisits ? (
+            <div className="flex flex-col items-center justify-center h-40">
+              <Loader2 size={28} className="animate-spin mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Ładowanie danych wizyt</p>
+            </div>
+          ) : visitsForSelectedDate.length > 0 ? (
             <div className="space-y-4">
               {visitsForSelectedDate.map((visit) => {
                 const { client, pet } = getVisitDetails(visit);
-                const visitTime = formatVisitDate(visit.date);
+                const visitTime = visit.time || formatVisitDate(visit.date);
                 return (
                   <div
                     key={visit.id}
@@ -229,11 +350,16 @@ const CalendarTab = () => {
                       <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleClientChange(e.target.value);
+                        }}
+                        disabled={isLoadingClients}
                       >
                         <option value="" disabled>
-                          Wybierz klienta
+                          {isLoadingClients ? "Ładowanie klientów..." : "Wybierz klienta"}
                         </option>
-                        {mockClients.map((client) => (
+                        {clients.map((client) => (
                           <option key={client.id} value={client.id}>
                             {client.firstName} {client.lastName}
                           </option>
@@ -255,20 +381,23 @@ const CalendarTab = () => {
                       <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         {...field}
-                        disabled={!form.watch("clientId")}
+                        disabled={!selectedClientId || isLoadingClientPets}
                       >
                         <option value="" disabled>
-                          Wybierz zwierzę
+                          {isLoadingClientPets 
+                            ? "Ładowanie zwierząt..." 
+                            : !selectedClientId 
+                              ? "Najpierw wybierz klienta" 
+                              : clientPets.length === 0
+                                ? "Brak zwierząt dla tego klienta"
+                                : "Wybierz zwierzę"
+                          }
                         </option>
-                        {mockPets
-                          .filter(
-                            (pet) => pet.clientId === form.watch("clientId")
-                          )
-                          .map((pet) => (
-                            <option key={pet.id} value={pet.id}>
-                              {pet.name} ({pet.species})
-                            </option>
-                          ))}
+                        {clientPets.map((pet) => (
+                          <option key={pet.id} value={pet.id}>
+                            {pet.name} ({pet.species})
+                          </option>
+                        ))}
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -348,10 +477,24 @@ const CalendarTab = () => {
               />
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setShowNewAppointment(false)}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowNewAppointment(false)}
+                >
                   Anuluj
                 </Button>
-                <Button type="submit">Zapisz wizytę</Button>
+                <Button 
+                  type="submit" 
+                  disabled={createVisitMutation.isPending}
+                >
+                  {createVisitMutation.isPending ? (
+                    <>
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                      Zapisywanie...
+                    </>
+                  ) : "Zapisz wizytę"}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
@@ -381,8 +524,9 @@ const CalendarTab = () => {
                             typeof selectedVisit.date === 'string' 
                               ? new Date(selectedVisit.date) 
                               : selectedVisit.date, 
-                            "dd.MM.yyyy, HH:mm"
+                            "dd.MM.yyyy"
                           )}
+                          {selectedVisit.time ? `, ${selectedVisit.time}` : ''}
                         </p>
                       </div>
 
@@ -411,6 +555,24 @@ const CalendarTab = () => {
                           <p className="text-sm">{selectedVisit.notes}</p>
                         </div>
                       )}
+
+                      {selectedVisit.recommendations && (
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Zalecenia</p>
+                          <p className="text-sm">{selectedVisit.recommendations}</p>
+                        </div>
+                      )}
+
+                      {selectedVisit.followUpNeeded && (
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Wizyta kontrolna</p>
+                          <p className="text-amber-600">
+                            {selectedVisit.followUpDate 
+                              ? `Zaplanowana na ${new Date(selectedVisit.followUpDate).toLocaleDateString('pl-PL')}` 
+                              : 'Wymagana'}
+                          </p>
+                        </div>
+                      )}
                     </>
                   );
                 })()}
@@ -425,16 +587,15 @@ const CalendarTab = () => {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => {
-                    setVisits(visits.filter(v => v.id !== selectedVisit.id));
-                    setShowVisitDetails(false);
-                    toast({
-                      title: "Wizyta anulowana",
-                      description: "Wizyta została usunięta z kalendarza",
-                    });
-                  }}
+                  onClick={() => deleteVisitMutation.mutate(selectedVisit.id)}
+                  disabled={deleteVisitMutation.isPending}
                 >
-                  Anuluj wizytę
+                  {deleteVisitMutation.isPending ? (
+                    <>
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                      Anulowanie...
+                    </>
+                  ) : "Anuluj wizytę"}
                 </Button>
               </DialogFooter>
             </>
