@@ -34,6 +34,9 @@ const visitTypes = [
   "Inny",
 ] as const;
 
+// Convert the readonly array to a tuple type that Zod can use
+type VisitType = typeof visitTypes[number];
+
 // Appointment form schema
 const appointmentSchema = z.object({
   clientId: z.string({
@@ -48,7 +51,7 @@ const appointmentSchema = z.object({
   time: z.string({
     required_error: "Proszę wybrać godzinę",
   }),
-  type: z.enum(visitTypes as [string, ...string[]], {
+  type: z.enum(visitTypes, {
     required_error: "Proszę wybrać typ wizyty",
   }),
   notes: z.string().optional(),
