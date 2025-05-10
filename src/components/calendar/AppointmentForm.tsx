@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -23,6 +24,16 @@ interface AppointmentFormProps {
   clients: any[];
 }
 
+// Predefined visit types
+const visitTypes = [
+  "Kontrola",
+  "Szczepienie",
+  "Zabieg",
+  "Konsultacja",
+  "Badanie diagnostyczne",
+  "Inny",
+] as const;
+
 // Appointment form schema
 const appointmentSchema = z.object({
   clientId: z.string({
@@ -37,8 +48,8 @@ const appointmentSchema = z.object({
   time: z.string({
     required_error: "Proszę wybrać godzinę",
   }),
-  type: z.string({
-    required_error: "Proszę podać typ wizyty",
+  type: z.enum(visitTypes as [string, ...string[]], {
+    required_error: "Proszę wybrać typ wizyty",
   }),
   notes: z.string().optional(),
 });
@@ -245,7 +256,20 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
                 <FormItem>
                   <FormLabel>Typ wizyty</FormLabel>
                   <FormControl>
-                    <Input placeholder="np. Badanie kontrolne" {...field} disabled={createVisitMutation.isPending} />
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      {...field}
+                      disabled={createVisitMutation.isPending}
+                    >
+                      <option value="" disabled>
+                        Wybierz typ wizyty
+                      </option>
+                      {visitTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
