@@ -1,0 +1,72 @@
+
+import { ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import PricingFeatureItem from "./PricingFeatureItem";
+
+export interface PricingFeature {
+  id: string;
+  content: ReactNode;
+}
+
+export interface PricingTierProps {
+  name: string;
+  monthlyPrice: string;
+  yearlyPrice: string;
+  description: string;
+  features: PricingFeature[];
+  cta: string;
+  popular: boolean;
+  billingPeriod: 'monthly' | 'yearly';
+}
+
+export default function PricingCard({
+  name,
+  monthlyPrice,
+  yearlyPrice,
+  description,
+  features,
+  cta,
+  popular,
+  billingPeriod
+}: PricingTierProps) {
+  return (
+    <Card className={popular ? "border-primary shadow-lg" : ""}>
+      {popular && (
+        <div className="absolute -top-3 left-0 right-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+          Polecany
+        </div>
+      )}
+      <CardHeader>
+        <CardTitle>{name}</CardTitle>
+        <div className="mt-4">
+          <span className="text-3xl font-bold">
+            {billingPeriod === 'monthly' ? monthlyPrice : yearlyPrice}
+          </span>
+          <span className="text-sm text-muted-foreground ml-1">
+            {billingPeriod === 'monthly' ? '/ miesiąc' : '/ rok'}
+          </span>
+        </div>
+        <CardDescription className="mt-2">{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-3">
+          {features.map((feature) => (
+            <PricingFeatureItem key={feature.id} {...feature} />
+          ))}
+        </ul>
+      </CardContent>
+      <CardFooter>
+        <Link to="/register" className="w-full">
+          <Button
+            className="w-full"
+            variant={popular ? "default" : "outline"}
+          >
+            {cta}
+          </Button>
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+}
