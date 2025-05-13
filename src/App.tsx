@@ -26,6 +26,11 @@ import Catalog from './pages/Catalog';
 import SpecialistProfile from './pages/SpecialistProfile';
 import { AuthProvider } from './contexts/AuthProvider';
 
+// Blog routes
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
+import BlogPostForm from './pages/BlogPostForm';
+
 // Admin routes
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -67,6 +72,12 @@ function App() {
               <Route path="/become-specialist" element={<BecomeSpecialist />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/specialist/:id" element={<SpecialistProfile />} />
+              
+              {/* Blog routes */}
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/blog/new" element={<BlogPostForm />} />
+              <Route path="/blog/edit/:id" element={<BlogPostForm />} />
               
               {/* Admin routes */}
               <Route path="/admin" element={<AdminLayout />}>

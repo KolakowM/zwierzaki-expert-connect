@@ -13,7 +13,8 @@ import {
   Bell, 
   ChevronRight, 
   CircleDollarSign, 
-  LogOut 
+  LogOut,
+  Book
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -73,6 +74,17 @@ const Sidebar = ({ className }: SidebarProps) => {
               <NavLink to="/calendar">
                 <Calendar className="mr-2 h-4 w-4" />
                 Kalendarz
+              </NavLink>
+            </Button>
+            
+            <Button 
+              variant={location.pathname.startsWith("/blog") ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <NavLink to="/blog">
+                <Book className="mr-2 h-4 w-4" />
+                Blog
               </NavLink>
             </Button>
           </div>

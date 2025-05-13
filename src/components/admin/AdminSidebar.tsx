@@ -13,7 +13,8 @@ import {
   Settings, 
   PawPrint, 
   Brain, 
-  ShieldAlert 
+  ShieldAlert,
+  Book
 } from "lucide-react";
 
 interface SidebarItemProps {
@@ -55,6 +56,12 @@ const AdminSidebar = () => {
       href: "/admin/visits",
       label: "Wizyty",
       icon: <Calendar className="h-5 w-5" />,
+      admin: true,
+    },
+    {
+      href: "/blog",
+      label: "Blog",
+      icon: <Book className="h-5 w-5" />,
       admin: true,
     },
     {

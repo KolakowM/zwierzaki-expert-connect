@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import dashboard components
@@ -19,13 +18,13 @@ const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, isAuthenticated, logout } = useAuth();
   const [specialistProfile, setSpecialistProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Get the tab from URL query parameter or default to "overview"
-  const queryParams = new URLSearchParams(location.search);
-  const tabFromQuery = queryParams.get('tab');
+  const tabFromQuery = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
 
   useEffect(() => {
@@ -62,10 +61,21 @@ const Dashboard = () => {
     }
   };
 
-  // Update URL when tab changes
+  // Update URL when tab changes - fixed to prevent re-renders
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    navigate(`/dashboard${value !== "overview" ? `?tab=${value}` : ""}`, { replace: true });
+    
+    // Use replace:true to prevent adding to history stack
+    // Use a callback to access current search params
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value !== "overview") {
+        newParams.set('tab', value);
+      } else {
+        newParams.delete('tab');
+      }
+      return newParams;
+    }, { replace: true });
   };
 
   const handleLogout = () => {
@@ -96,7 +106,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+        <Tabs defaultValue={activeTab} value={activeTab} onValueChange={handleTabChange} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4 md:w-auto md:grid-cols-4">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="clients">Klienci</TabsTrigger>
