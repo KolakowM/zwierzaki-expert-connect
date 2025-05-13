@@ -63,7 +63,7 @@ export default function Pricing() {
       description: "Idealny dla rozwijających się praktyk",
       features: [
         { id: "a1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
-        { id: "a2", content: <strong> Standardowa widoczność w katalogu specjalistów </strong> },
+        { id: "a2", content: <strong>Standardowa widoczność w katalogu specjalistów</strong> },
         { id: "a3", content: "Do 25 klientów" },
         { id: "a4", content: "Do 40 zwierząt" },
         { id: "a5", content: "Do 3 specjalizacji / 6 usług" },
@@ -181,7 +181,7 @@ export default function Pricing() {
               <AccordionItem value="faq-1">
                 <AccordionTrigger>Czym różnią się poszczególne plany?</AccordionTrigger>
                 <AccordionContent>
-                  Plany różnią się przede wszystkim limitami CRM (klienci/zwierzęta), liczbą dostępnych specjalizacji/usług oraz widocznością w katalogu specjalistów. Plan Testowy nie daje widoczności w katalogu, Zaawansowany oferuje standardową widoczność, a Zawodowiec - wyróżnioną.
+                  Plany różnią się przede wszystkim limitami CRM (klienci/zwierząt), liczbą dostępnych specjalizacji/usług oraz widocznością w katalogu specjalistów. Plan Testowy nie daje widoczności w katalogu, Zaawansowany oferuje standardową widoczność, a Zawodowiec - wyróżnioną.
                 </AccordionContent>
               </AccordionItem>
 
