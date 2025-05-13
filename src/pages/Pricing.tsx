@@ -63,7 +63,7 @@ export default function Pricing() {
       description: "Idealny dla rozwijających się praktyk",
       features: [
         { id: "a1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
-        { id: "a2", content: <strong>Standardowa widoczność w katalogu specjalistów</strong> },
+        <strong> { id: "a2", content: Standardowa widoczność w katalogu specjalistów</strong> },
         { id: "a3", content: "Do 25 klientów" },
         { id: "a4", content: "Do 40 zwierząt" },
         { id: "a5", content: "Do 3 specjalizacji / 6 usług" },
