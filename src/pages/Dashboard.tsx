@@ -35,7 +35,7 @@ const Dashboard = () => {
         description: "Musisz być zalogowany, aby zobaczyć ten panel",
         variant: "destructive"
       });
-      navigate("/login");
+     // navigate("/login"); // Tymczasowo zakomentowane!
     } else if (user?.id) {
       fetchSpecialistProfile(user.id);
     }
