@@ -21,7 +21,7 @@ export default function BillingToggle({ billingPeriod, setBillingPeriod }: Billi
         onClick={() => setBillingPeriod('yearly')}
         className="relative z-10"
       >
-        Rocznie (~25% rabatu)
+        Rocznie (+2 miesiące gratis)
       </Button>
     </div>
   );
