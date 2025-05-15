@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
-import { SpecialistCard } from "@/components/specialists/SpecialistCard";
+import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
 import { useTranslation } from "react-i18next";
 import { useFeaturedSpecialists } from "@/hooks/useFeaturedSpecialists";
 import { Loader2 } from "lucide-react";
