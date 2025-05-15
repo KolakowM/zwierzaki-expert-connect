@@ -29,7 +29,7 @@ export function useFeaturedSpecialists(limit = 12) {
           // Get user IDs of verified specialists
           const specialistIds = userRolesData.map(item => item.user_id);
           
-          // Query specialist profiles and related user profiles for these IDs
+          // Query specialist profiles for these IDs
           const { data: profilesData, error: profilesError } = await supabase
             .from('specialist_profiles')
             .select(`
@@ -40,8 +40,7 @@ export function useFeaturedSpecialists(limit = 12) {
               photo_url, 
               specializations
             `)
-            .in('id', specialistIds)
-            .order('random()');
+            .in('id', specialistIds);
             
           if (profilesError) throw profilesError;
           
