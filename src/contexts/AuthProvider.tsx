@@ -55,9 +55,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const updatedUser: AuthUser = {
             id: session.user.id,
             email: session.user.email || '',
-            role: session.user.user_metadata?.role || 'user',
-            firstName: session.user.user_metadata?.first_name,
-            lastName: session.user.user_metadata?.last_name,
+            role: session.user.user_metadata?.role || 'specialist',
+            firstName: session.user.user_metadata?.firstName,
+            lastName: session.user.user_metadata?.lastName,
           };
           setUser(updatedUser);
         } else if (event === 'SIGNED_OUT') {
@@ -100,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (credentials: SignUpCredentials): Promise<void> => {
     try {
       setIsLoading(true);
+      // Now the metadata will be properly processed by our database trigger
       const { data, error } = await supabase.auth.signUp({
         email: credentials.email,
         password: credentials.password,
@@ -107,8 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: {
             firstName: credentials.firstName,
             lastName: credentials.lastName,
-            role: 'specialist',
-            status: 'pending'
+            role: 'specialist'
           },
         },
       });

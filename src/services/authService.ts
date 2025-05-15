@@ -45,8 +45,9 @@ export const signUp = async ({ email, password, firstName, lastName }: SignUpCre
     password,
     options: {
       data: {
-        first_name: firstName,
-        last_name: lastName,
+        firstName,
+        lastName,
+        role: 'specialist'
       },
     },
   });
@@ -81,9 +82,9 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
   return {
     id: user.id,
     email: user.email || '',
-    role: user.user_metadata?.role || 'user',
-    firstName: user.user_metadata?.first_name,
-    lastName: user.user_metadata?.last_name,
+    role: user.user_metadata?.role || 'specialist',
+    firstName: user.user_metadata?.firstName,
+    lastName: user.user_metadata?.lastName,
   };
 };
 
@@ -111,8 +112,8 @@ export const updatePassword = async (password: string) => {
 export const updateUserProfile = async (profileData: UserProfileUpdate) => {
   const { data, error } = await supabase.auth.updateUser({
     data: {
-      first_name: profileData.firstName,
-      last_name: profileData.lastName,
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
       // Add other profile data as needed
     }
   });

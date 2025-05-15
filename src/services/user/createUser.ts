@@ -11,7 +11,8 @@ export const createUser = async (userData: UserFormValues) => {
       password: '123456', // Temporary password, should be changed by the user
       email_confirm: true,
       user_metadata: {
-        name: userData.name,
+        firstName: userData.name.split(' ')[0],
+        lastName: userData.name.split(' ').slice(1).join(' '),
         role: userData.role,
         status: userData.status
       }
@@ -19,20 +20,9 @@ export const createUser = async (userData: UserFormValues) => {
     
     if (authError) throw authError;
     
-    // If user creation was successful, store the user role in user_roles table
+    // The handle_new_user trigger will automatically create user_profile and user_role
+    // We just need to return the new user data in the expected format
     if (authData.user) {
-      // Insert into user_roles table with status
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: authData.user.id,
-          role: (userData.role === 'specialist' ? 'user' : userData.role) as AppRole,
-          status: 'niezweryfikowany'
-        });
-        
-      if (roleError) throw roleError;
-      
-      // Return the new user
       return {
         id: authData.user.id,
         name: userData.name,
