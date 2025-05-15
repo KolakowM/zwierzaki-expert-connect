@@ -15,41 +15,72 @@ export function useFeaturedSpecialists(limit = 12) {
       try {
         setLoading(true);
         
-        // Query to get verified specialists
-        const { data, error } = await supabase
-          .from('specialist_profiles')
-          .select(`
-            id,
-            title,
-            description,
-            location,
-            photo_url,
-            specializations,
-            user_profiles(first_name, last_name),
-            user_roles!inner(role, status)
-          `)
-          .eq('user_roles.role', 'specialist')
-          .eq('user_roles.status', 'zweryfikowany')
-          .order('random()')
+        // First get user_roles data for specialists that are verified
+        const { data: userRolesData, error: userRolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role, status')
+          .eq('role', 'specialist')
+          .eq('status', 'zweryfikowany')
           .limit(limit);
 
-        if (error) throw error;
+        if (userRolesError) throw userRolesError;
 
-        if (data) {
-          // Transform the data into the format expected by SpecialistCard
-          const transformedData: Specialist[] = data.map(profile => ({
-            id: profile.id,
-            name: `${profile.user_profiles?.first_name || ''} ${profile.user_profiles?.last_name || ''}`,
-            title: profile.title || "Specjalista",
-            specializations: profile.specializations || [],
-            location: profile.location || "Polska",
-            image: profile.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
-            rating: 5.0, // Default rating
-            verified: true, // Since we filtered for verified specialists
-            role: 'specialist'
-          }));
+        if (userRolesData && userRolesData.length > 0) {
+          // Get user IDs of verified specialists
+          const specialistIds = userRolesData.map(item => item.user_id);
           
-          setSpecialists(transformedData);
+          // Query specialist profiles and related user profiles for these IDs
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('specialist_profiles')
+            .select(`
+              id, 
+              title, 
+              description, 
+              location, 
+              photo_url, 
+              specializations
+            `)
+            .in('id', specialistIds)
+            .order('random()');
+            
+          if (profilesError) throw profilesError;
+          
+          // Get user profiles data separately
+          const { data: userProfilesData, error: userProfilesError } = await supabase
+            .from('user_profiles')
+            .select('id, first_name, last_name')
+            .in('id', specialistIds);
+            
+          if (userProfilesError) throw userProfilesError;
+          
+          // Create a mapping for easy lookup
+          const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
+            acc[profile.id] = profile;
+            return acc;
+          }, {} as Record<string, any>) || {};
+          
+          // Transform the data into the format expected by SpecialistCard
+          if (profilesData) {
+            const transformedData: Specialist[] = profilesData.map(profile => {
+              const userProfile = userProfilesMap[profile.id] || {};
+              
+              return {
+                id: profile.id,
+                name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`,
+                title: profile.title || "Specjalista",
+                specializations: profile.specializations || [],
+                location: profile.location || "Polska",
+                image: profile.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
+                rating: 5.0, // Default rating
+                verified: true, // Since we filtered for verified specialists
+                role: 'specialist'
+              };
+            });
+            
+            setSpecialists(transformedData);
+          }
+        } else {
+          setSpecialists([]);
         }
       } catch (err) {
         console.error("Error fetching featured specialists:", err);
