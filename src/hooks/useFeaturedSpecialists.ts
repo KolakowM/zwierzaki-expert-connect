@@ -16,31 +16,34 @@ export function useFeaturedSpecialists(limit = 12) {
         setLoading(true);
         
         // Query to get verified specialists
-        const { data: userRolesData, error: userRolesError } = await supabase
-          .from('user_roles')
+        const { data, error } = await supabase
+          .from('specialist_profiles')
           .select(`
-            user_id,
-            user_profiles!inner(first_name, last_name, email),
-            specialist_profiles!inner(
-              id, title, description, location, photo_url, specializations
-            )
+            id,
+            title,
+            description,
+            location,
+            photo_url,
+            specializations,
+            user_profiles(first_name, last_name),
+            user_roles!inner(role, status)
           `)
-          .eq('role', 'specialist')
-          .eq('status', 'zweryfikowany')
+          .eq('user_roles.role', 'specialist')
+          .eq('user_roles.status', 'zweryfikowany')
           .order('random()')
           .limit(limit);
 
-        if (userRolesError) throw userRolesError;
+        if (error) throw error;
 
-        if (userRolesData) {
+        if (data) {
           // Transform the data into the format expected by SpecialistCard
-          const transformedData: Specialist[] = userRolesData.map(entry => ({
-            id: entry.specialist_profiles.id,
-            name: `${entry.user_profiles.first_name} ${entry.user_profiles.last_name}`,
-            title: entry.specialist_profiles.title || "Specjalista",
-            specializations: entry.specialist_profiles.specializations || [],
-            location: entry.specialist_profiles.location || "Polska",
-            image: entry.specialist_profiles.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
+          const transformedData: Specialist[] = data.map(profile => ({
+            id: profile.id,
+            name: `${profile.user_profiles?.first_name || ''} ${profile.user_profiles?.last_name || ''}`,
+            title: profile.title || "Specjalista",
+            specializations: profile.specializations || [],
+            location: profile.location || "Polska",
+            image: profile.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
             rating: 5.0, // Default rating
             verified: true, // Since we filtered for verified specialists
             role: 'specialist'
