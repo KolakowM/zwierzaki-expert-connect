@@ -106,10 +106,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <img src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" alt="Pets Flow Logo" className="w-8 h-8" />
-            <span className="ml-2 font-bold text-primary text-2xl">
-              /*  <span>PetsFlow </span> */
-              <span className="text-primary">Pets</span>Flow
-            </span>
+            <span className="ml-2 font-bold text-primary text-2xl"> PetsFlow </span>
           </Link>
         </div>
         
