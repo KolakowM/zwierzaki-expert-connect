@@ -32,7 +32,7 @@ export const pricingTiers: PricingTier[] = [
   },
   {
     name: "Zaawansowany",
-    monthlyPrice: "29 zł",
+    monthlyPrice: "49 zł",
     yearlyPrice: "490 zł",
     description: "Idealny dla rozwijających się praktyk",
     features: [
@@ -50,7 +50,7 @@ export const pricingTiers: PricingTier[] = [
   },
   {
     name: "Zawodowiec",
-    monthlyPrice: "49 zł",
+    monthlyPrice: "99 zł",
     yearlyPrice: "990 zł",
     description: "Dla profesjonalnych praktyk",
     features: [
