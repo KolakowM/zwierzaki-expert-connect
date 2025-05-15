@@ -1,9 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
-import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
+import { SpecialistCard } from "@/components/specialists/SpecialistCard";
 import { useTranslation } from "react-i18next";
+import { useFeaturedSpecialists } from "@/hooks/useFeaturedSpecialists";
+import { Loader2 } from "lucide-react";
 
 const featuredSpecialists: Specialist[] = [
   {
@@ -54,6 +55,7 @@ const featuredSpecialists: Specialist[] = [
 
 const Index = () => {
   const { t } = useTranslation();
+  const { specialists, loading, error } = useFeaturedSpecialists();
 
   const benefitsData = [
     {
@@ -181,11 +183,31 @@ const Index = () => {
               {t('home.featured_description')}
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredSpecialists.map(specialist => (
-              <SpecialistCard specialist={specialist} key={specialist.id} />
-            ))}
-          </div>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              <span className="ml-2">Ładowanie specjalistów...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-destructive">Nie udało się załadować specjalistów. Spróbuj ponownie później.</p>
+              <Button 
+                variant="outline" 
+                className="mt-4" 
+                onClick={() => window.location.reload()}
+              >
+                Odśwież stronę
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {specialists.slice(0, 4).map(specialist => (
+                <SpecialistCard specialist={specialist} key={specialist.id} />
+              ))}
+            </div>
+          )}
+          
           <div className="mt-10 text-center">
             <Link to="/catalog">
               <Button variant="outline" size="lg">

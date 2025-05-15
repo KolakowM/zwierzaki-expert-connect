@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface BillingToggleProps {
   billingPeriod: 'monthly' | 'yearly';
@@ -7,6 +8,8 @@ interface BillingToggleProps {
 }
 
 export default function BillingToggle({ billingPeriod, setBillingPeriod }: BillingToggleProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="mt-6 inline-flex items-center rounded-lg border p-1">
       <Button
@@ -14,14 +17,14 @@ export default function BillingToggle({ billingPeriod, setBillingPeriod }: Billi
         onClick={() => setBillingPeriod('monthly')}
         className="relative z-10"
       >
-        Miesięcznie
+        {t('pricing.monthly')}
       </Button>
       <Button
         variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
         onClick={() => setBillingPeriod('yearly')}
         className="relative z-10"
       >
-        Rocznie (+2 miesiące gratis)
+        {t('pricing.yearly_with_discount')}
       </Button>
     </div>
   );
