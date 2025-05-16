@@ -69,7 +69,7 @@ export function useFeaturedSpecialists(limit = 12) {
                 title: profile.title || "Specjalista",
                 specializations: profile.specializations || [],
                 location: profile.location || "Polska",
-                image: profile.photo_url || // "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
+                image: profile.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
                 rating: 5.0, // Default rating
                 verified: true, // Since we filtered for verified specialists
                 role: 'specialist'
