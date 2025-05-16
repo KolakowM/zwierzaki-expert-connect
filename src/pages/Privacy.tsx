@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { Shield } from "lucide-react";
 
@@ -18,7 +17,7 @@ export default function Privacy() {
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">1. Wstęp</h2>
               <p>
-                Niniejsza Polityka Prywatności ma na celu poinformowanie użytkowników platformy ExpertZwierzaki 
+                Niniejsza Polityka Prywatności ma na celu poinformowanie użytkowników platformy PetsFlow 
                 o tym, jakie dane osobowe gromadzimy, w jaki sposób je wykorzystujemy, przechowujemy i chronimy.
                 Korzystając z naszych usług, użytkownik akceptuje praktyki opisane w niniejszej Polityce Prywatności.
               </p>
@@ -27,7 +26,7 @@ export default function Privacy() {
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">2. Administrator danych osobowych</h2>
               <p>
-                Administratorem danych osobowych jest ExpertZwierzaki Sp. z o.o. z siedzibą w Warszawie,
+                Administratorem danych osobowych jest PetsFlow Sp. z o.o. z siedzibą w Warszawie,
                 ul. Zwierzęca 123, 00-001 Warszawa, wpisana do rejestru przedsiębiorców Krajowego Rejestru
                 Sądowego pod numerem KRS: 0000000000, NIP: 0000000000, REGON: 000000000.
               </p>
@@ -54,7 +53,7 @@ export default function Privacy() {
                 Przetwarzamy dane osobowe w następujących celach:
               </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Świadczenie usług w ramach platformy ExpertZwierzaki</li>
+                <li>Świadczenie usług w ramach platformy PetsFlow</li>
                 <li>Zarządzanie kontem użytkownika</li>
                 <li>Poprawa jakości naszych usług</li>
                 <li>Komunikacja z użytkownikami</li>

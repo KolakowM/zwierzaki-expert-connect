@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { FileText } from "lucide-react";
 
@@ -18,8 +17,8 @@ export default function Terms() {
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">1. Wstęp</h2>
               <p>
-                Niniejsze Warunki Korzystania określają zasady użytkowania platformy internetowej ExpertZwierzaki, 
-                dostępnej pod adresem www.expertzwierzaki.pl. Korzystając z platformy, użytkownik akceptuje poniższe 
+                Niniejsze Warunki Korzystania określają zasady użytkowania platformy internetowej PetsFlow, 
+                dostępnej pod adresem www.petsflow.pl. Korzystając z platformy, użytkownik akceptuje poniższe 
                 warunki i zobowiązuje się do ich przestrzegania.
               </p>
             </div>
@@ -27,7 +26,7 @@ export default function Terms() {
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">2. Definicje</h2>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Platforma</strong> - serwis internetowy ExpertZwierzaki</li>
+                <li><strong>Platforma</strong> - serwis internetowy PetsFlow</li>
                 <li><strong>Użytkownik</strong> - osoba korzystająca z Platformy</li>
                 <li><strong>Specjalista</strong> - weterynarze, behawioryści, groomerzy i inni specjaliści zajmujący się zwierzętami</li>
                 <li><strong>Klient</strong> - właściciel zwierzęcia korzystający z usług Specjalisty</li>

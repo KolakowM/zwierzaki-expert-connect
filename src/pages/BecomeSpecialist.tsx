@@ -61,7 +61,7 @@ export default function BecomeSpecialist() {
               <UserPlus className="h-12 w-12 text-primary" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-              Zostań Specjalistą na ExpertZwierzaki
+              Zostań Specjalistą na PetsFlow
             </h1>
             <p className="mx-auto max-w-3xl text-lg text-muted-foreground">
               Dołącz do społeczności profesjonalistów i skorzystaj z nowoczesnych narzędzi 
@@ -111,7 +111,7 @@ export default function BecomeSpecialist() {
             <div className="p-8 text-center">
               <h2 className="mb-4 text-2xl font-bold">Gotowy, by rozwijać swoją praktykę?</h2>
               <p className="mb-6 text-lg">
-                Dołącz do ExpertZwierzaki już dziś i zacznij korzystać z nowoczesnych narzędzi.
+                Dołącz do PetsFlow już dziś i zacznij korzystać z nowoczesnych narzędzi.
               </p>
               <Link to="/register">
                 <Button size="lg" variant="secondary">

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -16,7 +15,7 @@ export default function Footer() {
                 alt="Pets Flow Logo" 
                 className="w-6 h-6"
               />
-              <span className="text-lg font-bold text-primary">ExpertZwierzaki</span>
+              <span className="text-lg font-bold text-primary">PetsFlow</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Platforma CRM dla specjalistów opiekujących się zwierzętami, z publicznym katalogiem usług.

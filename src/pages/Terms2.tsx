@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { FileText } from "lucide-react";
 
@@ -19,10 +18,10 @@ export default function Terms2() {
               <h2 className="text-2xl font-semibold">§1. Postanowienia ogólne</h2>
               <p>
                 1. Niniejszy regulamin określa zasady świadczenia usług drogą elektroniczną w ramach 
-                serwisu internetowego ExpertZwierzaki, dostępnego pod adresem www.expertzwierzaki.pl.
+                serwisu internetowego PetsFlow, dostępnego pod adresem www.petsflow.pl.
               </p>
               <p>
-                2. Właścicielem i operatorem serwisu ExpertZwierzaki jest ExpertZwierzaki Sp. z o.o. 
+                2. Właścicielem i operatorem serwisu PetsFlow jest PetsFlow Sp. z o.o. 
                 z siedzibą w Warszawie, ul. Zwierzęca 123, 00-001 Warszawa, wpisana do rejestru 
                 przedsiębiorców Krajowego Rejestru Sądowego pod numerem KRS: 0000000000, 
                 NIP: 0000000000, REGON: 000000000.
@@ -35,8 +34,8 @@ export default function Terms2() {
                 Na potrzeby niniejszego regulaminu przyjmuje się następujące znaczenie pojęć:
               </p>
               <ol className="list-decimal pl-6 space-y-2">
-                <li><strong>Serwis</strong> – platforma internetowa ExpertZwierzaki dostępna pod adresem www.expertzwierzaki.pl;</li>
-                <li><strong>Usługodawca</strong> – ExpertZwierzaki Sp. z o.o. z siedzibą w Warszawie;</li>
+                <li><strong>Serwis</strong> – platforma internetowa PetsFlow dostępna pod adresem www.petsflow.pl;</li>
+                <li><strong>Usługodawca</strong> – PetsFlow Sp. z o.o. z siedzibą w Warszawie;</li>
                 <li><strong>Użytkownik</strong> – osoba fizyczna, osoba prawna lub jednostka organizacyjna nieposiadająca osobowości prawnej, korzystająca z Serwisu;</li>
                 <li><strong>Specjalista</strong> – Użytkownik świadczący usługi w zakresie opieki nad zwierzętami;</li>
                 <li><strong>Klient</strong> – Użytkownik korzystający z usług Specjalisty;</li>
