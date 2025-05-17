@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
@@ -5,6 +6,13 @@ import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistC
 import { useTranslation } from "react-i18next";
 import { useFeaturedSpecialists } from "@/hooks/useFeaturedSpecialists";
 import { Loader2 } from "lucide-react";
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from "@/components/ui/carousel";
 
 const featuredSpecialists: Specialist[] = [
   {
@@ -201,10 +209,22 @@ const Index = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {specialists.slice(0, 4).map(specialist => (
-                <SpecialistCard specialist={specialist} key={specialist.id} />
-              ))}
+            <div className="relative">
+              <Carousel className="w-full">
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {specialists.slice(0, 8).map(specialist => (
+                    <CarouselItem key={specialist.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/4">
+                      <div className="h-full">
+                        <SpecialistCard specialist={specialist} />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="hidden md:block">
+                  <CarouselPrevious className="left-0 -translate-x-1/2" />
+                  <CarouselNext className="right-0 translate-x-1/2" />
+                </div>
+              </Carousel>
             </div>
           )}
           
