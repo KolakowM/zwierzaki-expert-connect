@@ -1,4 +1,3 @@
-
 {
   "common": {
     "save": "Speichern",
@@ -94,5 +93,17 @@
     "en": "Englisch",
     "de": "Deutsch",
     "uk": "Ukrainisch"
+  },
+  "pricing": {
+    "title": "Transparente Preise",
+    "subtitle": "Wählen Sie einen Plan, der zu Ihrer Praxis passt",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "yearly_with_discount": "Jährlich (2 Monate kostenlos)",
+    "month_suffix": "/ Monat",
+    "year_suffix": "/ Jahr",
+    "recommended": "Empfohlen",
+    "start_free": "Kostenlos starten",
+    "choose_plan": "Diesen Plan wählen"
   }
 }

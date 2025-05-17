@@ -4,12 +4,13 @@ import MainLayout from "@/components/layout/MainLayout";
 import PricingHeader from "@/components/pricing/PricingHeader";
 import PricingCard from "@/components/pricing/PricingCard";
 import PricingFAQ from "@/components/pricing/PricingFAQ";
-import { pricingTiers } from "@/components/pricing/pricingData";
+import { usePricingTiers } from "@/components/pricing/pricingData";
 import { useTranslation } from "react-i18next";
 
 export default function Pricing() {
   const { t } = useTranslation();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const pricingTiers = usePricingTiers();
 
   return (
     <MainLayout>

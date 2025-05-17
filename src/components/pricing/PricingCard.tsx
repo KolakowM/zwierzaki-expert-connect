@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import PricingFeatureItem from "./PricingFeatureItem";
+import { useTranslation } from "react-i18next";
 
 export interface PricingFeature {
   id: string;
@@ -31,11 +32,13 @@ export default function PricingCard({
   popular,
   billingPeriod
 }: PricingTierProps) {
+  const { t } = useTranslation();
+  
   return (
     <Card className={popular ? "border-primary shadow-lg" : ""}>
       {popular && (
         <div className="absolute -top-3 left-0 right-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-          Polecany
+          {t('pricing.recommended')}
         </div>
       )}
       <CardHeader>
@@ -45,7 +48,7 @@ export default function PricingCard({
             {billingPeriod === 'monthly' ? monthlyPrice : yearlyPrice}
           </span>
           <span className="text-sm text-muted-foreground ml-1">
-            {billingPeriod === 'monthly' ? '/ miesiąc' : '/ rok'}
+            {billingPeriod === 'monthly' ? t('pricing.month_suffix') : t('pricing.year_suffix')}
           </span>
         </div>
         <CardDescription className="mt-2">{description}</CardDescription>
