@@ -85,21 +85,24 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
               ) : error ? (
                 <p className="text-sm text-destructive">Error loading specializations</p>
               ) : (
-                specializations.map((specialization) => (
-                  <div className="flex items-center space-x-2" key={specialization.id}>
-                    <Checkbox 
-                      id={specialization.id} 
-                      checked={selectedSpecializations.includes(specialization.id)}
-                      onCheckedChange={() => handleSpecializationChange(specialization.id)}
-                    />
-                    <label
-                      htmlFor={specialization.id}
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {specialization.name}
-                    </label>
-                  </div>
-                ))
+                specializations
+                  .slice() // Create a shallow copy
+                  .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
+                  .map((specialization) => (
+                    <div className="flex items-center space-x-2" key={specialization.id}>
+                      <Checkbox 
+                        id={specialization.id} 
+                        checked={selectedSpecializations.includes(specialization.id)}
+                        onCheckedChange={() => handleSpecializationChange(specialization.id)}
+                      />
+                      <label
+                        htmlFor={specialization.id}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {specialization.name}
+                      </label>
+                    </div>
+                  ))
               )}
             </div>
           </div>
