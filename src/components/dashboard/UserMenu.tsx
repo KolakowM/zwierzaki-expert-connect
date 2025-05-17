@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Settings, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -82,11 +81,11 @@ const UserMenu = ({ firstName, lastName, onLogout, photoUrl }: UserMenuProps) =>
         <NavigationMenuItem>
           <NavigationMenuTrigger className="gap-2">
             <Avatar className="h-8 w-8">
-              {photoUrl ? (
-                <AvatarImage src={photoUrl} alt={displayName} />
-              ) : (
-                <AvatarFallback>{initials}</AvatarFallback>
-              )}
+              <AvatarImage src={photoUrl} alt={displayName} />
+              <AvatarFallback>
+                {/* We'll retain the initials here instead of the SVG for the small user menu avatar */}
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <span>{displayName}</span>
           </NavigationMenuTrigger>

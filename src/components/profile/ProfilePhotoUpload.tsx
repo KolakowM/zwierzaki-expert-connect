@@ -42,7 +42,7 @@ export function ProfilePhotoUpload({ photoUrl, userId, onPhotoChange }: ProfileP
         <Avatar className="w-24 h-24 border-2 border-gray-200">
           <AvatarImage src={photoUrl || undefined} alt="Zdjęcie profilowe" />
           <AvatarFallback className="bg-primary/10 text-primary text-xl">
-            {userId?.charAt(0).toUpperCase() || "?"}
+            {/* We don't need to add the SVG here as it's now in the AvatarFallback component */}
           </AvatarFallback>
         </Avatar>
         

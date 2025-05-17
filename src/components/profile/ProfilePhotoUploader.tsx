@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Camera } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { FormLabel } from "@/components/ui/form";
@@ -44,13 +43,10 @@ export function ProfilePhotoUploader({
       <div className="flex items-center gap-6">
         <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-muted">
           <Avatar className="h-full w-full">
-            {photoUrl ? (
-              <AvatarImage src={photoUrl} alt="Zdjęcie profilowe" className="object-cover" />
-            ) : (
-              <AvatarFallback className="bg-muted">
-                <Camera className="h-12 w-12 text-muted-foreground" />
-              </AvatarFallback>
-            )}
+            <AvatarImage src={photoUrl} alt="Zdjęcie profilowe" className="object-cover" />
+            <AvatarFallback className="bg-muted">
+              {/* Our SVG is now in the AvatarFallback component */}
+            </AvatarFallback>
           </Avatar>
         </div>
         <div className="flex flex-col space-y-2">
