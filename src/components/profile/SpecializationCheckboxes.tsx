@@ -126,7 +126,10 @@ export function SpecializationCheckboxes({ form }: SpecializationCheckboxesProps
                 Error loading specializations. Please try again.
               </div>
             ) : (
-              specializations.map((item) => (
+              specializations
+                .slice() // Create a shallow copy
+                .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
+                .map((item) => (
                 <FormField
                   key={item.id}
                   control={form.control}
