@@ -6,12 +6,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 export default function FAQ() {
   const faqItems = [
     {
-      question: "Czym jest ExpertZwierzaki?",
-      answer: "ExpertZwierzaki to platforma CRM zaprojektowana specjalnie dla specjalistów zajmujących się opieką nad zwierzętami, takich jak weterynarze, behawioryści, groomerzy i inni. Platforma umożliwia zarządzanie klientami, pacjentami, terminarzem wizyt oraz dokumentacją medyczną w jednym miejscu."
+      question: "Czym jest PetsFlow?",
+      answer: "PetsFlow to platforma zaprojektowana specjalnie dla specjalistów zajmujących się opieką nad zwierzętami, takich jak weterynarze, behawioryści, groomerzy i inni. Platforma umożliwia zarządzanie klientami, pacjentami, terminarzem wizyt oraz dokumentacją medyczną w jednym miejscu."
     },
     {
-      question: "Czy mogę korzystać z ExpertZwierzaki na urządzeniach mobilnych?",
-      answer: "Tak, platforma ExpertZwierzaki jest w pełni responsywna i dostępna na wszystkich urządzeniach z dostępem do internetu - komputerach, tabletach i smartfonach. Możesz zarządzać swoją praktyką z dowolnego miejsca i w dowolnym czasie."
+      question: "Czy mogę korzystać z PetsFlow na urządzeniach mobilnych?",
+      answer: "Tak, platforma PetsFlow jest w pełni responsywna i dostępna na wszystkich urządzeniach z dostępem do internetu - komputerach, tabletach i smartfonach. Możesz zarządzać swoją praktyką z dowolnego miejsca i w dowolnym czasie."
     },
     {
       question: "Jak wygląda proces rejestracji?",
@@ -57,7 +57,7 @@ export default function FAQ() {
             </div>
             <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">Często Zadawane Pytania</h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Znajdź odpowiedzi na najczęściej zadawane pytania dotyczące platformy ExpertZwierzaki.
+              Znajdź odpowiedzi na najczęściej zadawane pytania dotyczące platformy PetsFlow.
             </p>
           </div>
 
