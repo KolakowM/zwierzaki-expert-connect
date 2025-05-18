@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import dashboard components
@@ -14,7 +13,6 @@ import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import ClientsTab from "@/components/dashboard/ClientsTab";
 import AnimalsTab from "@/components/dashboard/AnimalsTab";
 import CalendarTab from "@/components/dashboard/CalendarTab";
-import SubscriptionInfo from "@/components/dashboard/SubscriptionInfo";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -110,10 +108,6 @@ const Dashboard = () => {
               photoUrl={specialistProfile?.photo_url} 
             />
           </div>
-        </div>
-
-        <div className="mb-6">
-          <SubscriptionInfo />
         </div>
 
         <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
