@@ -16,7 +16,7 @@ export interface SocialMediaLinks {
   [key: string]: string | null | undefined;
 }
 
-// Import Client type
+// Import Client and Visit types
 import { Client } from './client';
 import { Visit } from './visit';
 
