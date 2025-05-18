@@ -1,5 +1,26 @@
-import { Visit } from "@/types";
+
+import { Visit, mapDbVisitToVisit } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+
+// Helper function to map Visit type to database format
+export function mapVisitToDbVisit(visit: Partial<Visit>): any {
+  const dbVisit: any = {};
+  
+  if (visit.date !== undefined) dbVisit.date = visit.date;
+  if (visit.time !== undefined) dbVisit.time = visit.time;
+  if (visit.clientId !== undefined) dbVisit.clientid = visit.clientId;
+  if (visit.petId !== undefined) dbVisit.petid = visit.petId;
+  if (visit.notes !== undefined) dbVisit.notes = visit.notes;
+  if (visit.status !== undefined) dbVisit.status = visit.status;
+  if (visit.type !== undefined) dbVisit.type = visit.type;
+  if (visit.followUp !== undefined) dbVisit.followup = visit.followUp;
+  if (visit.followUpNeeded !== undefined) dbVisit.followupneeded = visit.followUpNeeded;
+  if (visit.followUpDate !== undefined) dbVisit.followupdate = visit.followUpDate;
+  if (visit.recommendations !== undefined) dbVisit.recommendations = visit.recommendations;
+  if (visit.user_id !== undefined) dbVisit.user_id = visit.user_id;
+  
+  return dbVisit;
+}
 
 export const getVisits = async (): Promise<Visit[]> => {
   try {
@@ -16,7 +37,7 @@ export const getVisits = async (): Promise<Visit[]> => {
       return [];
     }
     
-    return data || [];
+    return data ? data.map(mapDbVisitToVisit) : [];
   } catch (error) {
     console.error("Error in getVisits:", error);
     return [];
@@ -36,7 +57,7 @@ export const getVisitById = async (visitId: string): Promise<Visit | null> => {
       return null;
     }
     
-    return data;
+    return data ? mapDbVisitToVisit(data) : null;
   } catch (error) {
     console.error("Error in getVisitById:", error);
     return null;
@@ -55,7 +76,7 @@ export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
       return [];
     }
     
-    return data || [];
+    return data ? data.map(mapDbVisitToVisit) : [];
   } catch (error) {
     console.error("Error in getVisitsByPetId:", error);
     return [];
@@ -67,22 +88,18 @@ export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promi
     const { data: authUser } = await supabase.auth.getUser();
     if (!authUser.user) throw new Error("User not authenticated");
     
-    const newVisit = {
-      ...visit,
-      user_id: authUser.user.id,
-      status: visit.status || "scheduled",
-      created_at: new Date().toISOString()
-    };
+    const dbVisit = mapVisitToDbVisit(visit);
+    dbVisit.user_id = authUser.user.id; // Always ensure user_id is set
     
     const { data, error } = await supabase
       .from('visits')
-      .insert([newVisit])
+      .insert([dbVisit])
       .select()
       .single();
       
     if (error) throw error;
     
-    return data;
+    return mapDbVisitToVisit(data);
   } catch (error) {
     console.error("Error creating visit:", error);
     throw error;
@@ -91,16 +108,18 @@ export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promi
 
 export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Visit> => {
   try {
+    const dbVisit = mapVisitToDbVisit(visit);
+    
     const { data, error } = await supabase
       .from('visits')
-      .update(visit)
+      .update(dbVisit)
       .eq('id', id)
       .select()
       .single();
       
     if (error) throw error;
     
-    return data;
+    return mapDbVisitToVisit(data);
   } catch (error) {
     console.error("Error updating visit:", error);
     throw error;

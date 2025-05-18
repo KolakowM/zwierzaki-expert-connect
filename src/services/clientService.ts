@@ -1,4 +1,6 @@
+
 import { Client } from "@/types";
+import { mapDbClientToClient, mapClientToDbClient } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export const getClients = async (): Promise<Client[]> => {
@@ -16,7 +18,7 @@ export const getClients = async (): Promise<Client[]> => {
       return [];
     }
     
-    return data || [];
+    return data ? data.map(mapDbClientToClient) : [];
   } catch (error) {
     console.error("Error in getClients:", error);
     return [];
@@ -36,7 +38,7 @@ export const getClientById = async (clientId: string): Promise<Client | null> =>
       return null;
     }
     
-    return data;
+    return data ? mapDbClientToClient(data) : null;
   } catch (error) {
     console.error("Error in getClientById:", error);
     return null;
@@ -48,21 +50,18 @@ export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Pr
     const { data: authUser } = await supabase.auth.getUser();
     if (!authUser.user) throw new Error("User not authenticated");
     
-    const newClient = {
-      ...client,
-      user_id: authUser.user.id,
-      created_at: new Date().toISOString()
-    };
+    const dbClient = mapClientToDbClient(client);
+    dbClient.user_id = authUser.user.id; // Always ensure user_id is set
     
     const { data, error } = await supabase
       .from('clients')
-      .insert([newClient])
+      .insert([dbClient])
       .select()
       .single();
       
     if (error) throw error;
     
-    return data;
+    return mapDbClientToClient(data);
   } catch (error) {
     console.error("Error creating client:", error);
     throw error;
@@ -71,16 +70,18 @@ export const createClient = async (client: Omit<Client, 'id' | 'createdAt'>): Pr
 
 export const updateClient = async (id: string, client: Partial<Client>): Promise<Client> => {
   try {
+    const dbClient = mapClientToDbClient(client);
+    
     const { data, error } = await supabase
       .from('clients')
-      .update(client)
+      .update(dbClient)
       .eq('id', id)
       .select()
       .single();
       
     if (error) throw error;
     
-    return data;
+    return mapDbClientToClient(data);
   } catch (error) {
     console.error("Error updating client:", error);
     throw error;

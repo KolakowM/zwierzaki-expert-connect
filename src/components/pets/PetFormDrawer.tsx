@@ -11,128 +11,82 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import PetForm from "./PetForm";
-import { PetSpecies, PetSex, PetFormOutput } from "./PetFormSchema";
-import { Dog, Edit } from "lucide-react";
-import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
-import { useQueryClient } from "@tanstack/react-query";
+import { Pet } from "@/types";
+import { PawPrint, Edit } from "lucide-react";
+import { ReactNode } from "react";
 
 interface PetFormDrawerProps {
-  clientId: string;
   buttonText?: string;
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
+  clientId?: string;
   title?: string;
   defaultValues?: Partial<Pet>;
   onPetSaved?: (pet: Pet) => void;
-  className?: string;
   isEditing?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 const PetFormDrawer = ({
-  clientId,
-  buttonText = "Dodaj zwierzaka",
-  buttonVariant = "outline",
+  buttonText = "Dodaj zwierzę",
+  buttonVariant = "default",
   buttonSize = "default",
+  clientId,
   title,
   defaultValues,
   onPetSaved,
-  className,
   isEditing = false,
   children,
 }: PetFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Set default title based on whether we're editing or creating
-  const drawerTitle = title || (isEditing ? "Edytuj dane zwierzaka" : "Dodaj nowego zwierzaka");
+  const dialogTitle = title || (isEditing ? "Edytuj dane zwierzęcia" : "Dodaj nowe zwierzę");
 
-  // Convert Pet type to PetForm expected types
-  const formDefaultValues = defaultValues ? {
-    ...defaultValues,
-    // Convert number values to strings for the form inputs
-    age: defaultValues.age?.toString() || '',
-    weight: defaultValues.weight?.toString() || '',
-    species: defaultValues.species as PetSpecies,
-    sex: defaultValues.sex as PetSex || undefined
-  } : undefined;
-
-  const handleSubmit = async (formData: PetFormOutput) => {
+  const handleSubmit = async (formData: any) => {
     try {
       setIsSubmitting(true);
-      console.log("Saving pet:", formData);
       
       let petData: Pet;
       
       if (isEditing && defaultValues?.id) {
         // Update existing pet
-        petData = await updatePet(defaultValues.id, {
-          ...formData,
-          clientId
-        });
+        petData = await updatePet(defaultValues.id, formData);
         
         toast({
-          title: "Dane zwierzaka zaktualizowane",
-          description: `Dane zwierzaka ${formData.name} zostały zaktualizowane pomyślnie`
+          title: "Dane zwierzęcia zaktualizowane",
+          description: `Dane ${formData.name} zostały pomyślnie zaktualizowane`,
         });
       } else {
-        // Create new pet
-        // Ensure required fields are present for new pet creation
-        if (!formData.name || !formData.species) {
-          throw new Error("Imię i gatunek zwierzęcia są wymagane");
-        }
+        // Create new pet with clientId
+        const newPetData = {
+          ...formData,
+          clientId: clientId || formData.clientId
+        };
         
-        // Here we're removing the type error by providing all required fields
-        petData = await createPet({
-          name: formData.name,
-          species: formData.species,
-          clientId,
-          breed: formData.breed,
-          age: formData.age ? Number(formData.age) : undefined,
-          weight: formData.weight ? Number(formData.weight) : undefined,
-          sex: formData.sex,
-          neutered: formData.neutered,
-          medicalHistory: formData.medicalHistory,
-          allergies: formData.allergies,
-          dietaryRestrictions: formData.dietaryRestrictions,
-          behavioralNotes: formData.behavioralNotes,
-          hasMicrochip: formData.hasMicrochip || false,
-          microchipNumber: formData.microchipNumber,
-          vaccinationDescription: formData.vaccinationDescription,
-          user_id: "", // This will be set by the createPet function
-          createdAt: ""  // This will be set by the createPet function
-        });
+        petData = await createPet(newPetData);
         
         toast({
-          title: "Zwierzak dodany pomyślnie",
-          description: `Dodano zwierzaka ${formData.name}`,
+          title: "Zwierzę dodane pomyślnie",
+          description: `${formData.name} zostało dodane do systemu`,
         });
       }
-
-      // Invalidate queries to refresh data
-      if (defaultValues?.id) {
-        queryClient.invalidateQueries({ queryKey: ['pet', defaultValues.id] });
-      }
-      queryClient.invalidateQueries({ queryKey: ['pets'] });
-      if (defaultValues?.clientId) {
-        queryClient.invalidateQueries({ queryKey: ['pets', defaultValues.clientId] });
-      }
-
+      
       // Call the callback if provided
       if (onPetSaved) {
         onPetSaved(petData);
       }
-
+      
       // Close the drawer
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving pet:", error);
       toast({
-        title: isEditing ? "Błąd podczas aktualizacji danych" : "Błąd podczas dodawania zwierzaka",
-        description: "Spróbuj ponownie później",
+        title: "Błąd podczas zapisywania danych",
+        description: error.message || "Spróbuj ponownie później",
         variant: "destructive",
       });
     } finally {
@@ -143,21 +97,25 @@ const PetFormDrawer = ({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant={buttonVariant} size={buttonSize} className={className}>
-          {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Dog className="mr-2 h-4 w-4" />}
-          {buttonText}
+        <Button variant={buttonVariant} size={buttonSize}>
+          {children || (
+            <>
+              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <PawPrint className="mr-2 h-4 w-4" />}
+              {buttonText}
+            </>
+          )}
         </Button>
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="text-left">
-          <DrawerTitle>{drawerTitle}</DrawerTitle>
+          <DrawerTitle>{dialogTitle}</DrawerTitle>
         </DrawerHeader>
-        <div className="px-4 pb-4 overflow-y-auto">
+        <div className="px-4 pb-0 overflow-y-auto">
           <PetForm 
-            clientId={clientId}
-            defaultValues={formDefaultValues} 
+            defaultValues={defaultValues} 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
+            clientId={clientId}
           />
         </div>
         <DrawerFooter className="pt-2 border-t">
