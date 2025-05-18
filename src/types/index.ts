@@ -16,6 +16,10 @@ export interface SocialMediaLinks {
   [key: string]: string | null | undefined;
 }
 
+// Import Client type
+import { Client } from './client';
+import { Visit } from './visit';
+
 // Helper function to map database client to Client type
 export function mapDbClientToClient(dbClient: any): Client {
   return {

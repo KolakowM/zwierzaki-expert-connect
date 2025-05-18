@@ -27,8 +27,8 @@ export function mapDbPetToPet(dbPet: any): Pet {
 }
 
 // Helper function to map Pet type to database format
-export function mapPetToDbPet(pet: Partial<Pet>): any {
-  const dbPet: any = {};
+export function mapPetToDbPet(pet: Record<string, any>): any {
+  const dbPet: Record<string, any> = {};
   
   if (pet.name !== undefined) dbPet.name = pet.name;
   if (pet.species !== undefined) dbPet.species = pet.species;

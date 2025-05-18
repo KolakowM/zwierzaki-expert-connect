@@ -112,7 +112,7 @@ const PetFormDrawer = ({
         </DrawerHeader>
         <div className="px-4 pb-0 overflow-y-auto">
           <PetForm 
-            defaultValues={defaultValues} 
+            defaultValues={defaultValues as any}
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting} 
             clientId={clientId}

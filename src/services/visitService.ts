@@ -3,8 +3,8 @@ import { Visit, mapDbVisitToVisit } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper function to map Visit type to database format
-export function mapVisitToDbVisit(visit: Partial<Visit>): any {
-  const dbVisit: any = {};
+export function mapVisitToDbVisit(visit: Record<string, any>): any {
+  const dbVisit: Record<string, any> = {};
   
   if (visit.date !== undefined) dbVisit.date = visit.date;
   if (visit.time !== undefined) dbVisit.time = visit.time;

@@ -104,7 +104,7 @@ const PetFormDialog = ({
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <PetForm 
-          defaultValues={defaultValues} 
+          defaultValues={defaultValues as any} 
           onSubmit={handleSubmit} 
           isSubmitting={isSubmitting} 
           clientId={clientId}

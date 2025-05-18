@@ -48,7 +48,13 @@ const ClientTableRow = ({ client }: ClientTableRowProps) => {
               <Edit className="h-4 w-4" />
             </ResponsiveClientForm>
           </Button>
-          <DeleteClientButton client={client} />
+          <DeleteClientButton 
+            clientId={client.id} 
+            clientName={`${client.firstName} ${client.lastName}`}
+            onClientDeleted={() => {
+              queryClient.invalidateQueries({ queryKey: ['clients'] });
+            }} 
+          />
         </div>
       </TableCell>
     </TableRow>
