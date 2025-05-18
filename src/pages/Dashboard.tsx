@@ -35,7 +35,7 @@ const Dashboard = () => {
       toast({
         title: "Płatność zakończona pomyślnie!",
         description: "Twoja subskrypcja została aktywowana",
-        variant: "success"
+        variant: "default"
       });
       
       // Remove query parameter
