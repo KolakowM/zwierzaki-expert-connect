@@ -1,4 +1,3 @@
-
 import { Visit } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -44,6 +43,25 @@ export const getVisitById = async (visitId: string): Promise<Visit | null> => {
   }
 };
 
+export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('visits')
+      .select('*')
+      .eq('petid', petId);
+      
+    if (error) {
+      console.error("Error fetching visits by pet id:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getVisitsByPetId:", error);
+    return [];
+  }
+};
+
 export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promise<Visit> => {
   try {
     const { data: authUser } = await supabase.auth.getUser();
@@ -52,6 +70,7 @@ export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promi
     const newVisit = {
       ...visit,
       user_id: authUser.user.id,
+      status: visit.status || "scheduled",
       created_at: new Date().toISOString()
     };
     

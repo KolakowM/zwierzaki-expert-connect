@@ -1,4 +1,3 @@
-
 import { Pet } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -68,8 +67,23 @@ export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet
     const { data: authUser } = await supabase.auth.getUser();
     if (!authUser.user) throw new Error("User not authenticated");
     
+    // Convert camelCase to snake_case for database
     const newPet = {
-      ...pet,
+      name: pet.name,
+      species: pet.species,
+      clientid: pet.clientId,
+      breed: pet.breed,
+      age: pet.age ? Number(pet.age) : null,
+      weight: pet.weight ? Number(pet.weight) : null,
+      sex: pet.sex,
+      neutered: pet.neutered,
+      medicalhistory: pet.medicalHistory,
+      allergies: pet.allergies,
+      dietaryrestrictions: pet.dietaryRestrictions,
+      behavioralnotes: pet.behavioralNotes,
+      has_microchip: pet.hasMicrochip || false,
+      microchip_number: pet.microchipNumber,
+      vaccination_description: pet.vaccinationDescription,
       user_id: authUser.user.id,
       created_at: new Date().toISOString()
     };
@@ -91,9 +105,28 @@ export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet
 
 export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => {
   try {
+    // Convert camelCase to snake_case for database
+    const updateData: any = {};
+    
+    if (pet.name) updateData.name = pet.name;
+    if (pet.species) updateData.species = pet.species;
+    if (pet.clientId) updateData.clientid = pet.clientId;
+    if (pet.breed) updateData.breed = pet.breed;
+    if (pet.age !== undefined) updateData.age = pet.age;
+    if (pet.weight !== undefined) updateData.weight = pet.weight;
+    if (pet.sex) updateData.sex = pet.sex;
+    if (pet.neutered !== undefined) updateData.neutered = pet.neutered;
+    if (pet.medicalHistory) updateData.medicalhistory = pet.medicalHistory;
+    if (pet.allergies) updateData.allergies = pet.allergies;
+    if (pet.dietaryRestrictions) updateData.dietaryrestrictions = pet.dietaryRestrictions;
+    if (pet.behavioralNotes) updateData.behavioralnotes = pet.behavioralNotes;
+    if (pet.hasMicrochip !== undefined) updateData.has_microchip = pet.hasMicrochip;
+    if (pet.microchipNumber) updateData.microchip_number = pet.microchipNumber;
+    if (pet.vaccinationDescription) updateData.vaccination_description = pet.vaccinationDescription;
+    
     const { data, error } = await supabase
       .from('pets')
-      .update(pet)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -120,5 +153,23 @@ export const deletePet = async (id: string): Promise<boolean> => {
   } catch (error) {
     console.error("Error deleting pet:", error);
     throw error;
+  }
+};
+
+// Add the missing function for counting related entities
+export const getRelatedEntitiesCount = async (petId: string): Promise<{ visits: number, carePrograms: number }> => {
+  try {
+    const [visitsResult, programsResult] = await Promise.all([
+      supabase.from('visits').select('id', { count: 'exact' }).eq('petid', petId),
+      supabase.from('care_programs').select('id', { count: 'exact' }).eq('petid', petId)
+    ]);
+    
+    return {
+      visits: visitsResult.count || 0,
+      carePrograms: programsResult.count || 0
+    };
+  } catch (error) {
+    console.error("Error counting related entities:", error);
+    return { visits: 0, carePrograms: 0 };
   }
 };

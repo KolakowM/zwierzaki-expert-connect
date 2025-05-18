@@ -85,13 +85,14 @@ const PetFormDrawer = ({
           throw new Error("Imię i gatunek zwierzęcia są wymagane");
         }
         
+        // Here we're removing the type error by providing all required fields
         petData = await createPet({
           name: formData.name,
           species: formData.species,
           clientId,
           breed: formData.breed,
-          age: formData.age,
-          weight: formData.weight,
+          age: formData.age ? Number(formData.age) : undefined,
+          weight: formData.weight ? Number(formData.weight) : undefined,
           sex: formData.sex,
           neutered: formData.neutered,
           medicalHistory: formData.medicalHistory,
@@ -100,7 +101,9 @@ const PetFormDrawer = ({
           behavioralNotes: formData.behavioralNotes,
           hasMicrochip: formData.hasMicrochip || false,
           microchipNumber: formData.microchipNumber,
-          vaccinationDescription: formData.vaccinationDescription
+          vaccinationDescription: formData.vaccinationDescription,
+          user_id: "", // This will be set by the createPet function
+          createdAt: ""  // This will be set by the createPet function
         });
         
         toast({

@@ -11,8 +11,9 @@ export const mockClients: Client[] = [
     address: "ul. Kwiatowa 1",
     city: "Warszawa",
     postCode: "00-001",
-    createdAt: new Date("2023-01-15T10:30:00Z"),
-    notes: "Regularny klient, przychodzi co miesiąc."
+    createdAt: "2023-01-15T10:30:00Z",
+    notes: "Regularny klient, przychodzi co miesiąc.",
+    user_id: "1"
   },
   {
     id: "2",
@@ -23,8 +24,9 @@ export const mockClients: Client[] = [
     address: "ul. Słoneczna 5",
     city: "Kraków",
     postCode: "30-001",
-    createdAt: new Date("2023-02-20T14:15:00Z"),
-    notes: "Dwóch psów i jeden kot."
+    createdAt: "2023-02-20T14:15:00Z",
+    notes: "Dwóch psów i jeden kot.",
+    user_id: "1"
   },
   {
     id: "3",
@@ -35,8 +37,9 @@ export const mockClients: Client[] = [
     address: "ul. Lipowa 8",
     city: "Wrocław",
     postCode: "50-001",
-    createdAt: new Date("2023-03-05T09:00:00Z"),
-    notes: "Alergiczny na niektóre karmy dla psów. Kot ma specjalną dietę."
+    createdAt: "2023-03-05T09:00:00Z",
+    notes: "Alergiczny na niektóre karmy dla psów. Kot ma specjalną dietę.",
+    user_id: "1"
   }
 ];
 
@@ -57,8 +60,9 @@ export const mockPets: Pet[] = [
     behavioralNotes: "Przyjazny, dobrze socjalizowany",
     createdAt: "2023-01-15T10:35:00Z",
     hasMicrochip: false,
-    microchipNumber: null,
-    vaccinationDescription: null
+    microchipNumber: undefined,
+    vaccinationDescription: undefined,
+    user_id: "1"
   },
   {
     id: "2",
@@ -76,8 +80,9 @@ export const mockPets: Pet[] = [
     behavioralNotes: "Lekko lękliwy przy nowych sytuacjach",
     createdAt: "2023-02-20T14:20:00Z",
     hasMicrochip: false,
-    microchipNumber: null,
-    vaccinationDescription: null
+    microchipNumber: undefined,
+    vaccinationDescription: undefined,
+    user_id: "1"
   },
   {
     id: "3",
@@ -95,8 +100,9 @@ export const mockPets: Pet[] = [
     behavioralNotes: "Bardzo energiczna, potrzebuje dużo ruchu",
     createdAt: "2023-02-20T14:25:00Z",
     hasMicrochip: false,
-    microchipNumber: null,
-    vaccinationDescription: null
+    microchipNumber: undefined,
+    vaccinationDescription: undefined,
+    user_id: "1"
   },
   {
     id: "4",
@@ -114,8 +120,9 @@ export const mockPets: Pet[] = [
     behavioralNotes: "Spokojny, domator",
     createdAt: "2023-02-20T14:30:00Z",
     hasMicrochip: false,
-    microchipNumber: null,
-    vaccinationDescription: null
+    microchipNumber: undefined,
+    vaccinationDescription: undefined,
+    user_id: "1"
   },
   {
     id: "5",
@@ -133,8 +140,9 @@ export const mockPets: Pet[] = [
     behavioralNotes: "Towarzyski, lubi zabawę",
     createdAt: "2023-03-05T09:10:00Z",
     hasMicrochip: false,
-    microchipNumber: null,
-    vaccinationDescription: null
+    microchipNumber: undefined,
+    vaccinationDescription: undefined,
+    user_id: "1"
   }
 ];
 
@@ -144,33 +152,45 @@ export const mockVisits: Visit[] = [
     petId: "1",
     clientId: "1",
     date: "2023-04-10T11:00:00Z",
+    time: "11:00",
     type: "Kontrola ogólna",
     notes: "Pies w dobrej kondycji, waga stabilna",
     recommendations: "Kontynuować obecną dietę, zwiększyć aktywność fizyczną",
     followUpNeeded: true,
-    followUpDate: "2023-07-10T00:00:00Z"
+    followUpDate: "2023-07-10T00:00:00Z",
+    status: "completed",
+    createdAt: "2023-04-10T09:00:00Z",
+    user_id: "1"
   },
   {
     id: "2",
     petId: "2",
     clientId: "2",
     date: "2023-05-15T14:30:00Z",
+    time: "14:30",
     type: "Konsultacja ortopedyczna",
     notes: "Widoczna poprawa w poruszaniu się po suplementacji",
     recommendations: "Kontynuować suplementację, łagodne ćwiczenia rehabilitacyjne",
     followUpNeeded: true,
-    followUpDate: "2023-06-15T00:00:00Z"
+    followUpDate: "2023-06-15T00:00:00Z",
+    status: "completed",
+    createdAt: "2023-05-15T10:00:00Z",
+    user_id: "1"
   },
   {
     id: "3",
     petId: "4",
     clientId: "2",
     date: "2023-05-20T10:00:00Z",
+    time: "10:00",
     type: "Badanie krwi - kontrola nerek",
     notes: "Parametry stabilne, ale wciąż podwyższone",
     recommendations: "Kontynuować dietę nerkową, zwiększyć nawodnienie",
     followUpNeeded: true,
-    followUpDate: "2023-08-20T00:00:00Z"
+    followUpDate: "2023-08-20T00:00:00Z",
+    status: "completed",
+    createdAt: "2023-05-20T08:00:00Z",
+    user_id: "1"
   }
 ];
 
