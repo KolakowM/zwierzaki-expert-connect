@@ -14,6 +14,7 @@ import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import ClientsTab from "@/components/dashboard/ClientsTab";
 import AnimalsTab from "@/components/dashboard/AnimalsTab";
 import CalendarTab from "@/components/dashboard/CalendarTab";
+import SubscriptionInfo from "@/components/dashboard/SubscriptionInfo";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -27,6 +28,21 @@ const Dashboard = () => {
   const queryParams = new URLSearchParams(location.search);
   const tabFromQuery = queryParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
+
+  // Check if payment was just completed
+  useEffect(() => {
+    if (queryParams.get('checkout_success') === 'true') {
+      toast({
+        title: "Płatność zakończona pomyślnie!",
+        description: "Twoja subskrypcja została aktywowana",
+        variant: "success"
+      });
+      
+      // Remove query parameter
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -94,6 +110,10 @@ const Dashboard = () => {
               photoUrl={specialistProfile?.photo_url} 
             />
           </div>
+        </div>
+
+        <div className="mb-6">
+          <SubscriptionInfo />
         </div>
 
         <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
