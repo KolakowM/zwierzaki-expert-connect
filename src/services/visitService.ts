@@ -24,6 +24,26 @@ export const getVisits = async (): Promise<Visit[]> => {
   }
 };
 
+export const getVisitById = async (visitId: string): Promise<Visit | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('visits')
+      .select('*')
+      .eq('id', visitId)
+      .single();
+      
+    if (error) {
+      console.error("Error fetching visit by id:", error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in getVisitById:", error);
+    return null;
+  }
+};
+
 export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promise<Visit> => {
   try {
     const { data: authUser } = await supabase.auth.getUser();
@@ -46,6 +66,40 @@ export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promi
     return data;
   } catch (error) {
     console.error("Error creating visit:", error);
+    throw error;
+  }
+};
+
+export const updateVisit = async (id: string, visit: Partial<Visit>): Promise<Visit> => {
+  try {
+    const { data, error } = await supabase
+      .from('visits')
+      .update(visit)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    console.error("Error updating visit:", error);
+    throw error;
+  }
+};
+
+export const deleteVisit = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('visits')
+      .delete()
+      .eq('id', id);
+      
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting visit:", error);
     throw error;
   }
 };

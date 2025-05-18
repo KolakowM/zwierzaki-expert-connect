@@ -9,6 +9,9 @@ export interface Visit {
   status: 'scheduled' | 'completed' | 'cancelled';
   type: string;
   followUp?: string;
+  followUpNeeded?: boolean;
+  followUpDate?: string;
+  recommendations?: string;
   createdAt: string;
   user_id: string;
 }
