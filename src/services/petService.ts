@@ -27,7 +27,7 @@ export function mapDbPetToPet(dbPet: any): Pet {
 }
 
 // Helper function to map Pet type to database format
-export function mapPetToDbPet(pet: Record<string, any>): Record<string, any> {
+export function mapPetToDbPet(pet: Partial<Pet>): Record<string, any> {
   const dbPet: Record<string, any> = {};
   
   if (pet.name !== undefined) dbPet.name = pet.name;
@@ -121,7 +121,7 @@ export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet
     
     const { data, error } = await supabase
       .from('pets')
-      .insert([dbPet])
+      .insert([dbPet]) // Insert as an array with one object
       .select()
       .single();
       

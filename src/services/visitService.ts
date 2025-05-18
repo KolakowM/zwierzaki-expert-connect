@@ -3,7 +3,7 @@ import { Visit, mapDbVisitToVisit } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper function to map Visit type to database format
-export function mapVisitToDbVisit(visit: Record<string, any>): Record<string, any> {
+export function mapVisitToDbVisit(visit: Partial<Visit>): Record<string, any> {
   const dbVisit: Record<string, any> = {};
   
   if (visit.date !== undefined) dbVisit.date = visit.date;
@@ -93,7 +93,7 @@ export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promi
     
     const { data, error } = await supabase
       .from('visits')
-      .insert([dbVisit])
+      .insert([dbVisit]) // Insert as an array with one object
       .select()
       .single();
       
