@@ -19,10 +19,10 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="petsflow-theme">
-      <AuthProvider>
-        <SubscriptionProvider>
-          <Router basename="/">
+    <Router basename="/">
+      <ThemeProvider defaultTheme="light" storageKey="petsflow-theme">
+        <AuthProvider>
+          <SubscriptionProvider>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -36,11 +36,11 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
             </Routes>
-          </Router>
-        </SubscriptionProvider>
-      </AuthProvider>
-      <Toaster />
-    </ThemeProvider>
+            <Toaster />
+          </SubscriptionProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 
