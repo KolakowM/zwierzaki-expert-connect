@@ -18,5 +18,4 @@ export interface Pet {
   behavioralNotes?: string;
   vaccinationDescription?: string;
   createdAt: string;
-  user_id: string;
 }
