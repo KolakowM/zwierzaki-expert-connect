@@ -1,3 +1,4 @@
+
 import { Visit, mapDbVisitToVisit } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,7 +17,6 @@ export function mapVisitToDbVisit(visit: Partial<Visit>): any {
   if (visit.followUpNeeded !== undefined) dbVisit.followupneeded = visit.followUpNeeded;
   if (visit.followUpDate !== undefined) dbVisit.followupdate = visit.followUpDate;
   if (visit.recommendations !== undefined) dbVisit.recommendations = visit.recommendations;
-  if (visit.user_id !== undefined) dbVisit.user_id = visit.user_id;
   
   return dbVisit;
 }
@@ -26,17 +26,30 @@ export const getVisits = async (): Promise<Visit[]> => {
     const { data: authUser } = await supabase.auth.getUser();
     if (!authUser.user) return [];
     
-    const { data, error } = await supabase
-      .from('visits')
-      .select('*')
+    // Najpierw pobierz klientów zalogowanego użytkownika
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id')
       .eq('user_id', authUser.user.id);
       
-    if (error) {
-      console.error("Error fetching visits:", error);
+    if (clientsError || !clients || clients.length === 0) {
+      console.error("Error fetching clients or no clients found:", clientsError);
       return [];
     }
     
-    return data ? data.map(mapDbVisitToVisit) : [];
+    // Pobierz wizyty przypisane do klientów tego użytkownika
+    const clientIds = clients.map(client => client.id);
+    const { data: visits, error: visitsError } = await supabase
+      .from('visits')
+      .select('*')
+      .in('clientid', clientIds);
+      
+    if (visitsError) {
+      console.error("Error fetching visits:", visitsError);
+      return [];
+    }
+    
+    return visits ? visits.map(mapDbVisitToVisit) : [];
   } catch (error) {
     console.error("Error in getVisits:", error);
     return [];
@@ -82,13 +95,9 @@ export const getVisitsByPetId = async (petId: string): Promise<Visit[]> => {
   }
 };
 
-export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promise<Visit> => {
+export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt' | 'user_id'>): Promise<Visit> => {
   try {
-    const { data: authUser } = await supabase.auth.getUser();
-    if (!authUser.user) throw new Error("User not authenticated");
-    
     const dbVisit = mapVisitToDbVisit(visit);
-    dbVisit.user_id = authUser.user.id; // Always ensure user_id is set
     
     // Ensure required fields are provided
     if (!dbVisit.date) throw new Error("Visit date is required");

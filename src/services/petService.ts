@@ -1,3 +1,4 @@
+
 import { Pet } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -44,7 +45,6 @@ export function mapPetToDbPet(pet: Partial<Pet>): any {
   if (pet.hasMicrochip !== undefined) dbPet.has_microchip = pet.hasMicrochip;
   if (pet.microchipNumber !== undefined) dbPet.microchip_number = pet.microchipNumber;
   if (pet.vaccinationDescription !== undefined) dbPet.vaccination_description = pet.vaccinationDescription;
-  if (pet.user_id !== undefined) dbPet.user_id = pet.user_id;
   
   return dbPet;
 }
@@ -54,17 +54,30 @@ export const getPets = async (): Promise<Pet[]> => {
     const { data: authUser } = await supabase.auth.getUser();
     if (!authUser.user) return [];
     
-    const { data, error } = await supabase
-      .from('pets')
-      .select('*')
+    // Najpierw pobierz klientów zalogowanego użytkownika
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id')
       .eq('user_id', authUser.user.id);
       
-    if (error) {
-      console.error("Error fetching pets:", error);
+    if (clientsError || !clients || clients.length === 0) {
+      console.error("Error fetching clients or no clients found:", clientsError);
       return [];
     }
     
-    return data ? data.map(mapDbPetToPet) : [];
+    // Pobierz zwierzęta przypisane do klientów tego użytkownika
+    const clientIds = clients.map(client => client.id);
+    const { data: pets, error: petsError } = await supabase
+      .from('pets')
+      .select('*')
+      .in('clientid', clientIds);
+      
+    if (petsError) {
+      console.error("Error fetching pets:", petsError);
+      return [];
+    }
+    
+    return pets ? pets.map(mapDbPetToPet) : [];
   } catch (error) {
     console.error("Error in getPets:", error);
     return [];
@@ -110,22 +123,18 @@ export const getPetsByClientId = async (clientId: string): Promise<Pet[]> => {
   }
 };
 
-export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet> => {
+export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt' | 'user_id'>): Promise<Pet> => {
   try {
-    const { data: authUser } = await supabase.auth.getUser();
-    if (!authUser.user) throw new Error("User not authenticated");
+    // Ensure required fields are provided
+    if (!pet.name) throw new Error("Pet name is required");
+    if (!pet.species) throw new Error("Pet species is required");
+    if (!pet.clientId) throw new Error("Client ID is required");
     
     const dbPet = mapPetToDbPet(pet);
-    dbPet.user_id = authUser.user.id; // Always ensure user_id is set
-    
-    // Ensure required fields are provided
-    if (!dbPet.name) throw new Error("Pet name is required");
-    if (!dbPet.species) throw new Error("Pet species is required");
-    if (!dbPet.clientid) throw new Error("Client ID is required");
     
     const { data, error } = await supabase
       .from('pets')
-      .insert([dbPet]) // Insert as an array with one object
+      .insert([dbPet])
       .select()
       .single();
       
