@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import dashboard components
@@ -27,21 +28,6 @@ const Dashboard = () => {
   const tabFromQuery = queryParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
 
-  // Check if payment was just completed
-  useEffect(() => {
-    if (queryParams.get('checkout_success') === 'true') {
-      toast({
-        title: "Płatność zakończona pomyślnie!",
-        description: "Twoja subskrypcja została aktywowana",
-        variant: "default"
-      });
-      
-      // Remove query parameter
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
-    }
-  }, []);
-
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
@@ -49,7 +35,7 @@ const Dashboard = () => {
         description: "Musisz być zalogowany, aby zobaczyć ten panel",
         variant: "destructive"
       });
-      // navigate("/login"); // Tymczasowo zakomentowane!
+     // navigate("/login"); // Tymczasowo zakomentowane!
     } else if (user?.id) {
       fetchSpecialistProfile(user.id);
     }

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -124,13 +125,10 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
       date: appointmentDateTime.toISOString(),
       time: data.time,
       type: data.type,
-      notes: data.notes || undefined,
-      status: 'scheduled',
+      notes: data.notes || null,
       recommendations: null,
       followUpNeeded: false,
-      followUpDate: null,
-      user_id: '',  // This will be set by the createVisit function
-      createdAt: new Date().toISOString()
+      followUpDate: null
     };
 
     createVisitMutation.mutate(newVisit);

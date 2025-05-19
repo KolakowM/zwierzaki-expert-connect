@@ -1,13 +1,13 @@
 
-import { Client } from './client';
-import { Pet } from './pet';
-import { Visit } from './visit';
-import { CareProgram } from './care-program';
+import { DbClient, Client } from './client';
+import { DbPet, Pet } from './pet';
+import { DbVisit, Visit } from './visit';
+import { DbCareProgram, CareProgram } from './care-program';
 
 // Type mappings between database and application types
 export type Tables = {
-  clients: Client;
-  pets: Pet;
-  visits: Visit;
-  care_programs: CareProgram;
+  clients: DbClient;
+  pets: DbPet;
+  visits: DbVisit;
+  care_programs: DbCareProgram;
 };
