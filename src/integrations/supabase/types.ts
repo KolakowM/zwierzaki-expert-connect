@@ -423,6 +423,7 @@ export type Database = {
           notes: string | null
           petid: string
           recommendations: string | null
+          status: string | null
           time: string | null
           type: string
         }
@@ -435,6 +436,7 @@ export type Database = {
           notes?: string | null
           petid: string
           recommendations?: string | null
+          status?: string | null
           time?: string | null
           type: string
         }
@@ -447,6 +449,7 @@ export type Database = {
           notes?: string | null
           petid?: string
           recommendations?: string | null
+          status?: string | null
           time?: string | null
           type?: string
         }

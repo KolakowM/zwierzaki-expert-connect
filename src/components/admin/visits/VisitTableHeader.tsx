@@ -1,55 +1,60 @@
 
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface VisitTableHeaderProps {
+  sortBy: string | null;
+  sortOrder: "asc" | "desc";
   handleSort: (column: string) => void;
 }
 
-const VisitTableHeader = ({ handleSort }: VisitTableHeaderProps) => {
+const VisitTableHeader = ({ sortBy, sortOrder, handleSort }: VisitTableHeaderProps) => {
+  const renderSortIcon = (column: string) => {
+    if (sortBy !== column) return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    return sortOrder === "asc" ? 
+      <ArrowUpAZ className="h-4 w-4 ml-1" /> : 
+      <ArrowDownAZ className="h-4 w-4 ml-1" />;
+  };
+
   return (
     <TableHeader>
       <TableRow>
-        <TableHead 
-          className="cursor-pointer"
-          onClick={() => handleSort("date")}
-        >
-          <div className="flex items-center">
-            Data
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </div>
+        <TableHead>
+          <Button 
+            variant="ghost" 
+            onClick={() => handleSort("date")}
+            className="p-0 font-medium flex items-center hover:bg-transparent"
+          >
+            Data {renderSortIcon("date")}
+          </Button>
         </TableHead>
-        <TableHead 
-          className="cursor-pointer"
-          onClick={() => handleSort("type")}
-        >
-          <div className="flex items-center">
-            Rodzaj Wizyty
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </div>
+        <TableHead>
+          <Button 
+            variant="ghost" 
+            onClick={() => handleSort("client")}
+            className="p-0 font-medium flex items-center hover:bg-transparent"
+          >
+            Pacjent / Klient {renderSortIcon("client")}
+          </Button>
         </TableHead>
-        <TableHead 
-          className="cursor-pointer"
-          onClick={() => handleSort("pet")}
-        >
-          <div className="flex items-center">
-            Zwierzę
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </div>
+        <TableHead>
+          <Button 
+            variant="ghost" 
+            onClick={() => handleSort("type")}
+            className="p-0 font-medium flex items-center hover:bg-transparent"
+          >
+            Typ wizyty {renderSortIcon("type")}
+          </Button>
         </TableHead>
-        <TableHead 
-          className="cursor-pointer hidden md:table-cell"
-          onClick={() => handleSort("client")}
-        >
-          <div className="flex items-center">
-            Właściciel
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </div>
-        </TableHead>
-        <TableHead 
-          className="cursor-pointer hidden md:table-cell"
-        >
-          Kontynuacja
+        <TableHead>
+          <Button 
+            variant="ghost" 
+            onClick={() => handleSort("status")}
+            className="p-0 font-medium flex items-center hover:bg-transparent"
+          >
+            Status {renderSortIcon("status")}
+          </Button>
         </TableHead>
         <TableHead className="text-right">Akcje</TableHead>
       </TableRow>

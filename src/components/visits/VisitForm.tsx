@@ -11,8 +11,10 @@ import VisitTimeField from "./form-fields/VisitTimeField";
 import VisitTypeField from "./form-fields/VisitTypeField";
 import VisitRichTextField from "./form-fields/VisitRichTextField";
 import VisitFollowUpField from "./form-fields/VisitFollowUpField";
+import VisitStatusField from "./form-fields/VisitStatusField";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbVisitToVisit } from "@/types";
+import { ALL_VISIT_STATUSES } from "@/constants/visitStatuses";
 
 // Define the schema for visit validation
 const visitFormSchema = z.object({
@@ -25,6 +27,7 @@ const visitFormSchema = z.object({
   recommendations: z.string().optional(),
   followUpNeeded: z.boolean().default(false),
   followUpDate: z.date().optional().nullable(),
+  status: z.enum(ALL_VISIT_STATUSES as [string, ...string[]]).default("Planowana"),
 });
 
 type VisitFormValues = z.infer<typeof visitFormSchema>;
@@ -51,6 +54,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
       recommendations: "",
       followUpNeeded: false,
       followUpDate: null,
+      status: "Planowana",
       ...defaultValues,
     },
   });
@@ -125,6 +129,8 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
           <VisitTimeField form={form} />
           <VisitTypeField form={form} />
         </div>
+
+        <VisitStatusField form={form} />
 
         <VisitRichTextField
           form={form}
