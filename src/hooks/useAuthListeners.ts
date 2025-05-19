@@ -20,6 +20,9 @@ export function useAuthListeners(
     console.log("Setting up auth state change listener");
     let isMounted = true;
     
+    // Use a flag to track if we've already loaded user data
+    let initialUserLoaded = false;
+    
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event);
@@ -42,18 +45,21 @@ export function useAuthListeners(
           setSessionChecked(true);
           setIsLoading(false);
         } else if (event === 'TOKEN_REFRESHED') {
-          // Refresh user data when token is refreshed without triggering a loading state
-          try {
-            const currentUser = await getCurrentUser();
-            if (isMounted) {
-              setUser(currentUser);
-              setSessionChecked(true);
+          // Use setTimeout to avoid circular updates and defer after current operation
+          setTimeout(async () => {
+            if (!isMounted) return;
+            try {
+              const currentUser = await getCurrentUser();
+              if (isMounted) {
+                setUser(currentUser);
+                setSessionChecked(true);
+              }
+            } finally {
+              if (isMounted) {
+                setIsLoading(false);
+              }
             }
-          } finally {
-            if (isMounted) {
-              setIsLoading(false);
-            }
-          }
+          }, 0);
         } else if (event === 'INITIAL_SESSION') {
           // Handle initial session without redirecting
           if (session?.user) {
@@ -72,22 +78,11 @@ export function useAuthListeners(
       }
     );
 
-    return () => {
-      isMounted = false;
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
-  }, []);
-
-  // Initial auth check - only run once on component mount
-  useEffect(() => {
-    console.log("Running initial auth check");
-    let isMounted = true;
-    
+    // Only run initial auth check if no listener events have fired yet
     const loadUser = async () => {
       try {
         if (!isMounted) return;
+        if (initialUserLoaded) return;
         
         // First try to get user from current session
         const currentUser = await getCurrentUser();
@@ -97,6 +92,7 @@ export function useAuthListeners(
           try {
             const refreshed = await refreshSession();
             if (refreshed && isMounted) {
+              initialUserLoaded = true;
               const refreshedUser = await getCurrentUser();
               setUser(refreshedUser);
             }
@@ -104,6 +100,7 @@ export function useAuthListeners(
             console.error("Error refreshing session:", refreshError);
           }
         } else if (isMounted) {
+          initialUserLoaded = true;
           setUser(currentUser);
         }
       } catch (error) {
@@ -115,11 +112,15 @@ export function useAuthListeners(
         }
       }
     };
-
-    loadUser();
     
+    // Load user data with a small delay to avoid race conditions with the listener
+    setTimeout(loadUser, 100);
+
     return () => {
       isMounted = false;
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
 }

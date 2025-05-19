@@ -1,176 +1,129 @@
 
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { getCurrentUser, signIn, signOut, signUp, refreshSession, SignInCredentials, SignUpCredentials } from "@/services/authService";
-import { AuthState } from "./useAuthState";
+import { useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  signIn, 
+  signUp, 
+  signOut, 
+  getCurrentUser, 
+  refreshSession,
+  AuthUser
+} from "@/services/authService";
 
-export function useAuthMethods(
-  { user, setUser, setIsLoading }: Pick<AuthState & {
-    setUser: (user: any) => void;
-    setIsLoading: (loading: boolean) => void;
-  }, "user" | "setUser" | "setIsLoading">
-) {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+type AuthMethodsParams = {
+  user: AuthUser | null;
+  setUser: (user: AuthUser | null) => void;
+  setIsLoading: (isLoading: boolean) => void;
+};
 
-  const login = async (credentials: SignInCredentials) => {
+export function useAuthMethods({ user, setUser, setIsLoading }: AuthMethodsParams) {
+  // Cache verification timestamp to prevent excessive checks
+  let lastVerifiedTimestamp = 0;
+  const VERIFICATION_THROTTLE = 10000; // 10 seconds
+  
+  const login = useCallback(async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      console.log("Login attempt for:", credentials.email);
-      await signIn(credentials);
-      
-      // Let the auth listener handle the user state update
-      // We check the result here just to ensure no errors
-      const currentUser = await getCurrentUser();
-      
-      if (!currentUser) {
-        throw new Error("Nie udało się zalogować. Spróbuj ponownie.");
-      }
-      
-      toast({
-        title: t("auth.login_success"),
-        description: t("auth.login_welcome")
-      });
-      
-      // Let the auth state listener handle navigation
+      await signIn({ email, password });
+      // We don't need to explicitly set the user here as the auth state listener will handle it
+      return true;
     } catch (error: any) {
       console.error("Login error:", error);
-      toast({
-        title: "Błąd logowania",
-        description: error.message || "Sprawdź swoje dane i spróbuj ponownie.",
-        variant: "destructive"
-      });
-      throw error;
+      return { error: error.message || "Failed to login" };
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setIsLoading]);
 
-  const register = async (credentials: SignUpCredentials): Promise<void> => {
+  const register = useCallback(async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
       setIsLoading(true);
-      console.log("Register attempt for:", credentials.email);
-      await signUp(credentials);
-      
-      // We need to explicitly sign in after registration
-      try {
-        await signIn({
-          email: credentials.email,
-          password: credentials.password
-        });
-      } catch (signInError) {
-        console.error("Auto sign-in after registration failed:", signInError);
-        // Continue with registration process even if auto sign-in fails
-      }
-      
-      // Let the auth listener handle the user state update and navigation
-      // We check the result here just to ensure no errors
-      const currentUser = await getCurrentUser();
-      
-      if (currentUser) {
-        setUser(currentUser);
-        
-        toast({
-          title: t("auth.register_success"),
-          description: t("auth.register_welcome")
-        });
-        
-        // Let the auth state listener handle navigation
-      } else {
-        // If we couldn't get the user after registration, direct to login
-        toast({
-          title: t("auth.register_success"),
-          description: "Możesz teraz się zalogować."
-        });
-        navigate("/login");
-      }
+      await signUp({ email, password, firstName, lastName });
+      return true;
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        title: "Błąd rejestracji",
-        description: error.message || "Spróbuj ponownie z innym adresem email.",
-        variant: "destructive"
-      });
-      throw error;
+      return { error: error.message || "Failed to register" };
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setIsLoading]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       setIsLoading(true);
       await signOut();
       setUser(null);
-      toast({
-        title: t("auth.logout_success"),
-        description: t("auth.logout_goodbye")
-      });
-      navigate("/login");
-    } catch (error: any) {
+      return true;
+    } catch (error) {
       console.error("Logout error:", error);
-      toast({
-        title: "Błąd wylogowania",
-        description: error.message || "Spróbuj ponownie później.",
-        variant: "destructive"
-      });
-      throw error;
+      return false;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setUser, setIsLoading]);
 
-  const verifySession = async (): Promise<boolean> => {
+  const verifySession = useCallback(async (): Promise<boolean> => {
+    const now = Date.now();
+    
+    // Don't verify too frequently to reduce database calls
+    if (now - lastVerifiedTimestamp < VERIFICATION_THROTTLE) {
+      console.log("Session verification throttled");
+      // If we already have a user, trust it for the throttle period
+      return !!user;
+    }
+    
     try {
-      console.log("Verifying session");
-      const currentUser = await getCurrentUser();
+      setIsLoading(true);
+      lastVerifiedTimestamp = now;
       
-      // If no user found, try to refresh the session
-      if (!currentUser) {
-        try {
-          const refreshed = await refreshSession();
-          if (!refreshed) {
-            setUser(null);
-            return false;
-          }
-          
-          // Check again after refresh attempt
-          const refreshedUser = await getCurrentUser();
-          setUser(refreshedUser);
-          return !!refreshedUser;
-        } catch (refreshError) {
-          console.error("Error refreshing session:", refreshError);
-          setUser(null);
-          return false;
-        }
-      } else {
+      // First check if we already have the user in state
+      if (user) {
+        return true;
+      }
+      
+      // If no user in state, try to get from current session
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
         setUser(currentUser);
         return true;
       }
-    } catch (error) {
-      console.error("Error verifying session:", error);
-      setUser(null);
+      
+      // If no current session, try to refresh the session
+      const refreshed = await refreshSession();
+      if (refreshed) {
+        const refreshedUser = await getCurrentUser();
+        if (refreshedUser) {
+          setUser(refreshedUser);
+          return true;
+        }
+      }
+      
       return false;
+    } catch (error) {
+      console.error("Session verification error:", error);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [user, setUser, setIsLoading]);
 
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     try {
       setIsLoading(true);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
+      return currentUser;
     } catch (error) {
       console.error("Error refreshing user data:", error);
+      return null;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setUser, setIsLoading]);
 
-  const isAdmin = () => {
+  const isAdmin = useCallback(() => {
     return user?.role === 'admin';
-  };
+  }, [user]);
 
   return {
     login,

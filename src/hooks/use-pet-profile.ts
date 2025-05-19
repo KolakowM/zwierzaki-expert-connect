@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPetById, deletePet } from "@/services/petService";
@@ -20,6 +19,7 @@ export const usePetProfile = () => {
 
   const petId = id || "";
 
+  // Use caching for pet data
   const { 
     data: pet,
     isLoading: isPetLoading,
@@ -29,8 +29,10 @@ export const usePetProfile = () => {
     queryKey: ['pet', petId],
     queryFn: () => getPetById(petId),
     enabled: !!petId && isAuthenticated,
+    staleTime: 60000, // Cache data for 1 minute
   });
 
+  // Use caching for owner data
   const { 
     data: owner,
     isLoading: isOwnerLoading 
@@ -38,8 +40,10 @@ export const usePetProfile = () => {
     queryKey: ['client', pet?.clientId],
     queryFn: () => pet?.clientId ? getClientById(pet.clientId) : null,
     enabled: !!pet?.clientId && isAuthenticated,
+    staleTime: 60000, // Cache data for 1 minute
   });
 
+  // Use caching for visits data
   const {
     data: visits = [],
     isLoading: isVisitsLoading,
@@ -48,8 +52,10 @@ export const usePetProfile = () => {
     queryKey: ['visits', petId],
     queryFn: () => getVisitsByPetId(petId),
     enabled: !!petId && isAuthenticated,
+    staleTime: 60000, // Cache data for 1 minute
   });
 
+  // Use caching for care programs data
   const { 
     data: carePrograms = [],
     isLoading: isCareLoading
@@ -57,20 +63,22 @@ export const usePetProfile = () => {
     queryKey: ['carePrograms', petId],
     queryFn: () => getCareProgramsByPetId(petId),
     enabled: !!petId && isAuthenticated,
+    staleTime: 60000, // Cache data for 1 minute
   });
 
   const isLoading = isPetLoading || isOwnerLoading || isVisitsLoading || isCareLoading;
 
+  // We'll only show the authentication error message once, not trigger navigation
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !isLoading) {
       toast({
         title: "Brak dostępu",
         description: "Musisz być zalogowany, aby przeglądać dane zwierząt",
         variant: "destructive"
       });
-      navigate("/login");
+      // Note: Navigation will be handled by ProtectedRoute, not here
     }
-  }, [isAuthenticated, navigate, toast]);
+  }, [isAuthenticated, isLoading, toast]);
 
   useEffect(() => {
     if (petError) {
