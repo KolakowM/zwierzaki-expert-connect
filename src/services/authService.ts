@@ -64,28 +64,59 @@ export const signOut = async () => {
   if (error) {
     throw error;
   }
+  
+  // Clear any local session data to ensure complete logout
+  localStorage.removeItem('supabase.auth.token');
 };
 
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
-  const { data } = await supabase.auth.getSession();
-  
-  if (!data.session) {
+  try {
+    // Get the current session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+      return null;
+    }
+    
+    if (!sessionData?.session) {
+      return null;
+    }
+    
+    // Verify the session is valid by checking the user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !userData?.user) {
+      console.error('User verification error:', userError);
+      return null;
+    }
+    
+    const user = userData.user;
+    
+    return {
+      id: user.id,
+      email: user.email || '',
+      role: user.user_metadata?.role || 'specialist',
+      firstName: user.user_metadata?.firstName,
+      lastName: user.user_metadata?.lastName,
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
     return null;
   }
-  
-  const { user } = data.session;
-  
-  if (!user) {
-    return null;
+};
+
+export const refreshSession = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data?.session) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error refreshing session:', error);
+    return false;
   }
-  
-  return {
-    id: user.id,
-    email: user.email || '',
-    role: user.user_metadata?.role || 'specialist',
-    firstName: user.user_metadata?.firstName,
-    lastName: user.user_metadata?.lastName,
-  };
 };
 
 export const resetPassword = async (email: string) => {

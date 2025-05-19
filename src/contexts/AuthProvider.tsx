@@ -1,8 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { getCurrentUser, signIn, signOut, signUp, AuthUser, SignInCredentials, SignUpCredentials } from "@/services/authService";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getCurrentUser, signIn, signOut, signUp, refreshSession, AuthUser, SignInCredentials, SignUpCredentials } from "@/services/authService";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAdmin: () => boolean;
   refreshUserData: () => Promise<void>;
+  verifySession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,35 +23,77 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
-  const refreshUserData = async () => {
+  // Session verification function
+  const verifySession = async (): Promise<boolean> => {
     try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      
+      // Also try to refresh the session
+      if (!currentUser) {
+        await refreshSession();
+        // Check again after refresh attempt
+        const refreshedUser = await getCurrentUser();
+        setUser(refreshedUser);
+        return !!refreshedUser;
+      }
+      
+      return !!currentUser;
+    } catch (error) {
+      console.error("Error verifying session:", error);
+      return false;
+    }
+  };
+
+  const refreshUserData = async () => {
+    if (!sessionChecked) return;
+    
+    try {
+      setIsLoading(true);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
     } catch (error) {
       console.error("Error refreshing user data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Check authentication on route changes
+  useEffect(() => {
+    if (sessionChecked) {
+      verifySession();
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
+        // First try to get user from current session
         const currentUser = await getCurrentUser();
         setUser(currentUser);
       } catch (error) {
         console.error("Error loading user:", error);
+        setUser(null);
       } finally {
         setIsLoading(false);
+        setSessionChecked(true);
       }
     };
 
     loadUser();
 
+    // Set up auth listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event);
+        
         if (event === 'SIGNED_IN' && session?.user) {
           const updatedUser: AuthUser = {
             id: session.user.id,
@@ -60,8 +103,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             lastName: session.user.user_metadata?.lastName,
           };
           setUser(updatedUser);
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
           setUser(null);
+          // Force redirect to login on sign out
+          if (
+            !location.pathname.includes('/login') && 
+            !location.pathname.includes('/register') && 
+            !location.pathname === '/'
+          ) {
+            navigate('/login');
+          }
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Refresh user data when token is refreshed
+          const currentUser = await getCurrentUser();
+          setUser(currentUser);
         }
       }
     );
@@ -79,10 +134,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signIn(credentials);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
+      
+      if (!currentUser) {
+        throw new Error("Nie udało się zalogować. Spróbuj ponownie.");
+      }
+      
       toast({
         title: t("auth.login_success"),
         description: t("auth.login_welcome")
       });
+      
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
@@ -100,29 +161,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (credentials: SignUpCredentials): Promise<void> => {
     try {
       setIsLoading(true);
-      // Now the metadata will be properly processed by our database trigger
-      const { data, error } = await supabase.auth.signUp({
-        email: credentials.email,
-        password: credentials.password,
-        options: {
-          data: {
-            firstName: credentials.firstName,
-            lastName: credentials.lastName,
-            role: 'specialist'
-          },
-        },
-      });
+      await signUp(credentials);
       
-      if (error) throw error;
-      
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || "",
-          firstName: credentials.firstName || "",
-          lastName: credentials.lastName || "",
-          role: 'specialist'
+      // We need to explicitly sign in after registration
+      try {
+        await signIn({
+          email: credentials.email,
+          password: credentials.password
         });
+      } catch (signInError) {
+        console.error("Auto sign-in after registration failed:", signInError);
+        // Continue with registration process even if auto sign-in fails
+      }
+      
+      // Fetch updated user data
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
         
         toast({
           title: t("auth.register_success"),
@@ -130,6 +185,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         
         navigate("/dashboard");
+      } else {
+        // If we couldn't get the user after registration, direct to login
+        toast({
+          title: t("auth.register_success"),
+          description: "Możesz teraz się zalogować."
+        });
+        navigate("/login");
       }
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -174,12 +236,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && sessionChecked,
     login,
     register,
     logout,
     isAdmin,
     refreshUserData,
+    verifySession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

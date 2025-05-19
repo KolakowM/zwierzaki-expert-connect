@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,26 @@ const Register = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   
-  const { register, isAuthenticated } = useAuth();
+  const { register, isAuthenticated, verifySession } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  
+  // On component mount, verify the session explicitly
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifySession();
+      setAuthenticated(isValid);
+      
+      if (isValid) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkAuth();
+  }, [verifySession, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +84,19 @@ const Register = () => {
     }
   };
   
-  if (isAuthenticated) {
+  // If checking authentication status, show loading
+  if (authenticated === null) {
+    return (
+      <MainLayout>
+        <div className="container flex items-center justify-center min-h-[calc(100vh-12rem)] py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  // If already logged in, redirect to dashboard
+  if (authenticated || isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
