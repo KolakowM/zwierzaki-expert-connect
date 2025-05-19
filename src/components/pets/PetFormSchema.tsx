@@ -2,7 +2,7 @@
 import * as z from "zod";
 
 // Define species and sex as enum for consistent typing
-export const PET_SPECIES = ["pies", "kot", "królik", "chomik", "świnka morska", "inne"] as const;
+export const PET_SPECIES = ["pies", "kot", "gryzoń", "ptak", "gad", "płaz", "koń", "inne"] as const;
 export const PET_SEX = ["samiec", "samica"] as const;
 
 export type PetSpecies = typeof PET_SPECIES[number];
@@ -10,7 +10,7 @@ export type PetSex = typeof PET_SEX[number];
 
 // Define the schema for pet validation
 export const petFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().min(2, "Imię musi zawierać conajmnie 2 znaki"),
   species: z.enum(PET_SPECIES),
   breed: z.string().optional(),
   // Improve age handling - parse as a number and allow empty string
