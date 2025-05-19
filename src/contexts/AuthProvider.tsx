@@ -103,13 +103,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             lastName: session.user.user_metadata?.lastName,
           };
           setUser(updatedUser);
-        } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        } else if (event === 'SIGNED_OUT') {
           setUser(null);
           // Force redirect to login on sign out
           if (
             !location.pathname.includes('/login') && 
             !location.pathname.includes('/register') && 
-            !location.pathname === '/'
+            location.pathname !== '/'
           ) {
             navigate('/login');
           }
