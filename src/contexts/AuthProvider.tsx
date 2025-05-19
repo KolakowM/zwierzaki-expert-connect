@@ -53,7 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     verifySession,
   };
 
-  console.log("AuthProvider state:", { isLoading, isAuthenticated, sessionChecked, hasUser: !!user });
+  // Only log when values change to avoid excessive logging
+  React.useEffect(() => {
+    console.log("AuthProvider state:", { isLoading, isAuthenticated, sessionChecked, hasUser: !!user });
+  }, [isLoading, isAuthenticated, sessionChecked, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

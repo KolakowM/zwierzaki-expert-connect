@@ -18,10 +18,13 @@ export function useAuthListeners(
   // Set up auth listener
   useEffect(() => {
     console.log("Setting up auth state change listener");
+    let isMounted = true;
     
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event);
+        
+        if (!isMounted) return;
         
         if (event === 'SIGNED_IN' && session?.user) {
           const updatedUser = {
@@ -33,35 +36,41 @@ export function useAuthListeners(
           };
           setUser(updatedUser);
           setSessionChecked(true);
+          setIsLoading(false);
           
           // Don't navigate if already on dashboard
           if (!location.pathname.includes('/dashboard')) {
-            navigate('/dashboard');
+            navigate('/dashboard', { replace: true });
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setSessionChecked(true);
+          setIsLoading(false);
           
           // Only redirect if on a protected route
           const publicRoutes = ['/login', '/register', '/', '/about', '/pricing', '/contact'];
           if (!publicRoutes.some(route => location.pathname.includes(route))) {
-            navigate('/login');
+            navigate('/login', { replace: true });
           }
         } else if (event === 'TOKEN_REFRESHED') {
-          // Refresh user data when token is refreshed
-          setIsLoading(true);
+          // Refresh user data when token is refreshed without triggering a loading state
           try {
             const currentUser = await getCurrentUser();
-            setUser(currentUser);
+            if (isMounted) {
+              setUser(currentUser);
+              setSessionChecked(true);
+            }
           } finally {
-            setIsLoading(false);
-            setSessionChecked(true);
+            if (isMounted) {
+              setIsLoading(false);
+            }
           }
         }
       }
     );
 
     return () => {
+      isMounted = false;
       if (authListener && authListener.subscription) {
         authListener.subscription.unsubscribe();
       }
@@ -71,34 +80,43 @@ export function useAuthListeners(
   // Initial auth check - only run once on component mount
   useEffect(() => {
     console.log("Running initial auth check");
+    let isMounted = true;
+    
     const loadUser = async () => {
       try {
-        setIsLoading(true);
+        if (!isMounted) return;
+        
         // First try to get user from current session
         const currentUser = await getCurrentUser();
         
         // If no user found, try to refresh the session
-        if (!currentUser) {
+        if (!currentUser && isMounted) {
           try {
             const refreshed = await refreshSession();
-            if (refreshed) {
+            if (refreshed && isMounted) {
               const refreshedUser = await getCurrentUser();
               setUser(refreshedUser);
             }
           } catch (refreshError) {
             console.error("Error refreshing session:", refreshError);
           }
-        } else {
+        } else if (isMounted) {
           setUser(currentUser);
         }
       } catch (error) {
         console.error("Error loading user:", error);
       } finally {
-        setIsLoading(false);
-        setSessionChecked(true);
+        if (isMounted) {
+          setIsLoading(false);
+          setSessionChecked(true);
+        }
       }
     };
 
     loadUser();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 }

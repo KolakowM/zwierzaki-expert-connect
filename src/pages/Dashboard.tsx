@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import dashboard components
@@ -19,43 +18,25 @@ const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout, verifySession } = useAuth();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
   const [specialistProfile, setSpecialistProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   // Get the tab from URL query parameter or default to "overview"
   const queryParams = new URLSearchParams(location.search);
   const tabFromQuery = queryParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
   
-  // Check if user is authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const isValid = await verifySession();
-        
-        if (!isValid) {
-          toast({
-            title: "Brak dostępu",
-            description: "Musisz być zalogowany, aby zobaczyć ten panel",
-            variant: "destructive"
-          });
-          navigate("/login");
-        } else if (user?.id) {
-          fetchSpecialistProfile(user.id);
-        }
-      } finally {
-        setAuthChecked(true);
-      }
-    };
-    
-    checkAuth();
-  }, [navigate, toast, user?.id, verifySession]);
+    // Only fetch profile if we have a user and they're authenticated
+    if (user?.id && isAuthenticated && !specialistProfile) {
+      fetchSpecialistProfile(user.id);
+    }
+  }, [user?.id, isAuthenticated]);
 
   const fetchSpecialistProfile = async (userId: string) => {
     try {
-      setIsLoading(true);
+      setProfileLoading(true);
       const { data, error } = await supabase
         .from('specialist_profiles')
         .select('*')
@@ -70,7 +51,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error fetching specialist profile:', error);
     } finally {
-      setIsLoading(false);
+      setProfileLoading(false);
     }
   };
 
@@ -90,7 +71,7 @@ const Dashboard = () => {
   };
 
   // Show loading indicator while checking authentication
-  if (isLoading || !authChecked) {
+  if (isLoading) {
     return (
       <MainLayout>
         <div className="container flex items-center justify-center min-h-screen">
@@ -100,10 +81,9 @@ const Dashboard = () => {
     );
   }
 
-  // Additional protection - if not authenticated after checking, don't show anything
-  if (!isAuthenticated && authChecked) {
-    // Redirect to login
-    navigate("/login");
+  // Additional protection - if not authenticated, don't show anything
+  if (!isAuthenticated) {
+    // Redirect to login happens in ProtectedRoute, no need to duplicate here
     return null;
   }
 
