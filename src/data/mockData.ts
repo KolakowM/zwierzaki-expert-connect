@@ -61,8 +61,7 @@ export const mockPets: Pet[] = [
     createdAt: "2023-01-15T10:35:00Z",
     hasMicrochip: false,
     microchipNumber: undefined,
-    vaccinationDescription: undefined,
-    user_id: "1"
+    vaccinationDescription: undefined
   },
   {
     id: "2",
@@ -81,8 +80,7 @@ export const mockPets: Pet[] = [
     createdAt: "2023-02-20T14:20:00Z",
     hasMicrochip: false,
     microchipNumber: undefined,
-    vaccinationDescription: undefined,
-    user_id: "1"
+    vaccinationDescription: undefined
   },
   {
     id: "3",
@@ -101,8 +99,7 @@ export const mockPets: Pet[] = [
     createdAt: "2023-02-20T14:25:00Z",
     hasMicrochip: false,
     microchipNumber: undefined,
-    vaccinationDescription: undefined,
-    user_id: "1"
+    vaccinationDescription: undefined
   },
   {
     id: "4",
@@ -121,8 +118,7 @@ export const mockPets: Pet[] = [
     createdAt: "2023-02-20T14:30:00Z",
     hasMicrochip: false,
     microchipNumber: undefined,
-    vaccinationDescription: undefined,
-    user_id: "1"
+    vaccinationDescription: undefined
   },
   {
     id: "5",
@@ -141,8 +137,7 @@ export const mockPets: Pet[] = [
     createdAt: "2023-03-05T09:10:00Z",
     hasMicrochip: false,
     microchipNumber: undefined,
-    vaccinationDescription: undefined,
-    user_id: "1"
+    vaccinationDescription: undefined
   }
 ];
 
@@ -222,3 +217,4 @@ export const mockCarePrograms: CareProgram[] = [
     createdAt: "2023-05-15T15:00:00Z"
   }
 ];
+
