@@ -5,8 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 // Import dashboard components
 import UserMenu from "@/components/dashboard/UserMenu";
@@ -19,48 +19,38 @@ const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuth();
-  const [specialistProfile, setSpecialistProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const { user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
+  
   // Get the tab from URL query parameter or default to "overview"
   const queryParams = new URLSearchParams(location.search);
   const tabFromQuery = queryParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
-
+  
+  // Set the active tab only once on component mount to avoid unnecessary rerenders
   useEffect(() => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Brak dostępu",
-        description: "Musisz być zalogowany, aby zobaczyć ten panel",
-        variant: "destructive"
-      });
-     // navigate("/login"); // Tymczasowo zakomentowane!
-    } else if (user?.id) {
-      fetchSpecialistProfile(user.id);
+    if (tabFromQuery) {
+      setActiveTab(tabFromQuery);
     }
-  }, [isAuthenticated, navigate, toast, user?.id]);
+  }, []);
 
-  const fetchSpecialistProfile = async (userId: string) => {
-    try {
-      setIsLoading(true);
+  // Fetch specialist profile using React Query for proper caching
+  const { data: specialistProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ['specialistProfile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
       const { data, error } = await supabase
         .from('specialist_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', user.id)
         .maybeSingle();
         
       if (error) throw error;
-      
-      if (data) {
-        setSpecialistProfile(data);
-      }
-    } catch (error) {
-      console.error('Error fetching specialist profile:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 60000, // Cache for 1 minute
+  });
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
@@ -76,10 +66,6 @@ const Dashboard = () => {
     });
     navigate("/");
   };
-
-  if (!isAuthenticated) {
-    return <div />;
-  }
 
   return (
     <MainLayout>

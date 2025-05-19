@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AuthUser {
@@ -26,6 +25,11 @@ export interface UserProfileUpdate {
   city?: string;
 }
 
+// Caching mechanism for getCurrentUser to reduce redundant calls
+let cachedUser: AuthUser | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 30000; // 30 seconds
+
 export const signIn = async ({ email, password }: SignInCredentials) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -36,6 +40,8 @@ export const signIn = async ({ email, password }: SignInCredentials) => {
     throw error;
   }
 
+  // Update cache when signing in
+  clearUserCache();
   return data.user;
 };
 
@@ -64,28 +70,89 @@ export const signOut = async () => {
   if (error) {
     throw error;
   }
+  
+  // Clear cache on logout
+  clearUserCache();
+  
+  // Clear any local session data to ensure complete logout
+  localStorage.removeItem('supabase.auth.token');
+};
+
+// Helper function to clear user cache
+const clearUserCache = () => {
+  cachedUser = null;
+  cacheTimestamp = 0;
 };
 
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
-  const { data } = await supabase.auth.getSession();
-  
-  if (!data.session) {
+  // Check cache first
+  const now = Date.now();
+  if (cachedUser && (now - cacheTimestamp) < CACHE_TTL) {
+    console.log("Using cached user data");
+    return cachedUser;
+  }
+
+  try {
+    // Get the current session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+      clearUserCache();
+      return null;
+    }
+    
+    if (!sessionData?.session) {
+      clearUserCache();
+      return null;
+    }
+    
+    // Verify the session is valid by checking the user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !userData?.user) {
+      console.error('User verification error:', userError);
+      clearUserCache();
+      return null;
+    }
+    
+    const user = userData.user;
+    
+    const authUser = {
+      id: user.id,
+      email: user.email || '',
+      role: user.user_metadata?.role || 'specialist',
+      firstName: user.user_metadata?.firstName,
+      lastName: user.user_metadata?.lastName,
+    };
+    
+    // Update cache
+    cachedUser = authUser;
+    cacheTimestamp = now;
+    
+    return authUser;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    clearUserCache();
     return null;
   }
-  
-  const { user } = data.session;
-  
-  if (!user) {
-    return null;
+};
+
+export const refreshSession = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    
+    // Clear cache on refresh
+    clearUserCache();
+    
+    if (error || !data?.session) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error refreshing session:', error);
+    return false;
   }
-  
-  return {
-    id: user.id,
-    email: user.email || '',
-    role: user.user_metadata?.role || 'specialist',
-    firstName: user.user_metadata?.firstName,
-    lastName: user.user_metadata?.lastName,
-  };
 };
 
 export const resetPassword = async (email: string) => {
@@ -106,8 +173,6 @@ export const updatePassword = async (password: string) => {
   }
 };
 
-// New functions for account settings
-
 // Update user profile metadata
 export const updateUserProfile = async (profileData: UserProfileUpdate) => {
   const { data, error } = await supabase.auth.updateUser({
@@ -122,6 +187,8 @@ export const updateUserProfile = async (profileData: UserProfileUpdate) => {
     throw error;
   }
 
+  // Clear cache when updating profile
+  clearUserCache();
   return data.user;
 };
 

@@ -1,190 +1,70 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { getCurrentUser, signIn, signOut, signUp, AuthUser, SignInCredentials, SignUpCredentials } from "@/services/authService";
-import { supabase } from "@/integrations/supabase/client";
-import { useTranslation } from "react-i18next";
+import React, { createContext, useContext, ReactNode } from "react";
+import { AuthUser } from "@/services/authService";
+import { useAuthState } from "@/hooks/useAuthState";
+import { useAuthListeners } from "@/hooks/useAuthListeners";
+import { useAuthMethods } from "@/hooks/useAuthMethods";
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: SignInCredentials) => Promise<void>;
-  register: (credentials: SignUpCredentials) => Promise<void>;
-  logout: () => Promise<void>;
-  isAdmin: () => boolean;
-  refreshUserData: () => Promise<void>;
+  login: ReturnType<typeof useAuthMethods>['login'];
+  register: ReturnType<typeof useAuthMethods>['register'];
+  logout: ReturnType<typeof useAuthMethods>['logout'];
+  isAdmin: ReturnType<typeof useAuthMethods>['isAdmin'];
+  refreshUserData: ReturnType<typeof useAuthMethods>['refreshUserData'];
+  verifySession: ReturnType<typeof useAuthMethods>['verifySession'];
 }
 
+// Create context with a default undefined value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { 
+    user, 
+    setUser, 
+    isLoading, 
+    setIsLoading, 
+    sessionChecked,
+    setSessionChecked,
+    isAuthenticated 
+  } = useAuthState();
 
-  const refreshUserData = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-    } catch (error) {
-      console.error("Error refreshing user data:", error);
-    }
-  };
+  // Initialize auth listeners with the current state
+  // We only pass the necessary state setters, not any methods that would cause circular dependencies
+  useAuthListeners({ user, setUser, setSessionChecked, setIsLoading });
 
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error("Error loading user:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          const updatedUser: AuthUser = {
-            id: session.user.id,
-            email: session.user.email || '',
-            role: session.user.user_metadata?.role || 'specialist',
-            firstName: session.user.user_metadata?.firstName,
-            lastName: session.user.user_metadata?.lastName,
-          };
-          setUser(updatedUser);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      }
-    );
-
-    return () => {
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
-  }, []);
-
-  const login = async (credentials: SignInCredentials) => {
-    try {
-      setIsLoading(true);
-      await signIn(credentials);
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-      toast({
-        title: t("auth.login_success"),
-        description: t("auth.login_welcome")
-      });
-      navigate("/dashboard");
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast({
-        title: "Błąd logowania",
-        description: error.message || "Sprawdź swoje dane i spróbuj ponownie.",
-        variant: "destructive"
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (credentials: SignUpCredentials): Promise<void> => {
-    try {
-      setIsLoading(true);
-      // Now the metadata will be properly processed by our database trigger
-      const { data, error } = await supabase.auth.signUp({
-        email: credentials.email,
-        password: credentials.password,
-        options: {
-          data: {
-            firstName: credentials.firstName,
-            lastName: credentials.lastName,
-            role: 'specialist'
-          },
-        },
-      });
-      
-      if (error) throw error;
-      
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || "",
-          firstName: credentials.firstName || "",
-          lastName: credentials.lastName || "",
-          role: 'specialist'
-        });
-        
-        toast({
-          title: t("auth.register_success"),
-          description: t("auth.register_welcome")
-        });
-        
-        navigate("/dashboard");
-      }
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      toast({
-        title: "Błąd rejestracji",
-        description: error.message || "Spróbuj ponownie z innym adresem email.",
-        variant: "destructive"
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      setIsLoading(true);
-      await signOut();
-      setUser(null);
-      toast({
-        title: t("auth.logout_success"),
-        description: t("auth.logout_goodbye")
-      });
-      navigate("/login");
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      toast({
-        title: "Błąd wylogowania",
-        description: error.message || "Spróbuj ponownie później.",
-        variant: "destructive"
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isAdmin = () => {
-    return user?.role === 'admin';
-  };
+  const {
+    login,
+    register,
+    logout,
+    verifySession,
+    refreshUserData,
+    isAdmin
+  } = useAuthMethods({ user, setUser, setIsLoading });
 
   const value = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated,
     login,
     register,
     logout,
     isAdmin,
     refreshUserData,
+    verifySession,
   };
+
+  // Only log when values change to avoid excessive logging
+  React.useEffect(() => {
+    console.log("AuthProvider state:", { isLoading, isAuthenticated, sessionChecked, hasUser: !!user });
+  }, [isLoading, isAuthenticated, sessionChecked, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// Export the useAuth hook with proper error handling
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

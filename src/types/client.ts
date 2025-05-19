@@ -9,8 +9,9 @@ export interface DbClient {
   address?: string | null;
   city?: string | null;
   postcode?: string | null;
-  createdat: string;
+  createdat: string; // ISO date string format
   notes?: string | null;
+  user_id?: string | null; // Added user_id field from DB
 }
 
 export interface Client {
@@ -22,8 +23,9 @@ export interface Client {
   address?: string | null;
   city?: string | null;
   postCode?: string | null;
-  createdAt: string;
+  createdAt: Date; // Date object in application
   notes?: string | null;
+  userId?: string | null; // Added userId field for app usage
 }
 
 // Mapping functions for clients
@@ -36,8 +38,9 @@ export const mapDbClientToClient = (dbClient: DbClient): Client => ({
   address: dbClient.address,
   city: dbClient.city,
   postCode: dbClient.postcode,
-  createdAt: dbClient.createdat,
+  createdAt: new Date(dbClient.createdat),
   notes: dbClient.notes,
+  userId: dbClient.user_id,
 });
 
 export const mapClientToDbClient = (client: Omit<Client, 'id' | 'createdAt'>): Omit<DbClient, 'id' | 'createdat'> => ({
@@ -49,4 +52,5 @@ export const mapClientToDbClient = (client: Omit<Client, 'id' | 'createdAt'>): O
   city: client.city,
   postcode: client.postCode,
   notes: client.notes,
+  user_id: client.userId,
 });

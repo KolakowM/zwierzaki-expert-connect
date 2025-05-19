@@ -1,23 +1,31 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
-import { Link, Navigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SignInCredentials } from "@/services/authService";
 import { useTranslation } from "react-i18next";
+import { CardContent, CardFooter } from "@/components/ui/card";
+import AuthFormWrapper from "@/components/auth/AuthFormWrapper";
+import AuthFormError from "@/components/auth/AuthFormError";
+import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const { t } = useTranslation();
+  const location = useLocation();
+  
+  // Get redirect path from location state or default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,80 +33,86 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const credentials: SignInCredentials = { email, password };
-      await login(credentials);
+      // Fix: Call login with email and password directly instead of credentials object
+      const result = await login(email, password);
+      
+      if (result !== true && result?.error) {
+        setError(result.error);
+      }
+      // No need to redirect here - onAuthStateChange handles that
     } catch (err: any) {
       setError(err.message || "Błąd logowania. Sprawdź dane i spróbuj ponownie.");
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
   };
   
-  // If already logged in, redirect to dashboard
+  // Show loading screen while authentication state is being verified
+  if (authLoading) {
+    console.log("Login: showing loading screen");
+    return <AuthLoadingScreen />;
+  }
+  
+  // Redirect to dashboard if user is already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    console.log("Login: user is authenticated, redirecting to:", from);
+    return <Navigate to={from} replace />;
   }
 
   return (
-    <MainLayout>
-      <div className="container flex items-center justify-center min-h-[calc(100vh-12rem)] py-12">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-3xl">{t('auth.login_title')}</CardTitle>
-              <CardDescription>{t('auth.login_description')}</CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-4">
-                {error && <div className="bg-red-50 text-red-500 px-4 py-2 rounded-md text-sm">{error}</div>}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('auth.email')}</Label>
-                  <Input 
-                    id="email"
-                    type="email"
-                    placeholder="przyklad@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">{t('auth.password')}</Label>
-                    <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                      {t('auth.forgot_password')}
-                    </Link>
-                  </div>
-                  <Input 
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex flex-col space-y-4">
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t('common.loading') : t('auth.login_title')}
-                </Button>
-                
-                <div className="text-center text-sm">
-                  {t('auth.no_account')}{" "}
-                  <Link to="/register" className="text-primary hover:underline">
-                    {t('auth.register')}
-                  </Link>
-                </div>
-              </CardFooter>
-            </form>
-          </Card>
-        </div>
-      </div>
-    </MainLayout>
+    <AuthFormWrapper
+      title={t('auth.login_title')}
+      description={t('auth.login_description')}
+    >
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <AuthFormError error={error} />
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">{t('auth.email')}</Label>
+            <Input 
+              id="email"
+              type="email"
+              placeholder="przyklad@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                {t('auth.forgot_password')}
+              </Link>
+            </div>
+            <Input 
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+        </CardContent>
+        
+        <CardFooter className="flex flex-col space-y-4">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? t('common.loading') : t('auth.login_title')}
+          </Button>
+          
+          <div className="text-center text-sm">
+            {t('auth.no_account')}{" "}
+            <Link to="/register" className="text-primary hover:underline">
+              {t('auth.register')}
+            </Link>
+          </div>
+        </CardFooter>
+      </form>
+    </AuthFormWrapper>
   );
 };
 

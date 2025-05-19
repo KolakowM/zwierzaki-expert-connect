@@ -1,6 +1,7 @@
 
 import { Client, Pet, Visit, CareProgram } from "@/types";
 
+// Mock clients data
 export const mockClients: Client[] = [
   {
     id: "1",
@@ -40,6 +41,7 @@ export const mockClients: Client[] = [
   }
 ];
 
+// Mock pets data
 export const mockPets: Pet[] = [
   {
     id: "1",
@@ -138,42 +140,44 @@ export const mockPets: Pet[] = [
   }
 ];
 
+// Mock visits data
 export const mockVisits: Visit[] = [
   {
     id: "1",
     petId: "1",
     clientId: "1",
-    date: "2023-04-10T11:00:00Z",
+    date: new Date("2023-04-10T11:00:00Z"),
     type: "Kontrola ogólna",
     notes: "Pies w dobrej kondycji, waga stabilna",
     recommendations: "Kontynuować obecną dietę, zwiększyć aktywność fizyczną",
     followUpNeeded: true,
-    followUpDate: "2023-07-10T00:00:00Z"
+    followUpDate: new Date("2023-07-10T00:00:00Z")
   },
   {
     id: "2",
     petId: "2",
     clientId: "2",
-    date: "2023-05-15T14:30:00Z",
+    date: new Date("2023-05-15T14:30:00Z"),
     type: "Konsultacja ortopedyczna",
     notes: "Widoczna poprawa w poruszaniu się po suplementacji",
     recommendations: "Kontynuować suplementację, łagodne ćwiczenia rehabilitacyjne",
     followUpNeeded: true,
-    followUpDate: "2023-06-15T00:00:00Z"
+    followUpDate: new Date("2023-06-15T00:00:00Z")
   },
   {
     id: "3",
     petId: "4",
     clientId: "2",
-    date: "2023-05-20T10:00:00Z",
+    date: new Date("2023-05-20T10:00:00Z"),
     type: "Badanie krwi - kontrola nerek",
     notes: "Parametry stabilne, ale wciąż podwyższone",
     recommendations: "Kontynuować dietę nerkową, zwiększyć nawodnienie",
     followUpNeeded: true,
-    followUpDate: "2023-08-20T00:00:00Z"
+    followUpDate: new Date("2023-08-20T00:00:00Z")
   }
 ];
 
+// Mock care programs data
 export const mockCarePrograms: CareProgram[] = [
   {
     id: "1",
@@ -181,12 +185,12 @@ export const mockCarePrograms: CareProgram[] = [
     name: "Plan redukcji wagi",
     goal: "Zmniejszenie wagi o 2kg w ciągu 3 miesięcy",
     description: "Stopniowa redukcja kalorii i zwiększenie aktywności fizycznej",
-    startDate: "2023-04-10T00:00:00Z",
-    endDate: "2023-07-10T00:00:00Z",
+    startDate: new Date("2023-04-10T00:00:00Z"),
+    endDate: new Date("2023-07-10T00:00:00Z"),
     status: "aktywny",
     instructions: "1. Karma niskokaloryczna 2x dziennie po 100g\n2. Spacery min. 45 minut 2x dziennie\n3. Zakaz dodatkowych przysmaków",
     recommendations: "Cotygodniowe ważenie i zapisywanie postępów",
-    createdAt: "2023-04-10T11:30:00Z"
+    createdAt: new Date("2023-04-10T11:30:00Z")
   },
   {
     id: "2",
@@ -194,11 +198,11 @@ export const mockCarePrograms: CareProgram[] = [
     name: "Program wsparcia stawów",
     goal: "Poprawa mobilności i zmniejszenie bólu stawów",
     description: "Suplementacja i ćwiczenia rehabilitacyjne",
-    startDate: "2023-05-15T00:00:00Z",
-    endDate: "2023-08-15T00:00:00Z",
+    startDate: new Date("2023-05-15T00:00:00Z"),
+    endDate: new Date("2023-08-15T00:00:00Z"),
     status: "aktywny",
     instructions: "1. Suplement na stawy 2x dziennie\n2. Olej rybi 1 łyżka dziennie\n3. Ćwiczenia rehabilitacyjne według załączonego schematu",
     recommendations: "Unikać skoków i intensywnej aktywności obciążającej stawy",
-    createdAt: "2023-05-15T15:00:00Z"
+    createdAt: new Date("2023-05-15T15:00:00Z")
   }
 ];
