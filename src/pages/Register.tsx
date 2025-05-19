@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SignUpCredentials } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { CardContent, CardFooter } from "@/components/ui/card";
@@ -52,19 +51,22 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      const credentials: SignUpCredentials = {
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName
-      };
+      // Fix: Pass all required parameters to register function
+      const result = await register(
+        formData.email, 
+        formData.password,
+        formData.firstName,
+        formData.lastName
+      );
       
-      await register(credentials);
-      
-      toast({
-        title: t("auth.register_success"),
-        description: t("auth.register_welcome"),
-      });
+      if (result === true) {
+        toast({
+          title: t("auth.register_success"),
+          description: t("auth.register_welcome"),
+        });
+      } else if (result?.error) {
+        setError(result.error);
+      }
       
       // No need to navigate here - onAuthStateChange handles that
     } catch (err: any) {

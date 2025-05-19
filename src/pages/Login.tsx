@@ -33,8 +33,12 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const credentials: SignInCredentials = { email, password };
-      await login(credentials);
+      // Fix: Call login with email and password directly instead of credentials object
+      const result = await login(email, password);
+      
+      if (result !== true && result?.error) {
+        setError(result.error);
+      }
       // No need to redirect here - onAuthStateChange handles that
     } catch (err: any) {
       setError(err.message || "Błąd logowania. Sprawdź dane i spróbuj ponownie.");
