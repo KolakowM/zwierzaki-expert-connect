@@ -57,7 +57,7 @@ export function ContactInfo({ specialist, socialMediaIcons }: ContactInfoProps) 
           </svg>
           <span>{specialist.location}</span>
         </div>
-        {specialist.phoneNumber && (
+        {specialist.phoneNumber && specialist.phoneNumber !== "Brak numeru telefonu" && (
           <div className="flex items-start">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +78,7 @@ export function ContactInfo({ specialist, socialMediaIcons }: ContactInfoProps) 
             </a>
           </div>
         )}
-        {specialist.email && (
+        {specialist.email && specialist.email !== "Brak adresu email" && (
           <div className="flex items-start">
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -1,86 +1,68 @@
 
-import { FileText, Mail, MapPin, Phone } from "lucide-react";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
+import { ProfileFormValues } from "./SpecialistProfileTab";
 
 interface ContactInfoTabProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ProfileFormValues>;
   isSubmitting: boolean;
 }
 
 export function ContactInfoTab({ form, isSubmitting }: ContactInfoTabProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Dane kontaktowe</CardTitle>
-        <CardDescription>
-          Podaj dane kontaktowe, które będą widoczne dla potencjalnych klientów
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Dane kontaktowe</h3>
+        <p className="text-sm text-muted-foreground">
+          Podaj dane kontaktowe, które będą widoczne na Twoim profilu
+        </p>
+      </div>
+      
+      <div className="space-y-4">
         <FormField
           control={form.control}
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Lokalizacja</FormLabel>
+              <FormLabel>Miasto</FormLabel>
               <FormControl>
-                <div className="flex items-center">
-                  <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="np. Warszawa, Mokotów" {...field} />
-                </div>
+                <Input placeholder="np. Warszawa" {...field} />
               </FormControl>
-              <FormDescription>
-                Miasto lub dzielnica, w której przyjmujesz klientów
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="phoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Numer telefonu (opcjonalnie)</FormLabel>
+              <FormLabel>Telefon kontaktowy</FormLabel>
               <FormControl>
-                <div className="flex items-center">
-                  <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="np. 123456789" {...field} />
-                </div>
+                <Input type="tel" placeholder="np. 123 456 789" {...field} />
               </FormControl>
-              <FormDescription>
-                Numer telefonu do kontaktu z klientami (pole opcjonalne)
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email kontaktowy</FormLabel>
               <FormControl>
-                <div className="flex items-center">
-                  <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="email@example.com" {...field} />
-                </div>
+                <Input type="email" placeholder="np. jan.kowalski@example.com" {...field} />
               </FormControl>
-              <FormDescription>
-                Adres email do kontaktu z klientami
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="website"
@@ -88,24 +70,17 @@ export function ContactInfoTab({ form, isSubmitting }: ContactInfoTabProps) {
             <FormItem>
               <FormLabel>Strona internetowa</FormLabel>
               <FormControl>
-                <div className="flex items-center">
-                  <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="np. www.twoja-strona.pl" {...field} />
-                </div>
+                <Input type="url" placeholder="np. https://moja-strona.pl" {...field} />
               </FormControl>
-              <FormDescription>
-                Twoja strona internetowa (opcjonalnie)
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-      </CardContent>
-      <CardFooter>
-        <Button type="submit" className="ml-auto" disabled={isSubmitting}>
-          {isSubmitting ? "Zapisywanie..." : "Zapisz profil"}
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+      
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Zapisywanie..." : "Zapisz dane kontaktowe"}
+      </Button>
+    </div>
   );
 }
