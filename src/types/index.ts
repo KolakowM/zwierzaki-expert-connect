@@ -27,8 +27,10 @@ export interface SpecialistProfile {
   experience?: string;
   location?: string;
   phone_number?: string;
+  email?: string; // Added email field
   website?: string;
   photo_url?: string;
   social_media?: SocialMediaLinks;
   updated_at?: string;
 }
+

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,7 @@ export interface Specialist {
   specializations: string[];
   location: string;
   image: string;
+  email?: string; // Added email field
   rating?: number;
   verified: boolean;
   role: AppRole;

@@ -1,5 +1,5 @@
 
-import { Info, MapPin, Phone } from "lucide-react";
+import { Info, MapPin, Phone, Mail } from "lucide-react";
 
 interface ProfileDisplayInfoProps {
   label: string;
@@ -43,6 +43,16 @@ export function LocationDisplayInfo({ value }: { value: string | undefined }) {
       label="Miasto" 
       value={value} 
       icon={<MapPin className="mr-2 h-4 w-4 text-muted-foreground" />} 
+    />
+  );
+}
+
+export function EmailDisplayInfo({ value }: { value: string | undefined }) {
+  return (
+    <ProfileDisplayInfo 
+      label="Email kontaktowy" 
+      value={value} 
+      icon={<Mail className="mr-2 h-4 w-4 text-muted-foreground" />} 
     />
   );
 }

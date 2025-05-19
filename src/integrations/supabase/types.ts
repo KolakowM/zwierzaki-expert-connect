@@ -246,6 +246,7 @@ export type Database = {
         Row: {
           description: string | null
           education: string[] | null
+          email: string | null
           experience: string | null
           id: string
           location: string | null
@@ -261,6 +262,7 @@ export type Database = {
         Insert: {
           description?: string | null
           education?: string[] | null
+          email?: string | null
           experience?: string | null
           id: string
           location?: string | null
@@ -276,6 +278,7 @@ export type Database = {
         Update: {
           description?: string | null
           education?: string[] | null
+          email?: string | null
           experience?: string | null
           id?: string
           location?: string | null

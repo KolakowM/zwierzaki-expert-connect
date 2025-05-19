@@ -111,6 +111,7 @@ export function useCatalogData() {
             specializations: specializationsBySpecialist[userId] || [],
             location: specialistProfile?.location || userProfile.city || "Polska",
             image: specialistProfile?.photo_url || "/placeholder.svg",
+            email: specialistProfile?.email || userProfile.email, // Added email from specialist_profiles or user_profiles
             rating: 0,
             verified: roleData.status === 'zweryfikowany',
             role: roleData.role
