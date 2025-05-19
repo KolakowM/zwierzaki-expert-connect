@@ -17,6 +17,7 @@ interface AuthContextType {
   verifySession: ReturnType<typeof useAuthMethods>['verifySession'];
 }
 
+// Create context with a default undefined value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -30,6 +31,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated 
   } = useAuthState();
 
+  // Initialize auth listeners with the current state
+  // We only pass the necessary state setters, not any methods that would cause circular dependencies
   useAuthListeners({ user, setUser, setSessionChecked, setIsLoading });
 
   const {
@@ -61,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// Export the useAuth hook with proper error handling
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -18,7 +18,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const [specialistProfile, setSpecialistProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -28,11 +28,11 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
   
   useEffect(() => {
-    // Only fetch profile if we have a user and they're authenticated
-    if (user?.id && isAuthenticated && !specialistProfile) {
+    // Only fetch profile if we have a user
+    if (user?.id && !specialistProfile) {
       fetchSpecialistProfile(user.id);
     }
-  }, [user?.id, isAuthenticated]);
+  }, [user?.id]);
 
   const fetchSpecialistProfile = async (userId: string) => {
     try {
@@ -79,12 +79,6 @@ const Dashboard = () => {
         </div>
       </MainLayout>
     );
-  }
-
-  // Additional protection - if not authenticated, don't show anything
-  if (!isAuthenticated) {
-    // Redirect to login happens in ProtectedRoute, no need to duplicate here
-    return null;
   }
 
   return (

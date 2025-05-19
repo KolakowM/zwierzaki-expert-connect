@@ -37,21 +37,10 @@ export function useAuthListeners(
           setUser(updatedUser);
           setSessionChecked(true);
           setIsLoading(false);
-          
-          // Don't navigate if already on dashboard
-          if (!location.pathname.includes('/dashboard')) {
-            navigate('/dashboard', { replace: true });
-          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setSessionChecked(true);
           setIsLoading(false);
-          
-          // Only redirect if on a protected route
-          const publicRoutes = ['/login', '/register', '/', '/about', '/pricing', '/contact'];
-          if (!publicRoutes.some(route => location.pathname.includes(route))) {
-            navigate('/login', { replace: true });
-          }
         } else if (event === 'TOKEN_REFRESHED') {
           // Refresh user data when token is refreshed without triggering a loading state
           try {
@@ -65,6 +54,20 @@ export function useAuthListeners(
               setIsLoading(false);
             }
           }
+        } else if (event === 'INITIAL_SESSION') {
+          // Handle initial session without redirecting
+          if (session?.user) {
+            const updatedUser = {
+              id: session.user.id,
+              email: session.user.email || '',
+              role: session.user.user_metadata?.role || 'specialist',
+              firstName: session.user.user_metadata?.firstName,
+              lastName: session.user.user_metadata?.lastName,
+            };
+            setUser(updatedUser);
+          }
+          setSessionChecked(true);
+          setIsLoading(false);
         }
       }
     );
