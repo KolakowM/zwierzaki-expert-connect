@@ -122,7 +122,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
     const newVisit: Omit<Visit, 'id'> = {
       petId: data.petId,
       clientId: data.clientId,
-      date: appointmentDateTime.toISOString(),
+      date: appointmentDateTime, // Now passing a Date object instead of a string
       time: data.time,
       type: data.type,
       notes: data.notes || null,
