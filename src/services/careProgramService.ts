@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CareProgram, DbCareProgram, mapDbCareProgramToCareProgram, mapCareProgramToDbCareProgram } from "@/types";
 
@@ -47,18 +46,7 @@ export const getCareProgramById = async (id: string): Promise<CareProgram | null
 };
 
 export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
-  // Convert dates to ISO strings if they are Date objects
-  const prepared = {
-    ...program,
-    startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
-    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate,
-    // Ensure status is one of the allowed values
-    status: program.status || "aktywny"
-  };
-
-  console.log("Creating care program with data:", prepared);
-  const dbProgram = mapCareProgramToDbCareProgram(prepared);
-  console.log("DB program data:", dbProgram);
+  const dbProgram = mapCareProgramToDbCareProgram(program);
   
   const { data, error } = await supabase
     .from('care_programs')

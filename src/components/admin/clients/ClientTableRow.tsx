@@ -24,7 +24,7 @@ const ClientTableRow = ({ client }: ClientTableRowProps) => {
       <TableCell>{client.phone || "-"}</TableCell>
       <TableCell className="hidden md:table-cell">{client.city || "-"}</TableCell>
       <TableCell className="hidden md:table-cell">
-        {new Date(client.createdAt).toLocaleDateString()}
+        {client.createdAt.toLocaleDateString()}
       </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Visit, DbVisit, mapDbVisitToVisit, mapVisitToDbVisit } from "@/types";
 
@@ -62,14 +61,7 @@ export const getVisitById = async (id: string): Promise<Visit | null> => {
 };
 
 export const createVisit = async (visit: Omit<Visit, 'id'>): Promise<Visit> => {
-  // Convert dates to ISO strings if they are Date objects
-  const prepared = {
-    ...visit,
-    date: visit.date instanceof Date ? visit.date.toISOString() : visit.date,
-    followUpDate: visit.followUpDate instanceof Date ? visit.followUpDate.toISOString() : visit.followUpDate
-  };
-  
-  const dbVisit = mapVisitToDbVisit(prepared);
+  const dbVisit = mapVisitToDbVisit(visit);
   
   const { data, error } = await supabase
     .from('visits')

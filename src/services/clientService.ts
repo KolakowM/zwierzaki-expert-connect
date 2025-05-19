@@ -1,7 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Client, DbClient, mapDbClientToClient, mapClientToDbClient } from "@/types";
-import { useAuth } from "@/contexts/AuthProvider";
 
 export const getClients = async (): Promise<Client[]> => {
   // With RLS enabled, this will automatically only return the user's clients
