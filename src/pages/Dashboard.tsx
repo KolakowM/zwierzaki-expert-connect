@@ -19,27 +19,39 @@ const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, verifySession } = useAuth();
   const [specialistProfile, setSpecialistProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Get the tab from URL query parameter or default to "overview"
   const queryParams = new URLSearchParams(location.search);
   const tabFromQuery = queryParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabFromQuery || "overview");
-
+  
+  // Check if user is authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Brak dostępu",
-        description: "Musisz być zalogowany, aby zobaczyć ten panel",
-        variant: "destructive"
-      });
-      navigate("/login"); // Uncommented this line to ensure redirect happens
-    } else if (user?.id) {
-      fetchSpecialistProfile(user.id);
-    }
-  }, [isAuthenticated, navigate, toast, user?.id]);
+    const checkAuth = async () => {
+      try {
+        const isValid = await verifySession();
+        
+        if (!isValid) {
+          toast({
+            title: "Brak dostępu",
+            description: "Musisz być zalogowany, aby zobaczyć ten panel",
+            variant: "destructive"
+          });
+          navigate("/login");
+        } else if (user?.id) {
+          fetchSpecialistProfile(user.id);
+        }
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+    
+    checkAuth();
+  }, [navigate, toast, user?.id, verifySession]);
 
   const fetchSpecialistProfile = async (userId: string) => {
     try {
@@ -77,8 +89,22 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  if (!isAuthenticated) {
-    return <div />;
+  // Show loading indicator while checking authentication
+  if (isLoading || !authChecked) {
+    return (
+      <MainLayout>
+        <div className="container flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Additional protection - if not authenticated after checking, don't show anything
+  if (!isAuthenticated && authChecked) {
+    // Redirect to login
+    navigate("/login");
+    return null;
   }
 
   return (

@@ -33,20 +33,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifySession = async (): Promise<boolean> => {
     try {
       const currentUser = await getCurrentUser();
-      setUser(currentUser);
       
-      // Also try to refresh the session
+      // If no user found, try to refresh the session
       if (!currentUser) {
-        await refreshSession();
-        // Check again after refresh attempt
-        const refreshedUser = await getCurrentUser();
-        setUser(refreshedUser);
-        return !!refreshedUser;
+        try {
+          const refreshed = await refreshSession();
+          if (!refreshed) {
+            setUser(null);
+            return false;
+          }
+          
+          // Check again after refresh attempt
+          const refreshedUser = await getCurrentUser();
+          setUser(refreshedUser);
+          return !!refreshedUser;
+        } catch (refreshError) {
+          console.error("Error refreshing session:", refreshError);
+          setUser(null);
+          return false;
+        }
+      } else {
+        setUser(currentUser);
+        return true;
       }
-      
-      return !!currentUser;
     } catch (error) {
       console.error("Error verifying session:", error);
+      setUser(null);
       return false;
     }
   };
@@ -76,8 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const loadUser = async () => {
       try {
         // First try to get user from current session
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
+        await verifySession();
       } catch (error) {
         console.error("Error loading user:", error);
         setUser(null);

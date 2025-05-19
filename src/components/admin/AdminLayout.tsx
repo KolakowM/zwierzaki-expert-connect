@@ -1,5 +1,5 @@
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -10,34 +10,53 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const { isAuthenticated, isLoading, verifySession } = useAuth();
+  const { isAuthenticated, isLoading, verifySession, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const isValidSession = await verifySession();
-      
-      if (!isValidSession) {
-        toast({
-          title: "Brak dostępu",
-          description: "Musisz być zalogowany, aby uzyskać dostęp do tego obszaru",
-          variant: "destructive"
-        });
-        navigate("/login");
+      try {
+        const isValid = await verifySession();
+        
+        if (!isValid) {
+          toast({
+            title: "Brak dostępu",
+            description: "Musisz być zalogowany, aby uzyskać dostęp do tego obszaru",
+            variant: "destructive"
+          });
+          navigate("/login");
+          return;
+        }
+        
+        // Additional check for admin access
+        if (!isAdmin()) {
+          toast({
+            title: "Brak uprawnień",
+            description: "Tylko administratorzy mają dostęp do tego obszaru",
+            variant: "destructive"
+          });
+          navigate("/dashboard");
+          return;
+        }
+      } finally {
+        setAuthChecked(true);
       }
     };
     
     checkAuth();
-  }, [verifySession, navigate, toast]);
+  }, [verifySession, navigate, toast, isAdmin]);
 
-  if (isLoading) {
+  if (isLoading || !authChecked) {
     return <div className="flex h-screen items-center justify-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>;
   }
   
-  if (!isAuthenticated) {
+  // Additional protection - if not authenticated after checking, don't show anything
+  if (!isAuthenticated && authChecked) {
+    navigate("/login");
     return null;
   }
 

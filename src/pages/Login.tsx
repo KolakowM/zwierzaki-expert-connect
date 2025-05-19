@@ -15,7 +15,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   
   const { login, isAuthenticated, verifySession } = useAuth();
   const { t } = useTranslation();
@@ -24,11 +25,15 @@ const Login = () => {
   // On component mount, verify the session explicitly
   useEffect(() => {
     const checkAuth = async () => {
-      const isValid = await verifySession();
-      setAuthenticated(isValid);
-      
-      if (isValid) {
-        navigate('/dashboard');
+      try {
+        const isValid = await verifySession();
+        setAuthenticated(isValid);
+        
+        if (isValid) {
+          navigate('/dashboard');
+        }
+      } finally {
+        setAuthChecked(true);
       }
     };
     
@@ -50,8 +55,8 @@ const Login = () => {
     }
   };
   
-  // If checking authentication status, show loading
-  if (authenticated === null) {
+  // If still checking authentication status, show loading
+  if (!authChecked) {
     return (
       <MainLayout>
         <div className="container flex items-center justify-center min-h-[calc(100vh-12rem)] py-12">
@@ -61,8 +66,8 @@ const Login = () => {
     );
   }
   
-  // If already logged in, redirect to dashboard
-  if (authenticated || isAuthenticated) {
+  // Only redirect if we've confirmed authentication
+  if (authenticated && authChecked) {
     return <Navigate to="/dashboard" replace />;
   }
 
