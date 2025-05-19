@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPetsByClientId } from "@/services/petService";
 import { format } from "date-fns";
 
+// Type definitions
 interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,10 +35,9 @@ const visitTypes = [
   "Inny",
 ] as const;
 
-// Convert the readonly array to a tuple type that Zod can use
 type VisitType = typeof visitTypes[number];
 
-// Appointment form schema
+// Form schema definition
 const appointmentSchema = z.object({
   clientId: z.string({
     required_error: "Proszę wybrać klienta",
@@ -57,13 +57,15 @@ const appointmentSchema = z.object({
   notes: z.string().optional(),
 });
 
+type AppointmentFormValues = z.infer<typeof appointmentSchema>;
+
 const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: AppointmentFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   
-  // Form for new appointments
-  const form = useForm<z.infer<typeof appointmentSchema>>({
+  // Form initialization
+  const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
       date: selectedDate,
@@ -71,6 +73,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
     },
   });
 
+  // Fetch client's pets
   const {
     data: clientPets = [],
     isLoading: isLoadingClientPets,
@@ -86,33 +89,42 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
       return createVisit(newVisit);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['visits'] });
-      toast({
-        title: "Wizyta dodana",
-        description: "Wizyta została pomyślnie zaplanowana",
-      });
-      onClose();
-      form.reset();
+      handleSuccessfulSubmit();
     },
     onError: (error) => {
-      console.error("Error creating visit:", error);
-      toast({
-        title: "Błąd",
-        description: "Nie udało się dodać wizyty",
-        variant: "destructive",
-      });
+      handleSubmitError(error);
     }
   });
 
-  // Handle client selection in the form
+  // Success handler
+  const handleSuccessfulSubmit = () => {
+    queryClient.invalidateQueries({ queryKey: ['visits'] });
+    toast({
+      title: "Wizyta dodana",
+      description: "Wizyta została pomyślnie zaplanowana",
+    });
+    onClose();
+    form.reset();
+  };
+
+  // Error handler
+  const handleSubmitError = (error: any) => {
+    console.error("Error creating visit:", error);
+    toast({
+      title: "Błąd",
+      description: "Nie udało się dodać wizyty",
+      variant: "destructive",
+    });
+  };
+
+  // Handle client selection
   const handleClientChange = (clientId: string) => {
     setSelectedClientId(clientId);
-    // Reset pet selection when changing client
     form.setValue('petId', '');
   };
 
-  // Handle form submission
-  const onSubmit = (data: z.infer<typeof appointmentSchema>) => {
+  // Form submission handler
+  const onSubmit = (data: AppointmentFormValues) => {
     // Format date and time
     const appointmentDateTime = new Date(data.date);
     const [hours, minutes] = data.time.split(':').map(Number);
@@ -122,7 +134,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
     const newVisit: Omit<Visit, 'id'> = {
       petId: data.petId,
       clientId: data.clientId,
-      date: appointmentDateTime, // Now passing a Date object instead of a string
+      date: appointmentDateTime,
       time: data.time,
       type: data.type,
       notes: data.notes || null,
@@ -146,6 +158,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Client Selection */}
             <FormField
               control={form.control}
               name="clientId"
@@ -177,6 +190,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               )}
             />
 
+            {/* Pet Selection */}
             <FormField
               control={form.control}
               name="petId"
@@ -211,6 +225,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               )}
             />
 
+            {/* Date and Time Fields */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -244,7 +259,11 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
                   <FormItem>
                     <FormLabel>Godzina</FormLabel>
                     <FormControl>
-                      <Input type="time" {...field} disabled={createVisitMutation.isPending} />
+                      <Input 
+                        type="time" 
+                        {...field} 
+                        disabled={createVisitMutation.isPending} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -252,6 +271,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               />
             </div>
 
+            {/* Visit Type Selection */}
             <FormField
               control={form.control}
               name="type"
@@ -279,6 +299,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               )}
             />
 
+            {/* Notes Field */}
             <FormField
               control={form.control}
               name="notes"
@@ -297,6 +318,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               )}
             />
 
+            {/* Form Buttons */}
             <DialogFooter>
               <Button 
                 type="button" 

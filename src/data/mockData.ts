@@ -1,6 +1,7 @@
 
 import { Client, Pet, Visit, CareProgram } from "@/types";
 
+// Mock clients data
 export const mockClients: Client[] = [
   {
     id: "1",
@@ -40,6 +41,7 @@ export const mockClients: Client[] = [
   }
 ];
 
+// Mock pets data
 export const mockPets: Pet[] = [
   {
     id: "1",
@@ -138,6 +140,7 @@ export const mockPets: Pet[] = [
   }
 ];
 
+// Mock visits data
 export const mockVisits: Visit[] = [
   {
     id: "1",
@@ -174,6 +177,7 @@ export const mockVisits: Visit[] = [
   }
 ];
 
+// Mock care programs data
 export const mockCarePrograms: CareProgram[] = [
   {
     id: "1",
