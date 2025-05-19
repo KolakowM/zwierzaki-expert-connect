@@ -27,6 +27,7 @@ import BecomeSpecialist from './pages/BecomeSpecialist';
 import Catalog from './pages/Catalog';
 import SpecialistProfile from './pages/SpecialistProfile';
 import { AuthProvider } from './contexts/AuthProvider';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Admin routes
 import AdminLayout from './components/admin/AdminLayout';
@@ -49,6 +50,7 @@ function App() {
           <AuthProvider>
             <Toaster position="top-right" />
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -57,23 +59,57 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/clients" element={<Clients />} />
-              <Route path="/clients/:id" element={<ClientDetails />} />
-              <Route path="/pets" element={<Pets />} />
-              <Route path="/pets/:id" element={<PetProfile />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/terms2" element={<Terms2 />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/faq" element={<FAQ />} />
-              <Route path="/profile" element={<ProfileEditor />} />
-              <Route path="/settings" element={<AccountSettings />} />
-              <Route path="/become-specialist" element={<BecomeSpecialist />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/specialist/:id" element={<SpecialistProfile />} />
+              <Route path="/become-specialist" element={<BecomeSpecialist />} />
+              
+              {/* Protected routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/clients" element={
+                <ProtectedRoute>
+                  <Clients />
+                </ProtectedRoute>
+              } />
+              <Route path="/clients/:id" element={
+                <ProtectedRoute>
+                  <ClientDetails />
+                </ProtectedRoute>
+              } />
+              <Route path="/pets" element={
+                <ProtectedRoute>
+                  <Pets />
+                </ProtectedRoute>
+              } />
+              <Route path="/pets/:id" element={
+                <ProtectedRoute>
+                  <PetProfile />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfileEditor />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <AccountSettings />
+                </ProtectedRoute>
+              } />
               
               {/* Admin routes */}
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
                 <Route index element={<AdminDashboard />} />
                 <Route path="clients" element={<AdminClients />} />
                 <Route path="pets" element={<AdminPets />} />

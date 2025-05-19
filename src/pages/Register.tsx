@@ -13,7 +13,6 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import AuthFormWrapper from "@/components/auth/AuthFormWrapper";
 import AuthFormError from "@/components/auth/AuthFormError";
 import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
-import { useAuthForm } from "@/hooks/useAuthForm";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,9 +23,10 @@ const Register = () => {
     confirmPassword: ""
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
-  const { register, isAuthenticated } = useAuth();
-  const { error, setError, isLoading, setIsLoading, authLoading } = useAuthForm();
+  const { register, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   
@@ -65,13 +65,11 @@ const Register = () => {
         title: t("auth.register_success"),
         description: t("auth.register_welcome"),
       });
+      
+      // No need to navigate here - onAuthStateChange handles that
     } catch (err: any) {
+      console.error("Registration error:", err);
       setError(err.message || "Błąd rejestracji. Spróbuj ponownie później.");
-      toast({
-        title: "Błąd rejestracji",
-        description: err.message || "Nie udało się utworzyć konta. Spróbuj ponownie później.",
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }

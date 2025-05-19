@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated 
   } = useAuthState();
 
-  useAuthListeners({ user, setUser, setSessionChecked });
+  useAuthListeners({ user, setUser, setSessionChecked, setIsLoading });
 
   const {
     login,
@@ -52,6 +52,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     refreshUserData,
     verifySession,
   };
+
+  console.log("AuthProvider state:", { isLoading, isAuthenticated, sessionChecked, hasUser: !!user });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

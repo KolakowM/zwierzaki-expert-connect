@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,15 +11,21 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import AuthFormWrapper from "@/components/auth/AuthFormWrapper";
 import AuthFormError from "@/components/auth/AuthFormError";
 import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
-import { useAuthForm } from "@/hooks/useAuthForm";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
-  const { login, isAuthenticated } = useAuth();
-  const { error, setError, isLoading, setIsLoading, authLoading } = useAuthForm();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const { t } = useTranslation();
+  const location = useLocation();
+  
+  // Get redirect path from location state or default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +35,10 @@ const Login = () => {
     try {
       const credentials: SignInCredentials = { email, password };
       await login(credentials);
+      // No need to redirect here - onAuthStateChange handles that
     } catch (err: any) {
       setError(err.message || "Błąd logowania. Sprawdź dane i spróbuj ponownie.");
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -38,12 +46,14 @@ const Login = () => {
   
   // Show loading screen while authentication state is being verified
   if (authLoading) {
+    console.log("Login: showing loading screen");
     return <AuthLoadingScreen />;
   }
   
   // Redirect to dashboard if user is already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    console.log("Login: user is authenticated, redirecting to:", from);
+    return <Navigate to={from} replace />;
   }
 
   return (

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthProvider";
 
 export function useAuthForm() {
   const [error, setError] = useState("");

@@ -18,9 +18,12 @@ export function useAuthMethods(
   const login = async (credentials: SignInCredentials) => {
     try {
       setIsLoading(true);
+      console.log("Login attempt for:", credentials.email);
       await signIn(credentials);
+      
+      // Let the auth listener handle the user state update
+      // We check the result here just to ensure no errors
       const currentUser = await getCurrentUser();
-      setUser(currentUser);
       
       if (!currentUser) {
         throw new Error("Nie udało się zalogować. Spróbuj ponownie.");
@@ -31,7 +34,7 @@ export function useAuthMethods(
         description: t("auth.login_welcome")
       });
       
-      navigate("/dashboard");
+      // Let the auth state listener handle navigation
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -48,6 +51,7 @@ export function useAuthMethods(
   const register = async (credentials: SignUpCredentials): Promise<void> => {
     try {
       setIsLoading(true);
+      console.log("Register attempt for:", credentials.email);
       await signUp(credentials);
       
       // We need to explicitly sign in after registration
@@ -61,8 +65,10 @@ export function useAuthMethods(
         // Continue with registration process even if auto sign-in fails
       }
       
-      // Fetch updated user data
+      // Let the auth listener handle the user state update and navigation
+      // We check the result here just to ensure no errors
       const currentUser = await getCurrentUser();
+      
       if (currentUser) {
         setUser(currentUser);
         
@@ -71,7 +77,7 @@ export function useAuthMethods(
           description: t("auth.register_welcome")
         });
         
-        navigate("/dashboard");
+        // Let the auth state listener handle navigation
       } else {
         // If we couldn't get the user after registration, direct to login
         toast({
@@ -118,6 +124,7 @@ export function useAuthMethods(
 
   const verifySession = async (): Promise<boolean> => {
     try {
+      console.log("Verifying session");
       const currentUser = await getCurrentUser();
       
       // If no user found, try to refresh the session

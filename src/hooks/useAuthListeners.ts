@@ -6,16 +6,19 @@ import { AuthState } from "./useAuthState";
 import { getCurrentUser, refreshSession } from "@/services/authService";
 
 export function useAuthListeners(
-  { user, setUser, setSessionChecked }: Pick<AuthState & {
+  { user, setUser, setSessionChecked, setIsLoading }: Pick<AuthState & {
     setUser: (user: any) => void;
     setSessionChecked: (checked: boolean) => void;
-  }, "user" | "setUser" | "setSessionChecked">
+    setIsLoading: (loading: boolean) => void;
+  }, "user" | "setUser" | "setSessionChecked" | "setIsLoading">
 ) {
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   // Set up auth listener
   useEffect(() => {
+    console.log("Setting up auth state change listener");
+    
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event);
@@ -29,20 +32,31 @@ export function useAuthListeners(
             lastName: session.user.user_metadata?.lastName,
           };
           setUser(updatedUser);
+          setSessionChecked(true);
+          
+          // Don't navigate if already on dashboard
+          if (!location.pathname.includes('/dashboard')) {
+            navigate('/dashboard');
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
-          // Force redirect to login on sign out
-          if (
-            !location.pathname.includes('/login') && 
-            !location.pathname.includes('/register') && 
-            location.pathname !== '/'
-          ) {
+          setSessionChecked(true);
+          
+          // Only redirect if on a protected route
+          const publicRoutes = ['/login', '/register', '/', '/about', '/pricing', '/contact'];
+          if (!publicRoutes.some(route => location.pathname.includes(route))) {
             navigate('/login');
           }
         } else if (event === 'TOKEN_REFRESHED') {
           // Refresh user data when token is refreshed
-          const currentUser = await getCurrentUser();
-          setUser(currentUser);
+          setIsLoading(true);
+          try {
+            const currentUser = await getCurrentUser();
+            setUser(currentUser);
+          } finally {
+            setIsLoading(false);
+            setSessionChecked(true);
+          }
         }
       }
     );
@@ -54,29 +68,12 @@ export function useAuthListeners(
     };
   }, []);
 
-  // Check authentication on route changes
+  // Initial auth check - only run once on component mount
   useEffect(() => {
-    if (location.pathname !== '/login' && location.pathname !== '/register') {
-      const verifyAuth = async () => {
-        try {
-          const isValid = await refreshSession();
-          if (!isValid && !location.pathname.startsWith('/reset-password')) {
-            const currentUser = await getCurrentUser();
-            setUser(currentUser);
-          }
-        } catch (error) {
-          console.error('Error verifying session on route change:', error);
-        }
-      };
-
-      verifyAuth();
-    }
-  }, [location.pathname]);
-
-  // Initial auth check
-  useEffect(() => {
+    console.log("Running initial auth check");
     const loadUser = async () => {
       try {
+        setIsLoading(true);
         // First try to get user from current session
         const currentUser = await getCurrentUser();
         
@@ -97,6 +94,7 @@ export function useAuthListeners(
       } catch (error) {
         console.error("Error loading user:", error);
       } finally {
+        setIsLoading(false);
         setSessionChecked(true);
       }
     };
