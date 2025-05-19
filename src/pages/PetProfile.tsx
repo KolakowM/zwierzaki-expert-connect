@@ -195,13 +195,13 @@ const PetProfile = () => {
               )}
               {pet.allergies && (
                 <div className="mt-4">
-                  <p className="text-sm font-medium">Alergie:</p>
+                  <p className="text-sm font-semibold">Alergie:</p>
                   <p className="text-sm">{pet.allergies}</p>
                 </div>
               )}
               {pet.vaccinationDescription && (
                 <div className="mt-4">
-                  <p className="text-sm font-medium">Historia szczepień:</p>
+                  <p className="text-sm font-semibold">Historia szczepień:</p>
                   <p className="text-sm">{pet.vaccinationDescription}</p>
                 </div>
               )}
@@ -226,14 +226,14 @@ const PetProfile = () => {
                 <CardContent className="space-y-4">
                   {pet.dietaryRestrictions && (
                     <div>
-                      <h4 className="font-medium mb-1">Ograniczenia dietetyczne:</h4>
+                      <h4 className="font-semibold mb-1">Ograniczenia dietetyczne:</h4>
                       <p>{pet.dietaryRestrictions}</p>
                     </div>
                   )}
                   
                   {pet.behavioralNotes && (
                     <div>
-                      <h4 className="font-medium mb-1">Notatki behawioralne:</h4>
+                      <h4 className="font-semibold mb-1">Notatki behawioralne:</h4>
                       <p>{pet.behavioralNotes}</p>
                     </div>
                   )}
