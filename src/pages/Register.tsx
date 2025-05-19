@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import AuthFormWrapper from "@/components/auth/AuthFormWrapper";
 import AuthFormError from "@/components/auth/AuthFormError";
 import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
+import { useAuthForm } from "@/hooks/useAuthForm";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -23,32 +24,11 @@ const Register = () => {
     confirmPassword: ""
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [authChecked, setAuthChecked] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
   
-  const { register, isAuthenticated, verifySession } = useAuth();
+  const { register, isAuthenticated } = useAuth();
+  const { error, setError, isLoading, setIsLoading, authLoading } = useAuthForm();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const isValid = await verifySession();
-        setAuthenticated(isValid);
-        
-        if (isValid) {
-          navigate('/dashboard');
-        }
-      } finally {
-        setAuthChecked(true);
-      }
-    };
-    
-    checkAuth();
-  }, [verifySession, navigate]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,11 +77,13 @@ const Register = () => {
     }
   };
   
-  if (!authChecked) {
+  // Show loading screen while authentication state is being verified
+  if (authLoading) {
     return <AuthLoadingScreen />;
   }
   
-  if (authenticated && authChecked) {
+  // Redirect to dashboard if user is already authenticated
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
