@@ -91,9 +91,15 @@ export const createVisit = async (visit: Omit<Visit, 'id' | 'createdAt'>): Promi
     const dbVisit = mapVisitToDbVisit(visit);
     dbVisit.user_id = authUser.user.id; // Always ensure user_id is set
     
+    // Ensure required fields are provided
+    if (!dbVisit.date) throw new Error("Visit date is required");
+    if (!dbVisit.type) throw new Error("Visit type is required");
+    if (!dbVisit.petid) throw new Error("Pet ID is required");
+    if (!dbVisit.clientid) throw new Error("Client ID is required");
+    
     const { data, error } = await supabase
       .from('visits')
-      .insert([dbVisit]) // Insert as an array with one object
+      .insert(dbVisit)
       .select()
       .single();
       

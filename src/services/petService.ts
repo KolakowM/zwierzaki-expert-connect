@@ -119,9 +119,14 @@ export const createPet = async (pet: Omit<Pet, 'id' | 'createdAt'>): Promise<Pet
     const dbPet = mapPetToDbPet(pet);
     dbPet.user_id = authUser.user.id; // Always ensure user_id is set
     
+    // Ensure required fields are provided
+    if (!dbPet.name) throw new Error("Pet name is required");
+    if (!dbPet.species) throw new Error("Pet species is required");
+    if (!dbPet.clientid) throw new Error("Client ID is required");
+    
     const { data, error } = await supabase
       .from('pets')
-      .insert([dbPet]) // Insert as an array with one object
+      .insert(dbPet)
       .select()
       .single();
       
