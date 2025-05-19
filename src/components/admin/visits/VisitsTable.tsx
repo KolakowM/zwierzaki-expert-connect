@@ -12,6 +12,8 @@ interface VisitsTableProps {
   formatDate: (dateString: string | Date) => string;
   handleSort: (column: string) => void;
   handleDeleteVisit: (id: string, type: string) => void;
+  sortBy: string | null; // Dodane pole sortBy
+  sortOrder: "asc" | "desc"; // Dodane pole sortOrder
 }
 
 const VisitsTable = ({ 
@@ -21,12 +23,18 @@ const VisitsTable = ({
   getClientName, 
   formatDate, 
   handleSort, 
-  handleDeleteVisit 
+  handleDeleteVisit,
+  sortBy, // Dodane pole
+  sortOrder // Dodane pole 
 }: VisitsTableProps) => {
   return (
     <div className="overflow-x-auto">
       <Table>
-        <VisitTableHeader handleSort={handleSort} />
+        <VisitTableHeader 
+          handleSort={handleSort} 
+          sortBy={sortBy} // Przekazujemy wymagane właściwości
+          sortOrder={sortOrder} 
+        />
         <TableBody>
           {isLoading ? (
             <TableRow>
