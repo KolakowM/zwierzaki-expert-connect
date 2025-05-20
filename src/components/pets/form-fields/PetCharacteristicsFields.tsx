@@ -18,7 +18,7 @@ const PetCharacteristicsFields = ({ control }: PetCharacteristicsFieldsProps) =>
         name="sex"
         render={({ field }) => (
           <FormItem className="space-y-3">
-            <FormLabel>Płeć</FormLabel>
+            <FormLabel>Płeć*</FormLabel>
             <FormControl>
               <RadioGroup
                 onValueChange={field.onChange}

@@ -59,7 +59,7 @@ const PetBasicInfoFields = ({ control }: PetBasicInfoFieldsProps) => {
           name="breed"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Rasa</FormLabel>
+              <FormLabel>Rasa*</FormLabel>
               <FormControl>
                 <Input placeholder="np. Labrador" {...field} />
               </FormControl>

@@ -81,8 +81,8 @@ const PetFormDrawer = ({
       } else {
         // Create new pet
         // Ensure required fields are present for new pet creation
-        if (!formData.name || !formData.species) {
-          throw new Error("Imię i gatunek zwierzęcia są wymagane");
+        if (!formData.name || !formData.species || !formData.breed || !formData.age || !formData.weight || !formData.sex) {
+          throw new Error("Wszystkie wymagane pola muszą być wypełnione");
         }
         
         petData = await createPet({

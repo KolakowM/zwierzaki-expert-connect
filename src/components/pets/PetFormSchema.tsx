@@ -12,28 +12,28 @@ export type PetSex = typeof PET_SEX[number];
 export const petFormSchema = z.object({
   name: z.string().min(2, "Imię musi zawierać conajmnie 2 znaki"),
   species: z.enum(PET_SPECIES),
-  breed: z.string().optional(),
-  // Improve age handling - parse as a number and allow empty string
+  breed: z.string().min(1, "Rasa jest wymagana"),
+  // Improve age handling - require as a number
   age: z.union([
-    z.string().trim().transform(val => val === "" ? undefined : Number(val)),
-    z.number().optional(),
-    z.undefined()
+    z.string().trim().min(1, "Wiek jest wymagany").transform(val => Number(val)),
+    z.number()
   ])
   .refine(
-    (val) => val === undefined || (typeof val === "number" && !isNaN(val)),
+    (val) => !isNaN(val),
     { message: "Wiek musi być liczbą" }
   ),
-  // Improve weight handling - parse as a number and allow empty string
+  // Improve weight handling - require as a number
   weight: z.union([
-    z.string().trim().transform(val => val === "" ? undefined : Number(val)),
-    z.number().optional(),
-    z.undefined()
+    z.string().trim().min(1, "Waga jest wymagana").transform(val => Number(val)),
+    z.number()
   ])
   .refine(
-    (val) => val === undefined || (typeof val === "number" && !isNaN(val)),
+    (val) => !isNaN(val),
     { message: "Waga musi być liczbą" }
   ),
-  sex: z.enum(PET_SEX).optional(),
+  sex: z.enum(PET_SEX, {
+    required_error: "Płeć jest wymagana"
+  }),
   neutered: z.boolean().optional(),
   hasMicrochip: z.boolean().default(false),
   microchipNumber: z.string().max(15, "Numer mikrochipa może mieć maksymalnie 15 znaków")
