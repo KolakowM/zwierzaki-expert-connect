@@ -5,6 +5,8 @@ import { UseFormReturn } from 'react-hook-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form } from '@/components/ui/form';
 import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface SpecialistProfileTabWrapperProps {
   profileForm: UseFormReturn<ProfileFormValues>;
@@ -45,7 +47,20 @@ export function SpecialistProfileTabWrapper({
   onPhotoChange,
   isLoadingProfile
 }: SpecialistProfileTabWrapperProps) {
-  // If the profile is still loading, show a skeleton loading state
+  // Jeśli brak userId, pokazujemy alert
+  if (!userId) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Błąd autoryzacji</AlertTitle>
+        <AlertDescription>
+          Nie udało się załadować Twojego profilu. Zaloguj się ponownie lub skontaktuj się z administratorem.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Jeśli profil jest w trakcie ładowania, pokazujemy skeleton
   if (isLoadingProfile) {
     return (
       <div className="space-y-6">
