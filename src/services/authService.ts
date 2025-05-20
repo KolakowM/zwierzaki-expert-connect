@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AuthUser {
@@ -46,23 +47,29 @@ export const signIn = async ({ email, password }: SignInCredentials) => {
 };
 
 export const signUp = async ({ email, password, firstName, lastName }: SignUpCredentials) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        firstName,
-        lastName,
-        role: 'specialist'
+  try {
+    // Register the user with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          firstName,
+          lastName,
+          // The role will be assigned by the handle_new_user trigger function
+        },
       },
-    },
-  });
+    });
 
-  if (error) {
+    if (error) {
+      throw error;
+    }
+
+    return data.user;
+  } catch (error) {
+    console.error('Registration error:', error);
     throw error;
   }
-
-  return data.user;
 };
 
 export const signOut = async () => {
