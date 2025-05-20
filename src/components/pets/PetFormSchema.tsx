@@ -12,11 +12,11 @@ export type PetSex = typeof PET_SEX[number];
 export const petFormSchema = z.object({
   name: z.string().min(2, "Imię musi zawierać conajmnie 2 znaki"),
   species: z.enum(PET_SPECIES),
-  breed: z.string(),
+  breed: z.string().optional(),
   // Improve age handling - parse as a number and allow empty string
   age: z.union([
     z.string().trim().transform(val => val === "" ? undefined : Number(val)),
-    z.number()(),
+    z.number().optional(),
     z.undefined()
   ])
   .refine(
@@ -26,7 +26,7 @@ export const petFormSchema = z.object({
   // Improve weight handling - parse as a number and allow empty string
   weight: z.union([
     z.string().trim().transform(val => val === "" ? undefined : Number(val)),
-    z.number()(),
+    z.number().optional(),
     z.undefined()
   ])
   .refine(
