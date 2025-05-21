@@ -184,23 +184,27 @@ export function useCatalogData() {
     // Zapisz całkowitą liczbę wyników po filtrowaniu
     setTotalCount(filtered.length);
 
-    // Zastosuj paginację do już przefiltrowanych wyników
-    if (filters.page !== undefined) {
-      setCurrentPage(filters.page);
+    // Ustaw wartości paginacji z filtrów lub użyj domyślnych
+    const filtersPage = filters.page !== undefined ? filters.page : currentPage;
+    const filtersPageSize = filters.pageSize !== undefined ? filters.pageSize : pageSize;
+    
+    // Aktualizuj stany paginacji TYLKO jeśli zmieniły się wartości
+    if (filtersPage !== currentPage) {
+      setCurrentPage(filtersPage);
     }
     
-    if (filters.pageSize !== undefined) {
-      setPageSize(filters.pageSize);
+    if (filtersPageSize !== pageSize) {
+      setPageSize(filtersPageSize);
     }
 
     // Paginacja na poziomie klienta
-    const startIndex = (currentPage - 1) * pageSize;
-    const paginatedResults = filtered.slice(startIndex, startIndex + pageSize);
+    const startIndex = (filtersPage - 1) * filtersPageSize;
+    const paginatedResults = filtered.slice(startIndex, startIndex + filtersPageSize);
     setFilteredSpecialists(paginatedResults);
   };
 
   // Obliczamy całkowitą liczbę stron
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return {
     specialists,

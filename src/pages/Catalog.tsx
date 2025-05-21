@@ -15,9 +15,7 @@ const Catalog = () => {
     loading, 
     filterSpecialists, 
     currentPage, 
-    setCurrentPage, 
     pageSize, 
-    setPageSize, 
     totalCount, 
     totalPages 
   } = useCatalogData();
@@ -35,12 +33,16 @@ const Catalog = () => {
   };
 
   const handlePageChange = (page: number) => {
+    if (page === currentPage) return; // Nie reaguj, jeśli to ta sama strona
+    
     const newFilters = { ...activeFilters, page };
     setActiveFilters(newFilters);
     filterSpecialists(newFilters);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
+    if (newPageSize === pageSize) return; // Nie reaguj, jeśli to ten sam rozmiar strony
+    
     const newFilters = { ...activeFilters, pageSize: newPageSize, page: 1 };
     setActiveFilters(newFilters);
     filterSpecialists(newFilters);

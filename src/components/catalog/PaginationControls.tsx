@@ -1,4 +1,5 @@
 
+import React, { memo } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -14,7 +15,11 @@ interface PaginationControlsProps {
   onPageChange: (page: number) => void;
 }
 
-export function PaginationControls({ currentPage, totalPages, onPageChange }: PaginationControlsProps) {
+export const PaginationControls = memo(function PaginationControls({ 
+  currentPage, 
+  totalPages, 
+  onPageChange 
+}: PaginationControlsProps) {
   // Funkcja generująca przyciski z numerami stron
   const generatePaginationItems = () => {
     const items = [];
@@ -35,7 +40,10 @@ export function PaginationControls({ currentPage, totalPages, onPageChange }: Pa
         <PaginationItem key={i}>
           <PaginationLink 
             isActive={currentPage === i} 
-            onClick={() => onPageChange(i)}
+            onClick={(e) => {
+              e.preventDefault();
+              onPageChange(i);
+            }}
           >
             {i}
           </PaginationLink>
@@ -46,12 +54,27 @@ export function PaginationControls({ currentPage, totalPages, onPageChange }: Pa
     return items;
   };
 
+  // Obsługujemy kliknięcie w przycisk Poprzednia/Następna
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious 
-            onClick={() => currentPage > 1 ? onPageChange(currentPage - 1) : null}
+            onClick={handlePrevious}
             className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
@@ -60,11 +83,11 @@ export function PaginationControls({ currentPage, totalPages, onPageChange }: Pa
         
         <PaginationItem>
           <PaginationNext 
-            onClick={() => currentPage < totalPages ? onPageChange(currentPage + 1) : null}
+            onClick={handleNext}
             className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
       </PaginationContent>
     </Pagination>
   );
-}
+});
