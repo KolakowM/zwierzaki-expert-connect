@@ -10,12 +10,17 @@ export interface CatalogFilters {
   location?: string;
   specializations?: string[];
   roles?: AppRole[];
+  page?: number;
+  pageSize?: number;
 }
 
 export function useCatalogData() {
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [filteredSpecialists, setFilteredSpecialists] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
   // Fetch all users - now accessible to guest users due to updated RLS policies
@@ -38,6 +43,7 @@ export function useCatalogData() {
           console.log('No users found');
           setSpecialists([]);
           setFilteredSpecialists([]);
+          setTotalCount(0);
           setLoading(false);
           return;
         }
@@ -122,6 +128,7 @@ export function useCatalogData() {
         
         setSpecialists(usersData);
         setFilteredSpecialists(usersData);
+        setTotalCount(usersData.length);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast({
@@ -131,6 +138,7 @@ export function useCatalogData() {
         });
         setSpecialists([]);
         setFilteredSpecialists([]);
+        setTotalCount(0);
       } finally {
         setLoading(false);
       }
@@ -173,13 +181,37 @@ export function useCatalogData() {
       );
     }
 
-    setFilteredSpecialists(filtered);
+    // Zapisz całkowitą liczbę wyników po filtrowaniu
+    setTotalCount(filtered.length);
+
+    // Zastosuj paginację do już przefiltrowanych wyników
+    if (filters.page !== undefined) {
+      setCurrentPage(filters.page);
+    }
+    
+    if (filters.pageSize !== undefined) {
+      setPageSize(filters.pageSize);
+    }
+
+    // Paginacja na poziomie klienta
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedResults = filtered.slice(startIndex, startIndex + pageSize);
+    setFilteredSpecialists(paginatedResults);
   };
+
+  // Obliczamy całkowitą liczbę stron
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return {
     specialists,
     filteredSpecialists,
     loading,
-    filterSpecialists
+    filterSpecialists,
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalCount,
+    totalPages
   };
 }
