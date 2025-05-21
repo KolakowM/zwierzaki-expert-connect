@@ -8,7 +8,7 @@ interface ItemsPerPageSelectProps {
 }
 
 export function ItemsPerPageSelect({ pageSize, onPageSizeChange }: ItemsPerPageSelectProps) {
-  const pageSizeOptions = [18, 21, 24, 27];
+  const pageSizeOptions = [3, 6, 9, 15, 12,18, 21, 24, 27];
 
   return (
     <div className="flex items-center space-x-2">
