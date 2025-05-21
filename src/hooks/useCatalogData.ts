@@ -80,9 +80,11 @@ export function useCatalogData() {
         }, {} as Record<string, any>) || {};
         
         // Get specializations for each specialist - now publicly accessible
+        // Zmodyfikowane zapytanie - pobieramy tylko aktywne specjalizacje (active = 'yes')
         const { data: specialistSpecs, error: specsError } = await supabase
           .from('specialist_specializations')
-          .select('specialist_id, specialization_id');
+          .select('specialist_id, specialization_id')
+          .eq('active', 'yes');
           
         if (specsError) {
           throw specsError;
@@ -111,7 +113,7 @@ export function useCatalogData() {
             specializations: specializationsBySpecialist[userId] || [],
             location: specialistProfile?.location || userProfile.city || "Polska",
             image: specialistProfile?.photo_url || "/placeholder.svg",
-            email: specialistProfile?.email || userProfile.email, // Added email from specialist_profiles or user_profiles
+            email: specialistProfile?.email || userProfile.email,
             rating: 0,
             verified: roleData.status === 'zweryfikowany',
             role: roleData.role
