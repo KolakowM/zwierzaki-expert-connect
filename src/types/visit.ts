@@ -11,7 +11,11 @@ export interface DbVisit {
   recommendations?: string | null;
   followupneeded?: boolean | null;
   followupdate?: string | null; // ISO date string format
+  status?: string | null; // Dodane nowe pole status
 }
+
+// Definiujemy dozwolone wartości statusu
+export type VisitStatus = "Planowana" | "Odbyła się" | "Anulowana" | "Zmiana terminu";
 
 export interface Visit {
   id: string;
@@ -24,6 +28,7 @@ export interface Visit {
   recommendations?: string | null;
   followUpNeeded?: boolean | null;
   followUpDate?: Date | null; // Date object in application
+  status?: VisitStatus | null; // Dodane pole status z typem VisitStatus
 }
 
 // Mapping functions for visits
@@ -38,6 +43,7 @@ export const mapDbVisitToVisit = (dbVisit: DbVisit): Visit => ({
   recommendations: dbVisit.recommendations,
   followUpNeeded: dbVisit.followupneeded,
   followUpDate: dbVisit.followupdate ? new Date(dbVisit.followupdate) : null,
+  status: dbVisit.status as VisitStatus || "Planowana", // Mapowanie pola status z domyślną wartością
 });
 
 export const mapVisitToDbVisit = (visit: Omit<Visit, 'id'>): Omit<DbVisit, 'id'> => ({
@@ -50,4 +56,5 @@ export const mapVisitToDbVisit = (visit: Omit<Visit, 'id'>): Omit<DbVisit, 'id'>
   recommendations: visit.recommendations,
   followupneeded: visit.followUpNeeded,
   followupdate: visit.followUpDate ? visit.followUpDate.toISOString() : null,
+  status: visit.status || "Planowana", // Mapowanie pola status z domyślną wartością
 });

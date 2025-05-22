@@ -26,6 +26,7 @@ export function useProfileDataProcessor() {
         experience: formData.experience?.trim() || "",
         location: formData.location?.trim() || "Polska",
         phone_number: formData.phoneNumber?.trim() || null,
+        email: formData.email?.trim() || null, // Added email field
         website: formData.website?.trim() || null,
         photo_url: photoUrl || null,
         // We'll handle specializations through the join table instead

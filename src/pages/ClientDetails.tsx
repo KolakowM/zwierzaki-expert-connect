@@ -207,7 +207,7 @@ const ClientDetails = () => {
             <TabsTrigger value="pets">Zwierzęta ({pets.length})</TabsTrigger>
             <TabsTrigger value="visits">Historia wizyt ({visits.length})</TabsTrigger>
             <TabsTrigger value="notes">Notatki</TabsTrigger>
-            <TabsTrigger value="documents">Dokumenty</TabsTrigger>
+            <TabsTrigger value="documents">Programy opieki</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">

@@ -129,6 +129,9 @@ export const useSpecialistProfile = (initialProfileData: any = null) => {
       if (typeof socialMediaObj.twitch === 'string') socialMedia.twitch = socialMediaObj.twitch;
     }
     
+    // Use email from specialist profile if available, otherwise fall back to user email
+    const email = profileData.email || userEmail || '';
+    
     form.reset({
       title: profileData.title || "",
       description: profileData.description || "",
@@ -138,9 +141,16 @@ export const useSpecialistProfile = (initialProfileData: any = null) => {
       experience: profileData.experience || "",
       location: profileData.location || "",
       phoneNumber: profileData.phone_number || "",
-      email: userEmail || profileData.email || "",
+      email: email,
       website: profileData.website || "",
       socialMedia: socialMedia
+    });
+    
+    // Log the form data for debugging
+    console.log("Form populated with data:", {
+      email: email,
+      profile_email: profileData.email,
+      user_email: userEmail
     });
   };
 

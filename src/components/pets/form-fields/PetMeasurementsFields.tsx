@@ -16,7 +16,7 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
         name="age"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Wiek (lata)</FormLabel>
+            <FormLabel>Wiek (lata)*</FormLabel>
             <FormControl>
               <Input 
                 type="text" 
@@ -41,7 +41,7 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
         name="weight"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Waga (kg)</FormLabel>
+            <FormLabel>Waga (kg)*</FormLabel>
             <FormControl>
               <Input 
                 type="text" 

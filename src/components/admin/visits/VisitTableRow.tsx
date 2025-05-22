@@ -1,60 +1,70 @@
 
-import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, Edit, Trash2, CheckCircle } from "lucide-react";
 import { Visit } from "@/types";
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Link } from "react-router-dom";
+import { CalendarPlus, Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor } from "@/constants/visitStatuses";
 
 interface VisitTableRowProps {
   visit: Visit;
-  getPetName: (petId: string) => string;
   getClientName: (clientId: string) => string;
-  formatDate: (dateString: string | Date) => string;
+  getPetName: (petId: string) => string;
+  formatDate: (date: string | Date) => string;
   onDelete: (id: string, type: string) => void;
 }
 
-const VisitTableRow = ({ 
-  visit, 
-  getPetName, 
-  getClientName, 
-  formatDate, 
-  onDelete 
+const VisitTableRow = ({
+  visit,
+  getClientName,
+  getPetName,
+  formatDate,
+  onDelete
 }: VisitTableRowProps) => {
+  const clientName = getClientName(visit.clientId);
+  const petName = getPetName(visit.petId);
+  
+  const statusColor = getStatusColor(visit.status);
+
   return (
-    <TableRow key={visit.id}>
+    <TableRow>
       <TableCell>
-        <div className="flex items-center">
-          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-          {formatDate(visit.date)}
-        </div>
+        {formatDate(visit.date)}
+        {visit.time && <div className="text-sm text-gray-500">{visit.time}</div>}
       </TableCell>
       <TableCell>
-        <Badge variant="outline">{visit.type}</Badge>
-      </TableCell>
-      <TableCell className="font-medium">{getPetName(visit.petId)}</TableCell>
-      <TableCell className="hidden md:table-cell">{getClientName(visit.clientId)}</TableCell>
-      <TableCell className="hidden md:table-cell">
-        {visit.followUpNeeded ? (
-          <div className="flex items-center">
-            <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-            {visit.followUpDate ? formatDate(visit.followUpDate) : "Tak"}
-          </div>
-        ) : "Nie"}
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="icon">
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-red-500 hover:text-red-700"
-            onClick={() => onDelete(visit.id, visit.type)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        {petName}
+        <div className="text-sm text-gray-500">
+          <Link to={`/clients/${visit.clientId}`} className="hover:underline">
+            {clientName}
+          </Link>
         </div>
+      </TableCell>
+      <TableCell>{visit.type}</TableCell>
+      <TableCell>
+        <Badge className={`${statusColor} border`}>
+          {visit.status || "Planowana"}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right space-x-2">
+        <Button variant="outline" size="icon" asChild>
+          <Link to={`/pets/${visit.petId}`}>
+            <CalendarPlus className="h-4 w-4" />
+          </Link>
+        </Button>
+        <Button variant="outline" size="icon" asChild>
+          <Link to={`/clients/${visit.clientId}`}>
+            <Pencil className="h-4 w-4" />
+          </Link>
+        </Button>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => onDelete(visit.id, visit.type)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </TableCell>
     </TableRow>
   );

@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteVisit } from "@/services/visitService";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor } from "@/constants/visitStatuses";
 
 interface VisitDetailsDialogProps {
   isOpen: boolean;
@@ -45,6 +47,8 @@ const VisitDetailsDialog = ({ isOpen, onClose, visit, client, pet }: VisitDetail
   });
 
   if (!visit) return null;
+  
+  const statusColor = getStatusColor(visit.status);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -57,16 +61,22 @@ const VisitDetailsDialog = ({ isOpen, onClose, visit, client, pet }: VisitDetail
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Data i godzina</p>
-            <p>{format(
-                typeof visit.date === 'string' 
-                  ? new Date(visit.date) 
-                  : visit.date, 
-                "dd.MM.yyyy"
-              )}
-              {visit.time ? `, ${visit.time}` : ''}
-            </p>
+          <div className="flex justify-between items-center">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Data i godzina</p>
+              <p>{format(
+                  typeof visit.date === 'string' 
+                    ? new Date(visit.date) 
+                    : visit.date, 
+                  "dd.MM.yyyy"
+                )}
+                {visit.time ? `, ${visit.time}` : ''}
+              </p>
+            </div>
+            
+            <Badge className={`${statusColor} border`}>
+              {visit.status || "Planowana"}
+            </Badge>
           </div>
 
           <div className="space-y-1">

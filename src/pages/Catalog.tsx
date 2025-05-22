@@ -5,19 +5,45 @@ import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { CatalogResults } from "@/components/catalog/CatalogResults";
 import { CatalogHeader } from "@/components/catalog/CatalogHeader";
 import { useCatalogData, CatalogFilters } from "@/hooks/useCatalogData";
+import { PaginationControls } from "@/components/catalog/PaginationControls";
+import { ItemsPerPageSelect } from "@/components/catalog/ItemsPerPageSelect";
 
 const Catalog = () => {
   const [activeFilters, setActiveFilters] = useState<CatalogFilters>({});
-  const { filteredSpecialists, loading, filterSpecialists } = useCatalogData();
+  const { 
+    filteredSpecialists, 
+    loading, 
+    filterSpecialists, 
+    currentPage, 
+    pageSize, 
+    totalCount, 
+    totalPages 
+  } = useCatalogData();
 
   const handleSearch = (searchTerm: string) => {
-    const newFilters = { ...activeFilters, searchTerm };
+    const newFilters = { ...activeFilters, searchTerm, page: 1 };
     setActiveFilters(newFilters);
     filterSpecialists(newFilters);
   };
 
   const handleFilterChange = (filters: CatalogFilters) => {
-    const newFilters = { ...activeFilters, ...filters };
+    const newFilters = { ...activeFilters, ...filters, page: 1 };
+    setActiveFilters(newFilters);
+    filterSpecialists(newFilters);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page === currentPage) return; // Nie reaguj, jeśli to ta sama strona
+    
+    const newFilters = { ...activeFilters, page };
+    setActiveFilters(newFilters);
+    filterSpecialists(newFilters);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    if (newPageSize === pageSize) return; // Nie reaguj, jeśli to ten sam rozmiar strony
+    
+    const newFilters = { ...activeFilters, pageSize: newPageSize, page: 1 };
     setActiveFilters(newFilters);
     filterSpecialists(newFilters);
   };
@@ -33,16 +59,34 @@ const Catalog = () => {
           </aside>
           
           <div className="md:col-span-3">
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <p className="text-muted-foreground">
-                {loading ? "Ładowanie użytkowników..." : `Znaleziono ${filteredSpecialists.length} użytkowników`}
+                {loading 
+                  ? "Ładowanie użytkowników..." 
+                  : `Znaleziono ${totalCount} użytkowników`
+                }
               </p>
+              
+              <ItemsPerPageSelect 
+                pageSize={pageSize} 
+                onPageSizeChange={handlePageSizeChange} 
+              />
             </div>
             
             <CatalogResults 
               filteredSpecialists={filteredSpecialists}
               loading={loading}
             />
+            
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <PaginationControls 
+                  currentPage={currentPage} 
+                  totalPages={totalPages} 
+                  onPageChange={handlePageChange} 
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

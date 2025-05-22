@@ -62,7 +62,7 @@ const SpecialistProfile = () => {
             experience: data.experience || "Brak informacji o doświadczeniu",
             location: data.location || "Brak lokalizacji",
             phoneNumber: data.phone_number || "Brak numeru telefonu",
-            email: "Brak adresu email", // We don't have direct access to email
+            email: data.email || "Brak adresu email", // Changed to use data.email
             website: data.website || "",
             socialMedia: data.social_media || {},
             image: data.photo_url || null,

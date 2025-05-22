@@ -152,6 +152,8 @@ const AdminVisits = () => {
           formatDate={formatDate}
           handleSort={handleSort}
           handleDeleteVisit={handleDeleteVisit}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
       </Card>
     </>

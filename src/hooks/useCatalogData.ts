@@ -10,12 +10,17 @@ export interface CatalogFilters {
   location?: string;
   specializations?: string[];
   roles?: AppRole[];
+  page?: number;
+  pageSize?: number;
 }
 
 export function useCatalogData() {
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [filteredSpecialists, setFilteredSpecialists] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
   // Fetch all users - now accessible to guest users due to updated RLS policies
@@ -38,6 +43,7 @@ export function useCatalogData() {
           console.log('No users found');
           setSpecialists([]);
           setFilteredSpecialists([]);
+          setTotalCount(0);
           setLoading(false);
           return;
         }
@@ -80,9 +86,11 @@ export function useCatalogData() {
         }, {} as Record<string, any>) || {};
         
         // Get specializations for each specialist - now publicly accessible
+        // Zmodyfikowane zapytanie - pobieramy tylko aktywne specjalizacje (active = 'yes')
         const { data: specialistSpecs, error: specsError } = await supabase
           .from('specialist_specializations')
-          .select('specialist_id, specialization_id');
+          .select('specialist_id, specialization_id')
+          .eq('active', 'yes');
           
         if (specsError) {
           throw specsError;
@@ -111,6 +119,7 @@ export function useCatalogData() {
             specializations: specializationsBySpecialist[userId] || [],
             location: specialistProfile?.location || userProfile.city || "Polska",
             image: specialistProfile?.photo_url || "/placeholder.svg",
+            email: specialistProfile?.email || userProfile.email,
             rating: 0,
             verified: roleData.status === 'zweryfikowany',
             role: roleData.role
@@ -119,6 +128,7 @@ export function useCatalogData() {
         
         setSpecialists(usersData);
         setFilteredSpecialists(usersData);
+        setTotalCount(usersData.length);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast({
@@ -128,6 +138,7 @@ export function useCatalogData() {
         });
         setSpecialists([]);
         setFilteredSpecialists([]);
+        setTotalCount(0);
       } finally {
         setLoading(false);
       }
@@ -170,13 +181,41 @@ export function useCatalogData() {
       );
     }
 
-    setFilteredSpecialists(filtered);
+    // Zapisz całkowitą liczbę wyników po filtrowaniu
+    setTotalCount(filtered.length);
+
+    // Ustaw wartości paginacji z filtrów lub użyj domyślnych
+    const filtersPage = filters.page !== undefined ? filters.page : currentPage;
+    const filtersPageSize = filters.pageSize !== undefined ? filters.pageSize : pageSize;
+    
+    // Aktualizuj stany paginacji TYLKO jeśli zmieniły się wartości
+    if (filtersPage !== currentPage) {
+      setCurrentPage(filtersPage);
+    }
+    
+    if (filtersPageSize !== pageSize) {
+      setPageSize(filtersPageSize);
+    }
+
+    // Paginacja na poziomie klienta
+    const startIndex = (filtersPage - 1) * filtersPageSize;
+    const paginatedResults = filtered.slice(startIndex, startIndex + filtersPageSize);
+    setFilteredSpecialists(paginatedResults);
   };
+
+  // Obliczamy całkowitą liczbę stron
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return {
     specialists,
     filteredSpecialists,
     loading,
-    filterSpecialists
+    filterSpecialists,
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalCount,
+    totalPages
   };
 }
