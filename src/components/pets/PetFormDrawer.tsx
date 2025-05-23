@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -54,7 +55,6 @@ const PetFormDrawer = ({
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
     // Convert number values to strings for the form inputs
-    age: defaultValues.age?.toString() || '',
     weight: defaultValues.weight?.toString() || '',
     species: defaultValues.species as PetSpecies,
     sex: defaultValues.sex as PetSex || undefined,
@@ -86,7 +86,7 @@ const PetFormDrawer = ({
       } else {
         // Create new pet
         // Ensure required fields are present for new pet creation
-        if (!formData.name || !formData.species || !formData.breed || !formData.age || !formData.weight || !formData.sex) {
+        if (!formData.name || !formData.species || !formData.breed || !formData.weight || !formData.sex) {
           throw new Error("Wszystkie wymagane pola muszą być wypełnione");
         }
         
@@ -95,7 +95,6 @@ const PetFormDrawer = ({
           species: formData.species,
           clientId,
           breed: formData.breed,
-          age: formData.age,
           weight: formData.weight,
           sex: formData.sex,
           neutered: formData.neutered,
@@ -105,7 +104,8 @@ const PetFormDrawer = ({
           behavioralNotes: formData.behavioralNotes,
           hasMicrochip: formData.hasMicrochip || false,
           microchipNumber: formData.microchipNumber,
-          vaccinationDescription: formData.vaccinationDescription
+          vaccinationDescription: formData.vaccinationDescription,
+          dateOfBirth: formData.dateOfBirth
         });
         
         toast({

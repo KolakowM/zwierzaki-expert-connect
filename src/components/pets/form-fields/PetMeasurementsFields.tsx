@@ -23,8 +23,8 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
                 type="date" 
                 placeholder="DD-MM-RRRR"
                 {...field}
-                value={field.value && isValid(new Date(field.value)) 
-                  ? format(new Date(field.value), "yyyy-MM-dd") 
+                value={field.value && isValid(field.value as Date) 
+                  ? format(field.value as Date, "yyyy-MM-dd") 
                   : ""}
                 onChange={(e) => {
                   const dateString = e.target.value;

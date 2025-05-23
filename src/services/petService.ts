@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Pet, DbPet, mapDbPetToPet, mapPetToDbPet } from "@/types";
 
@@ -88,9 +89,11 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
   // Ensure weight is properly handled as a decimal
   if (pet.weight !== undefined) {
     // Convert weight to a number (can be decimal)
-    dbPetUpdate.weight = typeof pet.weight === 'string' 
-      ? Number(pet.weight.replace(',', '.')) 
-      : pet.weight;
+    if (typeof pet.weight === 'string') {
+      dbPetUpdate.weight = Number(pet.weight.replace(',', '.'));
+    } else {
+      dbPetUpdate.weight = pet.weight;
+    }
   }
   
   if (pet.sex !== undefined) dbPetUpdate.sex = pet.sex;
