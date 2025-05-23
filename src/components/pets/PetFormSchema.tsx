@@ -1,4 +1,3 @@
-
 import * as z from "zod";
 import { isValid, parseISO } from "date-fns";
 
@@ -44,6 +43,22 @@ export const petFormSchema = z.object({
     required_error: "Płeć jest wymagana"
   }),
   neutered: z.boolean().optional(),
+  
+  // Add neuteringDate field
+  neuteringDate: z.preprocess(
+    (val) => {
+      // Handle empty strings
+      if (typeof val === 'string' && val.trim() === '') return undefined;
+      // Parse date from YYYY-MM-DD format (from input type="date")
+      const parsedDate = typeof val === 'string' ? parseISO(val) : val;
+      // Return valid date or undefined
+      return isValid(parsedDate) ? parsedDate : undefined;
+    },
+    z.date({
+      invalid_type_error: "Nieprawidłowa data sterylizacji",
+    }).optional()
+  ),
+  
   hasMicrochip: z.boolean().default(false),
   microchipNumber: z.string().max(15, "Numer mikrochipa może mieć maksymalnie 15 znaków")
     .optional()
@@ -56,7 +71,21 @@ export const petFormSchema = z.object({
   allergies: z.string().optional(),
   dietaryRestrictions: z.string().optional(),
   behavioralNotes: z.string().optional(),
-});
+})
+.refine(
+  (data) => {
+    // Conditional validation: if neutered is true, neuteringDate must be provided
+    if (data.neutered === true) {
+      return data.neuteringDate !== undefined && data.neuteringDate !== null;
+    }
+    // Otherwise validation passes
+    return true;
+  },
+  {
+    message: "Data sterylizacji jest wymagana, jeśli zwierzę jest sterylizowane.",
+    path: ["neuteringDate"], // Point the error to the neuteringDate field
+  }
+);
 
 // Define the actual form values type (before transformation)
 export type PetFormValues = z.input<typeof petFormSchema>;

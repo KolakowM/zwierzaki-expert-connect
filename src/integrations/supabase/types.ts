@@ -190,6 +190,7 @@ export type Database = {
           microchip_number: string | null
           name: string
           neutered: boolean | null
+          neutering_date: string | null
           sex: string | null
           species: string
           vaccination_description: string | null
@@ -210,6 +211,7 @@ export type Database = {
           microchip_number?: string | null
           name: string
           neutered?: boolean | null
+          neutering_date?: string | null
           sex?: string | null
           species: string
           vaccination_description?: string | null
@@ -230,6 +232,7 @@ export type Database = {
           microchip_number?: string | null
           name?: string
           neutered?: boolean | null
+          neutering_date?: string | null
           sex?: string | null
           species?: string
           vaccination_description?: string | null

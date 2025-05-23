@@ -55,6 +55,11 @@ const PetFormDialog = ({
     dateOfBirth: defaultValues.dateOfBirth ? 
       (typeof defaultValues.dateOfBirth === 'string' ? 
         parseISO(defaultValues.dateOfBirth) : defaultValues.dateOfBirth) : 
+      undefined,
+    // Handle neutering date conversion
+    neuteringDate: defaultValues.neuteringDate ? 
+      (typeof defaultValues.neuteringDate === 'string' ? 
+        parseISO(defaultValues.neuteringDate) : defaultValues.neuteringDate) : 
       undefined
   } : undefined;
 
@@ -91,6 +96,7 @@ const PetFormDialog = ({
           weight: formData.weight,
           sex: formData.sex,
           neutered: formData.neutered,
+          neuteringDate: formData.neuteringDate,
           medicalHistory: formData.medicalHistory,
           allergies: formData.allergies,
           dietaryRestrictions: formData.dietaryRestrictions,

@@ -10,6 +10,7 @@ export interface DbPet {
   weight?: number | null;  // Decimal in database
   sex?: string | null;
   neutered?: boolean | null;
+  neutering_date?: string | null; // Added neutering date field
   medicalhistory?: string | null;
   allergies?: string | null;
   dietaryrestrictions?: string | null;
@@ -31,6 +32,7 @@ export interface Pet {
   weight?: number | null;  // Decimal in frontend
   sex?: string | null;
   neutered?: boolean | null;
+  neuteringDate?: Date | string | null; // Added neutering date field
   medicalHistory?: string | null;
   allergies?: string | null;
   dietaryRestrictions?: string | null;
@@ -53,6 +55,7 @@ export const mapDbPetToPet = (dbPet: DbPet): Pet => ({
   weight: dbPet.weight,
   sex: dbPet.sex,
   neutered: dbPet.neutered,
+  neuteringDate: dbPet.neutering_date, // Map neutering date
   medicalHistory: dbPet.medicalhistory,
   allergies: dbPet.allergies,
   dietaryRestrictions: dbPet.dietaryrestrictions,
@@ -77,6 +80,7 @@ export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
     : null,
   sex: pet.sex,
   neutered: pet.neutered,
+  neutering_date: pet.neuteringDate ? new Date(pet.neuteringDate).toISOString().split('T')[0] : null, // Format neutering date as YYYY-MM-DD
   medicalhistory: pet.medicalHistory,
   allergies: pet.allergies,
   dietaryrestrictions: pet.dietaryRestrictions,

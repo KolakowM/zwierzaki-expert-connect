@@ -19,13 +19,18 @@ interface PetFormProps {
 }
 
 const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: PetFormProps) => {
-  // Process defaultValues to handle dateOfBirth
+  // Process defaultValues to handle dates
   const processedDefaultValues = defaultValues ? {
     ...defaultValues,
     // Convert dateOfBirth string to Date object if it exists
     dateOfBirth: defaultValues.dateOfBirth ? 
       (typeof defaultValues.dateOfBirth === 'string' ? 
         parseISO(defaultValues.dateOfBirth) : defaultValues.dateOfBirth) : 
+      undefined,
+    // Convert neuteringDate string to Date object if it exists
+    neuteringDate: defaultValues.neuteringDate ? 
+      (typeof defaultValues.neuteringDate === 'string' ? 
+        parseISO(defaultValues.neuteringDate) : defaultValues.neuteringDate) : 
       undefined,
   } : undefined;
 
@@ -39,6 +44,7 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
       weight: "",
       sex: undefined,
       neutered: false,
+      neuteringDate: undefined,
       hasMicrochip: false,
       microchipNumber: "",
       vaccinationDescription: "",

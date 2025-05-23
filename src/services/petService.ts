@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Pet, DbPet, mapDbPetToPet, mapPetToDbPet } from "@/types";
 
@@ -100,6 +99,13 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
   
   if (pet.sex !== undefined) dbPetUpdate.sex = pet.sex;
   if (pet.neutered !== undefined) dbPetUpdate.neutered = pet.neutered;
+  
+  // Handle neuteringDate conversion to YYYY-MM-DD format for database
+  if (pet.neuteringDate !== undefined) {
+    dbPetUpdate.neutering_date = pet.neuteringDate ? 
+      new Date(pet.neuteringDate).toISOString().split('T')[0] : null;
+  }
+  
   if (pet.medicalHistory !== undefined) dbPetUpdate.medicalhistory = pet.medicalHistory;
   if (pet.allergies !== undefined) dbPetUpdate.allergies = pet.allergies;
   if (pet.dietaryRestrictions !== undefined) dbPetUpdate.dietaryrestrictions = pet.dietaryRestrictions;

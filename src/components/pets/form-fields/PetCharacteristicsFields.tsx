@@ -2,17 +2,26 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Control } from "react-hook-form";
+import { Control, useWatch } from "react-hook-form";
 import { PetFormValues, PET_SEX } from "../PetFormSchema";
+import { format, isValid } from "date-fns";
 
 interface PetCharacteristicsFieldsProps {
   control: Control<PetFormValues>;
 }
 
 const PetCharacteristicsFields = ({ control }: PetCharacteristicsFieldsProps) => {
+  // Monitor the neutered field value for conditional rendering
+  const isNeutered = useWatch({
+    control,
+    name: "neutered",
+    defaultValue: false,
+  });
+
   return (
-    <>
+    <div className="space-y-4">
       <FormField
         control={control}
         name="sex"
@@ -58,7 +67,36 @@ const PetCharacteristicsFields = ({ control }: PetCharacteristicsFieldsProps) =>
           </FormItem>
         )}
       />
-    </>
+
+      {/* Conditional rendering of neutering date field */}
+      {isNeutered && (
+        <FormField
+          control={control}
+          name="neuteringDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Data sterylizacji*</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  placeholder="DD-MM-RRRR"
+                  {...field}
+                  value={field.value && isValid(field.value as Date) 
+                    ? format(field.value as Date, "yyyy-MM-dd") 
+                    : ""}
+                  onChange={(e) => {
+                    const dateString = e.target.value;
+                    const date = dateString ? new Date(dateString) : undefined;
+                    field.onChange(date);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+    </div>
   );
 };
 
