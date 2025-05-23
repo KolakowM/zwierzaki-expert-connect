@@ -9,6 +9,7 @@ import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
 import { useQueryClient } from "@tanstack/react-query";
+import { parseISO } from "date-fns";
 
 interface PetFormDialogProps {
   clientId: string;
@@ -47,10 +48,19 @@ const PetFormDialog = ({
   const formDefaultValues = defaultValues ? {
     ...defaultValues,
     // Convert number values to strings for the form inputs
-    age: defaultValues.age?.toString() || '',
     weight: defaultValues.weight?.toString() || '',
     species: defaultValues.species as PetSpecies,
-    sex: defaultValues.sex as PetSex || undefined
+    sex: defaultValues.sex as PetSex || undefined,
+    // Handle date of birth conversion
+    dateOfBirth: defaultValues.dateOfBirth ? 
+      (typeof defaultValues.dateOfBirth === 'string' ? 
+        parseISO(defaultValues.dateOfBirth) : defaultValues.dateOfBirth) : 
+      undefined,
+    // Handle neutering date conversion
+    neuteringDate: defaultValues.neuteringDate ? 
+      (typeof defaultValues.neuteringDate === 'string' ? 
+        parseISO(defaultValues.neuteringDate) : defaultValues.neuteringDate) : 
+      undefined
   } : undefined;
 
   const handleSubmit = async (formData: PetFormOutput) => {
@@ -74,7 +84,7 @@ const PetFormDialog = ({
       } else {
         // Create new pet
         // Ensure required fields are present for new pet creation
-        if (!formData.name || !formData.species || !formData.breed || !formData.age || !formData.weight || !formData.sex) {
+        if (!formData.name || !formData.species || !formData.breed || !formData.weight || !formData.sex) {
           throw new Error("Wszystkie wymagane pola muszą być wypełnione");
         }
         
@@ -83,17 +93,18 @@ const PetFormDialog = ({
           species: formData.species,
           clientId,
           breed: formData.breed,
-          age: formData.age,
           weight: formData.weight,
           sex: formData.sex,
           neutered: formData.neutered,
+          neuteringDate: formData.neuteringDate,
           medicalHistory: formData.medicalHistory,
           allergies: formData.allergies,
           dietaryRestrictions: formData.dietaryRestrictions,
           behavioralNotes: formData.behavioralNotes,
           hasMicrochip: formData.hasMicrochip || false,
           microchipNumber: formData.microchipNumber,
-          vaccinationDescription: formData.vaccinationDescription
+          vaccinationDescription: formData.vaccinationDescription,
+          dateOfBirth: formData.dateOfBirth
         });
         
         toast({

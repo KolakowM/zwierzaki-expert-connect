@@ -32,6 +32,7 @@ import { usePetProfile } from "@/hooks/use-pet-profile";
 import PetProfileLoader from "@/components/pets/PetProfileLoader";
 import PetNotFound from "@/components/pets/PetNotFound";
 import PetNotes from "@/components/pets/PetNotes";
+import { getFormattedPetAge } from '@/utils/petAgeUtils';
 
 const PetProfile = () => {
   const {
@@ -57,7 +58,7 @@ const PetProfile = () => {
     return <PetNotFound />;
   }
 
-  const petAge = pet.age ? `${pet.age} lat` : "Nieznany";
+  const petAge = pet.dateOfBirth ? getFormattedPetAge(pet.dateOfBirth) : "Nieznany";
   const petWeight = pet.weight ? `${pet.weight} kg` : "Nieznana";
 
   const totalVisits = visits.length;

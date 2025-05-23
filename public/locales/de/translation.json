@@ -14,6 +14,11 @@
     "close": "Schließen",
     "language": "Sprache"
   },
+  "catalog": {
+    "results_count": "{{count}} Benutzer gefunden",
+    "no_results": "Keine Benutzer entsprechen Ihren Suchkriterien",
+    "title": "Benutzerkatalog"
+  },
   "header": {
     "catalog": "Spezialistenkatalog",
     "about": "Über die Plattform",
@@ -63,7 +68,7 @@
     "regulations": "Vorschriften",
     "contact_info": "Kontakt",
     "phone": "+48 123 456 789",
-    "email": "kontakt@expertzwierzaki.pl",
+    "email": "kontakt@petsflow.pl",
     "location": "Warschau, Polen",
     "copyright": "© 2025 PetsFlow. Alle Rechte vorbehalten."
   },
@@ -76,7 +81,7 @@
     "featured_description": "Lernen Sie unsere bestbewerteten Fachleute kennen, die Ihrem Haustier zu Gesundheit und Wohlbefinden verhelfen.",
     "view_all_specialists": "Alle Spezialisten anzeigen",
     "why_platform": "Warum unsere Plattform nutzen?",
-    "platform_description": "ExpertZwierzaki verbindet Tierbesitzer mit den besten Spezialisten in Polen und garantiert professionelle Pflege für Ihr Haustier.",
+    "platform_description": "PetsFlow verbindet Tierbesitzer mit den besten Spezialisten in Polen und garantiert professionelle Pflege für Ihr Haustier.",
     "are_you_specialist": "Sind Sie ein Tierspezialist?",
     "specialist_cta": "Treten Sie unserer Plattform bei, um Zugang zu neuen Kunden und einem praktischen CRM-Tool zu erhalten, das auf Ihre Praxis zugeschnitten ist."
   },

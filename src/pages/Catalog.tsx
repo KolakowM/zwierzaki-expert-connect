@@ -4,48 +4,37 @@ import MainLayout from "@/components/layout/MainLayout";
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { CatalogResults } from "@/components/catalog/CatalogResults";
 import { CatalogHeader } from "@/components/catalog/CatalogHeader";
-import { useCatalogData, CatalogFilters } from "@/hooks/useCatalogData";
+import { CatalogFilters, useCatalogQuery } from "@/hooks/catalog/useCatalogQuery";
 import { PaginationControls } from "@/components/catalog/PaginationControls";
 import { ItemsPerPageSelect } from "@/components/catalog/ItemsPerPageSelect";
+import { useTranslation } from "react-i18next";
 
 const Catalog = () => {
-  const [activeFilters, setActiveFilters] = useState<CatalogFilters>({});
+  const { t } = useTranslation();
+  const [filters, setFilters] = useState<CatalogFilters>({});
   const { 
-    filteredSpecialists, 
-    loading, 
-    filterSpecialists, 
-    currentPage, 
-    pageSize, 
-    totalCount, 
+    data: specialists, 
+    isLoading, 
+    totalCount,
+    currentPage,
+    pageSize,
     totalPages 
-  } = useCatalogData();
+  } = useCatalogQuery(filters);
 
   const handleSearch = (searchTerm: string) => {
-    const newFilters = { ...activeFilters, searchTerm, page: 1 };
-    setActiveFilters(newFilters);
-    filterSpecialists(newFilters);
+    setFilters(prev => ({ ...prev, searchTerm, page: 1 }));
   };
 
-  const handleFilterChange = (filters: CatalogFilters) => {
-    const newFilters = { ...activeFilters, ...filters, page: 1 };
-    setActiveFilters(newFilters);
-    filterSpecialists(newFilters);
+  const handleFilterChange = (newFilters: CatalogFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
-    if (page === currentPage) return; // Nie reaguj, jeśli to ta sama strona
-    
-    const newFilters = { ...activeFilters, page };
-    setActiveFilters(newFilters);
-    filterSpecialists(newFilters);
+    setFilters(prev => ({ ...prev, page }));
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    if (newPageSize === pageSize) return; // Nie reaguj, jeśli to ten sam rozmiar strony
-    
-    const newFilters = { ...activeFilters, pageSize: newPageSize, page: 1 };
-    setActiveFilters(newFilters);
-    filterSpecialists(newFilters);
+    setFilters(prev => ({ ...prev, pageSize: newPageSize, page: 1 }));
   };
 
   return (
@@ -61,9 +50,9 @@ const Catalog = () => {
           <div className="md:col-span-3">
             <div className="mb-4 flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <p className="text-muted-foreground">
-                {loading 
-                  ? "Ładowanie użytkowników..." 
-                  : `Znaleziono ${totalCount} użytkowników`
+                {isLoading 
+                  ? t('common.loading')
+                  : t('catalog.results_count', { count: totalCount })
                 }
               </p>
               
@@ -74,8 +63,8 @@ const Catalog = () => {
             </div>
             
             <CatalogResults 
-              filteredSpecialists={filteredSpecialists}
-              loading={loading}
+              filteredSpecialists={specialists}
+              loading={isLoading}
             />
             
             {totalPages > 1 && (

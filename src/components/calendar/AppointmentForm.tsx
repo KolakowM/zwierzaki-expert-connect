@@ -70,6 +70,8 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
     defaultValues: {
       date: selectedDate,
       notes: "",
+      clientId: "", // Zapewnia, że początkowa wartość to pusty string
+      petId: "",    // Dobrze jest również ustawić to na pusty string
     },
   });
 

@@ -1,5 +1,5 @@
-
 import * as z from "zod";
+import { isValid, parseISO } from "date-fns";
 
 // Define species and sex as enum for consistent typing
 export const PET_SPECIES = ["pies", "kot", "gryzoń", "ptak", "gad", "płaz", "koń", "inne"] as const;
@@ -13,18 +13,26 @@ export const petFormSchema = z.object({
   name: z.string().min(2, "Imię musi zawierać conajmnie 2 znaki"),
   species: z.enum(PET_SPECIES),
   breed: z.string().min(1, "Rasa jest wymagana"),
-  // Improve age handling - require as a number
-  age: z.union([
-    z.string().trim().min(1, "Wiek jest wymagany").transform(val => Number(val)),
-    z.number()
-  ])
-  .refine(
-    (val) => !isNaN(val),
-    { message: "Wiek musi być liczbą" }
+  
+  // Replace age field with dateOfBirth
+  dateOfBirth: z.preprocess(
+    (val) => {
+      // Handle empty strings
+      if (typeof val === 'string' && val.trim() === '') return undefined;
+      // Parse date from YYYY-MM-DD format (from input type="date")
+      const parsedDate = typeof val === 'string' ? parseISO(val) : val;
+      // Return valid date or undefined
+      return isValid(parsedDate) ? parsedDate : undefined;
+    },
+    z.date({
+      required_error: "Data urodzenia jest wymagana",
+      invalid_type_error: "Nieprawidłowa data urodzenia",
+    }).optional()
   ),
-  // Improve weight handling - require as a number
+  
+  // Improve weight handling - require as a number and support comma as decimal separator
   weight: z.union([
-    z.string().trim().min(1, "Waga jest wymagana").transform(val => Number(val)),
+    z.string().trim().min(1, "Waga jest wymagana").transform(val => Number(val.replace(',', '.'))),
     z.number()
   ])
   .refine(
@@ -35,6 +43,22 @@ export const petFormSchema = z.object({
     required_error: "Płeć jest wymagana"
   }),
   neutered: z.boolean().optional(),
+  
+  // Add neuteringDate field
+  neuteringDate: z.preprocess(
+    (val) => {
+      // Handle empty strings
+      if (typeof val === 'string' && val.trim() === '') return undefined;
+      // Parse date from YYYY-MM-DD format (from input type="date")
+      const parsedDate = typeof val === 'string' ? parseISO(val) : val;
+      // Return valid date or undefined
+      return isValid(parsedDate) ? parsedDate : undefined;
+    },
+    z.date({
+      invalid_type_error: "Nieprawidłowa data sterylizacji",
+    }).optional()
+  ),
+  
   hasMicrochip: z.boolean().default(false),
   microchipNumber: z.string().max(15, "Numer mikrochipa może mieć maksymalnie 15 znaków")
     .optional()
@@ -47,7 +71,21 @@ export const petFormSchema = z.object({
   allergies: z.string().optional(),
   dietaryRestrictions: z.string().optional(),
   behavioralNotes: z.string().optional(),
-});
+})
+.refine(
+  (data) => {
+    // Conditional validation: if neutered is true, neuteringDate must be provided
+    if (data.neutered === true) {
+      return data.neuteringDate !== undefined && data.neuteringDate !== null;
+    }
+    // Otherwise validation passes
+    return true;
+  },
+  {
+    message: "Data sterylizacji jest wymagana, jeśli zwierzę jest sterylizowane.",
+    path: ["neuteringDate"], // Point the error to the neuteringDate field
+  }
+);
 
 // Define the actual form values type (before transformation)
 export type PetFormValues = z.input<typeof petFormSchema>;

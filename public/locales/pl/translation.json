@@ -14,6 +14,11 @@
     "close": "Zamknij",
     "language": "Język"
   },
+  "catalog": {
+    "results_count": "Znaleziono {{count}} użytkowników",
+    "no_results": "Brak użytkowników spełniających podane kryteria",
+    "title": "Katalog Użytkowników"
+  },
   "header": {
     "catalog": "Katalog Specjalistów",
     "about": "O Platformie",
@@ -63,7 +68,7 @@
     "regulations": "Regulamin",
     "contact_info": "Kontakt",
     "phone": "+48 123 456 789",
-    "email": "kontakt@expertzwierzaki.pl",
+    "email": "kontakt@petsflow.pl",
     "location": "Warszawa, Polska",
     "copyright": "© 2025 PetsFlow. Wszelkie prawa zastrzeżone."
   },
@@ -76,7 +81,7 @@
     "featured_description": "Poznaj naszych najlepiej ocenianych profesjonalistów, którzy pomogą Twojemu pupilowi cieszyć się zdrowiem i dobrym samopoczuciem.",
     "view_all_specialists": "Zobacz wszystkich specjalistów",
     "why_platform": "Dlaczego warto korzystać z naszej platformy?",
-    "platform_description": "ExpertZwierzaki łączy właścicieli zwierząt z najlepszymi specjalistami w Polsce, gwarantując profesjonalną opiekę dla Twojego pupila.",
+    "platform_description": "PetsFlow łączy właścicieli zwierząt z najlepszymi specjalistami w Polsce, gwarantując profesjonalną opiekę dla Twojego pupila.",
     "are_you_specialist": "Jesteś specjalistą ds. zwierząt?",
     "specialist_cta": "Dołącz do naszej platformy, by zyskać dostęp do nowych klientów i wygodnego narzędzia CRM dopasowanego do Twojej praktyki."
   },

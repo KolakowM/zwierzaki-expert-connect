@@ -3,6 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
 import { PetFormValues } from "../PetFormSchema";
+import { format, isValid } from "date-fns";
 
 interface PetMeasurementsFieldsProps {
   control: Control<PetFormValues>;
@@ -13,22 +14,22 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <FormField
         control={control}
-        name="age"
+        name="dateOfBirth"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Wiek (lata)*</FormLabel>
+            <FormLabel>Data urodzenia*</FormLabel>
             <FormControl>
               <Input 
-                type="text" 
-                inputMode="numeric"
-                placeholder="np. 3"
+                type="date" 
+                placeholder="DD-MM-RRRR"
                 {...field}
+                value={field.value && isValid(field.value as Date) 
+                  ? format(field.value as Date, "yyyy-MM-dd") 
+                  : ""}
                 onChange={(e) => {
-                  // Allow empty value or numbers only
-                  const value = e.target.value;
-                  if (value === '' || /^[0-9]+$/.test(value)) {
-                    field.onChange(value);
-                  }
+                  const dateString = e.target.value;
+                  const date = dateString ? new Date(dateString) : undefined;
+                  field.onChange(date);
                 }}
               />
             </FormControl>
@@ -46,12 +47,13 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
               <Input 
                 type="text" 
                 inputMode="decimal"
-                placeholder="np. 15" 
+                placeholder="np. 15,5" 
                 {...field}
                 onChange={(e) => {
-                  // Allow empty value or decimal numbers
+                  // Allow empty value, decimal numbers with dot or comma
                   const value = e.target.value;
-                  if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                  if (value === '' || /^[0-9]*[.,]?[0-9]*$/.test(value)) {
+                    // Internally store with dot for consistency, but display with comma
                     field.onChange(value);
                   }
                 }}

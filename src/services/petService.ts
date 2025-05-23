@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Pet, DbPet, mapDbPetToPet, mapPetToDbPet } from "@/types";
 
@@ -72,7 +71,13 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
   if (pet.species !== undefined) dbPetUpdate.species = pet.species;
   if (pet.breed !== undefined) dbPetUpdate.breed = pet.breed;
   
-  // Ensure age is properly converted to a number (integer)
+  // Handle dateOfBirth conversion to YYYY-MM-DD format for database
+  if (pet.dateOfBirth !== undefined) {
+    dbPetUpdate.date_of_birth = pet.dateOfBirth ? 
+      new Date(pet.dateOfBirth).toISOString().split('T')[0] : null;
+  }
+  
+  // Keep age handling for backward compatibility
   if (pet.age !== undefined) {
     // If age is a string, convert to number and round to integer
     dbPetUpdate.age = typeof pet.age === 'string' 
@@ -83,13 +88,24 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
   // Ensure weight is properly handled as a decimal
   if (pet.weight !== undefined) {
     // Convert weight to a number (can be decimal)
-    dbPetUpdate.weight = typeof pet.weight === 'string' 
-      ? Number(pet.weight) 
-      : pet.weight;
+    if (typeof pet.weight === 'string') {
+      // Use type assertion to tell TypeScript this is indeed a string
+      const weightStr = pet.weight as string;
+      dbPetUpdate.weight = Number(weightStr.replace(',', '.'));
+    } else {
+      dbPetUpdate.weight = pet.weight;
+    }
   }
   
   if (pet.sex !== undefined) dbPetUpdate.sex = pet.sex;
   if (pet.neutered !== undefined) dbPetUpdate.neutered = pet.neutered;
+  
+  // Handle neuteringDate conversion to YYYY-MM-DD format for database
+  if (pet.neuteringDate !== undefined) {
+    dbPetUpdate.neutering_date = pet.neuteringDate ? 
+      new Date(pet.neuteringDate).toISOString().split('T')[0] : null;
+  }
+  
   if (pet.medicalHistory !== undefined) dbPetUpdate.medicalhistory = pet.medicalHistory;
   if (pet.allergies !== undefined) dbPetUpdate.allergies = pet.allergies;
   if (pet.dietaryRestrictions !== undefined) dbPetUpdate.dietaryrestrictions = pet.dietaryRestrictions;

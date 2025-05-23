@@ -182,6 +182,7 @@ export type Database = {
           breed: string | null
           clientid: string
           createdat: string
+          date_of_birth: string | null
           dietaryrestrictions: string | null
           has_microchip: boolean
           id: string
@@ -189,6 +190,7 @@ export type Database = {
           microchip_number: string | null
           name: string
           neutered: boolean | null
+          neutering_date: string | null
           sex: string | null
           species: string
           vaccination_description: string | null
@@ -201,6 +203,7 @@ export type Database = {
           breed?: string | null
           clientid: string
           createdat?: string
+          date_of_birth?: string | null
           dietaryrestrictions?: string | null
           has_microchip?: boolean
           id?: string
@@ -208,6 +211,7 @@ export type Database = {
           microchip_number?: string | null
           name: string
           neutered?: boolean | null
+          neutering_date?: string | null
           sex?: string | null
           species: string
           vaccination_description?: string | null
@@ -220,6 +224,7 @@ export type Database = {
           breed?: string | null
           clientid?: string
           createdat?: string
+          date_of_birth?: string | null
           dietaryrestrictions?: string | null
           has_microchip?: boolean
           id?: string
@@ -227,6 +232,7 @@ export type Database = {
           microchip_number?: string | null
           name?: string
           neutered?: boolean | null
+          neutering_date?: string | null
           sex?: string | null
           species?: string
           vaccination_description?: string | null
@@ -478,6 +484,29 @@ export type Database = {
       assign_unassigned_clients_to_user: {
         Args: { user_id_param: string }
         Returns: undefined
+      }
+      get_catalog_data: {
+        Args: {
+          p_search_term?: string
+          p_location?: string
+          p_specializations?: string[]
+          p_roles?: Database["public"]["Enums"]["app_role"][]
+          p_page?: number
+          p_page_size?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          title: string
+          specializations: string[]
+          location: string
+          image: string
+          email: string
+          rating: number
+          verified: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          total_count: number
+        }[]
       }
       has_role: {
         Args: {
