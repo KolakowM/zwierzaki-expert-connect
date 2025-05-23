@@ -22,9 +22,9 @@ export const petFormSchema = z.object({
     (val) => !isNaN(val),
     { message: "Wiek musi być liczbą" }
   ),
-  // Improve weight handling - require as a number
+  // Improve weight handling - require as a number and support comma as decimal separator
   weight: z.union([
-    z.string().trim().min(1, "Waga jest wymagana").transform(val => Number(val)),
+    z.string().trim().min(1, "Waga jest wymagana").transform(val => Number(val.replace(',', '.'))),
     z.number()
   ])
   .refine(

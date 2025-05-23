@@ -46,12 +46,13 @@ const PetMeasurementsFields = ({ control }: PetMeasurementsFieldsProps) => {
               <Input 
                 type="text" 
                 inputMode="decimal"
-                placeholder="np. 15" 
+                placeholder="np. 15,5" 
                 {...field}
                 onChange={(e) => {
-                  // Allow empty value or decimal numbers
+                  // Allow empty value, decimal numbers with dot or comma
                   const value = e.target.value;
-                  if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                  if (value === '' || /^[0-9]*[.,]?[0-9]*$/.test(value)) {
+                    // Internally store with dot for consistency, but display with comma
                     field.onChange(value);
                   }
                 }}
