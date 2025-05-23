@@ -6,7 +6,7 @@ export interface DbPet {
   name: string;
   species: string;
   breed?: string | null;
-  age?: number | null;  // Integer in database
+  age?: number | null;  // Keeping for backward compatibility
   weight?: number | null;  // Decimal in database
   sex?: string | null;
   neutered?: boolean | null;
@@ -18,6 +18,7 @@ export interface DbPet {
   vaccination_description?: string | null;
   has_microchip: boolean;
   microchip_number?: string | null;
+  date_of_birth?: string | null; // Added for date of birth
 }
 
 export interface Pet {
@@ -26,7 +27,7 @@ export interface Pet {
   name: string;
   species: string;
   breed?: string | null;
-  age?: number | null;  // Integer in frontend
+  age?: number | null;  // Keeping for backward compatibility
   weight?: number | null;  // Decimal in frontend
   sex?: string | null;
   neutered?: boolean | null;
@@ -38,6 +39,7 @@ export interface Pet {
   vaccinationDescription?: string | null;
   hasMicrochip: boolean;
   microchipNumber?: string | null;
+  dateOfBirth?: Date | string | null; // Added for date of birth (can be Date object or ISO string)
 }
 
 // Mapping functions for pets
@@ -59,6 +61,7 @@ export const mapDbPetToPet = (dbPet: DbPet): Pet => ({
   vaccinationDescription: dbPet.vaccination_description,
   hasMicrochip: dbPet.has_microchip,
   microchipNumber: dbPet.microchip_number,
+  dateOfBirth: dbPet.date_of_birth, // Map date of birth
 });
 
 export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
@@ -67,7 +70,7 @@ export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
   species: pet.species,
   breed: pet.breed,
   age: pet.age !== undefined && pet.age !== null 
-    ? Math.round(Number(pet.age)) // Ensure age is an integer
+    ? Math.round(Number(pet.age)) // Keep for backward compatibility
     : null,
   weight: pet.weight !== undefined && pet.weight !== null 
     ? Number(pet.weight) // Allow decimal for weight
@@ -81,4 +84,5 @@ export const mapPetToDbPet = (pet: Omit<Pet, 'id'>): Omit<DbPet, 'id'> => ({
   vaccination_description: pet.vaccinationDescription,
   has_microchip: pet.hasMicrochip || false,
   microchip_number: pet.microchipNumber,
+  date_of_birth: pet.dateOfBirth ? new Date(pet.dateOfBirth).toISOString().split('T')[0] : null, // Format date as YYYY-MM-DD
 });

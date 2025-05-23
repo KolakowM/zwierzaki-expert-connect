@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -16,6 +15,7 @@ import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
 import { createPet, updatePet } from "@/services/petService";
 import { useQueryClient } from "@tanstack/react-query";
+import { parseISO } from "date-fns";
 
 interface PetFormDrawerProps {
   clientId: string;
@@ -57,7 +57,12 @@ const PetFormDrawer = ({
     age: defaultValues.age?.toString() || '',
     weight: defaultValues.weight?.toString() || '',
     species: defaultValues.species as PetSpecies,
-    sex: defaultValues.sex as PetSex || undefined
+    sex: defaultValues.sex as PetSex || undefined,
+    // Handle date of birth conversion
+    dateOfBirth: defaultValues.dateOfBirth ? 
+      (typeof defaultValues.dateOfBirth === 'string' ? 
+        parseISO(defaultValues.dateOfBirth) : defaultValues.dateOfBirth) : 
+      undefined
   } : undefined;
 
   const handleSubmit = async (formData: PetFormOutput) => {

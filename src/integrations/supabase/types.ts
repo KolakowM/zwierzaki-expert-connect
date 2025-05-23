@@ -182,6 +182,7 @@ export type Database = {
           breed: string | null
           clientid: string
           createdat: string
+          date_of_birth: string | null
           dietaryrestrictions: string | null
           has_microchip: boolean
           id: string
@@ -201,6 +202,7 @@ export type Database = {
           breed?: string | null
           clientid: string
           createdat?: string
+          date_of_birth?: string | null
           dietaryrestrictions?: string | null
           has_microchip?: boolean
           id?: string
@@ -220,6 +222,7 @@ export type Database = {
           breed?: string | null
           clientid?: string
           createdat?: string
+          date_of_birth?: string | null
           dietaryrestrictions?: string | null
           has_microchip?: boolean
           id?: string

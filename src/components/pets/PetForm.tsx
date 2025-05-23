@@ -9,6 +9,7 @@ import PetMeasurementsFields from "./form-fields/PetMeasurementsFields";
 import PetCharacteristicsFields from "./form-fields/PetCharacteristicsFields";
 import VaccinationAndChipFields from "./form-fields/VaccinationAndChipFields";
 import PetMedicalFields from "./form-fields/PetMedicalFields";
+import { parseISO } from "date-fns";
 
 interface PetFormProps {
   clientId: string;
@@ -18,13 +19,23 @@ interface PetFormProps {
 }
 
 const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: PetFormProps) => {
+  // Process defaultValues to handle dateOfBirth
+  const processedDefaultValues = defaultValues ? {
+    ...defaultValues,
+    // Convert dateOfBirth string to Date object if it exists
+    dateOfBirth: defaultValues.dateOfBirth ? 
+      (typeof defaultValues.dateOfBirth === 'string' ? 
+        parseISO(defaultValues.dateOfBirth) : defaultValues.dateOfBirth) : 
+      undefined,
+  } : undefined;
+
   const form = useForm<PetFormValues>({
     resolver: zodResolver(petFormSchema),
     defaultValues: {
       name: "",
       species: "pies",
       breed: "",
-      age: "",
+      dateOfBirth: undefined,
       weight: "",
       sex: undefined,
       neutered: false,
@@ -35,7 +46,7 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false }: Pe
       allergies: "",
       dietaryRestrictions: "",
       behavioralNotes: "",
-      ...defaultValues,
+      ...processedDefaultValues,
     },
   });
 
