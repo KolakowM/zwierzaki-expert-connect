@@ -485,6 +485,29 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: undefined
       }
+      get_catalog_data: {
+        Args: {
+          p_search_term?: string
+          p_location?: string
+          p_specializations?: string[]
+          p_roles?: Database["public"]["Enums"]["app_role"][]
+          p_page?: number
+          p_page_size?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          title: string
+          specializations: string[]
+          location: string
+          image: string
+          email: string
+          rating: number
+          verified: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          total_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string

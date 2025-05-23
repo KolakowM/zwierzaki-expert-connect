@@ -1,5 +1,6 @@
 
 import { SpecialistCard, Specialist } from "@/components/specialists/SpecialistCard";
+import { useTranslation } from "react-i18next";
 
 interface CatalogResultsProps {
   filteredSpecialists: Specialist[];
@@ -7,6 +8,8 @@ interface CatalogResultsProps {
 }
 
 export function CatalogResults({ filteredSpecialists, loading }: CatalogResultsProps) {
+  const { t } = useTranslation();
+  
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -20,9 +23,9 @@ export function CatalogResults({ filteredSpecialists, loading }: CatalogResultsP
   if (filteredSpecialists.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-10 text-center">
-        <h3 className="mb-2 text-lg font-medium">Brak wyników</h3>
+        <h3 className="mb-2 text-lg font-medium">{t('catalog.no_results')}</h3>
         <p className="text-muted-foreground">
-          Nie znaleziono użytkowników spełniających podane kryteria. Spróbuj zmienić filtry.
+          {t('catalog.no_results')}
         </p>
       </div>
     );

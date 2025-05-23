@@ -14,6 +14,11 @@
     "close": "Schließen",
     "language": "Sprache"
   },
+  "catalog": {
+    "results_count": "{{count}} Benutzer gefunden",
+    "no_results": "Keine Benutzer entsprechen Ihren Suchkriterien",
+    "title": "Benutzerkatalog"
+  },
   "header": {
     "catalog": "Spezialistenkatalog",
     "about": "Über die Plattform",

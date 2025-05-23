@@ -14,6 +14,11 @@
     "close": "Zamknij",
     "language": "Język"
   },
+  "catalog": {
+    "results_count": "Znaleziono {{count}} użytkowników",
+    "no_results": "Brak użytkowników spełniających podane kryteria",
+    "title": "Katalog Użytkowników"
+  },
   "header": {
     "catalog": "Katalog Specjalistów",
     "about": "O Platformie",
