@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppRole } from "@/services/user/types";
-import { CatalogFilters } from "@/hooks/useCatalogData";
+import { CatalogFilters } from "@/hooks/catalog/useCatalogQuery";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: CatalogFilters) => void;
