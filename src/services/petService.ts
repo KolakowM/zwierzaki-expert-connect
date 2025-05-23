@@ -90,7 +90,9 @@ export const updatePet = async (id: string, pet: Partial<Pet>): Promise<Pet> => 
   if (pet.weight !== undefined) {
     // Convert weight to a number (can be decimal)
     if (typeof pet.weight === 'string') {
-      dbPetUpdate.weight = Number(pet.weight.replace(',', '.'));
+      // Use type assertion to tell TypeScript this is indeed a string
+      const weightStr = pet.weight as string;
+      dbPetUpdate.weight = Number(weightStr.replace(',', '.'));
     } else {
       dbPetUpdate.weight = pet.weight;
     }
