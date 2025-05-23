@@ -69,7 +69,7 @@ export default function Contact() {
                 </div>
                 <h3 className="text-xl font-medium">Email</h3>
                 <p className="text-muted-foreground">Wyślij nam wiadomość email</p>
-                <p>kontakt@expertzwierzaki.pl</p>
+                <p>kontakt@petsflow.pl</p>
                 <p className="text-sm text-muted-foreground">Odpowiadamy w ciągu 24h</p>
               </div>
             </Card>
