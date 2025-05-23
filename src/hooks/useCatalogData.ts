@@ -19,7 +19,7 @@ export function useCatalogData() {
   const [filteredSpecialists, setFilteredSpecialists] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize, setPageSize] = useState(9); //limit użytkoników na stronę
   const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
