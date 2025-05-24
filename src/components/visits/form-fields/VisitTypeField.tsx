@@ -26,7 +26,7 @@ const VisitTypeField = ({ form }: VisitTypeFieldProps) => {
           <FormLabel>Typ wizyty*</FormLabel>
           <Select
             onValueChange={field.onChange}
-            defaultValue={field.value}
+            value={field.value || ""} // Ensure empty value is handled properly
           >
             <FormControl>
               <SelectTrigger>
