@@ -64,14 +64,15 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
   const queryClient = useQueryClient();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   
-  // Form initialization
+  // Form initialization - removed default values for type field
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
       date: selectedDate,
       notes: "",
-      clientId: "", // Zapewnia, że początkowa wartość to pusty string
-      petId: "",    // Dobrze jest również ustawić to na pusty string
+      clientId: "",
+      petId: "",
+      // Removed type default value to force user selection
     },
   });
 
@@ -107,6 +108,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
     });
     onClose();
     form.reset();
+    setSelectedClientId(""); // Reset selected client
   };
 
   // Error handler
@@ -123,6 +125,13 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
   const handleClientChange = (clientId: string) => {
     setSelectedClientId(clientId);
     form.setValue('petId', '');
+  };
+
+  // Handle dialog close
+  const handleClose = () => {
+    form.reset();
+    setSelectedClientId("");
+    onClose();
   };
 
   // Form submission handler
@@ -149,7 +158,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Nowa wizyta</DialogTitle>
@@ -273,7 +282,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               />
             </div>
 
-            {/* Visit Type Selection */}
+            {/* Visit Type Selection - removed defaultValue */}
             <FormField
               control={form.control}
               name="type"
@@ -325,7 +334,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={onClose}
+                onClick={handleClose}
                 disabled={createVisitMutation.isPending}
               >
                 Anuluj

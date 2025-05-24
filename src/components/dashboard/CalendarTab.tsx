@@ -124,6 +124,8 @@ const CalendarTab = () => {
             appointments={visitsForSelectedDate}
             onAppointmentClick={handleVisitClick}
             onAddAppointment={() => setShowNewAppointment(true)}
+            clients={clients}
+            pets={allPets}
           />
         </CardContent>
       </Card>
