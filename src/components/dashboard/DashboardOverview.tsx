@@ -2,7 +2,7 @@
 import { Users, PawPrint, CalendarIcon, PieChart } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
-import ProfileStatus from "./ProfileStatus";
+/*import ProfileStatus from "./ProfileStatus";*/
 import AdminTab from "./AdminTab";
 import PackageStatusCard from "../subscription/PackageStatusCard";
 import { useQuery } from "@tanstack/react-query";
