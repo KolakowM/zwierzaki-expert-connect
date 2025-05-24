@@ -14,6 +14,7 @@ import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import ClientsTab from "@/components/dashboard/ClientsTab";
 import AnimalsTab from "@/components/dashboard/AnimalsTab";
 import CalendarTab from "@/components/dashboard/CalendarTab";
+import SubscriptionManagement from "@/components/subscription/SubscriptionManagement";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -83,11 +84,12 @@ const Dashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 md:w-auto md:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5 md:w-auto md:grid-cols-5">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="clients">Klienci</TabsTrigger>
             <TabsTrigger value="animals">Zwierzęta</TabsTrigger>
             <TabsTrigger value="calendar">Kalendarz</TabsTrigger>
+            <TabsTrigger value="subscription">Subskrypcja</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
@@ -104,6 +106,10 @@ const Dashboard = () => {
           
           <TabsContent value="calendar" className="space-y-4">
             <CalendarTab />
+          </TabsContent>
+          
+          <TabsContent value="subscription" className="space-y-4">
+            <SubscriptionManagement />
           </TabsContent>
         </Tabs>
       </div>

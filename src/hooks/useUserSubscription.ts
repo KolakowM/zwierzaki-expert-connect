@@ -19,7 +19,8 @@ export const useUserSubscription = () => {
   const {
     data: activeSubscription,
     isLoading: isLoadingSubscription,
-    error: subscriptionError
+    error: subscriptionError,
+    refetch
   } = useQuery({
     queryKey: ['activeSubscription', user?.id],
     queryFn: () => getUserActiveSubscription(user!.id),
@@ -93,5 +94,6 @@ export const useUserSubscription = () => {
     updateSubscription: updateSubscriptionMutation.mutate,
     isCreatingSubscription: createSubscriptionMutation.isPending,
     isUpdatingSubscription: updateSubscriptionMutation.isPending,
+    refetch,
   };
 };
