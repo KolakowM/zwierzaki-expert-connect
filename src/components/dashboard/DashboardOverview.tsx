@@ -67,7 +67,7 @@ const DashboardOverview = () => {
       {/* Admin tab for data fixes */}
       <AdminTab />
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, index) => (
           <StatsCard 
             key={index}
