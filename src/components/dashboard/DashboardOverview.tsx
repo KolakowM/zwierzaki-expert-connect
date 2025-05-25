@@ -49,9 +49,9 @@ const DashboardOverview = () => {
       link: "/dashboard?tab=calendar"
     },
     {
-      title: "Pakiet",
+      title: "Cześc",
       value: "",
-      description: "Status subskrypcji",
+      description: "miło Cię widzieć",
       icon: <Crown className="h-4 w-4 text-muted-foreground" />,
       link: "/dashboard?tab=subscription"
     }
@@ -67,7 +67,7 @@ const DashboardOverview = () => {
       {/* Admin tab for data fixes */}
       <AdminTab />
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <StatsCard 
             key={index}
