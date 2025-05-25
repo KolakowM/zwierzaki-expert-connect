@@ -1,8 +1,8 @@
 
-import { Users, PawPrint, CalendarIcon, PieChart } from "lucide-react";
+import { Users, PawPrint, CalendarIcon } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
-import ProfileStatus from "./ProfileStatus";
+// import ProfileStatus from "./ProfileStatus"; - USUNIĘTO
 import AdminTab from "./AdminTab";
 import PackageStatusCard from "../subscription/PackageStatusCard";
 import { useQuery } from "@tanstack/react-query";
@@ -48,14 +48,15 @@ const DashboardOverview = () => {
       description: "Zaplanowane wizyty",
       icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
       link: "/dashboard?tab=calendar"
-    },
-    {
-      title: "Plan",
-      value: "Podstawowy",
-      description: "Aktualny plan subskrypcji",
-      icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-      link: "/pricing"
     }
+    // SKOMENTOWANO statystykę "Plan"
+    // {
+    //   title: "Plan",
+    //   value: "Podstawowy",
+    //   description: "Aktualny plan subskrypcji",
+    //   icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
+    //   link: "/pricing"
+    // }
   ];
 
   // Get recent visits
@@ -68,7 +69,7 @@ const DashboardOverview = () => {
       {/* Admin tab for data fixes */}
       <AdminTab />
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat, index) => (
           <StatsCard 
             key={index}
@@ -81,9 +82,9 @@ const DashboardOverview = () => {
         ))}
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <UpcomingVisits visits={recentVisits} pets={pets} clients={clients} />
-        <ProfileStatus />
+        {/* USUNIĘTO ProfileStatus */}
         <PackageStatusCard />
       </div>
     </div>
