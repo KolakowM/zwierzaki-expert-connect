@@ -50,11 +50,11 @@ const DashboardOverview = () => {
       link: "/dashboard?tab=calendar"
     },
     {
-       title: "Witaj",
-       value: "miło cię znowu widzieć",
-       description: "--",
-       icon: <Users className="h-4 w-4 text-muted-foreground" />,
-       link: "/pricing"
+      title: "Plan",
+      value: "Podstawowy",
+      description: "Aktualny plan subskrypcji",
+      icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
+      link: "/pricing"
      }
   ];
 
@@ -83,7 +83,7 @@ const DashboardOverview = () => {
       
       <div className="grid gap-4 md:grid-cols-2">
         <UpcomingVisits visits={recentVisits} pets={pets} clients={clients} />
-        {/* USUNIĘTO ProfileStatus */}
+          <ProfileStatus />
         <PackageStatusCard />
       </div>
     </div>
