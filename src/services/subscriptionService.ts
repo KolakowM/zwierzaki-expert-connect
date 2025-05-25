@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Package, UserSubscription, ActiveSubscription, PackageLimits, UsageStats, ActionType } from "@/types/subscription";
 
@@ -103,7 +102,8 @@ export const upgradeSubscription = async (userId: string, newPackageId: string):
       package_id: newPackageId,
       status: 'active',
       start_date: new Date().toISOString(),
-      end_date: null // Dla subskrypcji bez określonego czasu końca
+      end_date: null,
+      payment_id: null // Dodane brakujące pole
     });
   }
 };
