@@ -52,7 +52,7 @@ const DashboardOverview = () => {
     {
       title: "",
       value: "Witaj, miło Cię znowu widzieć ",
-      description: "😍 ",
+      description: " ",
       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
       //link: "/pricing"
     }
