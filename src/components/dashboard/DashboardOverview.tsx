@@ -55,7 +55,7 @@ const DashboardOverview = () => {
        description: "",
        icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
        link: "/pricing"
-     }
+     },
   ];
 
   // Get recent visits
