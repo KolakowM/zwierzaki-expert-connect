@@ -50,11 +50,11 @@ const DashboardOverview = () => {
       link: "/dashboard?tab=calendar"
     },
     {
-      title: "Plan",
-      value: "Podstawowy",
-      description: "Aktualny plan subskrypcji",
+      title: "Witaj",
+      value: "miło Cię widzieć",
+      description: " ",
       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-      link: "/pricing"
+      //link: "/pricing"
     }
   ];
 
