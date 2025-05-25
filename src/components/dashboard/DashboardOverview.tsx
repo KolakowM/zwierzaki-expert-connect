@@ -1,8 +1,8 @@
 
-import { Users, PawPrint, CalendarIcon,PieChart  } from "lucide-react";
+import { Users, PawPrint, CalendarIcon, PieChart } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
-// import ProfileStatus from "./ProfileStatus"; - USUNIĘTO
+import ProfileStatus from "./ProfileStatus";
 import AdminTab from "./AdminTab";
 import PackageStatusCard from "../subscription/PackageStatusCard";
 import { useQuery } from "@tanstack/react-query";
@@ -53,9 +53,9 @@ const DashboardOverview = () => {
       title: "Plan",
       value: "Podstawowy",
       description: "Aktualny plan subskrypcji",
-      icon: <PieChart  className="h-4 w-4 text-muted-foreground" />,
+      icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
       link: "/pricing"
-     }
+    }
   ];
 
   // Get recent visits
@@ -83,7 +83,7 @@ const DashboardOverview = () => {
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <UpcomingVisits visits={recentVisits} pets={pets} clients={clients} />
-          <ProfileStatus />
+        <ProfileStatus />
         <PackageStatusCard />
       </div>
     </div>

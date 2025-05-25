@@ -97,14 +97,13 @@ export const upgradeSubscription = async (userId: string, newPackageId: string):
       updated_at: new Date().toISOString()
     });
   } else {
-    // Utwórz nową subskrypcję - NAPRAWIONY BŁĄD: dodano payment_id
+    // Utwórz nową subskrypcję
     return createUserSubscription({
       user_id: userId,
       package_id: newPackageId,
       status: 'active',
       start_date: new Date().toISOString(),
-      end_date: null,
-      payment_id: null // NAPRAWIONY BŁĄD: dodano brakujące pole
+      end_date: null // Dla subskrypcji bez określonego czasu końca
     });
   }
 };

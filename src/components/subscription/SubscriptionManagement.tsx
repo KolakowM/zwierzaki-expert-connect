@@ -6,17 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
-import { getActivePackages, cancelSubscription } from "@/services/subscriptionService";
+import { getActivePackages } from "@/services/subscriptionService";
 import PackageUpgradeDialog from "./PackageUpgradeDialog";
-import { Crown, ArrowRight, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Crown, ArrowRight } from "lucide-react";
 
 const SubscriptionManagement = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const { activeSubscription, isLoadingSubscription, refetch, isTrialUser } = useUserSubscription();
+  const { activeSubscription, isLoadingSubscription, refetch } = useUserSubscription();
   const [selectedUpgradePackage, setSelectedUpgradePackage] = useState<any>(null);
-  const [isCancelling, setIsCancelling] = useState(false);
 
   const { data: availablePackages = [], isLoading: isLoadingPackages } = useQuery({
     queryKey: ['availablePackages'],
@@ -26,47 +23,11 @@ const SubscriptionManagement = () => {
   const currentPackage = availablePackages.find(pkg => pkg.id === activeSubscription?.package_id);
 
   const getUpgradeablePackages = () => {
-    // POPRAWIONA LOGIKA: dla Trial pokazuj wszystkie pakiety
-    if (isTrialUser) {
-      return availablePackages;
-    }
-    
-    if (!currentPackage) return [];
+    if (!currentPackage) return availablePackages;
     
     return availablePackages.filter(pkg => {
       if (!pkg.price_pln || !currentPackage.price_pln) return false;
       return pkg.price_pln > currentPackage.price_pln;
-    });
-  };
-
-  const handleCancelSubscription = async () => {
-    if (!activeSubscription) return;
-    
-    setIsCancelling(true);
-    try {
-      await cancelSubscription(activeSubscription.subscription_id);
-      toast({
-        title: "Subskrypcja anulowana",
-        description: "Twoja subskrypcja została pomyślnie anulowana",
-      });
-      refetch();
-    } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      toast({
-        title: "Błąd",
-        description: "Nie udało się anulować subskrypcji",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCancelling(false);
-    }
-  };
-
-  const formatEndDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pl-PL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
     });
   };
 
@@ -110,28 +71,9 @@ const SubscriptionManagement = () => {
               </div>
             </div>
 
-            {/* DODANO: Wyświetlanie daty końca pakietu */}
             {activeSubscription?.end_date && (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-sm font-medium text-amber-800">
-                  Pakiet wygasa: {formatEndDate(activeSubscription.end_date)}
-                </p>
-              </div>
-            )}
-
-            {/* DODANO: Przycisk anulowania pakietu */}
-            {activeSubscription && !isTrialUser && (
-              <div className="pt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleCancelSubscription}
-                  disabled={isCancelling}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  {isCancelling ? "Anulowanie..." : "Anuluj pakiet"}
-                </Button>
+              <div className="text-sm text-muted-foreground">
+                Wygasa: {new Date(activeSubscription.end_date).toLocaleDateString('pl-PL')}
               </div>
             )}
           </div>
@@ -141,9 +83,7 @@ const SubscriptionManagement = () => {
       {upgradeablePackages.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              {isTrialUser ? "Dostępne pakiety" : "Dostępne upgrade'y"}
-            </CardTitle>
+            <CardTitle>Dostępne upgrade'y</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
@@ -183,7 +123,7 @@ const SubscriptionManagement = () => {
                         onClick={() => setSelectedUpgradePackage(pkg)}
                         className="flex items-center gap-1"
                       >
-                        {isTrialUser ? "Wybierz" : "Upgrade"} <ArrowRight className="h-3 w-3" />
+                        Upgrade <ArrowRight className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
