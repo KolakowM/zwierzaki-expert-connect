@@ -1,5 +1,5 @@
 
-import { Users, PawPrint, CalendarIcon } from "lucide-react";
+import { Users, PawPrint, CalendarIcon,PieChart  } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
 // import ProfileStatus from "./ProfileStatus"; - USUNIĘTO
@@ -53,7 +53,7 @@ const DashboardOverview = () => {
       title: "Plan",
       value: "Podstawowy",
       description: "Aktualny plan subskrypcji",
-      icon: <PawPrint className="h-4 w-4 text-muted-foreground" />,
+      icon: <PieChart  className="h-4 w-4 text-muted-foreground" />,
       link: "/pricing"
      }
   ];
