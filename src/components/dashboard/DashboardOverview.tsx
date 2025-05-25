@@ -51,7 +51,7 @@ const DashboardOverview = () => {
     },
     {
       title: "",
-      value: "Witaj, miło Cię znowu widzieć ",
+      value: "Witaj, miło Cię widzieć ",
       description: " ",
       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
       //link: "/pricing"
