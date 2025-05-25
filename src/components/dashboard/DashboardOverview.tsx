@@ -50,8 +50,8 @@ const DashboardOverview = () => {
       link: "/dashboard?tab=calendar"
     },
     {
-      title: "Witaj",
-      value: "miło Cię widzieć",
+      title: "Witaj, miło Cię znowu widzieć",
+      value: " ",
       description: " ",
       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
       //link: "/pricing"
