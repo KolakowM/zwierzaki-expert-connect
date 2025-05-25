@@ -1,6 +1,6 @@
 
-import { checkPackageLimits } from '@/services/subscriptionService';
 import { ActionType } from '@/types/subscription';
+import { checkPackageLimits } from '@/services/subscriptionService';
 
 export class PackageLimitError extends Error {
   constructor(
@@ -15,21 +15,20 @@ export class PackageLimitError extends Error {
   }
 }
 
-export const validatePackageLimit = async (userId: string, actionType: ActionType): Promise<void> => {
+export const validatePackageLimit = async (
+  userId: string, 
+  actionType: ActionType
+): Promise<void> => {
   try {
     const limits = await checkPackageLimits(userId, actionType);
     
-    if (!limits) {
-      throw new Error('Nie udało się sprawdzić limitów pakietu');
-    }
-
-    if (!limits.can_perform_action) {
+    if (!limits || !limits.can_perform_action) {
       throw new PackageLimitError(
-        `Osiągnięto limit ${actionType} (${limits.current_count}/${limits.max_allowed}) w pakiecie ${limits.package_name}`,
+        `Osiągnięto limit ${getActionLabel(actionType)} (${limits?.current_count || 0}/${limits?.max_allowed || 0}) w pakiecie ${limits?.package_name || 'Trial'}`,
         actionType,
-        limits.current_count,
-        limits.max_allowed,
-        limits.package_name
+        limits?.current_count || 0,
+        limits?.max_allowed || 0,
+        limits?.package_name || 'Trial'
       );
     }
   } catch (error) {
@@ -37,6 +36,16 @@ export const validatePackageLimit = async (userId: string, actionType: ActionTyp
       throw error;
     }
     console.error('Error checking package limits:', error);
-    throw new Error('Nie udało się sprawdzić limitów pakietu');
+    // W przypadku błędu API, pozwalamy na wykonanie akcji
+  }
+};
+
+const getActionLabel = (actionType: ActionType): string => {
+  switch (actionType) {
+    case 'clients': return 'klientów';
+    case 'pets': return 'zwierząt';
+    case 'services': return 'usług';
+    case 'specializations': return 'specjalizacji';
+    default: return 'elementów';
   }
 };

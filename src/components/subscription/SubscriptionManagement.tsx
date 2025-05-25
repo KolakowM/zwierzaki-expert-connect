@@ -6,14 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
-import { getActivePackages } from "@/services/subscriptionService";
+import { getActivePackages, cancelSubscription } from "@/services/subscriptionService";
 import PackageUpgradeDialog from "./PackageUpgradeDialog";
-import { Crown, ArrowRight } from "lucide-react";
+import { Crown, ArrowRight, AlertTriangle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const SubscriptionManagement = () => {
   const { user } = useAuth();
-  const { activeSubscription, isLoadingSubscription, refetch } = useUserSubscription();
+  const { toast } = useToast();
+  const { activeSubscription, isLoadingSubscription, refetch, isTrialUser } = useUserSubscription();
   const [selectedUpgradePackage, setSelectedUpgradePackage] = useState<any>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const { data: availablePackages = [], isLoading: isLoadingPackages } = useQuery({
     queryKey: ['availablePackages'],
@@ -23,7 +27,12 @@ const SubscriptionManagement = () => {
   const currentPackage = availablePackages.find(pkg => pkg.id === activeSubscription?.package_id);
 
   const getUpgradeablePackages = () => {
-    if (!currentPackage) return availablePackages;
+    if (isTrialUser) {
+      // Dla użytkowników Trial pokaż wszystkie dostępne pakiety
+      return availablePackages.filter(pkg => pkg.price_pln && pkg.price_pln > 0);
+    }
+    
+    if (!currentPackage) return [];
     
     return availablePackages.filter(pkg => {
       if (!pkg.price_pln || !currentPackage.price_pln) return false;
@@ -32,6 +41,29 @@ const SubscriptionManagement = () => {
   };
 
   const upgradeablePackages = getUpgradeablePackages();
+
+  const handleCancelSubscription = async () => {
+    if (!activeSubscription) return;
+    
+    setIsCancelling(true);
+    try {
+      await cancelSubscription(activeSubscription.subscription_id);
+      toast({
+        title: "Pakiet anulowany",
+        description: "Twój pakiet zostanie anulowany na koniec okresu rozliczeniowego.",
+      });
+      refetch();
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się anulować pakietu. Spróbuj ponownie.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   if (isLoadingSubscription || isLoadingPackages) {
     return <div className="animate-pulse h-32 bg-gray-200 rounded"></div>;
@@ -76,6 +108,36 @@ const SubscriptionManagement = () => {
                 Wygasa: {new Date(activeSubscription.end_date).toLocaleDateString('pl-PL')}
               </div>
             )}
+
+            {!isTrialUser && activeSubscription && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Anuluj pakiet
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Czy na pewno chcesz anulować pakiet?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Pakiet zostanie anulowany na koniec okresu rozliczeniowego. 
+                      Będziesz mógł korzystać z funkcji do {activeSubscription.end_date ? new Date(activeSubscription.end_date).toLocaleDateString('pl-PL') : 'końca okresu'}.
+                      Po tym czasie Twoje konto zostanie przełączone na plan Trial.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleCancelSubscription}
+                      disabled={isCancelling}
+                    >
+                      {isCancelling ? 'Anulowanie...' : 'Potwierdź anulowanie'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -83,7 +145,9 @@ const SubscriptionManagement = () => {
       {upgradeablePackages.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Dostępne upgrade'y</CardTitle>
+            <CardTitle>
+              {isTrialUser ? 'Dostępne pakiety' : 'Dostępne upgrade\'y'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
@@ -123,7 +187,7 @@ const SubscriptionManagement = () => {
                         onClick={() => setSelectedUpgradePackage(pkg)}
                         className="flex items-center gap-1"
                       >
-                        Upgrade <ArrowRight className="h-3 w-3" />
+                        {isTrialUser ? 'Wybierz' : 'Upgrade'} <ArrowRight className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>

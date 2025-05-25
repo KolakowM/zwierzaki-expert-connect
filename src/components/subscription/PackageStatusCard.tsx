@@ -4,10 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 import { Button } from "@/components/ui/button";
-import { Crown, Users, Heart, Briefcase, Star } from "lucide-react";
+import { Crown, Users, Heart, Briefcase, Star, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
 
 const PackageStatusCard = () => {
   const { activeSubscription, usageStats, isLoadingSubscription, isTrialUser, isSubscriptionExpired } = useUserSubscription();
+  const navigate = useNavigate();
 
   if (isLoadingSubscription) {
     return (
@@ -42,6 +45,10 @@ const PackageStatusCard = () => {
     return Math.min((current / max) * 100, 100);
   };
 
+  const isOverLimit = (current: number, max: number) => {
+    return current > max;
+  };
+
   const limits = activeSubscription || {
     max_clients: 5,
     max_pets: 10,
@@ -49,6 +56,14 @@ const PackageStatusCard = () => {
     max_specializations: 2,
     package_name: 'Trial'
   };
+
+  // Check if any limits are exceeded
+  const hasOverLimits = usageStats && (
+    isOverLimit(usageStats.clients_count, limits.max_clients) ||
+    isOverLimit(usageStats.pets_count, limits.max_pets) ||
+    isOverLimit(usageStats.services_count, limits.max_services) ||
+    isOverLimit(usageStats.specializations_count, limits.max_specializations)
+  );
 
   return (
     <Card>
@@ -62,6 +77,16 @@ const PackageStatusCard = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {hasOverLimits && (
+          <Alert className="border-red-200 bg-red-50">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-700">
+              <p className="font-medium">Przekroczono limity pakietu!</p>
+              <p className="text-sm">Niektóre funkcje mogą być ograniczone.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {usageStats && (
           <div className="space-y-3">
             <div className="space-y-1">
@@ -70,9 +95,14 @@ const PackageStatusCard = () => {
                   <Users className="h-4 w-4" />
                   Klienci
                 </div>
-                <span>{usageStats.clients_count}/{limits.max_clients}</span>
+                <span className={isOverLimit(usageStats.clients_count, limits.max_clients) ? "text-red-600 font-medium" : ""}>
+                  {usageStats.clients_count}/{limits.max_clients}
+                </span>
               </div>
-              <Progress value={getLimitProgress(usageStats.clients_count, limits.max_clients)} />
+              <Progress 
+                value={getLimitProgress(usageStats.clients_count, limits.max_clients)} 
+                className={isOverLimit(usageStats.clients_count, limits.max_clients) ? "bg-red-100" : ""}
+              />
             </div>
 
             <div className="space-y-1">
@@ -81,9 +111,14 @@ const PackageStatusCard = () => {
                   <Heart className="h-4 w-4" />
                   Zwierzęta
                 </div>
-                <span>{usageStats.pets_count}/{limits.max_pets}</span>
+                <span className={isOverLimit(usageStats.pets_count, limits.max_pets) ? "text-red-600 font-medium" : ""}>
+                  {usageStats.pets_count}/{limits.max_pets}
+                </span>
               </div>
-              <Progress value={getLimitProgress(usageStats.pets_count, limits.max_pets)} />
+              <Progress 
+                value={getLimitProgress(usageStats.pets_count, limits.max_pets)} 
+                className={isOverLimit(usageStats.pets_count, limits.max_pets) ? "bg-red-100" : ""}
+              />
             </div>
 
             <div className="space-y-1">
@@ -92,9 +127,14 @@ const PackageStatusCard = () => {
                   <Briefcase className="h-4 w-4" />
                   Usługi
                 </div>
-                <span>{usageStats.services_count}/{limits.max_services}</span>
+                <span className={isOverLimit(usageStats.services_count, limits.max_services) ? "text-red-600 font-medium" : ""}>
+                  {usageStats.services_count}/{limits.max_services}
+                </span>
               </div>
-              <Progress value={getLimitProgress(usageStats.services_count, limits.max_services)} />
+              <Progress 
+                value={getLimitProgress(usageStats.services_count, limits.max_services)} 
+                className={isOverLimit(usageStats.services_count, limits.max_services) ? "bg-red-100" : ""}
+              />
             </div>
 
             <div className="space-y-1">
@@ -103,20 +143,27 @@ const PackageStatusCard = () => {
                   <Star className="h-4 w-4" />
                   Specjalizacje
                 </div>
-                <span>{usageStats.specializations_count}/{limits.max_specializations}</span>
+                <span className={isOverLimit(usageStats.specializations_count, limits.max_specializations) ? "text-red-600 font-medium" : ""}>
+                  {usageStats.specializations_count}/{limits.max_specializations}
+                </span>
               </div>
-              <Progress value={getLimitProgress(usageStats.specializations_count, limits.max_specializations)} />
+              <Progress 
+                value={getLimitProgress(usageStats.specializations_count, limits.max_specializations)} 
+                className={isOverLimit(usageStats.specializations_count, limits.max_specializations) ? "bg-red-100" : ""}
+              />
             </div>
           </div>
         )}
 
-        {(isTrialUser || isSubscriptionExpired) && (
-          <div className="pt-2">
-            <Button className="w-full" variant="default">
-              Ulepsz pakiet
-            </Button>
-          </div>
-        )}
+        <div className="pt-2">
+          <Button 
+            className="w-full" 
+            variant={hasOverLimits ? "destructive" : "default"}
+            onClick={() => navigate('/dashboard?tab=subscription')}
+          >
+            {hasOverLimits ? 'Napraw limity' : (isTrialUser || isSubscriptionExpired) ? 'Ulepsz pakiet' : 'Zarządzaj pakietem'}
+          </Button>
+        </div>
 
         {activeSubscription?.end_date && !isSubscriptionExpired && (
           <div className="text-sm text-muted-foreground">
