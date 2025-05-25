@@ -48,14 +48,15 @@ const DashboardOverview = () => {
       description: "Zaplanowane wizyty",
       icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
       link: "/dashboard?tab=calendar"
-    },
-    {
-      title: "Plan",
-      value: "Podstawowy",
-      description: "Aktualny plan subskrypcji",
-      icon: < className="h-4 w-4 text-muted-foreground" />,
-      link: "/pricing"
-     }
+    }
+    // SKOMENTOWANO statystykę "Plan"
+    // {
+    //   title: "Plan",
+    //   value: "Podstawowy",
+    //   description: "Aktualny plan subskrypcji",
+    //   icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
+    //   link: "/pricing"
+    // }
   ];
 
   // Get recent visits
@@ -83,7 +84,7 @@ const DashboardOverview = () => {
       
       <div className="grid gap-4 md:grid-cols-2">
         <UpcomingVisits visits={recentVisits} pets={pets} clients={clients} />
-          <ProfileStatus />
+        {/* USUNIĘTO ProfileStatus */}
         <PackageStatusCard />
       </div>
     </div>
