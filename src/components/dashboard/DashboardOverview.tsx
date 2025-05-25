@@ -53,7 +53,7 @@ const DashboardOverview = () => {
       title: "Plan",
       value: "Podstawowy",
       description: "Aktualny plan subskrypcji",
-      icon: <User className="h-4 w-4 text-muted-foreground" />,
+      icon: <Users className="h-4 w-4 text-muted-foreground" />,
       link: "/pricing"
      }
   ];
