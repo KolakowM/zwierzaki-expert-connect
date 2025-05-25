@@ -48,15 +48,14 @@ const DashboardOverview = () => {
       description: "Zaplanowane wizyty",
       icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
       link: "/dashboard?tab=calendar"
-    }
-    // SKOMENTOWANO statystykę "Plan"
-    // {
-    //   title: "Plan",
-    //   value: "Podstawowy",
-    //   description: "Aktualny plan subskrypcji",
-    //   icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-    //   link: "/pricing"
-    // }
+    },
+    {
+       title: "Witaj,",
+       value: "miło cię znowu widzieć",
+       description: "",
+       icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
+    //  link: "/pricing"
+     }
   ];
 
   // Get recent visits
