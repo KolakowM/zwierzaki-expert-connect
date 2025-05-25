@@ -54,7 +54,7 @@ const DashboardOverview = () => {
        value: "miło cię znowu widzieć",
        description: "",
        icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-    //  link: "/pricing"
+       link: "/pricing"
      }
   ];
 
