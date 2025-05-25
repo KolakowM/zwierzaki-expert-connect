@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 import { getActivePackages, cancelSubscription } from "@/services/subscriptionService";
 import PackageUpgradeDialog from "./PackageUpgradeDialog";
-import { Crown, ArrowRight, AlertTriangle } from "lucide-react";
+import { Crown, ArrowRight, AlertTriangle, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -26,21 +26,22 @@ const SubscriptionManagement = () => {
 
   const currentPackage = availablePackages.find(pkg => pkg.id === activeSubscription?.package_id);
 
-  const getUpgradeablePackages = () => {
+  const getAvailablePackages = () => {
     if (isTrialUser) {
-      // Dla użytkowników Trial pokaż wszystkie dostępne pakiety
+      // Dla użytkowników Trial pokaż wszystkie płatne pakiety
       return availablePackages.filter(pkg => pkg.price_pln && pkg.price_pln > 0);
     }
     
     if (!currentPackage) return [];
     
+    // Dla użytkowników z aktywnym pakietem pokaż tylko droższe opcje
     return availablePackages.filter(pkg => {
       if (!pkg.price_pln || !currentPackage.price_pln) return false;
       return pkg.price_pln > currentPackage.price_pln;
     });
   };
 
-  const upgradeablePackages = getUpgradeablePackages();
+  const availableUpgrades = getAvailablePackages();
 
   const handleCancelSubscription = async () => {
     if (!activeSubscription) return;
@@ -142,61 +143,85 @@ const SubscriptionManagement = () => {
         </CardContent>
       </Card>
 
-      {upgradeablePackages.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isTrialUser ? 'Dostępne pakiety' : 'Dostępne upgrade\'y'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {upgradeablePackages.map((pkg) => (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5" />
+            {isTrialUser ? 'Wybierz swój pakiet' : 'Dostępne upgrade\'y'}
+          </CardTitle>
+          {isTrialUser && (
+            <p className="text-sm text-muted-foreground">
+              Aktualnie korzystasz z darmowego planu Trial. Wybierz pakiet dopasowany do Twoich potrzeb.
+            </p>
+          )}
+        </CardHeader>
+        <CardContent>
+          {availableUpgrades.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {availableUpgrades.map((pkg) => (
                 <div key={pkg.id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors">
                   <div className="space-y-3">
                     <div>
-                      <h4 className="font-semibold">{pkg.name}</h4>
+                      <h4 className="font-semibold text-lg">{pkg.name}</h4>
                       {pkg.description && (
-                        <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{pkg.description}</p>
                       )}
                     </div>
                     
-                    <div className="text-sm space-y-1">
-                      <div className="flex justify-between">
-                        <span>Klienci:</span>
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Klienci:</span>
                         <span className="font-medium">{pkg.max_clients}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Zwierzęta:</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Zwierzęta:</span>
                         <span className="font-medium">{pkg.max_pets}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Usługi:</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Usługi:</span>
                         <span className="font-medium">{pkg.max_services}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Specjalizacje:</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Specjalizacje:</span>
                         <span className="font-medium">{pkg.max_specializations}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2">
-                      <Badge>{pkg.price_pln} PLN/miesiąc</Badge>
+                    <div className="pt-2 border-t">
+                      <div className="flex items-center justify-between mb-3">
+                        <Badge variant="outline" className="text-lg font-semibold">
+                          {pkg.price_pln} PLN/miesiąc
+                        </Badge>
+                      </div>
                       <Button 
-                        size="sm" 
+                        className="w-full" 
                         onClick={() => setSelectedUpgradePackage(pkg)}
-                        className="flex items-center gap-1"
                       >
-                        {isTrialUser ? 'Wybierz' : 'Upgrade'} <ArrowRight className="h-3 w-3" />
+                        <Crown className="h-4 w-4 mr-2" />
+                        {isTrialUser ? 'Wybierz pakiet' : 'Upgrade'} 
+                        <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="text-center py-8">
+              <Crown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
+                {isTrialUser ? 'Brak dostępnych pakietów' : 'Masz już najlepszy pakiet!'}
+              </h3>
+              <p className="text-muted-foreground">
+                {isTrialUser 
+                  ? 'Obecnie nie ma dostępnych pakietów płatnych.' 
+                  : 'Korzystasz już z najwyższego dostępnego pakietu.'
+                }
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {selectedUpgradePackage && (
         <PackageUpgradeDialog
