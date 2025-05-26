@@ -1,19 +1,18 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { CareProgram, mapDbCareProgramToCareProgram, mapCareProgramToDbCareProgram } from "@/types/care-program";
+import { CareProgram, DbCareProgram, mapDbCareProgramToCareProgram, mapCareProgramToDbCareProgram } from "@/types";
 
 export const getCarePrograms = async (): Promise<CareProgram[]> => {
   const { data, error } = await supabase
     .from('care_programs')
     .select('*')
-    .order('startdate', { ascending: false });
-
+    .order('createdat', { ascending: false });
+  
   if (error) {
     console.error('Error fetching care programs:', error);
     throw error;
   }
-
-  return (data || []).map(mapDbCareProgramToCareProgram);
+  
+  return (data || []).map(program => mapDbCareProgramToCareProgram(program as DbCareProgram));
 };
 
 export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram[]> => {
@@ -22,13 +21,13 @@ export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram
     .select('*')
     .eq('petid', petId)
     .order('startdate', { ascending: false });
-
+  
   if (error) {
-    console.error('Error fetching care programs by pet ID:', error);
+    console.error(`Error fetching care programs for pet ${petId}:`, error);
     throw error;
   }
-
-  return (data || []).map(mapDbCareProgramToCareProgram);
+  
+  return (data || []).map(program => mapDbCareProgramToCareProgram(program as DbCareProgram));
 };
 
 export const getCareProgramById = async (id: string): Promise<CareProgram | null> => {
@@ -37,59 +36,68 @@ export const getCareProgramById = async (id: string): Promise<CareProgram | null
     .select('*')
     .eq('id', id)
     .single();
-
+  
   if (error) {
-    console.error('Error fetching care program:', error);
-    throw error;
+    console.error(`Error fetching care program with id ${id}:`, error);
+    return null;
   }
-
-  return data ? mapDbCareProgramToCareProgram(data) : null;
+  
+  return data ? mapDbCareProgramToCareProgram(data as DbCareProgram) : null;
 };
 
-export const createCareProgram = async (careProgram: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
-  const dbCareProgram = mapCareProgramToDbCareProgram(careProgram);
+export const createCareProgram = async (program: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
+  const dbProgram = mapCareProgramToDbCareProgram(program);
   
   const { data, error } = await supabase
     .from('care_programs')
-    .insert(dbCareProgram)
+    .insert([dbProgram])
     .select()
     .single();
-
+  
   if (error) {
     console.error('Error creating care program:', error);
     throw error;
   }
-
-  return mapDbCareProgramToCareProgram(data);
+  
+  return mapDbCareProgramToCareProgram(data as DbCareProgram);
 };
 
-export const updateCareProgram = async (id: string, updates: Partial<CareProgram>): Promise<CareProgram> => {
-  // Convert partial updates to database format
-  const dbUpdates: any = {};
-  
-  if (updates.petId !== undefined) dbUpdates.petid = updates.petId;
-  if (updates.name !== undefined) dbUpdates.name = updates.name;
-  if (updates.goal !== undefined) dbUpdates.goal = updates.goal;
-  if (updates.description !== undefined) dbUpdates.description = updates.description;
-  if (updates.startDate !== undefined) dbUpdates.startdate = updates.startDate.toISOString();
-  if (updates.endDate !== undefined) dbUpdates.enddate = updates.endDate ? updates.endDate.toISOString() : null;
-  if (updates.status !== undefined) dbUpdates.status = updates.status;
-  if (updates.instructions !== undefined) dbUpdates.instructions = updates.instructions;
-  if (updates.recommendations !== undefined) dbUpdates.recommendations = updates.recommendations;
+export const updateCareProgram = async (id: string, program: Partial<CareProgram>): Promise<CareProgram> => {
+  // Convert dates to ISO strings if they are Date objects
+  const prepared = {
+    ...program,
+    startDate: program.startDate instanceof Date ? program.startDate.toISOString() : program.startDate,
+    endDate: program.endDate instanceof Date ? program.endDate.toISOString() : program.endDate
+  };
+
+  // Convert camelCase properties to snake_case for the database
+  const dbProgramUpdate: Partial<DbCareProgram> = {};
+  if (prepared.petId !== undefined) dbProgramUpdate.petid = prepared.petId;
+  if (prepared.name !== undefined) dbProgramUpdate.name = prepared.name;
+  if (prepared.description !== undefined) dbProgramUpdate.description = prepared.description;
+  if (prepared.goal !== undefined) dbProgramUpdate.goal = prepared.goal;
+  if (prepared.status !== undefined) dbProgramUpdate.status = prepared.status;
+  if (prepared.recommendations !== undefined) dbProgramUpdate.recommendations = prepared.recommendations;
+  if (prepared.instructions !== undefined) dbProgramUpdate.instructions = prepared.instructions;
+  if (prepared.startDate !== undefined) dbProgramUpdate.startdate = prepared.startDate;
+  if (prepared.endDate !== undefined) dbProgramUpdate.enddate = prepared.endDate;
+
+  console.log("Updating care program with ID:", id);
+  console.log("Update data:", dbProgramUpdate);
 
   const { data, error } = await supabase
     .from('care_programs')
-    .update(dbUpdates)
+    .update(dbProgramUpdate)
     .eq('id', id)
     .select()
     .single();
-
+  
   if (error) {
-    console.error('Error updating care program:', error);
+    console.error(`Error updating care program with id ${id}:`, error);
     throw error;
   }
-
-  return mapDbCareProgramToCareProgram(data);
+  
+  return mapDbCareProgramToCareProgram(data as DbCareProgram);
 };
 
 export const deleteCareProgram = async (id: string): Promise<void> => {
@@ -97,15 +105,9 @@ export const deleteCareProgram = async (id: string): Promise<void> => {
     .from('care_programs')
     .delete()
     .eq('id', id);
-
+  
   if (error) {
-    console.error('Error deleting care program:', error);
+    console.error(`Error deleting care program with id ${id}:`, error);
     throw error;
   }
-};
-
-export const deleteCareProgramWithRelatedData = async (id: string): Promise<void> => {
-  // In a real implementation, you might need to delete related data first
-  // For now, we'll just delete the care program
-  await deleteCareProgram(id);
 };

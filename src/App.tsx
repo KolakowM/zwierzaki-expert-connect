@@ -29,6 +29,16 @@ import SpecialistProfile from './pages/SpecialistProfile';
 import { AuthProvider } from './contexts/AuthProvider';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
+// Admin routes
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminClients from './pages/admin/AdminClients';
+import AdminPets from './pages/admin/AdminPets';
+import AdminVisits from './pages/admin/AdminVisits';
+import AdminSettings from './pages/admin/AdminSettings';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminCarePrograms from './pages/admin/AdminCarePrograms';
+
 // Create a client
 const queryClient = new QueryClient();
 
@@ -93,6 +103,21 @@ function App() {
                   <AccountSettings />
                 </ProtectedRoute>
               } />
+              
+              {/* Admin routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<AdminDashboard />} />
+                <Route path="clients" element={<AdminClients />} />
+                <Route path="pets" element={<AdminPets />} />
+                <Route path="visits" element={<AdminVisits />} />
+                <Route path="settings" element={<AdminSettings />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="care-programs" element={<AdminCarePrograms />} />
+              </Route>
               
               <Route path="*" element={<NotFound />} />
             </Routes>

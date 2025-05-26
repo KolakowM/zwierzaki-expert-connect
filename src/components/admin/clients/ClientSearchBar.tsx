@@ -1,6 +1,10 @@
 
+import { Search, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import ResponsiveClientForm from "@/components/clients/ResponsiveClientForm";
+import { Client } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClientSearchBarProps {
   searchQuery: string;
@@ -8,6 +12,19 @@ interface ClientSearchBarProps {
 }
 
 const ClientSearchBar = ({ searchQuery, setSearchQuery }: ClientSearchBarProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const handleClientSaved = (client: Omit<Client, 'id' | 'createdAt'>) => {
+    // Invalidate clients query to refresh data after adding a new client
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+    
+    toast({
+      title: "Klient dodany pomyślnie",
+      description: `${client.firstName} ${client.lastName} został dodany do bazy klientów`
+    });
+  };
+
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-b space-y-2 sm:space-y-0">
       <div className="relative w-full sm:w-auto">
@@ -19,6 +36,13 @@ const ClientSearchBar = ({ searchQuery, setSearchQuery }: ClientSearchBarProps) 
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+      <ResponsiveClientForm
+        buttonText="Dodaj Klienta"
+        buttonVariant="default"
+        onClientSaved={handleClientSaved}
+      >
+        <UserPlus className="mr-2 h-4 w-4" /> Dodaj Klienta
+      </ResponsiveClientForm>
     </div>
   );
 };

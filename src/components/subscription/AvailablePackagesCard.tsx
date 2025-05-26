@@ -5,38 +5,32 @@ import { Package } from "@/types/subscription";
 import PackageCard from "./PackageCard";
 
 interface AvailablePackagesCardProps {
-  availablePackages: Package[];
-  currentPackage: Package | null;
+  availableUpgrades: Package[];
   isTrialUser: boolean;
   onUpgrade: (pkg: Package) => void;
 }
 
-const AvailablePackagesCard = ({ availablePackages, currentPackage, isTrialUser, onUpgrade }: AvailablePackagesCardProps) => {
+const AvailablePackagesCard = ({ availableUpgrades, isTrialUser, onUpgrade }: AvailablePackagesCardProps) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="h-5 w-5" />
-          {isTrialUser ? 'Wybierz swój pakiet' : 'Dostępne pakiety'}
+          {isTrialUser ? 'Wybierz swój pakiet' : 'Dostępne upgrade\'y'}
         </CardTitle>
-        {isTrialUser ? (
+        {isTrialUser && (
           <p className="text-sm text-muted-foreground">
             Aktualnie korzystasz z darmowego planu Trial. Wybierz pakiet dopasowany do Twoich potrzeb.
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Możesz zmienić swój pakiet na wyższy lub niższy w każdej chwili.
           </p>
         )}
       </CardHeader>
       <CardContent>
-        {availablePackages.length > 0 ? (
+        {availableUpgrades.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {availablePackages.map((pkg) => (
+            {availableUpgrades.map((pkg) => (
               <PackageCard
                 key={pkg.id}
                 package={pkg}
-                currentPackage={currentPackage}
                 isTrialUser={isTrialUser}
                 onUpgrade={onUpgrade}
               />
@@ -46,10 +40,13 @@ const AvailablePackagesCard = ({ availablePackages, currentPackage, isTrialUser,
           <div className="text-center py-8">
             <Crown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">
-              Brak dostępnych pakietów
+              {isTrialUser ? 'Brak dostępnych pakietów' : 'Masz już najlepszy pakiet!'}
             </h3>
             <p className="text-muted-foreground">
-              Obecnie nie ma dostępnych pakietów płatnych.
+              {isTrialUser 
+                ? 'Obecnie nie ma dostępnych pakietów płatnych.' 
+                : 'Korzystasz już z najwyższego dostępnego pakietu.'
+              }
             </p>
           </div>
         )}
