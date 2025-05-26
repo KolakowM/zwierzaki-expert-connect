@@ -4,6 +4,7 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { getClients } from "@/services/clientService";
+import { mapDbClientToClient } from "@/types/client";
 import ClientSearchBar from "@/components/admin/clients/ClientSearchBar";
 import ClientTable from "@/components/admin/clients/ClientTable";
 
@@ -12,10 +13,13 @@ const AdminClients = () => {
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: dbClients = [], isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: getClients,
   });
+
+  // Map database clients to application clients
+  const clients = dbClients.map(mapDbClientToClient);
   
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -26,7 +30,7 @@ const AdminClients = () => {
     }
   };
   
-  // Filter and sort clients
+  // Filter and sort clients - now with proper string createdAt for display
   const filteredClients = clients
     .filter(client => 
       client.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,7 +68,12 @@ const AdminClients = () => {
         return sortOrder === "asc" ? 1 : -1;
       }
       return 0;
-    });
+    })
+    // Convert to the format expected by ClientTable (with createdAt as string)
+    .map(client => ({
+      ...client,
+      createdAt: client.createdAt.toISOString()
+    }));
 
   return (
     <>

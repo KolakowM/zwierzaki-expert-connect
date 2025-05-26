@@ -1,18 +1,34 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { CareProgram } from "@/types";
+import { CareProgram, mapDbCareProgramToCareProgram, mapCareProgramToDbCareProgram } from "@/types/care-program";
 
 export const getCarePrograms = async (): Promise<CareProgram[]> => {
   const { data, error } = await supabase
     .from('care_programs')
     .select('*')
-    .order('startDate', { ascending: false });
+    .order('startdate', { ascending: false });
 
   if (error) {
     console.error('Error fetching care programs:', error);
     throw error;
   }
 
-  return data || [];
+  return (data || []).map(mapDbCareProgramToCareProgram);
+};
+
+export const getCareProgramsByPetId = async (petId: string): Promise<CareProgram[]> => {
+  const { data, error } = await supabase
+    .from('care_programs')
+    .select('*')
+    .eq('petid', petId)
+    .order('startdate', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching care programs by pet ID:', error);
+    throw error;
+  }
+
+  return (data || []).map(mapDbCareProgramToCareProgram);
 };
 
 export const getCareProgramById = async (id: string): Promise<CareProgram | null> => {
@@ -27,13 +43,15 @@ export const getCareProgramById = async (id: string): Promise<CareProgram | null
     throw error;
   }
 
-  return data;
+  return data ? mapDbCareProgramToCareProgram(data) : null;
 };
 
 export const createCareProgram = async (careProgram: Omit<CareProgram, 'id' | 'createdAt'>): Promise<CareProgram> => {
+  const dbCareProgram = mapCareProgramToDbCareProgram(careProgram);
+  
   const { data, error } = await supabase
     .from('care_programs')
-    .insert(careProgram)
+    .insert(dbCareProgram)
     .select()
     .single();
 
@@ -42,13 +60,26 @@ export const createCareProgram = async (careProgram: Omit<CareProgram, 'id' | 'c
     throw error;
   }
 
-  return data;
+  return mapDbCareProgramToCareProgram(data);
 };
 
 export const updateCareProgram = async (id: string, updates: Partial<CareProgram>): Promise<CareProgram> => {
+  // Convert partial updates to database format
+  const dbUpdates: any = {};
+  
+  if (updates.petId !== undefined) dbUpdates.petid = updates.petId;
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.goal !== undefined) dbUpdates.goal = updates.goal;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.startDate !== undefined) dbUpdates.startdate = updates.startDate.toISOString();
+  if (updates.endDate !== undefined) dbUpdates.enddate = updates.endDate ? updates.endDate.toISOString() : null;
+  if (updates.status !== undefined) dbUpdates.status = updates.status;
+  if (updates.instructions !== undefined) dbUpdates.instructions = updates.instructions;
+  if (updates.recommendations !== undefined) dbUpdates.recommendations = updates.recommendations;
+
   const { data, error } = await supabase
     .from('care_programs')
-    .update(updates)
+    .update(dbUpdates)
     .eq('id', id)
     .select()
     .single();
@@ -58,7 +89,7 @@ export const updateCareProgram = async (id: string, updates: Partial<CareProgram
     throw error;
   }
 
-  return data;
+  return mapDbCareProgramToCareProgram(data);
 };
 
 export const deleteCareProgram = async (id: string): Promise<void> => {
