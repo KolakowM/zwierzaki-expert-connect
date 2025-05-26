@@ -2,7 +2,6 @@
 import { Users, PawPrint, CalendarIcon, Crown } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
-import AdminTab from "./AdminTab";
 import PackageStatusCard from "../subscription/PackageStatusCard";
 import { useQuery } from "@tanstack/react-query";
 import { getClients } from "@/services/clientService";
@@ -64,9 +63,6 @@ const DashboardOverview = () => {
 
   return (
     <div className="space-y-4">
-      {/* Admin tab for data fixes */}
-      <AdminTab />
-      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <StatsCard 

@@ -20,23 +20,6 @@ const SubscriptionManagement = () => {
 
   const currentPackage = availablePackages.find(pkg => pkg.id === activeSubscription?.package_id);
 
-  const getAvailablePackages = () => {
-    if (isTrialUser) {
-      // Dla użytkowników Trial pokaż wszystkie płatne pakiety
-      return availablePackages.filter(pkg => pkg.price_pln && pkg.price_pln > 0);
-    }
-    
-    if (!currentPackage) return [];
-    
-    // Dla użytkowników z aktywnym pakietem pokaż tylko droższe opcje
-    return availablePackages.filter(pkg => {
-      if (!pkg.price_pln || !currentPackage.price_pln) return false;
-      return pkg.price_pln > currentPackage.price_pln;
-    });
-  };
-
-  const availableUpgrades = getAvailablePackages();
-
   const handleUpgradePackage = (pkg: any) => {
     setSelectedUpgradePackage(pkg);
   };
@@ -60,7 +43,8 @@ const SubscriptionManagement = () => {
       />
 
       <AvailablePackagesCard
-        availableUpgrades={availableUpgrades}
+        availablePackages={availablePackages}
+        currentPackage={currentPackage || null}
         isTrialUser={isTrialUser}
         onUpgrade={handleUpgradePackage}
       />
