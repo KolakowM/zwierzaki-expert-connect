@@ -33,12 +33,28 @@ const Carousel = React.forwardRef<
     },
     ref
   ) => {
+    // Count children properly for random start calculation
+    const childrenCount = React.useMemo(() => {
+      if (!children) return 0;
+      
+      // Find CarouselContent child and count its children
+      const carouselContent = React.Children.toArray(children).find(child => 
+        React.isValidElement(child) && child.type === CarouselContent
+      );
+      
+      if (React.isValidElement(carouselContent) && carouselContent.props.children) {
+        return React.Children.count(carouselContent.props.children);
+      }
+      
+      return 8; // fallback default
+    }, [children]);
+
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
         loop: true,
-        startIndex: randomStart ? Math.floor(Math.random() * (children?.props?.children?.length || 8)) : 0
+        startIndex: randomStart ? Math.floor(Math.random() * childrenCount) : 0
       },
       plugins
     )
