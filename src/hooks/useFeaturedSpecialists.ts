@@ -15,21 +15,26 @@ export function useFeaturedSpecialists(limit = 12) {
       try {
         setLoading(true);
         
-        // First get user_roles data for specialists that are verified
-        const { data: userRolesData, error: userRolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role, status')
-          .eq('role', 'specialist')
-          .eq('status', 'zweryfikowany')
+        // Get specialists with "Zawodowiec" package
+        const { data: subscriptionsData, error: subscriptionsError } = await supabase
+          .from('user_subscriptions')
+          .select(`
+            user_id,
+            packages!inner(
+              id,
+              name
+            )
+          `)
+          .eq('status', 'active')
+          .eq('packages.name', 'Zawodowiec')
           .limit(limit);
 
-        if (userRolesError) throw userRolesError;
+        if (subscriptionsError) throw subscriptionsError;
 
-        if (userRolesData && userRolesData.length > 0) {
-          // Get user IDs of verified specialists
-          const specialistIds = userRolesData.map(item => item.user_id);
+        if (subscriptionsData && subscriptionsData.length > 0) {
+          const specialistIds = subscriptionsData.map(sub => sub.user_id);
           
-          // Query specialist profiles for these IDs
+          // Get specialist profiles for these IDs
           const { data: profilesData, error: profilesError } = await supabase
             .from('specialist_profiles')
             .select(`
@@ -79,7 +84,67 @@ export function useFeaturedSpecialists(limit = 12) {
             setSpecialists(transformedData);
           }
         } else {
-          setSpecialists([]);
+          // Fallback to verified specialists if no "Zawodowiec" package users found
+          const { data: userRolesData, error: userRolesError } = await supabase
+            .from('user_roles')
+            .select('user_id, role, status')
+            .eq('role', 'specialist')
+            .eq('status', 'zweryfikowany')
+            .limit(limit);
+
+          if (userRolesError) throw userRolesError;
+
+          if (userRolesData && userRolesData.length > 0) {
+            const specialistIds = userRolesData.map(item => item.user_id);
+            
+            const { data: profilesData, error: profilesError } = await supabase
+              .from('specialist_profiles')
+              .select(`
+                id, 
+                title, 
+                description, 
+                location, 
+                photo_url, 
+                specializations
+              `)
+              .in('id', specialistIds);
+              
+            if (profilesError) throw profilesError;
+            
+            const { data: userProfilesData, error: userProfilesError } = await supabase
+              .from('user_profiles')
+              .select('id, first_name, last_name')
+              .in('id', specialistIds);
+              
+            if (userProfilesError) throw userProfilesError;
+            
+            const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
+              acc[profile.id] = profile;
+              return acc;
+            }, {} as Record<string, any>) || {};
+            
+            if (profilesData) {
+              const transformedData: Specialist[] = profilesData.map(profile => {
+                const userProfile = userProfilesMap[profile.id] || {};
+                
+                return {
+                  id: profile.id,
+                  name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`,
+                  title: profile.title || "Specjalista",
+                  specializations: profile.specializations || [],
+                  location: profile.location || "Polska",
+                  image: profile.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
+                  rating: 5.0,
+                  verified: true,
+                  role: 'specialist'
+                };
+              });
+              
+              setSpecialists(transformedData);
+            }
+          } else {
+            setSpecialists([]);
+          }
         }
       } catch (err) {
         console.error("Error fetching featured specialists:", err);

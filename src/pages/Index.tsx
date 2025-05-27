@@ -210,7 +210,12 @@ const Index = () => {
             </div>
           ) : (
             <div className="relative">
-              <Carousel className="w-full">
+              <Carousel 
+                className="w-full"
+                randomStart={true}
+                autoplay={true}
+                autoplayDelay={4000}
+              >
                 <CarouselContent className="-ml-2 md:-ml-4">
                   {specialists.slice(0, 8).map(specialist => (
                     <CarouselItem key={specialist.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/4">
