@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
@@ -14,9 +13,10 @@ import {
   CarouselPrevious
 } from "@/components/ui/carousel";
 
-const featuredSpecialists: Specialist[] = [
+// Fallback specialists data for demonstration
+const fallbackSpecialists: Specialist[] = [
   {
-    id: "1",
+    id: "fallback-1",
     name: "Anna Kowalska",
     title: "Dietetyk zwierzęcy",
     specializations: ["Dietetyka", "Żywienie psów", "Alergie pokarmowe"],
@@ -27,7 +27,7 @@ const featuredSpecialists: Specialist[] = [
     role: "specialist"
   },
   {
-    id: "2",
+    id: "fallback-2",
     name: "Piotr Nowak",
     title: "Behawiorysta psów",
     specializations: ["Behawiorystyka", "Terapia lękowa", "Agresja"],
@@ -38,7 +38,7 @@ const featuredSpecialists: Specialist[] = [
     role: "specialist"
   },
   {
-    id: "3",
+    id: "fallback-3",
     name: "Magdalena Wiśniewska",
     title: "Fizjoterapeuta zwierzęcy",
     specializations: ["Rehabilitacja", "Fizjoterapia", "Masaż"],
@@ -49,7 +49,7 @@ const featuredSpecialists: Specialist[] = [
     role: "specialist"
   },
   {
-    id: "4",
+    id: "fallback-4",
     name: "Tomasz Kaczmarek",
     title: "Trener psów",
     specializations: ["Szkolenie podstawowe", "Posłuszeństwo", "Trick training"],
@@ -58,12 +58,39 @@ const featuredSpecialists: Specialist[] = [
     rating: 4.7,
     verified: true,
     role: "specialist"
+  },
+  {
+    id: "fallback-5",
+    name: "Katarzyna Zielińska",
+    title: "Weterynarz",
+    specializations: ["Chirurgia", "Diagnostyka", "Medycyna wewnętrzna"],
+    location: "Gdańsk",
+    image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=2374&auto=format&fit=crop",
+    rating: 4.9,
+    verified: true,
+    role: "specialist"
+  },
+  {
+    id: "fallback-6",
+    name: "Michał Nowicki",
+    title: "Groomer",
+    specializations: ["Strzyżenie", "Pielęgnacja", "SPA dla zwierząt"],
+    location: "Łódź",
+    image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=2370&auto=format&fit=crop",
+    rating: 4.6,
+    verified: true,
+    role: "specialist"
   }
 ];
 
 const Index = () => {
   const { t } = useTranslation();
-  const { specialists, loading, error } = useFeaturedSpecialists();
+  const { specialists, loading, error } = useFeaturedSpecialists(12);
+
+  // Use fallback data if no specialists are loaded and not loading
+  const displaySpecialists = specialists.length > 0 ? specialists : (!loading ? fallbackSpecialists : []);
+  
+  console.log("Index page - specialists count:", specialists.length, "loading:", loading, "displaySpecialists:", displaySpecialists.length);
 
   const benefitsData = [
     {
@@ -208,16 +235,16 @@ const Index = () => {
                 Odśwież stronę
               </Button>
             </div>
-          ) : (
+          ) : displaySpecialists.length > 0 ? (
             <div className="relative">
               <Carousel 
                 className="w-full"
                 randomStart={true}
                 autoplay={true}
-                autoplayDelay={4000}
+                autoplayDelay={3500}
               >
                 <CarouselContent className="-ml-2 md:-ml-4">
-                  {specialists.slice(0, 8).map(specialist => (
+                  {displaySpecialists.map(specialist => (
                     <CarouselItem key={specialist.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/4">
                       <div className="h-full">
                         <SpecialistCard specialist={specialist} />
@@ -230,6 +257,10 @@ const Index = () => {
                   <CarouselNext className="right-0 translate-x-1/2" />
                 </div>
               </Carousel>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Brak dostępnych specjalistów w tym momencie.</p>
             </div>
           )}
           
