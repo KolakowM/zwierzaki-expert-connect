@@ -30,6 +30,7 @@ const Carousel = React.forwardRef<
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
+        loop: true
       },
       plugins
     )
