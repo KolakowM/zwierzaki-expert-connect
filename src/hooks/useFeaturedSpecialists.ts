@@ -14,96 +14,63 @@ export function useFeaturedSpecialists(limit = 12) {
     const fetchFeaturedSpecialists = async () => {
       try {
         setLoading(true);
-        console.log("Fetching featured specialists with limit:", limit);
+        console.log("Fetching featured specialists with Zawodowiec package subscriptions, limit:", limit);
         
-        // First, try to get specialists with active "Zawodowiec" package subscriptions
-        const { data: zawodowiecPackage, error: packageError } = await supabase
-          .from('packages')
-          .select('id')
-          .eq('name', 'Zawodowiec')
-          .eq('is_active', true)
-          .single();
+        // Get specialists with active "Zawodowiec" package subscriptions using a single optimized query
+        const { data: featuredData, error: featuredError } = await supabase
+          .from('user_subscriptions')
+          .select(`
+            user_id,
+            packages!inner(
+              id,
+              name,
+              can_access_carousel
+            ),
+            user_profiles!inner(
+              id,
+              first_name,
+              last_name,
+              email
+            ),
+            specialist_profiles(
+              id,
+              title,
+              description,
+              location,
+              photo_url,
+              email,
+              phone_number,
+              website
+            ),
+            user_roles!inner(
+              role,
+              status
+            )
+          `)
+          .eq('status', 'active')
+          .eq('packages.name', 'Zawodowiec')
+          .eq('packages.can_access_carousel', true)
+          .eq('packages.is_active', true)
+          .eq('user_roles.role', 'specialist')
+          .gte('end_date', new Date().toISOString())
+          .limit(limit);
 
-        let specialistIds: string[] = [];
-
-        if (zawodowiecPackage && !packageError) {
-          console.log("Found Zawodowiec package:", zawodowiecPackage.id);
-          
-          // Get users with active subscriptions for this package
-          const { data: subscriptionsData, error: subscriptionsError } = await supabase
-            .from('user_subscriptions')
-            .select('user_id')
-            .eq('status', 'active')
-            .eq('package_id', zawodowiecPackage.id)
-            .gte('end_date', new Date().toISOString())
-            .limit(limit);
-
-          if (!subscriptionsError && subscriptionsData) {
-            specialistIds = subscriptionsData.map(sub => sub.user_id);
-            console.log("Found specialists with active Zawodowiec subscriptions:", specialistIds.length);
-          }
-        } else {
-          console.log("Zawodowiec package not found or inactive:", packageError);
+        if (featuredError) {
+          console.error("Error fetching featured specialists:", featuredError);
+          throw featuredError;
         }
 
-        // If no specialists with Zawodowiec package, fall back to verified specialists
-        if (specialistIds.length === 0) {
-          console.log("Falling back to verified specialists");
-          
-          const { data: verifiedSpecialists, error: verifiedError } = await supabase
-            .from('user_roles')
-            .select('user_id')
-            .eq('role', 'specialist')
-            .eq('status', 'zweryfikowany')
-            .limit(limit);
-
-          if (verifiedError) {
-            console.error("Error fetching verified specialists:", verifiedError);
-            throw verifiedError;
-          }
-
-          specialistIds = verifiedSpecialists?.map(item => item.user_id) || [];
-          console.log("Found verified specialists:", specialistIds.length);
-        }
-
-        if (specialistIds.length === 0) {
-          console.log("No specialists found, setting empty array");
+        if (!featuredData || featuredData.length === 0) {
+          console.log("No specialists found with active Zawodowiec package subscriptions");
           setSpecialists([]);
           return;
         }
 
-        // Get user profiles data
-        const { data: userProfilesData, error: userProfilesError } = await supabase
-          .from('user_profiles')
-          .select('id, first_name, last_name, email')
-          .in('id', specialistIds);
-          
-        if (userProfilesError) {
-          console.error("Error fetching user profiles:", userProfilesError);
-          throw userProfilesError;
-        }
-        
-        // Get specialist profiles data
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('specialist_profiles')
-          .select(`
-            id, 
-            title, 
-            description, 
-            location, 
-            photo_url,
-            email,
-            phone_number,
-            website
-          `)
-          .in('id', specialistIds);
-          
-        if (profilesError) {
-          console.error("Error fetching specialist profiles:", profilesError);
-          throw profilesError;
-        }
+        console.log(`Found ${featuredData.length} specialists with active Zawodowiec subscriptions`);
 
-        // Get active specializations for each specialist
+        // Get specializations for all found specialists
+        const specialistIds = featuredData.map(item => item.user_id);
+        
         const { data: specializationsData, error: specializationsError } = await supabase
           .from('specialist_specializations')
           .select(`
@@ -118,17 +85,6 @@ export function useFeaturedSpecialists(limit = 12) {
           console.error("Error fetching specializations:", specializationsError);
         }
 
-        // Create mappings for easy lookup
-        const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
-          acc[profile.id] = profile;
-          return acc;
-        }, {} as Record<string, any>) || {};
-
-        const profilesMap = profilesData?.reduce((acc, profile) => {
-          acc[profile.id] = profile;
-          return acc;
-        }, {} as Record<string, any>) || {};
-
         // Group specializations by specialist
         const specializationsMap = specializationsData?.reduce((acc, item) => {
           if (!acc[item.specialist_id]) {
@@ -139,19 +95,19 @@ export function useFeaturedSpecialists(limit = 12) {
         }, {} as Record<string, string[]>) || {};
         
         // Transform the data into the format expected by SpecialistCard
-        const transformedData: Specialist[] = specialistIds
-          .map(id => {
-            const userProfile = userProfilesMap[id];
-            const specialistProfile = profilesMap[id];
-            const userSpecializations = specializationsMap[id] || [];
+        const transformedData: Specialist[] = featuredData
+          .map(item => {
+            const userProfile = item.user_profiles;
+            const specialistProfile = item.specialist_profiles;
+            const userSpecializations = specializationsMap[item.user_id] || [];
             
             if (!userProfile) {
-              console.warn(`No user profile found for specialist ${id}`);
+              console.warn(`No user profile found for specialist ${item.user_id}`);
               return null;
             }
             
             return {
-              id: id,
+              id: item.user_id,
               name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Specjalista',
               title: specialistProfile?.title || "Specjalista",
               specializations: userSpecializations,
@@ -159,7 +115,7 @@ export function useFeaturedSpecialists(limit = 12) {
               image: specialistProfile?.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
               email: specialistProfile?.email || userProfile.email,
               rating: 5.0, // Default rating
-              verified: true, // Since we filtered for verified specialists or package holders
+              verified: true, // All specialists with Zawodowiec package are considered verified
               role: 'specialist'
             };
           })
