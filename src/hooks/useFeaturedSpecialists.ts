@@ -16,21 +16,41 @@ export function useFeaturedSpecialists(limit = 12) {
         setLoading(true);
         console.log("Fetching featured specialists with Zawodowiec package subscriptions, limit:", limit);
         
-        // First, get user IDs with active "Zawodowiec" package subscriptions
+        // Step 1: Get the Zawodowiec package ID first
+        const { data: zawodowiecPackage, error: packageError } = await supabase
+          .from('packages')
+          .select('id')
+          .eq('name', 'Zawodowiec')
+          .eq('can_access_carousel', true)
+          .eq('is_active', true)
+          .single();
+
+        if (packageError) {
+          console.error("Error fetching Zawodowiec package:", packageError);
+          throw packageError;
+        }
+
+        if (!zawodowiecPackage) {
+          console.log("No Zawodowiec package found");
+          setSpecialists([]);
+          return;
+        }
+
+        console.log("Found Zawodowiec package:", zawodowiecPackage.id);
+
+        // Step 2: Get users with active Zawodowiec subscriptions using specific relationship
         const { data: subscriptionsData, error: subscriptionsError } = await supabase
           .from('user_subscriptions')
           .select(`
             user_id,
-            packages!inner(
+            packages!fk_user_subscriptions_package_id(
               id,
               name,
               can_access_carousel
             )
           `)
           .eq('status', 'active')
-          .eq('packages.name', 'Zawodowiec')
-          .eq('packages.can_access_carousel', true)
-          .eq('packages.is_active', true)
+          .eq('package_id', zawodowiecPackage.id)
           .gte('end_date', new Date().toISOString())
           .limit(limit);
 
@@ -50,7 +70,7 @@ export function useFeaturedSpecialists(limit = 12) {
         // Extract user IDs from subscriptions
         const userIds = subscriptionsData.map(sub => sub.user_id);
 
-        // Get user profiles for these users
+        // Step 3: Get user profiles for these users
         const { data: userProfilesData, error: userProfilesError } = await supabase
           .from('user_profiles')
           .select('*')
@@ -61,7 +81,7 @@ export function useFeaturedSpecialists(limit = 12) {
           throw userProfilesError;
         }
 
-        // Get specialist profiles for these users
+        // Step 4: Get specialist profiles for these users
         const { data: specialistProfilesData, error: specialistProfilesError } = await supabase
           .from('specialist_profiles')
           .select('*')
@@ -71,7 +91,7 @@ export function useFeaturedSpecialists(limit = 12) {
           console.error("Error fetching specialist profiles:", specialistProfilesError);
         }
 
-        // Get user roles for these users
+        // Step 5: Get user roles for these users
         const { data: userRolesData, error: userRolesError } = await supabase
           .from('user_roles')
           .select('*')
@@ -82,7 +102,7 @@ export function useFeaturedSpecialists(limit = 12) {
           console.error("Error fetching user roles:", userRolesError);
         }
 
-        // Get specializations for all found specialists
+        // Step 6: Get specializations for all found specialists
         const { data: specializationsData, error: specializationsError } = await supabase
           .from('specialist_specializations')
           .select(`
