@@ -35,11 +35,11 @@ export default function PricingCard({
   const { t } = useTranslation();
   
   return (
-    <Card className={popular ? "border-primary shadow-lg" : ""}>
-      {popular && (
-        <div className="absolute -top-3 left-0 right-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-          {t('pricing.recommended')}
-        </div>
+    //<Card className={popular ? "border-primary shadow-lg" : ""}>
+    //  {popular && (
+    //    <div className="absolute -top-3 left-0 right-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+    //      {t('pricing.recommended')}
+    //    </div>
       )}
       <CardHeader>
         <CardTitle>{name}</CardTitle>
