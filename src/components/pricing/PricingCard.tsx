@@ -38,7 +38,7 @@ export default function PricingCard({
     <Card className={popular ? "border-primary shadow-lg" : ""}>
       {popular && (
        // <div className="absolute -top-0 left-0 right-0 mx-auto w-fit border-radius: 25% bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-       //   {t('pricing.recommended')}
+          {t('pricing.recommended')}
        // </div>
       )}
       <CardHeader>
