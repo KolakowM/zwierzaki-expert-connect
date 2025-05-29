@@ -1,0 +1,133 @@
+
+# MAPA STRONY I STRUKTURA APLIKACJI PETSFLOW
+
+## MAPA STRONY (Publiczne i chronione strony):
+
+### STRONY PUBLICZNE:
+- / (Index) - Strona główna z karuzelą specjalistów, sekcja hero, korzyści
+- /about - O nas
+- /contact - Kontakt
+- /pricing - Cennik pakietów
+- /login - Logowanie
+- /register - Rejestracja
+- /forgot-password - Resetowanie hasła
+- /reset-password - Nowe hasło
+- /terms - Regulamin
+- /terms2 - Dodatkowy regulamin
+- /privacy - Polityka prywatności
+- /faq - Często zadawane pytania
+- /catalog - Katalog specjalistów (przeglądanie)
+- /specialist/:id - Profil specjalisty (widok publiczny)
+- /become-specialist - Zostań specjalistą
+
+### STRONY CHRONIONE (wymagają logowania):
+- /dashboard - Panel główny użytkownika
+- /clients - Lista klientów
+- /clients/:id - Szczegóły klienta
+- /pets - Lista zwierząt
+- /pets/:id - Profil zwierzęcia
+- /profile - Edycja profilu użytkownika
+- /settings - Ustawienia konta
+
+### STRONY ADMINISTRATORA:
+- /admin - Panel administratora
+- /admin/clients - Zarządzanie klientami
+- /admin/pets - Zarządzanie zwierzętami
+- /admin/visits - Zarządzanie wizytami
+- /admin/settings - Ustawienia systemu
+- /admin/users - Zarządzanie użytkownikami
+- /admin/care-programs - Programy opieki
+
+## GŁÓWNE FOLDERY I ICH ZAWARTOŚĆ:
+
+### /src/components/ - Komponenty UI i funkcjonalne:
+- /account/ - Komponenty ustawień konta
+- /admin/ - Komponenty panelu administratora
+- /auth/ - Komponenty autoryzacji
+- /calendar/ - Komponenty kalendarza i wizyt
+- /care-programs/ - Programy opieki dla zwierząt
+- /catalog/ - Katalog specjalistów
+- /clients/ - Zarządzanie klientami
+- /dashboard/ - Dashboard użytkownika
+- /layout/ - Layout strony (header, footer, sidebar)
+- /pets/ - Zarządzanie zwierzętami
+- /pricing/ - Komponenty cennika
+- /profile/ - Edycja profilu
+- /specialists/ - Komponenty profili specjalistów
+- /subscription/ - Zarządzanie subskrypcjami
+- /ui/ - Podstawowe komponenty UI (shadcn/ui)
+- /visits/ - Komponenty wizyt
+
+### /src/hooks/ - Custom React hooks:
+- useAuth* - Hooks autoryzacji
+- useFeaturedSpecialists - Hook do pobierania specjalistów
+- useSpecializations - Hook specjalizacji
+- useUserSubscription - Hook subskrypcji
+- use-toast - Hook powiadomień
+
+### /src/pages/ - Komponenty stron:
+- Index.tsx - Strona główna
+- About.tsx, Contact.tsx, Pricing.tsx - Strony informacyjne
+- Login.tsx, Register.tsx - Autoryzacja
+- Dashboard.tsx - Panel użytkownika
+- Clients.tsx, Pets.tsx - Zarządzanie danymi
+- /admin/ - Strony panelu administratora
+
+### /src/services/ - Usługi i API:
+- authService.ts - Autoryzacja
+- clientService.ts - Obsługa klientów
+- petService.ts - Obsługa zwierząt
+- subscriptionService.ts - Subskrypcje
+- /user/ - Zarządzanie użytkownikami
+
+### /src/integrations/supabase/ - Integracja z bazą danych:
+- client.ts - Klient Supabase
+- types.ts - Typy bazy danych
+
+### /src/contexts/ - React Context:
+- AuthContext.tsx - Kontekst autoryzacji
+- AuthProvider.tsx - Provider autoryzacji
+
+### /src/types/ - Definicje typów TypeScript:
+- index.ts - Główne typy
+- client.ts, pet.ts, visit.ts - Typy danych
+- subscription.ts - Typy subskrypcji
+
+## GŁÓWNE FUNKCJONALNOŚCI:
+
+1. **SYSTEM AUTORYZACJI** - Logowanie, rejestracja, role użytkowników
+2. **ZARZĄDZANIE KLIENTAMI** - CRUD klientów z formularzami
+3. **ZARZĄDZANIE ZWIERZĘTAMI** - Profile zwierząt, historia medyczna
+4. **SYSTEM WIZYT** - Planowanie i zarządzanie wizytami
+5. **PROFILE SPECJALISTÓW** - Prezentacja specjalistów z specjalizacjami
+6. **SYSTEM SUBSKRYPCJI** - Pakiety płatności i limity użytkowania
+7. **PANEL ADMINISTRATORA** - Zarządzanie całym systemem
+8. **KARUZELA SPECJALISTÓW** - Prezentacja zweryfikowanych specjalistów
+9. **KATALOG** - Przeglądanie i filtrowanie specjalistów
+10. **NOTATKI ZWIERZĄT** - System notatek z załącznikami
+
+## BAZA DANYCH (Supabase):
+
+### GŁÓWNE TABELE:
+- user_profiles - Profile użytkowników
+- user_roles - Role i statusy użytkowników  
+- specialist_profiles - Profile specjalistów
+- specialist_specializations - Specjalizacje specjalistów
+- specializations - Lista dostępnych specjalizacji
+- clients - Klienci
+- pets - Zwierzęta
+- visits - Wizyty
+- packages - Pakiety subskrypcji
+- user_subscriptions - Aktywne subskrypcje
+- care_programs - Programy opieki
+- pet_notes - Notatki zwierząt
+
+## TECHNOLOGIE:
+- React 18 + TypeScript
+- Tailwind CSS + shadcn/ui
+- React Router Dom - routing
+- Supabase - backend i baza danych
+- React Query - zarządzanie stanem
+- React Hook Form - formularze
+- i18next - internacjonalizacja
+- Embla Carousel - karuzele
