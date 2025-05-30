@@ -14,75 +14,122 @@ export function useFeaturedSpecialists(limit = 12) {
     const fetchFeaturedSpecialists = async () => {
       try {
         setLoading(true);
+        console.log("Fetching verified specialists with role 'specialist' and status 'zweryfikowany', limit:", limit);
         
-        // First get user_roles data for specialists that are verified
-        const { data: userRolesData, error: userRolesError } = await supabase
+        // Step 1: Get verified specialists from user_roles
+        const { data: verifiedSpecialists, error: rolesError } = await supabase
           .from('user_roles')
-          .select('user_id, role, status')
+          .select('user_id')
           .eq('role', 'specialist')
           .eq('status', 'zweryfikowany')
           .limit(limit);
 
-        if (userRolesError) throw userRolesError;
-
-        if (userRolesData && userRolesData.length > 0) {
-          // Get user IDs of verified specialists
-          const specialistIds = userRolesData.map(item => item.user_id);
-          
-          // Query specialist profiles for these IDs
-          const { data: profilesData, error: profilesError } = await supabase
-            .from('specialist_profiles')
-            .select(`
-              id, 
-              title, 
-              description, 
-              location, 
-              photo_url, 
-              specializations
-            `)
-            .in('id', specialistIds);
-            
-          if (profilesError) throw profilesError;
-          
-          // Get user profiles data separately
-          const { data: userProfilesData, error: userProfilesError } = await supabase
-            .from('user_profiles')
-            .select('id, first_name, last_name')
-            .in('id', specialistIds);
-            
-          if (userProfilesError) throw userProfilesError;
-          
-          // Create a mapping for easy lookup
-          const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
-            acc[profile.id] = profile;
-            return acc;
-          }, {} as Record<string, any>) || {};
-          
-          // Transform the data into the format expected by SpecialistCard
-          if (profilesData) {
-            const transformedData: Specialist[] = profilesData.map(profile => {
-              const userProfile = userProfilesMap[profile.id] || {};
-              
-              return {
-                id: profile.id,
-                name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`,
-                title: profile.title || "Specjalista",
-                specializations: profile.specializations || [],
-                location: profile.location || "Polska",
-                image: profile.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
-                rating: 5.0, // Default rating
-                verified: true, // Since we filtered for verified specialists
-                role: 'specialist'
-              };
-            });
-            
-            setSpecialists(transformedData);
-          }
-        } else {
-          setSpecialists([]);
+        if (rolesError) {
+          console.error("Error fetching verified specialists:", rolesError);
+          throw rolesError;
         }
+
+        if (!verifiedSpecialists || verifiedSpecialists.length === 0) {
+          console.log("No verified specialists found");
+          setSpecialists([]);
+          return;
+        }
+
+        console.log(`Found ${verifiedSpecialists.length} verified specialists`);
+
+        // Extract user IDs
+        const userIds = verifiedSpecialists.map(role => role.user_id);
+
+        // Step 2: Get user profiles for these users
+        const { data: userProfilesData, error: userProfilesError } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .in('id', userIds);
+
+        if (userProfilesError) {
+          console.error("Error fetching user profiles:", userProfilesError);
+          throw userProfilesError;
+        }
+
+        // Step 3: Get specialist profiles for these users
+        const { data: specialistProfilesData, error: specialistProfilesError } = await supabase
+          .from('specialist_profiles')
+          .select('*')
+          .in('id', userIds);
+
+        if (specialistProfilesError) {
+          console.error("Error fetching specialist profiles:", specialistProfilesError);
+        }
+
+        // Step 4: Get specializations for all found specialists
+        const { data: specializationsData, error: specializationsError } = await supabase
+          .from('specialist_specializations')
+          .select(`
+            specialist_id,
+            specialization_id,
+            specializations!inner(id, name)
+          `)
+          .in('specialist_id', userIds)
+          .eq('active', 'yes');
+
+        if (specializationsError) {
+          console.error("Error fetching specializations:", specializationsError);
+        }
+
+        // Group specializations by specialist
+        const specializationsMap = specializationsData?.reduce((acc, item) => {
+          if (!acc[item.specialist_id]) {
+            acc[item.specialist_id] = [];
+          }
+          acc[item.specialist_id].push(item.specialization_id);
+          return acc;
+        }, {} as Record<string, string[]>) || {};
+
+        // Create maps for easier lookup
+        const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as Record<string, any>) || {};
+
+        const specialistProfilesMap = specialistProfilesData?.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as Record<string, any>) || {};
+        
+        // Transform the data into the format expected by SpecialistCard
+        const transformedData: Specialist[] = verifiedSpecialists
+          .map(roleData => {
+            const userId = roleData.user_id;
+            const userProfile = userProfilesMap[userId];
+            const specialistProfile = specialistProfilesMap[userId];
+            const userSpecializations = specializationsMap[userId] || [];
+            
+            if (!userProfile) {
+              console.warn(`No user profile found for specialist ${userId}`);
+              return null;
+            }
+            
+            return {
+              id: userId,
+              name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Specjalista',
+              title: specialistProfile?.title || "Specjalista",
+              specializations: userSpecializations,
+              location: specialistProfile?.location || userProfile.city || "Polska",
+              image: specialistProfile?.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
+              email: specialistProfile?.email || userProfile.email,
+              rating: 5.0, // Default rating
+              verified: true, // All these specialists are verified
+              role: 'specialist'
+            };
+          })
+          .filter(Boolean) as Specialist[];
+          
+        console.log("Transformed verified specialists data:", transformedData.length);
+        console.log("Sample specialist with specializations:", transformedData[0]);
+        setSpecialists(transformedData);
+        
       } catch (err) {
-        console.error("Error fetching featured specialists:", err);
+        console.error("Error fetching verified specialists:", err);
         setError(err instanceof Error ? err : new Error("Failed to fetch specialists"));
         toast({
           title: "Błąd",

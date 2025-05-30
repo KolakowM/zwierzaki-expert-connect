@@ -101,6 +101,60 @@ export type Database = {
         }
         Relationships: []
       }
+      packages: {
+        Row: {
+          can_access_carousel: boolean
+          can_appear_in_catalog: boolean
+          created_at: string
+          description: string | null
+          id: string
+          interval_count: number | null
+          interval_unit: string | null
+          is_active: boolean
+          max_clients: number
+          max_pets: number
+          max_services: number
+          max_specializations: number
+          name: string
+          price_pln: number | null
+          updated_at: string
+        }
+        Insert: {
+          can_access_carousel?: boolean
+          can_appear_in_catalog?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval_count?: number | null
+          interval_unit?: string | null
+          is_active?: boolean
+          max_clients: number
+          max_pets: number
+          max_services: number
+          max_specializations: number
+          name: string
+          price_pln?: number | null
+          updated_at?: string
+        }
+        Update: {
+          can_access_carousel?: boolean
+          can_appear_in_catalog?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval_count?: number | null
+          interval_unit?: string | null
+          is_active?: boolean
+          max_clients?: number
+          max_pets?: number
+          max_services?: number
+          max_specializations?: number
+          name?: string
+          price_pln?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pet_note_attachments: {
         Row: {
           created_at: string
@@ -365,6 +419,64 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_audit: {
+        Row: {
+          action: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          metadata: Json | null
+          new_package_id: string | null
+          old_package_id: string | null
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          new_package_id?: string | null
+          old_package_id?: string | null
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          new_package_id?: string | null
+          old_package_id?: string | null
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_audit_new_package_id_fkey"
+            columns: ["new_package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_audit_old_package_id_fkey"
+            columns: ["old_package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_audit_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           city: string | null
@@ -418,6 +530,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          package_id: string
+          payment_id: string | null
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          package_id: string
+          payment_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          package_id?: string
+          payment_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_subscriptions_package_id"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       visits: {
         Row: {
@@ -485,6 +648,15 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: undefined
       }
+      check_package_limits: {
+        Args: { p_user_id: string; p_action_type: string }
+        Returns: {
+          can_perform_action: boolean
+          current_count: number
+          max_allowed: number
+          package_name: string
+        }[]
+      }
       get_catalog_data: {
         Args: {
           p_search_term?: string
@@ -506,6 +678,31 @@ export type Database = {
           verified: boolean
           role: Database["public"]["Enums"]["app_role"]
           total_count: number
+        }[]
+      }
+      get_user_active_subscription: {
+        Args: { p_user_id: string }
+        Returns: {
+          subscription_id: string
+          package_id: string
+          package_name: string
+          max_clients: number
+          max_pets: number
+          max_services: number
+          max_specializations: number
+          can_access_carousel: boolean
+          can_appear_in_catalog: boolean
+          end_date: string
+        }[]
+      }
+      get_user_usage_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          clients_count: number
+          pets_count: number
+          services_count: number
+          specializations_count: number
+          active_visits_count: number
         }[]
       }
       has_role: {

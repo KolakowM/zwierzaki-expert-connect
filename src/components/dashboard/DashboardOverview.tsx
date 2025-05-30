@@ -1,8 +1,9 @@
-import { Users, PawPrint, CalendarIcon, PieChart } from "lucide-react";
+
+import { Users, PawPrint, CalendarIcon, Crown } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
-import ProfileStatus from "./ProfileStatus";
 import AdminTab from "./AdminTab";
+import PackageStatusCard from "../subscription/PackageStatusCard";
 import { useQuery } from "@tanstack/react-query";
 import { getClients } from "@/services/clientService";
 import { getPets } from "@/services/petService";
@@ -48,11 +49,11 @@ const DashboardOverview = () => {
       link: "/dashboard?tab=calendar"
     },
     {
-      title: "Plan",
-      value: "Podstawowy",
-      description: "Aktualny plan subskrypcji",
-      icon: <PieChart className="h-4 w-4 text-muted-foreground" />,
-      link: "/pricing"
+      title: "Cześc",
+      value: "",
+      description: "miło Cię widzieć",
+      icon: <Crown className="h-4 w-4 text-muted-foreground" />,
+      link: "/dashboard?tab=subscription"
     }
   ];
 
@@ -79,9 +80,9 @@ const DashboardOverview = () => {
         ))}
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <UpcomingVisits visits={recentVisits} pets={pets} clients={clients} />
-        <ProfileStatus />
+        <PackageStatusCard />
       </div>
     </div>
   );

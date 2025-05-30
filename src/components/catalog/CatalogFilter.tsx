@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AppRole } from "@/services/user/types";
 import { CatalogFilters } from "@/hooks/catalog/useCatalogQuery";
 
 interface CatalogFilterProps {
@@ -16,7 +15,6 @@ interface CatalogFilterProps {
 export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [location, setLocation] = useState("");
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
   const { specializations, isLoading, error } = useSpecializationsData();
 
   const handleSpecializationChange = (id: string) => {
@@ -29,28 +27,16 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
     });
   };
 
-  const handleRoleChange = (role: AppRole) => {
-    setSelectedRoles(prev => {
-      if (prev.includes(role)) {
-        return prev.filter(item => item !== role);
-      } else {
-        return [...prev, role];
-      }
-    });
-  };
-
   const handleApplyFilter = () => {
     onFilterChange({
       location,
-      specializations: selectedSpecializations,
-      roles: selectedRoles
+      specializations: selectedSpecializations
     });
   };
 
   const handleReset = () => {
     setLocation("");
     setSelectedSpecializations([]);
-    setSelectedRoles([]);
     onFilterChange({});
   };
 
@@ -68,8 +54,6 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
               onChange={(e) => setLocation(e.target.value)}
             />
           </div>
-          
-          {/* Removed the "Typ użytkownika" filter section */}
           
           <div className="space-y-3">
             <Label>Specjalizacje</Label>

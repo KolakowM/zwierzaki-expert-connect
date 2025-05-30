@@ -20,7 +20,6 @@ import ClientOverviewTab from "@/components/clients/tabs/ClientOverviewTab";
 import ClientPetsTab from "@/components/clients/tabs/ClientPetsTab";
 import ClientVisitsTab from "@/components/clients/tabs/ClientVisitsTab";
 import ClientDocumentsTab from "@/components/clients/tabs/ClientDocumentsTab";
-import ClientNotesTab from "@/components/clients/tabs/ClientNotesTab";
 
 const ClientDetails = () => {
   const { toast } = useToast();
@@ -206,7 +205,6 @@ const ClientDetails = () => {
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="pets">Zwierzęta ({pets.length})</TabsTrigger>
             <TabsTrigger value="visits">Historia wizyt ({visits.length})</TabsTrigger>
-            <TabsTrigger value="notes">Notatki</TabsTrigger>
             <TabsTrigger value="documents">Programy opieki</TabsTrigger>
           </TabsList>
           
@@ -235,10 +233,6 @@ const ClientDetails = () => {
               visits={visits}
               onVisitAdded={handleVisitAdded}
             />
-          </TabsContent>
-          
-          <TabsContent value="notes" className="space-y-4">
-            <ClientNotesTab client={client} />
           </TabsContent>
           
           <TabsContent value="documents" className="space-y-4">

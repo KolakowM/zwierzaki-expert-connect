@@ -113,7 +113,13 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
       return;
     }
     
-    onSubmit(data);
+    // Ensure we have proper time formatting before submitting
+    const formattedData = {
+      ...data,
+      time: data.time || "12:00" // Fallback to 12:00 if no time is set
+    };
+    
+    onSubmit(formattedData);
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Specialization } from "@/hooks/useSpecializations";
 import { AppRole } from "@/services/user/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface Specialist {
   id: string;
@@ -16,7 +16,7 @@ export interface Specialist {
   specializations: string[];
   location: string;
   image: string;
-  email?: string; // Added email field
+  email?: string;
   rating?: number;
   verified: boolean;
   role: AppRole;
@@ -38,27 +38,36 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         
         if (!specialist.specializations || specialist.specializations.length === 0) {
           setSpecializations([]);
+          setLoading(false);
           return;
         }
+        
+        console.log(`Fetching specializations for ${specialist.name}:`, specialist.specializations);
         
         // Fetch specialization details for the IDs we have
         const { data, error } = await supabase
           .from('specializations')
-          .select('*')
-          .in('id', specialist.specializations);
+          .select('id, name, code, description')
+          .in('id', specialist.specializations)
+          .eq('active', 'yes');
           
-        if (error) throw error;
-        
-        setSpecializations(data || []);
+        if (error) {
+          console.error('Error fetching specializations for', specialist.name, error);
+          setSpecializations([]);
+        } else {
+          console.log(`Found ${data?.length || 0} specializations for ${specialist.name}:`, data);
+          setSpecializations(data || []);
+        }
       } catch (err) {
         console.error('Error fetching specializations:', err);
+        setSpecializations([]);
       } finally {
         setLoading(false);
       }
     };
     
     fetchSpecializations();
-  }, [specialist.specializations]);
+  }, [specialist.specializations, specialist.name]);
 
   // Get role-specific display information
   const getRoleInfo = () => {
@@ -66,7 +75,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
       case 'specialist':
         return {
           badge: 'Specjalista',
-          badgeVariant: 'primary' as const,
+          badgeVariant: 'default' as const,
           icon: <Users className="h-12 w-12 text-muted-foreground" />
         };
       case 'admin':
@@ -113,7 +122,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
             </div>
           )}
           <div className="absolute right-2 top-2">
-            <Badge className={`bg-${roleInfo.badgeVariant}/90 hover:bg-${roleInfo.badgeVariant}`}>
+            <Badge variant={roleInfo.badgeVariant}>
               {roleInfo.badge}
             </Badge>
           </div>
