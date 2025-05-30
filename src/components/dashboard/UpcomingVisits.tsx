@@ -20,12 +20,35 @@ const UpcomingVisits = ({ visits, pets, clients }: UpcomingVisitsProps) => {
   const getPet = (petId: string) => pets.find(p => p.id === petId);
   const getClient = (clientId: string) => clients.find(c => c.id === clientId);
   
+  // Sort visits by date (ascending - nearest first) and limit to 5
+  const sortedVisits = [...visits]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5);
+  
+  const hasMoreVisits = visits.length > 5;
+  
   const handleOpenVisitDetails = (visit: Visit) => {
     setSelectedVisit(visit);
   };
   
   const handleCloseVisitDetails = () => {
     setSelectedVisit(null);
+  };
+
+  const formatVisitDateTime = (visit: Visit) => {
+    const visitDate = new Date(visit.date);
+    const dateStr = visitDate.toLocaleDateString('pl-PL');
+    
+    // Use the time field if available, otherwise extract from date
+    let timeStr = "00:00";
+    if (visit.time) {
+      timeStr = visit.time;
+    } else {
+      // Extract time from the date object
+      timeStr = visitDate.toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
+    }
+    
+    return `${dateStr}, ${timeStr}`;
   };
   
   return (
@@ -42,13 +65,13 @@ const UpcomingVisits = ({ visits, pets, clients }: UpcomingVisitsProps) => {
         <CardContent>
           {visits.length > 0 ? (
             <div className="space-y-4">
-              {visits.map(visit => {
+              {sortedVisits.map(visit => {
                 const pet = getPet(visit.petId);
                 const client = getClient(visit.clientId);
                 return (
                   <div key={visit.id} className="flex items-center justify-between border-b pb-3 last:border-0">
                     <div>
-                      <p className="font-medium">{new Date(visit.date).toLocaleDateString('pl-PL')}, {new Date(visit.date).toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'})}</p>
+                      <p className="font-medium">{formatVisitDateTime(visit)}</p>
                       <p className="text-sm text-muted-foreground">{visit.type} - {pet?.name} ({client?.firstName} {client?.lastName})</p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => handleOpenVisitDetails(visit)}>
@@ -57,6 +80,18 @@ const UpcomingVisits = ({ visits, pets, clients }: UpcomingVisitsProps) => {
                   </div>
                 );
               })}
+              {hasMoreVisits && (
+                <div className="text-center pt-2">
+                  <p className="text-sm text-muted-foreground">
+                    i {visits.length - 5} więcej...
+                  </p>
+                  <Link to="/dashboard?tab=calendar">
+                    <Button variant="link" size="sm">
+                      Zobacz wszystkie
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center justify-center h-40 rounded-md border border-dashed">
@@ -76,7 +111,7 @@ const UpcomingVisits = ({ visits, pets, clients }: UpcomingVisitsProps) => {
             <DialogHeader>
               <DialogTitle>Szczegóły wizyty</DialogTitle>
               <DialogDescription>
-                {new Date(selectedVisit.date).toLocaleDateString('pl-PL')}, {new Date(selectedVisit.date).toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'})}
+                {formatVisitDateTime(selectedVisit)}
               </DialogDescription>
             </DialogHeader>
             

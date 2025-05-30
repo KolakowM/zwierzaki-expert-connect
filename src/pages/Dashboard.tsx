@@ -55,6 +55,12 @@ const Dashboard = () => {
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
+    // If user clicks on "clients" tab, redirect to /clients page
+    if (value === "clients") {
+      navigate("/clients");
+      return;
+    }
+    
     setActiveTab(value);
     navigate(`/dashboard${value !== "overview" ? `?tab=${value}` : ""}`, { replace: true });
   };
