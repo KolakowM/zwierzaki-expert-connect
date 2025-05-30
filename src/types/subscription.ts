@@ -30,9 +30,11 @@ export interface UserSubscription {
 }
 
 export interface ActiveSubscription {
+  id?: string;
   subscription_id: string;
   package_id: string;
   package_name: string;
+  status: 'trial' | 'active' | 'expired' | 'cancelled';
   max_clients: number;
   max_pets: number;
   max_services: number;

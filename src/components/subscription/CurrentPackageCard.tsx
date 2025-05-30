@@ -1,8 +1,9 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, AlertTriangle } from "lucide-react";
+import { Crown } from "lucide-react";
 import { Package, ActiveSubscription } from "@/types/subscription";
 import CancelSubscriptionDialog from "./CancelSubscriptionDialog";
 
@@ -19,6 +20,8 @@ const CurrentPackageCard = ({
   isTrialUser,
   onCancelSuccess 
 }: CurrentPackageCardProps) => {
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
   return (
     <Card>
       <CardHeader>
@@ -59,11 +62,17 @@ const CurrentPackageCard = ({
           )}
 
           {!isTrialUser && activeSubscription && (
-            <CancelSubscriptionDialog 
-              activeSubscription={activeSubscription}
-              onCancelSuccess={onCancelSuccess}
-            />
+            <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
+              Anuluj subskrypcję
+            </Button>
           )}
+
+          <CancelSubscriptionDialog 
+            open={showCancelDialog}
+            onOpenChange={setShowCancelDialog}
+            activeSubscription={activeSubscription}
+            onCancelSuccess={onCancelSuccess}
+          />
         </div>
       </CardContent>
     </Card>
