@@ -24,15 +24,15 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   
   // Get the tab from URL query parameter or default to "overview"
-  const queryParams = new URLSearchParams(location.search);
-  const tabFromQuery = queryParams.get('tab');
-  
-  // Set the active tab only once on component mount to avoid unnecessary rerenders
   useEffect(() => {
-    if (tabFromQuery) {
+    const queryParams = new URLSearchParams(location.search);
+    const tabFromQuery = queryParams.get('tab');
+    if (tabFromQuery && ['overview', 'clients', 'animals', 'calendar', 'subscription'].includes(tabFromQuery)) {
       setActiveTab(tabFromQuery);
+    } else {
+      setActiveTab("overview");
     }
-  }, []);
+  }, [location.search]);
 
   // Fetch specialist profile using React Query for proper caching
   const { data: specialistProfile, isLoading: profileLoading } = useQuery({
@@ -55,14 +55,12 @@ const Dashboard = () => {
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
-    // If user clicks on "clients" tab, redirect to /clients page
-    if (value === "clients") {
-      navigate("/clients");
-      return;
-    }
-    
     setActiveTab(value);
-    navigate(`/dashboard${value !== "overview" ? `?tab=${value}` : ""}`, { replace: true });
+    if (value === "overview") {
+      navigate("/dashboard", { replace: true });
+    } else {
+      navigate(`/dashboard?tab=${value}`, { replace: true });
+    }
   };
 
   const handleLogout = () => {
@@ -89,7 +87,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
           <TabsList className="grid w-full grid-cols-5 md:w-auto md:grid-cols-5">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="clients">Klienci</TabsTrigger>
