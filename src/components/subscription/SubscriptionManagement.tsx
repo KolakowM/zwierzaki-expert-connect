@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,25 +30,12 @@ const SubscriptionManagement = () => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   
   const { 
-    data: subscription, 
-    isLoading: subscriptionLoading 
+    activeSubscription: subscription, 
+    isLoadingSubscription: subscriptionLoading,
+    usageStats,
+    isLoadingUsage: usageLoading,
+    refetch
   } = useUserSubscription();
-
-  // Fetch usage statistics
-  const { data: usageStats, isLoading: usageLoading } = useQuery({
-    queryKey: ['userUsageStats', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      
-      const { data, error } = await supabase.rpc('get_user_usage_stats', {
-        p_user_id: user.id
-      });
-      
-      if (error) throw error;
-      return data?.[0] || null;
-    },
-    enabled: !!user?.id,
-  });
 
   // Fetch available packages
   const { data: packages = [] } = useQuery({
@@ -67,12 +53,23 @@ const SubscriptionManagement = () => {
   });
 
   const handleManageSubscription = () => {
-    if (subscription?.subscription_id) {
-      setShowUpgradeDialog(true);
-    } else {
-      // User doesn't have a subscription, show upgrade options
-      setShowUpgradeDialog(true);
-    }
+    setShowUpgradeDialog(true);
+  };
+
+  const handleUpgradeSuccess = () => {
+    refetch();
+    toast({
+      title: "Pakiet zaktualizowany",
+      description: "Twój pakiet został pomyślnie zaktualizowany",
+    });
+  };
+
+  const handleCancelSuccess = () => {
+    refetch();
+    toast({
+      title: "Pakiet anulowany",
+      description: "Twój pakiet zostanie anulowany na koniec okresu rozliczeniowego.",
+    });
   };
 
   const isLoading = subscriptionLoading || usageLoading;
@@ -293,13 +290,15 @@ const SubscriptionManagement = () => {
         onOpenChange={setShowUpgradeDialog}
         packages={packages}
         currentPackage={subscription}
+        onUpgradeSuccess={handleUpgradeSuccess}
       />
 
       {/* Cancel Dialog */}
       <CancelSubscriptionDialog
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
-        subscription={subscription}
+        activeSubscription={subscription}
+        onCancelSuccess={handleCancelSuccess}
       />
     </div>
   );

@@ -5,27 +5,51 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Package } from "@/types/subscription";
 import { upgradeSubscription, validatePackageUpgrade } from "@/services/subscriptionService";
 import { CheckCircle, XCircle, Crown } from "lucide-react";
 
+interface Package {
+  id: string;
+  name: string;
+  price_pln?: number;
+  max_clients: number;
+  max_pets: number;
+  max_services: number;
+  max_specializations: number;
+  can_access_carousel: boolean;
+  can_appear_in_catalog: boolean;
+}
+
+interface ActiveSubscription {
+  id?: string;
+  package_name?: string;
+  subscription_id?: string;
+  status?: string;
+  end_date?: string;
+  max_clients?: number;
+  max_pets?: number;
+  max_services?: number;
+  max_specializations?: number;
+  can_access_carousel?: boolean;
+  can_appear_in_catalog?: boolean;
+}
+
 interface PackageUpgradeDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  currentPackage: Package | null;
-  targetPackage: Package;
-  userId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  packages: Package[];
+  currentPackage: ActiveSubscription | null;
   onUpgradeSuccess: () => void;
 }
 
 const PackageUpgradeDialog = ({
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
+  packages,
   currentPackage,
-  targetPackage,
-  userId,
   onUpgradeSuccess
 }: PackageUpgradeDialogProps) => {
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [validationResult, setValidationResult] = useState<{
@@ -34,13 +58,20 @@ const PackageUpgradeDialog = ({
   } | null>(null);
   const { toast } = useToast();
 
+  const handleSelectPackage = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setValidationResult(null);
+  };
+
   const handleValidateUpgrade = async () => {
+    if (!selectedPackage) return;
+    
     setIsValidating(true);
     try {
       const result = await validatePackageUpgrade(
-        userId,
+        '', // Will be handled by the service
         currentPackage?.id || '',
-        targetPackage.id
+        selectedPackage.id
       );
       setValidationResult(result);
     } catch (error) {
@@ -56,15 +87,19 @@ const PackageUpgradeDialog = ({
   };
 
   const handleUpgrade = async () => {
+    if (!selectedPackage) return;
+    
     setIsUpgrading(true);
     try {
-      await upgradeSubscription(userId, targetPackage.id);
+      await upgradeSubscription('', selectedPackage.id); // User ID will be handled by the service
       toast({
         title: "Pakiet zaktualizowany",
-        description: `Pomyślnie przeszedłeś na pakiet ${targetPackage.name}`,
+        description: `Pomyślnie przeszedłeś na pakiet ${selectedPackage.name}`,
       });
       onUpgradeSuccess();
-      onClose();
+      onOpenChange(false);
+      setSelectedPackage(null);
+      setValidationResult(null);
     } catch (error) {
       console.error('Error upgrading subscription:', error);
       toast({
@@ -77,53 +112,89 @@ const PackageUpgradeDialog = ({
     }
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+    setSelectedPackage(null);
+    setValidationResult(null);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5" />
-            Upgrade do pakietu {targetPackage.name}
+            Wybierz pakiet
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Porównanie pakietów */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h4 className="font-medium">Obecny pakiet</h4>
-              <div className="p-4 border rounded-lg">
-                <p className="font-semibold">{currentPackage?.name || 'Trial'}</p>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>Klienci: {currentPackage?.max_clients || 5}</p>
-                  <p>Zwierzęta: {currentPackage?.max_pets || 10}</p>
-                  <p>Usługi: {currentPackage?.max_services || 3}</p>
-                  <p>Specjalizacje: {currentPackage?.max_specializations || 2}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="font-medium">Nowy pakiet</h4>
-              <div className="p-4 border rounded-lg bg-primary/5">
-                <p className="font-semibold">{targetPackage.name}</p>
-                <div className="text-sm space-y-1">
-                  <p>Klienci: {targetPackage.max_clients}</p>
-                  <p>Zwierzęta: {targetPackage.max_pets}</p>
-                  <p>Usługi: {targetPackage.max_services}</p>
-                  <p>Specjalizacje: {targetPackage.max_specializations}</p>
-                </div>
-                {targetPackage.price_pln && (
+          {/* Available Packages */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {packages.map((pkg) => (
+              <div
+                key={pkg.id}
+                className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                  selectedPackage?.id === pkg.id
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                onClick={() => handleSelectPackage(pkg)}
+              >
+                <h4 className="font-semibold">{pkg.name}</h4>
+                {pkg.price_pln && (
                   <Badge className="mt-2">
-                    {targetPackage.price_pln} PLN/miesiąc
+                    {pkg.price_pln} PLN/miesiąc
                   </Badge>
                 )}
+                <div className="text-sm text-muted-foreground space-y-1 mt-2">
+                  <p>Klienci: {pkg.max_clients}</p>
+                  <p>Zwierzęta: {pkg.max_pets}</p>
+                  <p>Usługi: {pkg.max_services}</p>
+                  <p>Specjalizacje: {pkg.max_specializations}</p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
 
-          {/* Walidacja */}
-          {!validationResult && (
+          {/* Package Comparison */}
+          {selectedPackage && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <h4 className="font-medium">Obecny pakiet</h4>
+                <div className="p-4 border rounded-lg">
+                  <p className="font-semibold">{currentPackage?.package_name || 'Trial'}</p>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>Klienci: {currentPackage?.max_clients || 5}</p>
+                    <p>Zwierzęta: {currentPackage?.max_pets || 10}</p>
+                    <p>Usługi: {currentPackage?.max_services || 3}</p>
+                    <p>Specjalizacje: {currentPackage?.max_specializations || 2}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Nowy pakiet</h4>
+                <div className="p-4 border rounded-lg bg-primary/5">
+                  <p className="font-semibold">{selectedPackage.name}</p>
+                  <div className="text-sm space-y-1">
+                    <p>Klienci: {selectedPackage.max_clients}</p>
+                    <p>Zwierzęta: {selectedPackage.max_pets}</p>
+                    <p>Usługi: {selectedPackage.max_services}</p>
+                    <p>Specjalizacje: {selectedPackage.max_specializations}</p>
+                  </div>
+                  {selectedPackage.price_pln && (
+                    <Badge className="mt-2">
+                      {selectedPackage.price_pln} PLN/miesiąc
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Validation */}
+          {selectedPackage && !validationResult && (
             <Button 
               onClick={handleValidateUpgrade} 
               disabled={isValidating}
@@ -159,9 +230,9 @@ const PackageUpgradeDialog = ({
             </Alert>
           )}
 
-          {/* Akcje */}
+          {/* Actions */}
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={handleClose}>
               Anuluj
             </Button>
             {validationResult?.canUpgrade && (
