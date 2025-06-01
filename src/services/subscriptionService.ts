@@ -18,7 +18,10 @@ export const getUserActiveSubscription = async (userId: string): Promise<ActiveS
   });
 
   if (error) throw error;
-  return data && data.length > 0 ? data[0] : null;
+  return data && data.length > 0 ? {
+    ...data[0],
+    status: data[0].status as 'trial' | 'active' | 'expired' | 'cancelled'
+  } : null;
 };
 
 export const checkPackageLimits = async (userId: string, actionType: ActionType): Promise<PackageLimits | null> => {

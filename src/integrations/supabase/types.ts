@@ -686,6 +686,7 @@ export type Database = {
           subscription_id: string
           package_id: string
           package_name: string
+          status: string
           max_clients: number
           max_pets: number
           max_services: number
