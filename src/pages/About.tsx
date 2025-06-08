@@ -15,7 +15,7 @@ export default function About() {
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">Nasza Misja</h2>
               <p>
-                Naszą misją jest dostarczenie specjalistom weterynarii, behawiorystom, groomingom i innym profesjonalistom 
+                Naszą misją jest dostarczenie specjalistom weterynarii, behawiorystom i innym profesjonalistom 
                 narzędzia, które usprawni zarządzanie praktyką, dokumentacją pacjentów i komunikacją z klientami.
               </p>
             </div>
@@ -24,12 +24,13 @@ export default function About() {
               <h2 className="text-2xl font-semibold">Dla Kogo?</h2>
               <p>Platforma PetsFlow została stworzona z myślą o:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Opiekunach zwierząt domowych</li>
-                <li>Behawiorystach zwierzęcych</li>
-                <li>Groomerach i salonach pielęgnacji</li>
-                <li>Rehabilitantach zwierzęcych</li>
-                <li>Trenerach zwierząt</li>
+                <li>Lekarzach weterynarii</li>
+                <li>Zoodietetykach</li>
+                <li>Fizjoterapeutach zwierzęcych</li>
+                <li>Behawiorystach zwierzęcych</li>                
+                <li>Trenerach zwierząt</li>                
                 <li>Innych specjalistach opiekujących się zwierzętami</li>
+                <li>Opiekunach zwierząt domowych</li>
               </ul>
             </div>
 
