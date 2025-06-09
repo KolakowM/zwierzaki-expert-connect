@@ -14,6 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useCanPerformAction } from "@/hooks/usePackageLimits";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 // Define the schema for client validation
 const clientFormSchema = z.object({
@@ -33,9 +36,19 @@ interface ClientFormProps {
   defaultValues?: Partial<ClientFormValues>;
   onSubmit: (data: ClientFormValues) => void;
   isSubmitting?: boolean;
+  isEditing?: boolean;
 }
 
-const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false }: ClientFormProps) => {
+const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false, isEditing = false }: ClientFormProps) => {
+  // Check package limits for clients
+  const { 
+    canPerform, 
+    currentCount, 
+    maxAllowed, 
+    packageName,
+    isLoading: limitsLoading 
+  } = useCanPerformAction('clients');
+
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientFormSchema),
     defaultValues: {
@@ -51,9 +64,23 @@ const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false }: ClientFor
     },
   });
 
+  // Check if user can add new clients (only for new clients, not editing)
+  const canAddClient = isEditing || canPerform;
+  const limitReached = !isEditing && !canPerform;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {limitReached && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Osiągnięto limit klientów ({currentCount}/{maxAllowed}) w pakiecie {packageName}. 
+              Nie można dodać więcej klientów. Ulepsz pakiet, aby zwiększyć limit.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -170,8 +197,11 @@ const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false }: ClientFor
         />
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Zapisywanie..." : "Zapisz dane klienta"}
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || limitsLoading || (!isEditing && limitReached)}
+          >
+            {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj dane klienta" : "Zapisz dane klienta")}
           </Button>
         </div>
       </form>
