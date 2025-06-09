@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import ClientForm from "./ClientForm";
 import { UserPlus, Edit } from "lucide-react";
 import { Client } from "@/types";
-import { createClient, updateClient } from "@/services/clientService";
+import { createClient, updateClient } from "@/services/clientServiceWithLimits";
+import { useAuth } from "@/contexts/AuthProvider";
 import { ReactNode } from "react";
+import { PackageLimitError } from "@/types/subscription";
+import LimitExceededDialog from "@/components/subscription/LimitExceededDialog";
 
 interface ClientFormDialogProps {
   buttonText?: string;
@@ -32,19 +35,30 @@ const ClientFormDialog = ({
 }: ClientFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [limitError, setLimitError] = useState<PackageLimitError | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Set default title based on whether we're editing or creating
   const dialogTitle = title || (isEditing ? "Edytuj dane klienta" : "Dodaj nowego klienta");
 
   const handleSubmit = async (formData: any) => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby zapisać klienta",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
       let clientData: Client;
       
       if (isEditing && defaultValues?.id) {
-        // Update existing client
+        // Update existing client (no limit check needed)
         clientData = await updateClient(defaultValues.id, formData);
         
         toast({
@@ -52,8 +66,11 @@ const ClientFormDialog = ({
           description: `Dane klienta ${formData.firstName} ${formData.lastName} zostały pomyślnie zaktualizowane`,
         });
       } else {
-        // Create new client
-        clientData = await createClient(formData);
+        // Create new client with automatic limit validation
+        clientData = await createClient({
+          ...formData,
+          userId: user.id
+        });
         
         toast({
           title: "Klient dodany pomyślnie",
@@ -70,6 +87,12 @@ const ClientFormDialog = ({
       setOpen(false);
     } catch (error: any) {
       console.error("Error saving client:", error);
+      
+      if (error instanceof PackageLimitError) {
+        setLimitError(error);
+        return;
+      }
+      
       toast({
         title: "Błąd podczas zapisywania klienta",
         description: error.message || "Spróbuj ponownie później",
@@ -81,28 +104,41 @@ const ClientFormDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={buttonVariant} size={buttonSize}>
-          {children || (
-            <>
-              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
-              {buttonText}
-            </>
-          )}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
-        </DialogHeader>
-        <ClientForm 
-          defaultValues={defaultValues} 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting} 
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant={buttonVariant} size={buttonSize}>
+            {children || (
+              <>
+                {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                {buttonText}
+              </>
+            )}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+          </DialogHeader>
+          <ClientForm 
+            defaultValues={defaultValues} 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting} 
+          />
+        </DialogContent>
+      </Dialog>
+
+      {limitError && (
+        <LimitExceededDialog
+          isOpen={!!limitError}
+          onClose={() => setLimitError(null)}
+          actionType={limitError.actionType}
+          currentCount={limitError.currentCount}
+          maxAllowed={limitError.maxAllowed}
+          packageName={limitError.packageName}
         />
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   );
 };
 

@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import VisitForm from "./VisitForm";
 import { CalendarPlus, Edit } from "lucide-react";
 import { Visit } from "@/types";
-import { createVisit, updateVisit } from "@/services/visitService";
+import { createVisit, updateVisit } from "@/services/visitServiceWithLimits";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
+import { PackageLimitError } from "@/types/subscription";
+import LimitExceededDialog from "@/components/subscription/LimitExceededDialog";
 
 interface VisitFormDialogProps {
   petId: string;
@@ -43,6 +45,7 @@ const VisitFormDialog = ({
 }: VisitFormDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [limitError, setLimitError] = useState<PackageLimitError | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -64,6 +67,7 @@ const VisitFormDialog = ({
     // If the dialog is closed and there are validation errors, reset them
     if (!open) {
       setIsSubmitting(false);
+      setLimitError(null);
     }
   }, [open]);
 
@@ -84,7 +88,7 @@ const VisitFormDialog = ({
       let visitData: Visit;
       
       if (isEditing && defaultValues?.id) {
-        // Update existing visit
+        // Update existing visit (no limit check needed)
         visitData = await updateVisit(defaultValues.id, {
           ...formData,
           petId,
@@ -96,11 +100,12 @@ const VisitFormDialog = ({
           description: `Dane wizyty zostały pomyślnie zaktualizowane`
         });
       } else {
-        // Create new visit
+        // Create new visit with automatic limit validation
         visitData = await createVisit({
           ...formData,
           petId,
-          clientId
+          clientId,
+          userId: user.id
         });
         
         toast({
@@ -118,6 +123,12 @@ const VisitFormDialog = ({
       setOpen(false);
     } catch (error: any) {
       console.error("Error saving visit:", error);
+      
+      if (error instanceof PackageLimitError) {
+        setLimitError(error);
+        return;
+      }
+      
       toast({
         title: isEditing ? "Błąd podczas aktualizacji wizyty" : "Błąd podczas dodawania wizyty",
         description: error.message || "Spróbuj ponownie później",
@@ -129,28 +140,41 @@ const VisitFormDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button variant={buttonVariant} size={buttonSize} className={className}>
-            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
-            {buttonText}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
-        </DialogHeader>
-        <VisitForm 
-          petId={petId}
-          clientId={clientId}
-          defaultValues={formDefaultValues} 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting} 
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children || (
+            <Button variant={buttonVariant} size={buttonSize} className={className}>
+              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
+              {buttonText}
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+          </DialogHeader>
+          <VisitForm 
+            petId={petId}
+            clientId={clientId}
+            defaultValues={formDefaultValues} 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting} 
+          />
+        </DialogContent>
+      </Dialog>
+
+      {limitError && (
+        <LimitExceededDialog
+          isOpen={!!limitError}
+          onClose={() => setLimitError(null)}
+          actionType={limitError.actionType}
+          currentCount={limitError.currentCount}
+          maxAllowed={limitError.maxAllowed}
+          packageName={limitError.packageName}
         />
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   );
 };
 

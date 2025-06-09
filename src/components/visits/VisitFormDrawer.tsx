@@ -13,8 +13,11 @@ import { Button } from "@/components/ui/button";
 import VisitForm from "./VisitForm";
 import { CalendarPlus, Edit } from "lucide-react";
 import { Visit } from "@/types";
-import { createVisit, updateVisit } from "@/services/visitService";
+import { createVisit, updateVisit } from "@/services/visitServiceWithLimits";
 import { ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthProvider";
+import { PackageLimitError } from "@/types/subscription";
+import LimitExceededDialog from "@/components/subscription/LimitExceededDialog";
 
 interface VisitFormDrawerProps {
   petId: string;
@@ -49,7 +52,9 @@ const VisitFormDrawer = ({
 }: VisitFormDrawerProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [limitError, setLimitError] = useState<PackageLimitError | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Use external or internal state based on what's provided
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -66,6 +71,15 @@ const VisitFormDrawer = ({
   } : undefined;
 
   const handleSubmit = async (formData: any) => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby zapisać wizytę",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log("Saving visit:", formData);
@@ -73,7 +87,7 @@ const VisitFormDrawer = ({
       let visitData: Visit;
       
       if (isEditing && defaultValues?.id) {
-        // Update existing visit
+        // Update existing visit (no limit check needed)
         visitData = await updateVisit(defaultValues.id, {
           ...formData,
           petId,
@@ -85,11 +99,12 @@ const VisitFormDrawer = ({
           description: `Dane wizyty zostały pomyślnie zaktualizowane`
         });
       } else {
-        // Create new visit
+        // Create new visit with automatic limit validation
         visitData = await createVisit({
           ...formData,
           petId,
-          clientId
+          clientId,
+          userId: user.id
         });
         
         toast({
@@ -105,11 +120,17 @@ const VisitFormDrawer = ({
 
       // Close the dialog
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving visit:", error);
+      
+      if (error instanceof PackageLimitError) {
+        setLimitError(error);
+        return;
+      }
+      
       toast({
         title: isEditing ? "Błąd podczas aktualizacji wizyty" : "Błąd podczas dodawania wizyty",
-        description: "Spróbuj ponownie później",
+        description: error.message || "Spróbuj ponownie później",
         variant: "destructive",
       });
     } finally {
@@ -118,33 +139,46 @@ const VisitFormDrawer = ({
   };
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        {children || (
-          <Button variant={buttonVariant} size={buttonSize} className={className}>
-            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
-            {buttonText}
-          </Button>
-        )}
-      </DrawerTrigger>
-      <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader className="text-left">
-          <DrawerTitle>{drawerTitle}</DrawerTitle>
-        </DrawerHeader>
-        <div className="px-4 pb-4 overflow-y-auto">
-          <VisitForm 
-            petId={petId}
-            clientId={clientId}
-            defaultValues={formDefaultValues} 
-            onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting} 
-          />
-        </div>
-        <DrawerFooter className="pt-2 border-t">
-          <Button variant="outline" onClick={() => setOpen(false)}>Anuluj</Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          {children || (
+            <Button variant={buttonVariant} size={buttonSize} className={className}>
+              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <CalendarPlus className="mr-2 h-4 w-4" />}
+              {buttonText}
+            </Button>
+          )}
+        </DrawerTrigger>
+        <DrawerContent className="max-h-[90vh]">
+          <DrawerHeader className="text-left">
+            <DrawerTitle>{drawerTitle}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4 overflow-y-auto">
+            <VisitForm 
+              petId={petId}
+              clientId={clientId}
+              defaultValues={formDefaultValues} 
+              onSubmit={handleSubmit} 
+              isSubmitting={isSubmitting} 
+            />
+          </div>
+          <DrawerFooter className="pt-2 border-t">
+            <Button variant="outline" onClick={() => setOpen(false)}>Anuluj</Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {limitError && (
+        <LimitExceededDialog
+          isOpen={!!limitError}
+          onClose={() => setLimitError(null)}
+          actionType={limitError.actionType}
+          currentCount={limitError.currentCount}
+          maxAllowed={limitError.maxAllowed}
+          packageName={limitError.packageName}
+        />
+      )}
+    </>
   );
 };
 
