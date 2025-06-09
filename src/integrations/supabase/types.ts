@@ -649,12 +649,17 @@ export type Database = {
         Returns: undefined
       }
       check_package_limits: {
-        Args: { p_user_id: string; p_action_type: string }
+        Args:
+          | { p_user_id: string; p_action_type: string }
+          | { p_user_id: string; p_action_type: string; p_soft_check?: boolean }
         Returns: {
           can_perform_action: boolean
           current_count: number
           max_allowed: number
           package_name: string
+          usage_percentage: number
+          is_at_soft_limit: boolean
+          error_message: string
         }[]
       }
       get_catalog_data: {

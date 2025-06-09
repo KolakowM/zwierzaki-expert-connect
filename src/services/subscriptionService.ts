@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { Package, UserSubscription, ActiveSubscription, PackageLimits, UsageStats, ActionType } from "@/types/subscription";
+import { Package, UserSubscription, ActiveSubscription, PackageLimits, UsageStats, ActionType, PackageLimitError } from "@/types/subscription";
 
 export const getActivePackages = async (): Promise<Package[]> => {
   const { data, error } = await supabase
@@ -24,13 +25,22 @@ export const getUserActiveSubscription = async (userId: string): Promise<ActiveS
   } : null;
 };
 
-export const checkPackageLimits = async (userId: string, actionType: ActionType): Promise<PackageLimits | null> => {
+export const checkPackageLimits = async (userId: string, actionType: ActionType, softCheck: boolean = true): Promise<PackageLimits | null> => {
   const { data, error } = await supabase.rpc('check_package_limits', {
     p_user_id: userId,
-    p_action_type: actionType
+    p_action_type: actionType,
+    p_soft_check: softCheck
   });
 
-  if (error) throw error;
+  if (error) {
+    // Handle hard check errors (PACKAGE_LIMIT_EXCEEDED exceptions)
+    if (error.message?.includes('PACKAGE_LIMIT_EXCEEDED:')) {
+      const errorMessage = error.message.replace('PACKAGE_LIMIT_EXCEEDED: ', '');
+      throw new PackageLimitError(errorMessage, actionType, 0, 0, 'Unknown');
+    }
+    throw error;
+  }
+  
   return data && data.length > 0 ? data[0] : null;
 };
 
@@ -86,27 +96,24 @@ export const updateUserSubscription = async (id: string, updates: Partial<UserSu
   };
 };
 
-// Nowe funkcje dla upgrade/downgrade
+// Enhanced functions for upgrade/downgrade
 export const upgradeSubscription = async (userId: string, newPackageId: string): Promise<UserSubscription> => {
-  // Najpierw sprawdź czy użytkownik ma aktywną subskrypcję
   const activeSubscription = await getUserActiveSubscription(userId);
   
   if (activeSubscription) {
-    // Zaktualizuj istniejącą subskrypcję
     return updateUserSubscription(activeSubscription.subscription_id, {
       package_id: newPackageId,
       status: 'active',
       updated_at: new Date().toISOString()
     });
   } else {
-    // Utwórz nową subskrypcję
     return createUserSubscription({
       user_id: userId,
       package_id: newPackageId,
       status: 'active',
       start_date: new Date().toISOString(),
       end_date: null,
-      payment_id: null // Dodane brakujące pole
+      payment_id: null
     });
   }
 };
@@ -129,7 +136,6 @@ export const validatePackageUpgrade = async (userId: string, currentPackageId: s
     return { canUpgrade: false, issues: ['Nie można pobrać statystyk użycia'] };
   }
 
-  // Pobierz pakiet docelowy
   const { data: targetPackage, error } = await supabase
     .from('packages')
     .select('*')
@@ -141,7 +147,6 @@ export const validatePackageUpgrade = async (userId: string, currentPackageId: s
     return { canUpgrade: false, issues };
   }
 
-  // Sprawdź czy obecne użycie mieści się w nowych limitach
   if (usageStats.clients_count > targetPackage.max_clients) {
     issues.push(`Masz ${usageStats.clients_count} klientów, a nowy pakiet pozwala na ${targetPackage.max_clients}`);
   }

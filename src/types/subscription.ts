@@ -49,6 +49,9 @@ export interface PackageLimits {
   current_count: number;
   max_allowed: number;
   package_name: string;
+  usage_percentage: number;
+  is_at_soft_limit: boolean;
+  error_message: string | null;
 }
 
 export interface UsageStats {
@@ -60,3 +63,16 @@ export interface UsageStats {
 }
 
 export type ActionType = 'clients' | 'pets' | 'services' | 'specializations';
+
+export class PackageLimitError extends Error {
+  constructor(
+    message: string,
+    public actionType: ActionType,
+    public currentCount: number,
+    public maxAllowed: number,
+    public packageName: string
+  ) {
+    super(message);
+    this.name = 'PackageLimitError';
+  }
+}
