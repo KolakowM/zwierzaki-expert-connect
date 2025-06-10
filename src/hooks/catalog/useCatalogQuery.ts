@@ -62,15 +62,10 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
               location,
               photo_url,
               email
-            ),
-            specialist_specializations!inner(
-              specialization_id,
-              active
             )
           `)
           .eq('user_roles.role', 'specialist')
-          .eq('user_roles.status', 'zweryfikowany')
-          .eq('specialist_specializations.active', 'yes');
+          .eq('user_roles.status', 'zweryfikowany');
 
         // Apply search filter if provided
         if (filtersWithDefaults.searchTerm) {
@@ -84,14 +79,8 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
           query = query.or(`city.ilike.%${locationTerm}%,specialist_profiles.location.ilike.%${locationTerm}%`);
         }
 
-        // Apply specialization filter if provided
-        if (filtersWithDefaults.specializations) {
-          query = query.in('specialist_specializations.specialization_id', filtersWithDefaults.specializations);
-        }
-
         // First get total count for pagination
-        const countQuery = query;
-        const { count: totalCount, error: countError } = await countQuery
+        const { count: totalCount, error: countError } = await query
           .select('*', { count: 'exact', head: true });
 
         if (countError) {
@@ -123,20 +112,40 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
 
         console.log(`Found ${specialistsData.length} specialists`);
 
+        // Get specializations separately if filter is applied
+        let filteredSpecialists = specialistsData;
+        
+        if (filtersWithDefaults.specializations) {
+          const { data: specializedUsers, error: specError } = await supabase
+            .from('specialist_specializations')
+            .select('specialist_id')
+            .in('specialization_id', filtersWithDefaults.specializations)
+            .eq('active', 'yes');
+
+          if (specError) {
+            console.error("Error fetching specializations:", specError);
+            throw specError;
+          }
+
+          const specializedUserIds = specializedUsers?.map(s => s.specialist_id) || [];
+          filteredSpecialists = specialistsData.filter(user => 
+            specializedUserIds.includes(user.id)
+          );
+        }
+
         // Transform the data into the format expected by SpecialistCard
-        const transformedData: Specialist[] = specialistsData
+        const transformedData: Specialist[] = filteredSpecialists
           .map(userData => {
             const userProfile = userData;
-            const specialistProfile = userData.specialist_profiles?.[0];
-            const userSpecializations = userData.specialist_specializations
-              ?.filter(spec => spec.active === 'yes')
-              ?.map(spec => spec.specialization_id) || [];
+            const specialistProfile = Array.isArray(userData.specialist_profiles) 
+              ? userData.specialist_profiles[0] 
+              : userData.specialist_profiles;
             
             return {
               id: userData.id,
               name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Specjalista',
               title: specialistProfile?.title || "Specjalista",
-              specializations: userSpecializations,
+              specializations: [], // Will be populated separately if needed
               location: specialistProfile?.location || userProfile.city || "Polska",
               image: specialistProfile?.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
               email: specialistProfile?.email || userProfile.email,
