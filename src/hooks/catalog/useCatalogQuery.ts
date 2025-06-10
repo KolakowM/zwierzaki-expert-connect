@@ -88,12 +88,13 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
           throw countError;
         }
 
+        // Calculate pagination range
+        const rangeStart = (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize;
+        const rangeEnd = filtersWithDefaults.page * filtersWithDefaults.pageSize - 1;
+
         // Now get the actual data with pagination
         const { data: specialistsData, error: specialistsError } = await query
-          .range(
-            (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize,
-            filtersWithDefaults.page * filtersWithDefaults.pageSize - 1
-          );
+          .range(rangeStart, rangeEnd);
 
         if (specialistsError) {
           console.error("Error fetching specialists:", specialistsError);
