@@ -1,7 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { petFormSchema, PetFormValues, PetFormOutput } from "./PetFormSchema";
+import { petFormSchema, PetFormOutput } from "./PetFormSchema";
 import {
   Form,
   FormControl,
@@ -25,7 +25,7 @@ import VaccinationAndChipFields from "./form-fields/VaccinationAndChipFields";
 
 interface PetFormProps {
   clientId: string;
-  defaultValues?: Partial<PetFormValues>;
+  defaultValues?: Partial<PetFormOutput>;
   onSubmit: (data: PetFormOutput) => void;
   isSubmitting?: boolean;
   isEditing?: boolean;
@@ -43,7 +43,7 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
     isLoading: limitsLoading 
   } = useCanPerformAction('pets');
 
-  const form = useForm<PetFormValues>({
+  const form = useForm<PetFormOutput>({
     resolver: zodResolver(petFormSchema),
     defaultValues: {
       name: "",
@@ -69,15 +69,9 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
   const canAddPet = isEditing || canPerform;
   const limitReached = !isEditing && !canPerform;
 
-  const handleSubmit = (data: PetFormValues) => {
-    // Transform the form data using zod schema to get PetFormOutput
-    const transformedData = petFormSchema.parse(data);
-    onSubmit(transformedData);
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {limitReached && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />

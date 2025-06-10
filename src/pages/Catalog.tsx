@@ -22,23 +22,11 @@ const Catalog = () => {
   } = useCatalogQuery(filters);
 
   const handleSearch = (searchTerm: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      searchTerm: searchTerm || undefined, 
-      page: 1 
-    }));
+    setFilters(prev => ({ ...prev, searchTerm, page: 1 }));
   };
 
   const handleFilterChange = (newFilters: CatalogFilters) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      ...newFilters, 
-      page: 1 
-    }));
-  };
-
-  const handleReset = () => {
-    setFilters({});
+    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
@@ -52,18 +40,11 @@ const Catalog = () => {
   return (
     <MainLayout>
       <div className="container py-8">
-        <CatalogHeader 
-          onSearch={handleSearch} 
-          searchTerm={filters.searchTerm || ''}
-        />
+        <CatalogHeader onSearch={handleSearch} />
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <aside className="md:col-span-1">
-            <CatalogFilter 
-              onFilterChange={handleFilterChange}
-              onReset={handleReset}
-              currentFilters={filters}
-            />
+            <CatalogFilter onFilterChange={handleFilterChange} />
           </aside>
           
           <div className="md:col-span-3">

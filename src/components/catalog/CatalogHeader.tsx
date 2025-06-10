@@ -1,25 +1,19 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
 interface CatalogHeaderProps {
   onSearch: (searchTerm: string) => void;
-  searchTerm: string;
 }
 
-export function CatalogHeader({ onSearch, searchTerm }: CatalogHeaderProps) {
+export function CatalogHeader({ onSearch }: CatalogHeaderProps) {
   const { t } = useTranslation();
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-
-  // Sync local state with external search term
-  useEffect(() => {
-    setLocalSearchTerm(searchTerm);
-  }, [searchTerm]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = () => {
-    onSearch(localSearchTerm);
+    onSearch(searchTerm);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -36,8 +30,8 @@ export function CatalogHeader({ onSearch, searchTerm }: CatalogHeaderProps) {
         <div className="flex-grow">
           <Input
             placeholder={t('common.search')}
-            value={localSearchTerm}
-            onChange={(e) => setLocalSearchTerm(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full"
           />

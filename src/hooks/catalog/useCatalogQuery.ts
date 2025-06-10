@@ -47,109 +47,123 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
       try {
         console.log('Fetching catalog data with filters:', filtersWithDefaults);
         
-        // Build the query step by step
-        let query = supabase
-          .from('user_profiles')
-          .select(`
-            id,
-            first_name,
-            last_name,
-            email,
-            city,
-            user_roles!inner(role, status),
-            specialist_profiles(
-              title,
-              location,
-              photo_url,
-              email
-            )
-          `)
-          .eq('user_roles.role', 'specialist')
-          .eq('user_roles.status', 'zweryfikowany');
+        // Step 1: Get verified specialists from user_roles
+        const { data: verifiedSpecialists, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'specialist')
+          .eq('status', 'zweryfikowany')
+          .range(
+            (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize,
+            filtersWithDefaults.page * filtersWithDefaults.pageSize - 1
+          );
 
-        // Apply search filter if provided
-        if (filtersWithDefaults.searchTerm) {
-          const searchTerm = filtersWithDefaults.searchTerm.toLowerCase();
-          query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,specialist_profiles.title.ilike.%${searchTerm}%`);
+        if (rolesError) {
+          console.error("Error fetching verified specialists:", rolesError);
+          throw rolesError;
         }
 
-        // Apply location filter if provided
-        if (filtersWithDefaults.location) {
-          const locationTerm = filtersWithDefaults.location.toLowerCase();
-          query = query.or(`city.ilike.%${locationTerm}%,specialist_profiles.location.ilike.%${locationTerm}%`);
+        if (!verifiedSpecialists || verifiedSpecialists.length === 0) {
+          console.log("No verified specialists found");
+          return { 
+            specialists: [], 
+            totalCount: 0,
+            currentPage: filtersWithDefaults.page,
+            pageSize: filtersWithDefaults.pageSize
+          };
         }
 
-        // First get total count for pagination
+        console.log(`Found ${verifiedSpecialists.length} verified specialists`);
+
+        // Get total count for pagination
         const { count: totalCount, error: countError } = await supabase
-          .from('user_profiles')
+          .from('user_roles')
           .select('*', { count: 'exact', head: true })
-          .eq('user_roles.role', 'specialist')
-          .eq('user_roles.status', 'zweryfikowany');
+          .eq('role', 'specialist')
+          .eq('status', 'zweryfikowany');
 
         if (countError) {
           console.error("Error getting total count:", countError);
           throw countError;
         }
 
-        // Calculate pagination range
-        const rangeStart = (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize;
-        const rangeEnd = filtersWithDefaults.page * filtersWithDefaults.pageSize - 1;
+        // Extract user IDs
+        const userIds = verifiedSpecialists.map(role => role.user_id);
 
-        // Now get the actual data with pagination
-        const { data: specialistsData, error: specialistsError } = await query
-          .range(rangeStart, rangeEnd);
+        // Step 2: Get user profiles for these users
+        const { data: userProfilesData, error: userProfilesError } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .in('id', userIds);
 
-        if (specialistsError) {
-          console.error("Error fetching specialists:", specialistsError);
-          throw specialistsError;
+        if (userProfilesError) {
+          console.error("Error fetching user profiles:", userProfilesError);
+          throw userProfilesError;
         }
 
-        if (!specialistsData || specialistsData.length === 0) {
-          console.log("No specialists found");
-          return { 
-            specialists: [], 
-            totalCount: totalCount || 0,
-            currentPage: filtersWithDefaults.page,
-            pageSize: filtersWithDefaults.pageSize
-          };
+        // Step 3: Get specialist profiles for these users
+        const { data: specialistProfilesData, error: specialistProfilesError } = await supabase
+          .from('specialist_profiles')
+          .select('*')
+          .in('id', userIds);
+
+        if (specialistProfilesError) {
+          console.error("Error fetching specialist profiles:", specialistProfilesError);
         }
 
-        console.log(`Found ${specialistsData.length} specialists`);
+        // Step 4: Get specializations for all found specialists
+        const { data: specializationsData, error: specializationsError } = await supabase
+          .from('specialist_specializations')
+          .select(`
+            specialist_id,
+            specialization_id,
+            specializations!inner(id, name)
+          `)
+          .in('specialist_id', userIds)
+          .eq('active', 'yes');
 
-        // Get specializations separately if filter is applied
-        let filteredSpecialists = specialistsData;
-        
-        if (filtersWithDefaults.specializations) {
-          const { data: specializedUsers, error: specError } = await supabase
-            .from('specialist_specializations')
-            .select('specialist_id')
-            .in('specialization_id', filtersWithDefaults.specializations)
-            .eq('active', 'yes');
+        if (specializationsError) {
+          console.error("Error fetching specializations:", specializationsError);
+        }
 
-          if (specError) {
-            console.error("Error fetching specializations:", specError);
-            throw specError;
+        // Group specializations by specialist
+        const specializationsMap = specializationsData?.reduce((acc, item) => {
+          if (!acc[item.specialist_id]) {
+            acc[item.specialist_id] = [];
           }
+          acc[item.specialist_id].push(item.specialization_id);
+          return acc;
+        }, {} as Record<string, string[]>) || {};
 
-          const specializedUserIds = specializedUsers?.map(s => s.specialist_id) || [];
-          filteredSpecialists = specialistsData.filter(user => 
-            specializedUserIds.includes(user.id)
-          );
-        }
+        // Create maps for easier lookup
+        const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as Record<string, any>) || {};
 
+        const specialistProfilesMap = specialistProfilesData?.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as Record<string, any>) || {};
+        
         // Transform the data into the format expected by SpecialistCard
-        const transformedData: Specialist[] = filteredSpecialists
-          .map(userData => {
-            const userProfile = userData;
-            const specialistProfile = Array.isArray(userData.specialist_profiles) 
-              ? userData.specialist_profiles[0] 
-              : userData.specialist_profiles;
+        let transformedData: Specialist[] = verifiedSpecialists
+          .map(roleData => {
+            const userId = roleData.user_id;
+            const userProfile = userProfilesMap[userId];
+            const specialistProfile = specialistProfilesMap[userId];
+            const userSpecializations = specializationsMap[userId] || [];
+            
+            if (!userProfile) {
+              console.warn(`No user profile found for specialist ${userId}`);
+              return null;
+            }
             
             return {
-              id: userData.id,
+              id: userId,
               name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Specjalista',
               title: specialistProfile?.title || "Specjalista",
-              specializations: [], // Will be populated separately if needed
+              specializations: userSpecializations,
               location: specialistProfile?.location || userProfile.city || "Polska",
               image: specialistProfile?.photo_url || "https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop",
               email: specialistProfile?.email || userProfile.email,
@@ -159,8 +173,32 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
             };
           })
           .filter(Boolean) as Specialist[];
+
+        // Apply additional filters if provided
+        if (filtersWithDefaults.searchTerm) {
+          const searchLower = filtersWithDefaults.searchTerm.toLowerCase();
+          transformedData = transformedData.filter(specialist => 
+            specialist.name.toLowerCase().includes(searchLower) ||
+            specialist.title.toLowerCase().includes(searchLower)
+          );
+        }
+
+        if (filtersWithDefaults.location) {
+          const locationLower = filtersWithDefaults.location.toLowerCase();
+          transformedData = transformedData.filter(specialist => 
+            specialist.location.toLowerCase().includes(locationLower)
+          );
+        }
+
+        if (filtersWithDefaults.specializations) {
+          transformedData = transformedData.filter(specialist => 
+            specialist.specializations.some(specId => 
+              filtersWithDefaults.specializations!.includes(specId)
+            )
+          );
+        }
           
-        console.log("Transformed specialists data:", transformedData.length);
+        console.log("Transformed verified specialists data:", transformedData.length);
         
         return { 
           specialists: transformedData,

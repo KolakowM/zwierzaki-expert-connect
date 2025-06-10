@@ -3,27 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CatalogFilters } from "@/hooks/catalog/useCatalogQuery";
 
 interface CatalogFilterProps {
   onFilterChange: (filters: CatalogFilters) => void;
-  onReset: () => void;
-  currentFilters: CatalogFilters;
 }
 
-export function CatalogFilter({ onFilterChange, onReset, currentFilters }: CatalogFilterProps) {
+export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [location, setLocation] = useState("");
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
   const { specializations, isLoading, error } = useSpecializationsData();
-
-  // Sync local state with current filters when they change externally
-  useEffect(() => {
-    setLocation(currentFilters.location || "");
-    setSelectedSpecializations(currentFilters.specializations || []);
-  }, [currentFilters]);
 
   const handleSpecializationChange = (id: string) => {
     setSelectedSpecializations(prev => {
@@ -37,15 +29,15 @@ export function CatalogFilter({ onFilterChange, onReset, currentFilters }: Catal
 
   const handleApplyFilter = () => {
     onFilterChange({
-      location: location || undefined,
-      specializations: selectedSpecializations.length > 0 ? selectedSpecializations : undefined
+      location,
+      specializations: selectedSpecializations
     });
   };
 
   const handleReset = () => {
     setLocation("");
     setSelectedSpecializations([]);
-    onReset();
+    onFilterChange({});
   };
 
   return (
