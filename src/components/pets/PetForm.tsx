@@ -1,7 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PetFormSchema, PetFormOutput } from "./PetFormSchema";
+import { petFormSchema, PetFormOutput } from "./PetFormSchema";
 import {
   Form,
   FormControl,
@@ -44,10 +44,10 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
   } = useCanPerformAction('pets');
 
   const form = useForm<PetFormOutput>({
-    resolver: zodResolver(PetFormSchema),
+    resolver: zodResolver(petFormSchema),
     defaultValues: {
       name: "",
-      species: "dog",
+      species: "pies",
       breed: "",
       weight: "",
       sex: undefined,
@@ -83,19 +83,19 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
         )}
 
         {/* Basic Information */}
-        <PetBasicInfoFields form={form} />
+        <PetBasicInfoFields control={form.control} />
 
         {/* Characteristics */}
-        <PetCharacteristicsFields form={form} />
+        <PetCharacteristicsFields control={form.control} />
 
         {/* Measurements */}
-        <PetMeasurementsFields form={form} />
+        <PetMeasurementsFields control={form.control} />
 
         {/* Medical Information */}
-        <PetMedicalFields form={form} />
+        <PetMedicalFields control={form.control} />
 
         {/* Vaccination and Microchip */}
-        <VaccinationAndChipFields form={form} />
+        <VaccinationAndChipFields control={form.control} />
 
         <div className="flex justify-end pt-4">
           <Button 
