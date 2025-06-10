@@ -80,8 +80,11 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
         }
 
         // First get total count for pagination
-        const { count: totalCount, error: countError } = await query
-          .select('*', { count: 'exact', head: true });
+        const { count: totalCount, error: countError } = await supabase
+          .from('user_profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_roles.role', 'specialist')
+          .eq('user_roles.status', 'zweryfikowany');
 
         if (countError) {
           console.error("Error getting total count:", countError);
