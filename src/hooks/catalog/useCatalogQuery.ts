@@ -47,120 +47,93 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
       try {
         console.log('Fetching catalog data with filters:', filtersWithDefaults);
         
-        // Step 1: Get verified specialists from user_roles
-        const { data: verifiedSpecialists, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'specialist')
-          .eq('status', 'zweryfikowany')
-          .range(
-            (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize,
-            filtersWithDefaults.page * filtersWithDefaults.pageSize - 1
-          );
+        // Build the query step by step
+        let query = supabase
+          .from('user_profiles')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            city,
+            user_roles!inner(role, status),
+            specialist_profiles(
+              title,
+              location,
+              photo_url,
+              email
+            ),
+            specialist_specializations!inner(
+              specialization_id,
+              active
+            )
+          `)
+          .eq('user_roles.role', 'specialist')
+          .eq('user_roles.status', 'zweryfikowany')
+          .eq('specialist_specializations.active', 'yes');
 
-        if (rolesError) {
-          console.error("Error fetching verified specialists:", rolesError);
-          throw rolesError;
+        // Apply search filter if provided
+        if (filtersWithDefaults.searchTerm) {
+          const searchTerm = filtersWithDefaults.searchTerm.toLowerCase();
+          query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,specialist_profiles.title.ilike.%${searchTerm}%`);
         }
 
-        if (!verifiedSpecialists || verifiedSpecialists.length === 0) {
-          console.log("No verified specialists found");
-          return { 
-            specialists: [], 
-            totalCount: 0,
-            currentPage: filtersWithDefaults.page,
-            pageSize: filtersWithDefaults.pageSize
-          };
+        // Apply location filter if provided
+        if (filtersWithDefaults.location) {
+          const locationTerm = filtersWithDefaults.location.toLowerCase();
+          query = query.or(`city.ilike.%${locationTerm}%,specialist_profiles.location.ilike.%${locationTerm}%`);
         }
 
-        console.log(`Found ${verifiedSpecialists.length} verified specialists`);
+        // Apply specialization filter if provided
+        if (filtersWithDefaults.specializations) {
+          query = query.in('specialist_specializations.specialization_id', filtersWithDefaults.specializations);
+        }
 
-        // Get total count for pagination
-        const { count: totalCount, error: countError } = await supabase
-          .from('user_roles')
-          .select('*', { count: 'exact', head: true })
-          .eq('role', 'specialist')
-          .eq('status', 'zweryfikowany');
+        // First get total count for pagination
+        const countQuery = query;
+        const { count: totalCount, error: countError } = await countQuery
+          .select('*', { count: 'exact', head: true });
 
         if (countError) {
           console.error("Error getting total count:", countError);
           throw countError;
         }
 
-        // Extract user IDs
-        const userIds = verifiedSpecialists.map(role => role.user_id);
+        // Now get the actual data with pagination
+        const { data: specialistsData, error: specialistsError } = await query
+          .range(
+            (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize,
+            filtersWithDefaults.page * filtersWithDefaults.pageSize - 1
+          );
 
-        // Step 2: Get user profiles for these users
-        const { data: userProfilesData, error: userProfilesError } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .in('id', userIds);
-
-        if (userProfilesError) {
-          console.error("Error fetching user profiles:", userProfilesError);
-          throw userProfilesError;
+        if (specialistsError) {
+          console.error("Error fetching specialists:", specialistsError);
+          throw specialistsError;
         }
 
-        // Step 3: Get specialist profiles for these users
-        const { data: specialistProfilesData, error: specialistProfilesError } = await supabase
-          .from('specialist_profiles')
-          .select('*')
-          .in('id', userIds);
-
-        if (specialistProfilesError) {
-          console.error("Error fetching specialist profiles:", specialistProfilesError);
+        if (!specialistsData || specialistsData.length === 0) {
+          console.log("No specialists found");
+          return { 
+            specialists: [], 
+            totalCount: totalCount || 0,
+            currentPage: filtersWithDefaults.page,
+            pageSize: filtersWithDefaults.pageSize
+          };
         }
 
-        // Step 4: Get specializations for all found specialists
-        const { data: specializationsData, error: specializationsError } = await supabase
-          .from('specialist_specializations')
-          .select(`
-            specialist_id,
-            specialization_id,
-            specializations!inner(id, name)
-          `)
-          .in('specialist_id', userIds)
-          .eq('active', 'yes');
+        console.log(`Found ${specialistsData.length} specialists`);
 
-        if (specializationsError) {
-          console.error("Error fetching specializations:", specializationsError);
-        }
-
-        // Group specializations by specialist
-        const specializationsMap = specializationsData?.reduce((acc, item) => {
-          if (!acc[item.specialist_id]) {
-            acc[item.specialist_id] = [];
-          }
-          acc[item.specialist_id].push(item.specialization_id);
-          return acc;
-        }, {} as Record<string, string[]>) || {};
-
-        // Create maps for easier lookup
-        const userProfilesMap = userProfilesData?.reduce((acc, profile) => {
-          acc[profile.id] = profile;
-          return acc;
-        }, {} as Record<string, any>) || {};
-
-        const specialistProfilesMap = specialistProfilesData?.reduce((acc, profile) => {
-          acc[profile.id] = profile;
-          return acc;
-        }, {} as Record<string, any>) || {};
-        
         // Transform the data into the format expected by SpecialistCard
-        let transformedData: Specialist[] = verifiedSpecialists
-          .map(roleData => {
-            const userId = roleData.user_id;
-            const userProfile = userProfilesMap[userId];
-            const specialistProfile = specialistProfilesMap[userId];
-            const userSpecializations = specializationsMap[userId] || [];
-            
-            if (!userProfile) {
-              console.warn(`No user profile found for specialist ${userId}`);
-              return null;
-            }
+        const transformedData: Specialist[] = specialistsData
+          .map(userData => {
+            const userProfile = userData;
+            const specialistProfile = userData.specialist_profiles?.[0];
+            const userSpecializations = userData.specialist_specializations
+              ?.filter(spec => spec.active === 'yes')
+              ?.map(spec => spec.specialization_id) || [];
             
             return {
-              id: userId,
+              id: userData.id,
               name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Specjalista',
               title: specialistProfile?.title || "Specjalista",
               specializations: userSpecializations,
@@ -173,32 +146,8 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
             };
           })
           .filter(Boolean) as Specialist[];
-
-        // Apply additional filters if provided
-        if (filtersWithDefaults.searchTerm) {
-          const searchLower = filtersWithDefaults.searchTerm.toLowerCase();
-          transformedData = transformedData.filter(specialist => 
-            specialist.name.toLowerCase().includes(searchLower) ||
-            specialist.title.toLowerCase().includes(searchLower)
-          );
-        }
-
-        if (filtersWithDefaults.location) {
-          const locationLower = filtersWithDefaults.location.toLowerCase();
-          transformedData = transformedData.filter(specialist => 
-            specialist.location.toLowerCase().includes(locationLower)
-          );
-        }
-
-        if (filtersWithDefaults.specializations) {
-          transformedData = transformedData.filter(specialist => 
-            specialist.specializations.some(specId => 
-              filtersWithDefaults.specializations!.includes(specId)
-            )
-          );
-        }
           
-        console.log("Transformed verified specialists data:", transformedData.length);
+        console.log("Transformed specialists data:", transformedData.length);
         
         return { 
           specialists: transformedData,
