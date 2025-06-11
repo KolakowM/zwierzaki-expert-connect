@@ -1,7 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { petFormSchema, PetFormValues, PetFormOutput } from "./PetFormSchema";
+import { petFormSchema, PetFormValues } from "./PetFormSchema";
 import {
   Form,
   FormControl,
@@ -26,7 +26,7 @@ import VaccinationAndChipFields from "./form-fields/VaccinationAndChipFields";
 interface PetFormProps {
   clientId: string;
   defaultValues?: Partial<PetFormValues>;
-  onSubmit: (data: PetFormOutput) => void;
+  onSubmit: (data: any) => void; // Accept the transformed data from zodResolver
   isSubmitting?: boolean;
   isEditing?: boolean;
 }
@@ -69,10 +69,11 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
   const canAddPet = isEditing || canPerform;
   const limitReached = !isEditing && !canPerform;
 
-  // Handle form submission with proper type handling
+  // Handle form submission - let zodResolver do the transformation
   const handleFormSubmit = (data: PetFormValues) => {
     // The zodResolver automatically transforms the data based on the schema
-    onSubmit(data as PetFormOutput);
+    // No need to cast - just pass the transformed data directly
+    onSubmit(data);
   };
 
   return (
