@@ -41,6 +41,7 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
     queryKey: ['catalogData', filtersWithDefaults],
     queryFn: async () => {
       try {
+        console.log('=== CATALOG QUERY DEBUG ===');
         console.log('Fetching catalog data with filters:', filtersWithDefaults);
         
         // Call the RPC function to get all specialists
@@ -81,22 +82,27 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
         }
 
         const featuredUserIds = featuredData?.map(sub => sub.user_id) || [];
-        console.log("Featured user IDs:", featuredUserIds);
+        console.log("Featured user IDs from subscriptions:", featuredUserIds);
 
         // Transform RPC data to Specialist format and mark featured specialists
-        const transformedData: Specialist[] = rpcData.map(specialist => ({
-          id: specialist.id,
-          name: specialist.name,
-          title: specialist.title,
-          specializations: specialist.specializations || [],
-          location: specialist.location,
-          image: specialist.image,
-          email: specialist.email,
-          rating: specialist.rating || 5.0,
-          verified: specialist.verified,
-          role: specialist.role,
-          is_featured: featuredUserIds.includes(specialist.id)
-        }));
+        const transformedData: Specialist[] = rpcData.map(specialist => {
+          const isFeatured = featuredUserIds.includes(specialist.id);
+          console.log(`Specialist ${specialist.name} (${specialist.id}): featured = ${isFeatured}`);
+          
+          return {
+            id: specialist.id,
+            name: specialist.name,
+            title: specialist.title,
+            specializations: specialist.specializations || [],
+            location: specialist.location,
+            image: specialist.image,
+            email: specialist.email,
+            rating: specialist.rating || 5.0,
+            verified: specialist.verified,
+            role: specialist.role,
+            is_featured: isFeatured
+          };
+        });
 
         // Sort specialists: featured first (up to 3), then alphabetically
         const featuredSpecialists = transformedData
@@ -109,16 +115,23 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
 
         const sortedSpecialists = [...featuredSpecialists, ...regularSpecialists];
 
+        console.log("Featured specialists found:", featuredSpecialists.length);
+        console.log("Featured specialists:", featuredSpecialists.map(s => ({ name: s.name, id: s.id, is_featured: s.is_featured })));
+        console.log("Total specialists after sorting:", sortedSpecialists.length);
+
         // Apply client-side pagination
         const startIndex = (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize;
         const endIndex = startIndex + filtersWithDefaults.pageSize;
         const paginatedSpecialists = sortedSpecialists.slice(startIndex, endIndex);
 
+        console.log(`Paginated specialists (${startIndex} to ${endIndex}):`, paginatedSpecialists.map(s => ({ name: s.name, is_featured: s.is_featured })));
+
         // Get total count from first record (all records have the same total_count)
         const totalCount = rpcData.length > 0 ? Number(rpcData[0].total_count) : 0;
         
-        console.log("Transformed specialists data:", paginatedSpecialists.length, "Total count:", totalCount);
+        console.log("Final paginated specialists:", paginatedSpecialists.length, "Total count:", totalCount);
         console.log("Featured specialists on this page:", paginatedSpecialists.filter(s => s.is_featured).length);
+        console.log('=========================');
         
         return { 
           specialists: paginatedSpecialists,
