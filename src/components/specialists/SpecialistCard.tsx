@@ -98,7 +98,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
           )}
           <div className="absolute right-2 top-2">
             {specialist.is_featured && (
-              <Badge className="bg-green-500/90 hover:bg-green-500 text-white">
+              <Badge className="bg-yellow-500/90 hover:bg-yellow-500">
                 Wyróżniony
               </Badge>
             )}
