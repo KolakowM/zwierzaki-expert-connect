@@ -1,7 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { petFormSchema, PetFormOutput } from "./PetFormSchema";
+import { petFormSchema, PetFormValues, PetFormOutput } from "./PetFormSchema";
 import {
   Form,
   FormControl,
@@ -25,7 +25,7 @@ import VaccinationAndChipFields from "./form-fields/VaccinationAndChipFields";
 
 interface PetFormProps {
   clientId: string;
-  defaultValues?: Partial<PetFormOutput>;
+  defaultValues?: Partial<PetFormValues>;
   onSubmit: (data: PetFormOutput) => void;
   isSubmitting?: boolean;
   isEditing?: boolean;
@@ -43,7 +43,7 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
     isLoading: limitsLoading 
   } = useCanPerformAction('pets');
 
-  const form = useForm<PetFormOutput>({
+  const form = useForm<PetFormValues>({
     resolver: zodResolver(petFormSchema),
     defaultValues: {
       name: "",
