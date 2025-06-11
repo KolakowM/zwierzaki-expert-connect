@@ -685,6 +685,28 @@ export type Database = {
           total_count: number
         }[]
       }
+      get_catalog_specialists: {
+        Args: {
+          p_search_term?: string
+          p_location?: string
+          p_specializations?: string[]
+          p_page?: number
+          p_page_size?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          title: string
+          specializations: string[]
+          location: string
+          image: string
+          email: string
+          rating: number
+          verified: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          total_count: number
+        }[]
+      }
       get_user_active_subscription: {
         Args: { p_user_id: string }
         Returns: {
