@@ -20,6 +20,7 @@ export interface Specialist {
   rating?: number;
   verified: boolean;
   role: AppRole;
+  is_featured?: boolean;
 }
 
 interface SpecialistCardProps {
@@ -69,32 +70,6 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
     fetchSpecializations();
   }, [specialist.specializations, specialist.name]);
 
-  // Get role-specific display information
-  const getRoleInfo = () => {
-    switch (specialist.role) {
-      case 'specialist':
-        return {
-          badge: 'Specjalista',
-          badgeVariant: 'default' as const,
-          icon: <Users className="h-12 w-12 text-muted-foreground" />
-        };
-      case 'admin':
-        return {
-          badge: 'Administrator',
-          badgeVariant: 'destructive' as const,
-          icon: <UserRound className="h-12 w-12 text-muted-foreground" />
-        };
-      default:
-        return {
-          badge: 'Użytkownik',
-          badgeVariant: 'secondary' as const,
-          icon: <UserRound className="h-12 w-12 text-muted-foreground" />
-        };
-    }
-  };
-
-  const roleInfo = getRoleInfo();
-
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="p-0">
@@ -122,15 +97,12 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
             </div>
           )}
           <div className="absolute right-2 top-2">
-            <Badge variant={roleInfo.badgeVariant}>
-              {roleInfo.badge}
-            </Badge>
+            {specialist.is_featured && (
+              <Badge className="bg-yellow-500/90 hover:bg-yellow-500">
+                Wyróżniony
+              </Badge>
+            )}
           </div>
-          {specialist.verified && (
-            <div className="absolute left-2 top-2">
-              <Badge className="bg-green-500/90 hover:bg-green-500">Zweryfikowany</Badge>
-            </div>
-          )}
         </div>
       </CardHeader>
       <CardContent className="p-4">
