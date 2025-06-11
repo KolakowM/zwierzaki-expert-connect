@@ -69,11 +69,11 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
   const canAddPet = isEditing || canPerform;
   const limitReached = !isEditing && !canPerform;
 
-  // Handle form submission with proper type transformation
-  const handleFormSubmit = (data: PetFormValues) => {
-    // The zodResolver will automatically transform the data to PetFormOutput format
-    // This is because petFormSchema includes transformations for weight (string -> number) and dates
-    onSubmit(data as PetFormOutput);
+  // Handle form submission - zodResolver automatically transforms the data
+  const handleFormSubmit = (data: PetFormOutput) => {
+    // At this point, data has already been transformed by zodResolver
+    // weight is now a number, dates are Date objects, etc.
+    onSubmit(data);
   };
 
   return (
