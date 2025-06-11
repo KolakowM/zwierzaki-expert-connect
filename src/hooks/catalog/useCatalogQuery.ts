@@ -43,13 +43,13 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
       try {
         console.log('Fetching catalog data with filters:', filtersWithDefaults);
         
-        // Call the RPC function to get all specialists
+        // Call the RPC function to get specialists with featured functionality
         const { data: rpcData, error: rpcError } = await supabase.rpc('get_catalog_specialists', {
           p_search_term: filtersWithDefaults.searchTerm,
           p_location: filtersWithDefaults.location,
           p_specializations: filtersWithDefaults.specializations,
-          p_page: 1, // Get all data first, then handle pagination client-side for featured sorting
-          p_page_size: 1000 // Large number to get all specialists
+          p_page: filtersWithDefaults.page,
+          p_page_size: filtersWithDefaults.pageSize
         });
 
         if (rpcError) {
@@ -69,21 +69,7 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
 
         console.log(`Found ${rpcData.length} specialists from RPC`);
 
-        // Get featured specialists by checking their subscriptions
-        const { data: featuredData, error: featuredError } = await supabase
-          .from('user_subscriptions')
-          .select('user_id')
-          .eq('package_id', '3d73a98e-9d72-47f6-b7c4-88167300b66c')
-          .eq('status', 'active');
-
-        if (featuredError) {
-          console.error("Error fetching featured specialists:", featuredError);
-        }
-
-        const featuredUserIds = featuredData?.map(sub => sub.user_id) || [];
-        console.log("Featured user IDs:", featuredUserIds);
-
-        // Transform RPC data to Specialist format and mark featured specialists
+        // Transform RPC data to Specialist format
         const transformedData: Specialist[] = rpcData.map(specialist => ({
           id: specialist.id,
           name: specialist.name,
@@ -95,34 +81,18 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
           rating: specialist.rating || 5.0,
           verified: specialist.verified,
           role: specialist.role,
-          is_featured: featuredUserIds.includes(specialist.id)
+          is_featured: specialist.is_featured
         }));
-
-        // Sort specialists: featured first (up to 3), then alphabetically
-        const featuredSpecialists = transformedData
-          .filter(specialist => specialist.is_featured)
-          .slice(0, 3); // Top 3 featured specialists
-        
-        const regularSpecialists = transformedData
-          .filter(specialist => !specialist.is_featured)
-          .sort((a, b) => a.name.localeCompare(b.name));
-
-        const sortedSpecialists = [...featuredSpecialists, ...regularSpecialists];
-
-        // Apply client-side pagination
-        const startIndex = (filtersWithDefaults.page - 1) * filtersWithDefaults.pageSize;
-        const endIndex = startIndex + filtersWithDefaults.pageSize;
-        const paginatedSpecialists = sortedSpecialists.slice(startIndex, endIndex);
 
         // Get total count from first record (all records have the same total_count)
         const totalCount = rpcData.length > 0 ? Number(rpcData[0].total_count) : 0;
         
-        console.log("Transformed specialists data:", paginatedSpecialists.length, "Total count:", totalCount);
-        console.log("Featured specialists on this page:", paginatedSpecialists.filter(s => s.is_featured).length);
+        console.log("Transformed specialists data:", transformedData.length, "Total count:", totalCount);
+        console.log("Featured specialists on this page:", transformedData.filter(s => s.is_featured).length);
         
         return { 
-          specialists: paginatedSpecialists,
-          totalCount: sortedSpecialists.length, // Use actual sorted length for pagination
+          specialists: transformedData,
+          totalCount,
           currentPage: filtersWithDefaults.page,
           pageSize: filtersWithDefaults.pageSize
         };

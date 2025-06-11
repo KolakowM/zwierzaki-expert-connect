@@ -704,6 +704,7 @@ export type Database = {
           rating: number
           verified: boolean
           role: Database["public"]["Enums"]["app_role"]
+          is_featured: boolean
           total_count: number
         }[]
       }
