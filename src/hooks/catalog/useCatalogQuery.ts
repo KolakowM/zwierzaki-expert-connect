@@ -89,6 +89,7 @@ export function useCatalogQuery(filters: CatalogFilters = {}): CatalogResponse &
         
         console.log("Transformed specialists data:", transformedData.length, "Total count:", totalCount);
         console.log("Featured specialists on this page:", transformedData.filter(s => s.is_featured).length);
+        console.log("Featured specialists details:", transformedData.filter(s => s.is_featured).map(s => ({ name: s.name, is_featured: s.is_featured })));
         
         return { 
           specialists: transformedData,
