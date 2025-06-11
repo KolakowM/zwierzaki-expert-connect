@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Users, UserRound } from "lucide-react";
+import { Users, UserRound, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Specialization } from "@/hooks/useSpecializations";
@@ -30,6 +30,17 @@ interface SpecialistCardProps {
 export function SpecialistCard({ specialist }: SpecialistCardProps) {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Debug logging for featured status
+  useEffect(() => {
+    console.log('=== FEATURED BADGE DEBUG ===');
+    console.log('Specialist:', specialist.name);
+    console.log('is_featured value:', specialist.is_featured);
+    console.log('is_featured type:', typeof specialist.is_featured);
+    console.log('is_featured truthy:', !!specialist.is_featured);
+    console.log('Specialist object:', specialist);
+    console.log('============================');
+  }, [specialist]);
 
   // Fetch specialization names for this specialist
   useEffect(() => {
@@ -96,10 +107,36 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
               </svg>
             </div>
           )}
-          <div className="absolute right-2 top-2">
+          
+          {/* Debug badge area - always show for debugging */}
+          <div className="absolute right-2 top-2 z-10">
+            {/* Debug info badge */}
+            <div className="mb-1">
+              <Badge 
+                variant="outline" 
+                className="text-xs bg-red-100 border-red-300 text-red-800"
+              >
+                DEBUG: {specialist.is_featured ? 'FEATURED' : 'NOT FEATURED'}
+              </Badge>
+            </div>
+            
+            {/* Actual featured badge */}
             {specialist.is_featured && (
-              <Badge className="bg-yellow-500/90 hover:bg-yellow-500">
+              <Badge 
+                className="bg-yellow-500 hover:bg-yellow-600 text-yellow-50 border-yellow-400 shadow-md"
+              >
+                <Star className="w-3 h-3 mr-1 fill-current" />
                 Wyróżniony
+              </Badge>
+            )}
+            
+            {/* Fallback badge for debugging */}
+            {!specialist.is_featured && (
+              <Badge 
+                variant="secondary" 
+                className="text-xs opacity-50"
+              >
+                Regular
               </Badge>
             )}
           </div>
@@ -110,6 +147,12 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         <CardDescription className="mb-2 text-sm text-muted-foreground">
           {specialist.title}
         </CardDescription>
+        
+        {/* Additional debug info */}
+        <div className="mb-2 text-xs text-muted-foreground">
+          ID: {specialist.id} | Featured: {String(specialist.is_featured)}
+        </div>
+        
         {specialist.role === 'specialist' && (
           <div className="mb-3 flex flex-wrap gap-1">
             {loading ? (
