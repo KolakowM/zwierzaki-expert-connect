@@ -40,7 +40,22 @@ export function useFeaturedSpecialists(limit = 12) {
         // Extract user IDs
         const userIds = verifiedSpecialists.map(role => role.user_id);
 
-        // Step 2: Get user profiles for these users
+        // Step 2: Get featured user IDs (active featured subscriptions)
+        const { data: featuredSubscriptions, error: featuredError } = await supabase
+          .from('user_subscriptions')
+          .select('user_id')
+          .eq('package_id', '3d73a98e-9d72-47f6-b7c4-88167300b66c')
+          .eq('status', 'active')
+          .in('user_id', userIds);
+
+        if (featuredError) {
+          console.error("Error fetching featured subscriptions:", featuredError);
+        }
+
+        const featuredUserIds = new Set(featuredSubscriptions?.map(sub => sub.user_id) || []);
+        console.log("Featured user IDs:", Array.from(featuredUserIds));
+
+        // Step 3: Get user profiles for these users
         const { data: userProfilesData, error: userProfilesError } = await supabase
           .from('user_profiles')
           .select('*')
@@ -51,7 +66,7 @@ export function useFeaturedSpecialists(limit = 12) {
           throw userProfilesError;
         }
 
-        // Step 3: Get specialist profiles for these users
+        // Step 4: Get specialist profiles for these users
         const { data: specialistProfilesData, error: specialistProfilesError } = await supabase
           .from('specialist_profiles')
           .select('*')
@@ -61,7 +76,7 @@ export function useFeaturedSpecialists(limit = 12) {
           console.error("Error fetching specialist profiles:", specialistProfilesError);
         }
 
-        // Step 4: Get specializations for all found specialists
+        // Step 5: Get specializations for all found specialists
         const { data: specializationsData, error: specializationsError } = await supabase
           .from('specialist_specializations')
           .select(`
@@ -119,13 +134,15 @@ export function useFeaturedSpecialists(limit = 12) {
               email: specialistProfile?.email || userProfile.email,
               rating: 5.0, // Default rating
               verified: true, // All these specialists are verified
-              role: 'specialist'
+              role: 'specialist',
+              is_featured: featuredUserIds.has(userId) // Check if user has featured subscription
             };
           })
           .filter(Boolean) as Specialist[];
           
         console.log("Transformed verified specialists data:", transformedData.length);
-        console.log("Sample specialist with specializations:", transformedData[0]);
+        console.log("Featured specialists:", transformedData.filter(s => s.is_featured).length);
+        console.log("Sample specialist with featured status:", transformedData[0]);
         setSpecialists(transformedData);
         
       } catch (err) {
