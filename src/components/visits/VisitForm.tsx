@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,7 +48,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
     defaultValues: {
       date: new Date(),
       time: "12:00",
-      type: "Konsultacja",
+      type: "", // Changed from "Konsultacja" to empty string
       notes: "",
       recommendations: "",
       followUpNeeded: false,
