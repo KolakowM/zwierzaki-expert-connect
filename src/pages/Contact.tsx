@@ -52,9 +52,9 @@ export default function Contact() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <Card className="p-6">
               <div className="flex flex-col items-center space-y-3 text-center">
-                <div className="rounded-full bg-primary/10 p-3">
+                {/* <div className="rounded-full bg-primary/10 p-3">
                   <Phone className="h-6 w-6 text-primary" />
-                </div>
+                </div>*/}
                 <h3 className="text-xl font-medium"> </h3>
                 <p className="text-muted-foreground"> </p>
                 <p> </p>
@@ -76,9 +76,9 @@ export default function Contact() {
             
             <Card className="p-6">
               <div className="flex flex-col items-center space-y-3 text-center">
-                <div className="rounded-full bg-primary/10 p-3">
+                {/*} <div className="rounded-full bg-primary/10 p-3">
                   <MapPin className="h-6 w-6 text-primary" />
-                </div>
+                </div> */}
                 <h3 className="text-xl font-medium"> </h3>
                 <p className="text-muted-foreground"> </p>
                 <p> </p>
