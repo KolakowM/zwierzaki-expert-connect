@@ -13,7 +13,7 @@ import {
   CarouselPrevious
 } from "@/components/ui/carousel";
 
-// Fallback specialists data for demonstration
+// Fallback specialists data for demonstration - now includes is_featured
 const fallbackSpecialists: Specialist[] = [
   {
     id: "fallback-1",
@@ -24,7 +24,8 @@ const fallbackSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?q=80&w=2376&auto=format&fit=crop",
     rating: 4.9,
     verified: true,
-    role: "specialist"
+    role: "specialist",
+    is_featured: true
   },
   {
     id: "fallback-2",
@@ -35,7 +36,8 @@ const fallbackSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2369&auto=format&fit=crop",
     rating: 5.0,
     verified: true,
-    role: "specialist"
+    role: "specialist",
+    is_featured: false
   },
   {
     id: "fallback-3",
@@ -46,7 +48,8 @@ const fallbackSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=2374&auto=format&fit=crop",
     rating: 4.8,
     verified: true,
-    role: "specialist"
+    role: "specialist",
+    is_featured: true
   },
   {
     id: "fallback-4",
@@ -57,7 +60,8 @@ const fallbackSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2368&auto=format&fit=crop",
     rating: 4.7,
     verified: true,
-    role: "specialist"
+    role: "specialist",
+    is_featured: false
   },
   {
     id: "fallback-5",
@@ -68,7 +72,8 @@ const fallbackSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=2374&auto=format&fit=crop",
     rating: 4.9,
     verified: true,
-    role: "specialist"
+    role: "specialist",
+    is_featured: true
   },
   {
     id: "fallback-6",
@@ -79,7 +84,8 @@ const fallbackSpecialists: Specialist[] = [
     image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=2370&auto=format&fit=crop",
     rating: 4.6,
     verified: true,
-    role: "specialist"
+    role: "specialist",
+    is_featured: false
   }
 ];
 
@@ -91,6 +97,7 @@ const Index = () => {
   const displaySpecialists = specialists.length > 0 ? specialists : (!loading ? fallbackSpecialists : []);
   
   console.log("Index page - specialists count:", specialists.length, "loading:", loading, "displaySpecialists:", displaySpecialists.length);
+  console.log("Featured specialists in display list:", displaySpecialists.filter(s => s.is_featured).length);
 
   const benefitsData = [
     {
