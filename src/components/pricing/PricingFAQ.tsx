@@ -35,7 +35,7 @@ export default function PricingFAQ() {
         <AccordionItem value="faq-4">
           <AccordionTrigger>Czy mogę rozszerzyć limit klientów i zwierząt?</AccordionTrigger>
           <AccordionContent>
-            Tak, oferujemy dodatek (+20 zł miesięcznie), który zwiększa limit o dodatkowych 10 klientów i 10 zwierząt. Możesz dokupić tyle dodatków, ile potrzebujesz.
+            Tak, oferujemy dodatek (+15 zł miesięcznie), który zwiększa limit o dodatkowych 10 klientów i 10 zwierząt. Możesz dokupić tyle dodatków, ile potrzebujesz.
           </AccordionContent>
         </AccordionItem>
 

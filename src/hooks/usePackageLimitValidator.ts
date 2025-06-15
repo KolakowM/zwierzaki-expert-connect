@@ -3,7 +3,17 @@ import { useCanPerformAction } from './usePackageLimits';
 import { ActionType } from '@/types/subscription';
 
 export const usePackageLimitValidator = (actionType: ActionType) => {
-  const { canPerform, currentCount, maxAllowed, packageName, isLoading, isAtLimit } = useCanPerformAction(actionType);
+  const { 
+    canPerform, 
+    currentCount, 
+    maxAllowed, 
+    packageName, 
+    usagePercentage,
+    isAtSoftLimit,
+    isLoading, 
+    isAtLimit,
+    errorMessage 
+  } = useCanPerformAction(actionType);
 
   const validateAction = () => {
     if (isLoading) return { canProceed: false, reason: 'loading' };
@@ -12,7 +22,15 @@ export const usePackageLimitValidator = (actionType: ActionType) => {
       return {
         canProceed: false,
         reason: 'limit_exceeded',
-        message: `Osiągnięto limit ${getActionLabel(actionType)} (${currentCount}/${maxAllowed}) w pakiecie ${packageName}. Ulepsz pakiet, aby dodać więcej.`
+        message: errorMessage || `Osiągnięto limit ${getActionLabel(actionType)} (${currentCount}/${maxAllowed}) w pakiecie ${packageName}. Ulepsz pakiet, aby dodać więcej.`
+      };
+    }
+
+    if (isAtSoftLimit) {
+      return {
+        canProceed: true,
+        reason: 'approaching_limit',
+        message: `Zbliżasz się do limitu ${getActionLabel(actionType)} (${usagePercentage}% wykorzystania). Rozważ ulepszenie pakietu.`
       };
     }
 
@@ -35,8 +53,11 @@ export const usePackageLimitValidator = (actionType: ActionType) => {
     currentCount,
     maxAllowed,
     packageName,
+    usagePercentage,
     isLoading,
     isAtLimit,
-    isOverLimit: currentCount > maxAllowed
+    isAtSoftLimit,
+    isOverLimit: currentCount > maxAllowed,
+    errorMessage
   };
 };

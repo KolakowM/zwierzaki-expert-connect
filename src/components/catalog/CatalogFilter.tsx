@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSpecializationsData } from "@/data/specializations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CatalogFilters } from "@/hooks/catalog/useCatalogQuery";
@@ -17,6 +17,14 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
   const { specializations, isLoading, error } = useSpecializationsData();
 
+  // Apply filters automatically when they change
+  useEffect(() => {
+    onFilterChange({
+      location: location || undefined,
+      specializations: selectedSpecializations.length > 0 ? selectedSpecializations : undefined
+    });
+  }, [location, selectedSpecializations, onFilterChange]);
+
   const handleSpecializationChange = (id: string) => {
     setSelectedSpecializations(prev => {
       if (prev.includes(id)) {
@@ -27,17 +35,10 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
     });
   };
 
-  const handleApplyFilter = () => {
-    onFilterChange({
-      location,
-      specializations: selectedSpecializations
-    });
-  };
-
   const handleReset = () => {
     setLocation("");
     setSelectedSpecializations([]);
-    onFilterChange({});
+    // onFilterChange will be called automatically via useEffect
   };
 
   return (
@@ -93,7 +94,6 @@ export function CatalogFilter({ onFilterChange }: CatalogFilterProps) {
         </div>
       </div>
       <div className="flex flex-col space-y-2">
-        <Button onClick={handleApplyFilter}>Zastosuj filtry</Button>
         <Button variant="outline" onClick={handleReset}>Resetuj filtry</Button>
       </div>
     </div>

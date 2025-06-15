@@ -1,10 +1,10 @@
 
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { PawPrint } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Client, Pet } from "@/types";
+import SmartActionButton from "@/components/subscription/SmartActionButton";
 import ResponsivePetForm from "@/components/pets/ResponsivePetForm";
 
 interface ClientPetsTabProps {
@@ -62,9 +62,15 @@ const ClientPetsTab = ({
                   <TableCell>{pet.sex || '—'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button variant="ghost" size="sm" asChild>
+                      <SmartActionButton
+                        actionType="pets"
+                        onAction={() => {}}
+                        variant="ghost"
+                        size="sm"
+                        showWarnings={false}
+                      >
                         <Link to={`/pets/${pet.id}`}>Szczegóły</Link>
-                      </Button>
+                      </SmartActionButton>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -79,12 +85,13 @@ const ClientPetsTab = ({
               Ten klient nie ma jeszcze zarejestrowanych zwierząt
             </p>
             {client.id && (
-              <ResponsivePetForm 
-                clientId={client.id}
-                buttonText="Dodaj pierwsze zwierzę"
-                className="mt-4"
-                onPetSaved={onPetSaved}
-              />
+              <div className="mt-4">
+                <ResponsivePetForm 
+                  clientId={client.id}
+                  buttonText="Dodaj pierwsze zwierzę"
+                  onPetSaved={onPetSaved}
+                />
+              </div>
             )}
           </div>
         )}

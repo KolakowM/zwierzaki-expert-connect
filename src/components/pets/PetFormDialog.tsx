@@ -7,9 +7,12 @@ import PetForm from "./PetForm";
 import { PetSpecies, PetSex, PetFormOutput } from "./PetFormSchema";
 import { Dog, Edit } from "lucide-react";
 import { Pet } from "@/types";
-import { createPet, updatePet } from "@/services/petService";
+import { createPet, updatePet } from "@/services/petServiceWithLimits";
+import { useAuth } from "@/contexts/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseISO } from "date-fns";
+import { PackageLimitError } from "@/types/subscription";
+import LimitExceededDialog from "@/components/subscription/LimitExceededDialog";
 
 interface PetFormDialogProps {
   clientId: string;
@@ -38,7 +41,9 @@ const PetFormDialog = ({
 }: PetFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [limitError, setLimitError] = useState<PackageLimitError | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Set default title based on whether we're editing or creating
@@ -64,6 +69,15 @@ const PetFormDialog = ({
   } : undefined;
 
   const handleSubmit = async (formData: PetFormOutput) => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby zapisać zwierzaka",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log("Saving pet:", formData);
@@ -71,7 +85,7 @@ const PetFormDialog = ({
       let petData: Pet;
       
       if (isEditing && defaultValues?.id) {
-        // Update existing pet
+        // Update existing pet (no limit check needed)
         petData = await updatePet(defaultValues.id, {
           ...formData,
           clientId
@@ -82,7 +96,7 @@ const PetFormDialog = ({
           description: `Dane zwierzaka ${formData.name} zostały zaktualizowane pomyślnie`
         });
       } else {
-        // Create new pet
+        // Create new pet with automatic limit validation
         // Ensure required fields are present for new pet creation
         if (!formData.name || !formData.species || !formData.breed || !formData.weight || !formData.sex) {
           throw new Error("Wszystkie wymagane pola muszą być wypełnione");
@@ -104,7 +118,8 @@ const PetFormDialog = ({
           hasMicrochip: formData.hasMicrochip || false,
           microchipNumber: formData.microchipNumber,
           vaccinationDescription: formData.vaccinationDescription,
-          dateOfBirth: formData.dateOfBirth
+          dateOfBirth: formData.dateOfBirth,
+          userId: user.id
         });
         
         toast({
@@ -129,11 +144,17 @@ const PetFormDialog = ({
 
       // Close the dialog
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving pet:", error);
+      
+      if (error instanceof PackageLimitError) {
+        setLimitError(error);
+        return;
+      }
+      
       toast({
         title: isEditing ? "Błąd podczas aktualizacji danych" : "Błąd podczas dodawania zwierzaka",
-        description: "Spróbuj ponownie później",
+        description: error.message || "Spróbuj ponownie później",
         variant: "destructive",
       });
     } finally {
@@ -142,32 +163,46 @@ const PetFormDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button variant={buttonVariant} size={buttonSize} className={className}>
-            {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Dog className="mr-2 h-4 w-4" />}
-            {buttonText}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogDescription>
-            {isEditing 
-              ? "Edytuj informacje o zwierzaku" 
-              : "Wprowadź dane nowego zwierzaka"}
-          </DialogDescription>
-        </DialogHeader>
-        <PetForm 
-          clientId={clientId}
-          defaultValues={formDefaultValues} 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting} 
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children || (
+            <Button variant={buttonVariant} size={buttonSize} className={className}>
+              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Dog className="mr-2 h-4 w-4" />}
+              {buttonText}
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            <DialogDescription>
+              {isEditing 
+                ? "Edytuj informacje o zwierzaku" 
+                : "Wprowadź dane nowego zwierzaka"}
+            </DialogDescription>
+          </DialogHeader>
+          <PetForm 
+            clientId={clientId}
+            defaultValues={formDefaultValues} 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting}
+            isEditing={isEditing}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {limitError && (
+        <LimitExceededDialog
+          isOpen={!!limitError}
+          onClose={() => setLimitError(null)}
+          actionType={limitError.actionType}
+          currentCount={limitError.currentCount}
+          maxAllowed={limitError.maxAllowed}
+          packageName={limitError.packageName}
         />
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   );
 };
 

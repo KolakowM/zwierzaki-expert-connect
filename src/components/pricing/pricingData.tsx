@@ -27,9 +27,9 @@ export const usePricingTiers = () => {
         { id: "t2", content: <strong>Brak widoczności w katalogu specjalistów</strong> },
         { id: "t3", content: "Do 5 klientów" },
         { id: "t4", content: "Do 10 zwierząt" },
-        { id: "t5", content: "1 specjalizacja / 3 usługi" },
+        { id: "t5", content: "1 specjalizacja i 3 usługi" },
         { id: "t6", content: "Podstawowy profil specjalisty" },
-        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+        { id: "t7", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt)" }
       ],
       cta: t('pricing.start_free'),
       popular: false
@@ -44,10 +44,10 @@ export const usePricingTiers = () => {
         { id: "a2", content: <strong>Standardowa widoczność w katalogu specjalistów</strong> },
         { id: "a3", content: "Do 25 klientów" },
         { id: "a4", content: "Do 40 zwierząt" },
-        { id: "a5", content: "Do 3 specjalizacji / 6 usług" },
+        { id: "a5", content: "Do 3 specjalizacji i 6 usług" },
         { id: "a6", content: "Pełny profil specjalisty" },
         { id: "a7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
-        { id: "a8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+        { id: "a8", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt)" }
       ],
       cta: `${t('pricing.choose_plan')} Zaawansowany`,
       popular: true
@@ -62,10 +62,10 @@ export const usePricingTiers = () => {
         { id: "p2", content: <strong>Wyróżniona widoczność w katalogu specjalistów</strong> },
         { id: "p3", content: "Do 50 klientów" },
         { id: "p4", content: "Do 75 zwierząt" },
-        { id: "p5", content: "Wszystkie specjalizacje / 15 usług" },
+        { id: "p5", content: "Wszystkie specjalizacje i 15 usług" },
         { id: "p6", content: "Priorytetowy profil specjalisty" },
         { id: "p7", content: <strong>Jednorazowy rabat 10 zł/mies lub 100 zł/rok przy pierwszym zakupie</strong> },
-        { id: "p8", content: "Możliwość rozbudowy limitu CRM (+20 zł/mies za dodatkowe 10 klientów/10 zwierząt)" }
+        { id: "p8", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt)" }
       ],
       cta: `${t('pricing.choose_plan')} Zawodowiec`,
       popular: false

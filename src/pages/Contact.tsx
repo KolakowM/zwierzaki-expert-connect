@@ -52,13 +52,13 @@ export default function Contact() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <Card className="p-6">
               <div className="flex flex-col items-center space-y-3 text-center">
-                <div className="rounded-full bg-primary/10 p-3">
+                {/* <div className="rounded-full bg-primary/10 p-3">
                   <Phone className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-medium">Telefon</h3>
-                <p className="text-muted-foreground">Zadzwoń do nas w dni robocze</p>
-                <p>+48 123 456 789</p>
-                <p className="text-sm text-muted-foreground">Pn-Pt: 9:00-17:00</p>
+                </div>*/}
+                <h3 className="text-xl font-medium"> </h3>
+                <p className="text-muted-foreground"> </p>
+                <p> </p>
+                <p className="text-sm text-muted-foreground"> </p>
               </div>
             </Card>
             
@@ -76,13 +76,13 @@ export default function Contact() {
             
             <Card className="p-6">
               <div className="flex flex-col items-center space-y-3 text-center">
-                <div className="rounded-full bg-primary/10 p-3">
+                {/*} <div className="rounded-full bg-primary/10 p-3">
                   <MapPin className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-medium">Adres</h3>
-                <p className="text-muted-foreground">Odwiedź nasze biuro</p>
-                <p>ul. Zwierzęca 123</p>
-                <p>00-001 Warszawa</p>
+                </div> */}
+                <h3 className="text-xl font-medium"> </h3>
+                <p className="text-muted-foreground"> </p>
+                <p> </p>
+                <p> </p>
               </div>
             </Card>
           </div>

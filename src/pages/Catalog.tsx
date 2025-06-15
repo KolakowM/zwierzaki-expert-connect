@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { CatalogFilter } from "@/components/catalog/CatalogFilter";
 import { CatalogResults } from "@/components/catalog/CatalogResults";
@@ -21,21 +21,21 @@ const Catalog = () => {
     totalPages 
   } = useCatalogQuery(filters);
 
-  const handleSearch = (searchTerm: string) => {
-    setFilters(prev => ({ ...prev, searchTerm, page: 1 }));
-  };
+  const handleSearch = useCallback((searchTerm: string) => {
+    setFilters(prev => ({ ...prev, searchTerm: searchTerm || undefined, page: 1 }));
+  }, []);
 
-  const handleFilterChange = (newFilters: CatalogFilters) => {
+  const handleFilterChange = useCallback((newFilters: CatalogFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
-  };
+  }, []);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setFilters(prev => ({ ...prev, page }));
-  };
+  }, []);
 
-  const handlePageSizeChange = (newPageSize: number) => {
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
     setFilters(prev => ({ ...prev, pageSize: newPageSize, page: 1 }));
-  };
+  }, []);
 
   return (
     <MainLayout>

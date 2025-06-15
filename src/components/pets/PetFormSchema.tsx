@@ -30,15 +30,15 @@ export const petFormSchema = z.object({
     }).optional()
   ),
   
-  // Improve weight handling - require as a number and support comma as decimal separator
-  weight: z.union([
-    z.string().trim().min(1, "Waga jest wymagana").transform(val => Number(val.replace(',', '.'))),
-    z.number()
-  ])
-  .refine(
-    (val) => !isNaN(val),
-    { message: "Waga musi być liczbą" }
-  ),
+  // Keep weight as string for form input, but validate and transform to number
+  weight: z.string().trim().min(1, "Waga jest wymagana").transform(val => {
+    const numVal = Number(val.replace(',', '.'));
+    if (isNaN(numVal)) {
+      throw new Error("Waga musi być liczbą");
+    }
+    return numVal;
+  }),
+  
   sex: z.enum(PET_SEX, {
     required_error: "Płeć jest wymagana"
   }),
@@ -91,3 +91,6 @@ export const petFormSchema = z.object({
 export type PetFormValues = z.input<typeof petFormSchema>;
 // Define the transformed output type (after zod transforms)
 export type PetFormOutput = z.output<typeof petFormSchema>;
+
+// Keep the old exports for backward compatibility
+export { petFormSchema as PetFormSchema };

@@ -649,12 +649,17 @@ export type Database = {
         Returns: undefined
       }
       check_package_limits: {
-        Args: { p_user_id: string; p_action_type: string }
+        Args:
+          | { p_user_id: string; p_action_type: string }
+          | { p_user_id: string; p_action_type: string; p_soft_check?: boolean }
         Returns: {
           can_perform_action: boolean
           current_count: number
           max_allowed: number
           package_name: string
+          usage_percentage: number
+          is_at_soft_limit: boolean
+          error_message: string
         }[]
       }
       get_catalog_data: {
@@ -680,12 +685,36 @@ export type Database = {
           total_count: number
         }[]
       }
+      get_catalog_specialists: {
+        Args: {
+          p_search_term?: string
+          p_location?: string
+          p_specializations?: string[]
+          p_page?: number
+          p_page_size?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          title: string
+          specializations: string[]
+          location: string
+          image: string
+          email: string
+          rating: number
+          verified: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          is_featured: boolean
+          total_count: number
+        }[]
+      }
       get_user_active_subscription: {
         Args: { p_user_id: string }
         Returns: {
           subscription_id: string
           package_id: string
           package_name: string
+          status: string
           max_clients: number
           max_pets: number
           max_services: number

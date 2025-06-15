@@ -295,7 +295,7 @@ const AppointmentForm = ({ isOpen, onClose, selectedDate, clients }: Appointment
                       {...field}
                       disabled={createVisitMutation.isPending}
                     >
-                      <option value="" disabled>
+                      <option value="" disabled selected>
                         Wybierz typ wizyty
                       </option>
                       {visitTypes.map((type) => (
