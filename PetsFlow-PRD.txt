@@ -3,7 +3,7 @@
 
 ## 1. Introduction
 
-PetsFlow to platforma internetowa przeznaczona dla specjalistów weterynarii i opieki nad zwierzętami, umożliwiająca efektywne zarządzanie klientami, ich zwierzętami oraz wizytami. Aplikacja wspiera specjalistów w codziennej pracy, zapewniając funkcjonalności takie jak prowadzenie dokumentacji medycznej, planowanie wizyt oraz tworzenie planów opieki.
+PetsFlow to platforma internetowa przeznaczona dla specjalistów weterynarii i opieki nad zwierzętami, umożliwiająca efektywne zarządzanie klientami, ich zwierzętami oraz wizytami. Aplikacja wspiera specjalistów w codziennej pracy, zapewniając funkcjonalności takie jak prowadzenie dokumentacji medycznej, planowanie wizyt oraz tworzenie planów opieki. Platforma oferuje również publiczny katalog specjalistów z systemem subskrypcji.
 
 ## 2. Struktura Aplikacji
 
@@ -13,24 +13,32 @@ PetsFlow to platforma internetowa przeznaczona dla specjalistów weterynarii i o
 src/
 ├── components/            # Komponenty UI
 │   ├── account/           # Komponenty związane z kontem użytkownika
-│   ├── admin/             # Komponenty panelu administratora
+│   ├── admin/             # Komponenty panelu administratora z audytem
+│   ├── auth/              # Komponenty autoryzacji
 │   ├── care-programs/     # Komponenty planów opieki
 │   ├── catalog/           # Komponenty katalogu specjalistów
 │   ├── clients/           # Komponenty zarządzania klientami
 │   │   ├── tabs/          # Zakładki szczegółów klienta
 │   ├── dashboard/         # Komponenty panelu głównego
-│   ├── layout/            # Komponenty układu strony (header, footer, sidebar)
+│   ├── home/              # Komponenty strony głównej
+│   │   ├── HeroSection    # Sekcja hero z obrazami
+│   │   ├── FeaturedSpecialistsSection # Karuzela specjalistów
+│   │   ├── BenefitsSection # Sekcja korzyści
+│   │   ├── CTASection     # Call-to-action
+│   ├── layout/            # Komponenty układu strony
 │   ├── pets/              # Komponenty zarządzania zwierzętami
 │   │   ├── form-fields/   # Pola formularzy zwierząt
 │   │   ├── tabs/          # Zakładki profilu zwierzęcia
+│   │   ├── notes/         # System notatek z załącznikami
 │   ├── profile/           # Komponenty profilu specjalisty
 │   ├── specialists/       # Komponenty dla specjalistów
 │   │   ├── profile/       # Komponenty profilu specjalisty
+│   ├── subscription/      # Zarządzanie subskrypcjami
 │   ├── ui/                # Komponenty UI (shadcn/ui)
 │   ├── visits/            # Komponenty wizyt
 │       ├── form-fields/   # Pola formularzy wizyt
 ├── contexts/              # Konteksty React (AuthProvider)
-├── data/                  # Dane statyczne (mock, specjalizacje)
+├── data/                  # Dane statyczne (fallback, specjalizacje)
 ├── hooks/                 # Hooki React
 ├── integrations/          # Integracje z zewnętrznymi usługami
 │   ├── supabase/          # Klient Supabase
@@ -44,275 +52,406 @@ src/
 
 ### 2.2 Struktura Nawigacji
 
-- **Strona główna** (`/`) - Landing page aplikacji
+#### Strony Publiczne:
+- **Strona główna** (`/`) - Landing page z karuzelą specjalistów
 - **O Platformie** (`/about`) - Informacje o platformie
 - **Kontakt** (`/contact`) - Strona kontaktowa
-- **Cennik** (`/pricing`) - Plany cenowe
-- **Katalog Specjalistów** (`/catalog`) - Lista dostępnych specjalistów
-- **Panel Specjalisty** (`/dashboard`) - Panel dla zalogowanych specjalistów
-- **Klienci** (`/clients`) - Zarządzanie klientami
+- **Cennik** (`/pricing`) - Plany cenowe z przełącznikiem płatności
+- **Katalog Specjalistów** (`/catalog`) - Lista z filtrowaniem i paginacją
+- **Profil Specjalisty** (`/specialist/:id`) - Publiczny profil specjalisty
+- **Zostań Specjalistą** (`/become-specialist`) - Informacje dla specjalistów
+
+#### Strony Autoryzacji:
+- **Logowanie** (`/login`) - Formularz logowania
+- **Rejestracja** (`/register`) - Formularz rejestracji
+- **Resetowanie hasła** (`/forgot-password`, `/reset-password`)
+
+#### Panel Specjalisty (chronione):
+- **Dashboard** (`/dashboard`) - Panel główny z zakładkami i statystykami
+- **Klienci** (`/clients`) - Zarządzanie klientami z wyszukiwaniem
+- **Szczegóły Klienta** (`/clients/:id`) - Profil klienta z zakładkami
 - **Zwierzęta** (`/pets`) - Zarządzanie zwierzętami
-- **Profil Specjalisty** (`/profile`) - Edycja profilu specjalisty
-- **Ustawienia Konta** (`/settings`) - Ustawienia konta użytkownika
-- **Panel Administratora** (`/admin`) - Panel administracyjny
+- **Profil Zwierzęcia** (`/pets/:id`) - Szczegółowy profil z notatkami
+- **Profil Specjalisty** (`/profile`) - Edycja profilu
+- **Ustawienia Konta** (`/settings`) - Ustawienia i subskrypcja
+
+#### Panel Administratora:
+- **Panel Administratora** (`/admin`) - Dashboard administratora
+- **Zarządzanie użytkownikami** (`/admin/users`)
+- **Zarządzanie klientami** (`/admin/clients`)
+- **Zarządzanie zwierzętami** (`/admin/pets`)
+- **Zarządzanie wizytami** (`/admin/visits`)
+- **Programy opieki** (`/admin/care-programs`)
+- **Ustawienia systemu** (`/admin/settings`) - z audytem bazy danych
 
 ## 3. Kluczowe Funkcjonalności
 
-### 3.1 Zarządzanie Kontem
+### 3.1 Strona Główna i Marketing
 
-#### 3.1.1 Rejestracja i Logowanie
-- Rejestracja nowego użytkownika (`/register`)
-- Logowanie istniejącego użytkownika (`/login`)
-- Wylogowanie z systemu
+#### 3.1.1 Sekcja Hero
+- Główny nagłówek z wyróżnionymi słowami kluczowymi
+- Opis platformy z korzyściami
+- Przyciski CTA: "Przeglądaj specjalistów" i "Dołącz jako specjalista"
+- Responsywne obrazy przedstawiające pracę z zwierzętami
 
-#### 3.1.2 Profil Specjalisty
-- Edycja danych podstawowych (imię, nazwisko, tytuł)
-- Dodawanie i edycja specjalizacji
-- Dodawanie i edycja usług
-- Zarządzanie danymi kontaktowymi
-- Zarządzanie zdjęciem profilowym
-- Dodawanie i edycja informacji o wykształceniu i doświadczeniu
-- Zarządzanie linkami do mediów społecznościowych
+#### 3.1.2 Karuzela Specjalistów
+- Prezentacja zweryfikowanych specjalistów z priorytetem dla featured
+- Automatyczne przewijanie z możliwością zatrzymania
+- Losowy start karuzeli przy każdym odświeżeniu
+- Responsywne karty specjalistów z podstawowymi informacjami
+- Loading states i fallback data
 
-#### 3.1.3 Ustawienia Konta
-- Zmiana hasła
-- Zarządzanie subskrypcją
-- Usuwanie konta
+#### 3.1.3 Sekcja Korzyści
+- Prezentacja kluczowych korzyści platformy
+- Ikony ilustrujące każdą korzyść
+- Responsywny układ grid
 
-### 3.2 Panel Specjalisty (Dashboard)
+#### 3.1.4 Sekcja Call-to-Action
+- Zachęta dla specjalistów do dołączenia
+- Linki do rejestracji i cennika
+- Wyróżniony design przyciągający uwagę
 
-#### 3.2.1 Przegląd
-- Statystyki (liczba klientów, zwierząt, wizyt)
-- Informacje o aktualnym planie
-- Baner promocyjny zachęcający do wykupienia planu płatnego w celu uzyskania widoczności w katalogu specjalistów, zawierający przycisk "Edytuj profil" kierujący do ustawień
+### 3.2 System Autoryzacji
+
+#### 3.2.1 Rejestracja i Logowanie
+- Formularz rejestracji z walidacją Zod
+- Logowanie z obsługą błędów
+- Resetowanie hasła przez email
+- Context API do zarządzania stanem autoryzacji
+
+#### 3.2.2 Role Użytkowników
+- Specjalista - pełny dostęp do funkcji zarządzania
+- Administrator - dostęp do panelu administracyjnego
+- System weryfikacji specjalistów
+
+### 3.3 Profil Specjalisty
+
+#### 3.3.1 Edycja Profilu
+- Zakładka podstawowych informacji (imię, nazwisko, tytuł)
+- Zarządzanie specjalizacjami z checkboxami
+- Definiowanie oferowanych usług
+- Upload zdjęcia profilowego z podglądem
+- Informacje kontaktowe i lokalizacja
+- Wykształcenie i doświadczenie (tablice pól)
+- Media społecznościowe z ikonami
+
+#### 3.3.2 Widoczność w Katalogu
+- System subskrypcji wpływający na widoczność
+- Featured specialists - priorytetowe wyświetlanie
+- Weryfikacja profili przez administratorów
+
+### 3.4 Panel Specjalisty (Dashboard)
+
+#### 3.4.1 Przegląd
+- Statystyki: liczba klientów, zwierząt, wizyt
+- Informacje o aktualnym pakiecie subskrypcji
+- Limity pakietu i wykorzystanie
 - Nadchodzące wizyty
+- Baner promocyjny dla pakietów płatnych
 
-#### 3.2.2 Zakładki Panelu
-- Przegląd - ogólne informacje i statystyki
-- Klienci - skrócony widok bazy klientów
-- Zwierzęta - skrócony widok zwierząt
-- Kalendarz - widok zaplanowanych wizyt
+#### 3.4.2 Zakładki Panelu
+- **Przegląd** - statystyki i informacje ogólne
+- **Klienci** - skrócony widok bazy klientów
+- **Zwierzęta** - skrócony widok zwierząt
+- **Kalendarz** - zaplanowane wizyty
+- **Admin** - panel administracyjny (tylko dla adminów)
 
-### 3.3 Zarządzanie Klientami
+### 3.5 Zarządzanie Klientami
 
-#### 3.3.1 Lista Klientów
-- Wyświetlanie wszystkich klientów
-- Wyszukiwanie i filtrowanie klientów
-- Dodawanie nowych klientów
-- Usuwanie klientów
+#### 3.5.1 Lista Klientów
+- Responsywna tabela z wyszukiwaniem
+- Filtrowanie po różnych kryteriach
+- Paginacja wyników
+- Dodawanie nowych klientów przez responsive formularze
 
-#### 3.3.2 Profil Klienta
-- Dane kontaktowe klienta
-- Lista zwierząt klienta
-- Historia wizyt wszystkich zwierząt klienta
-- Dodawanie notatek do profilu klienta
+#### 3.5.2 Profil Klienta z Zakładkami
+- **Przegląd** - dane kontaktowe i podstawowe informacje
+- **Zwierzęta** - lista zwierząt klienta z możliwością dodawania
+- **Wizyty** - historia wizyt wszystkich zwierząt
+- **Notatki** - notatki dotyczące klienta
 
-### 3.4 Zarządzanie Zwierzętami
+#### 3.5.3 Responsive Formularze
+- Dialog na desktop, Drawer na mobile
+- Walidacja z React Hook Form + Zod
+- Kontrola limitów pakietu przy dodawaniu
 
-#### 3.4.1 Lista Zwierząt
-- Wyświetlanie wszystkich zwierząt
-- Wyszukiwanie i filtrowanie zwierząt
-- Dodawanie nowych zwierząt do klientów
+### 3.6 Zarządzanie Zwierzętami
 
-#### 3.4.2 Profil Zwierzęcia
-- Informacje podstawowe (gatunek, rasa, wiek, waga)
-- Historia zdrowia
-- Historia wizyt
-- Plany opieki
-- Notatki behawioralne i dietetyczne
-- Zakładka "Notatki" z możliwością dodawania, edycji i usuwania notatek oraz zarządzania załącznikami (zdjęcia, pliki PDF)
+#### 3.6.1 Lista Zwierząt
+- Tabela z informacjami o wszystkich zwierzętach
+- Wyszukiwanie i filtrowanie
+- Informacje o kliencie-właścicielu
 
-### 3.5 Zarządzanie Wizytami
+#### 3.6.2 Szczegółowy Profil Zwierzęcia
+- **Przegląd** - podstawowe informacje i charakterystyka
+- **Wizyty** - historia wizyt z możliwością dodawania i edycji
+- **Programy Opieki** - aktywne i zakończone programy
+- **Notatki** - system notatek z załącznikami
 
-#### 3.5.1 Dodawanie Wizyt
-- Tworzenie nowych wizyt dla zwierząt z zapisem do bazy danych
-- Wybór typu wizyty z predefiniowanej listy (dropdown)
+#### 3.6.3 Formularz Zwierzęcia
+- Sekcje: podstawowe info, charakterystyka, pomiary, dane medyczne
+- Obsługa dat urodzenia i kastracji
+- Walidacja wagi i wieku
+- Informacje o czipie i szczepieniach
+
+#### 3.6.4 System Notatek
+- Edytor tekstu z formatowaniem (React Quill)
+- Upload i zarządzanie załącznikami (zdjęcia, PDF)
+- Drag & drop dla plików
+- Preview załączników
+- Edycja i usuwanie notatek
+
+### 3.7 Zarządzanie Wizytami
+
+#### 3.7.1 Dodawanie i Edycja Wizyt
+- Responsive formularze (Dialog/Drawer)
 - Wybór daty i godziny
-- Dodawanie notatek i zaleceń
-- Ustawianie przypomnień o kontroli
-
-#### 3.5.2 Historia Wizyt
-- Wyświetlanie historii wizyt dla zwierzęcia pobieranych z bazy danych
-- Szczegóły wizyty (notatki, zalecenia)
-- Edycja istniejących wizyt
-
-### 3.6 Plany Opieki
-
-#### 3.6.1 Tworzenie Planów Opieki
-- Definiowanie celu planu
-- Ustawianie statusu (aktywny, zakończony, wstrzymany)
-- Dodawanie instrukcji i zaleceń
-- Określanie dat rozpoczęcia i zakończenia
-
-#### 3.6.2 Zarządzanie Planami Opieki
-- Wyświetlanie planów opieki dla zwierzęcia
-- Edycja istniejących planów
-- Zmiana statusu planu
-
-### 3.7 Funkcje Administracyjne
-
-#### 3.7.1 Panel Administratora
-- Zarządzanie użytkownikami
-- Zarządzanie klientami
-- Zarządzanie zwierzętami
-- Zarządzanie wizytami
-- Zarządzanie planami opieki
-- Ustawienia systemu
-
-## 4. Widoki i Interfejs Użytkownika
-
-### 4.1 Komponenty Wspólne
-
-#### 4.1.1 Nagłówek (Header)
-- Logo aplikacji
-- Menu nawigacyjne
-- Przyciski logowania/wylogowania
-- Menu dla urządzeń mobilnych
-
-#### 4.1.2 Stopka (Footer)
-- Linki do stron informacyjnych
-- Linki do mediów społecznościowych
-- Informacje prawne (regulamin, polityka prywatności)
-
-### 4.2 Formularze
-
-#### 4.2.1 Formularze Klientów
-- Formularze dodawania/edycji klientów
-- Responsywne wersje dla urządzeń mobilnych (drawersy) i desktopowych (dialogi)
-
-#### 4.2.2 Formularze Zwierząt
-- Formularze dodawania/edycji zwierząt
-- Pola podstawowych informacji
-- Pola charakterystyki
-- Pola pomiarów
-- Pola medyczne
-
-#### 4.2.3 Formularze Wizyt
-- Formularze dodawania/edycji wizyt
-- Wybór daty i czasu
-- Wybór typu wizyty
+- Dropdown z typami wizyt
 - Edytor tekstu dla notatek i zaleceń
-- Ustawienia kontroli
+- Ustawienia kontroli i follow-up
 
-#### 4.2.4 Formularze Planów Opieki
-- Formularze dodawania/edycji planów opieki
-- Wybór statusu
-- Wybór dat
-- Definiowanie celu i instrukcji
+#### 3.7.2 Historia Wizyt
+- Tabela wizyt w profilu zwierzęcia
+- Szczegółowe widoki wizyt w dialogach
+- Edycja istniejących wizyt
+- Integracja z kalendarzem
 
-### 4.3 Widoki Szczegółowe
+### 3.8 Programy Opieki
 
-#### 4.3.1 Profil Zwierzęcia
-- Zakładka przeglądu z podstawowymi informacjami
-- Zakładka wizyt z historią wizyt
-- Zakładka planów opieki
-- Zakładka notatek z załącznikami
+#### 3.8.1 Tworzenie Programów
+- Formularz z definicją celu
+- Statusy: aktywny, zakończony, wstrzymany
+- Daty rozpoczęcia i zakończenia
+- Szczegółowe instrukcje
 
-#### 4.3.2 Profil Klienta
-- Zakładka przeglądu z danymi kontaktowymi
-- Zakładka zwierząt z listą zwierząt klienta
-- Zakładka wizyt z historią wizyt
-- Zakładka notatek
+#### 3.8.2 Zarządzanie Programami
+- Lista programów w profilu zwierzęcia
+- Edycja statusów i treści
+- Responsive formularze
 
-#### 4.3.3 Szczegóły Wizyty
-- Dialog ze szczegółami wizyty
-- Możliwość edycji wizyty
+### 3.9 System Subskrypcji
 
-#### 4.3.4 Szczegóły Planu Opieki
-- Dialog ze szczegółami planu opieki
-- Możliwość edycji planu
+#### 3.9.1 Pakiety
+- **Darmowy** - podstawowe funkcje z limitami
+- **Professional** - rozszerzone limity
+- **Featured** - priorytetowa widoczność w katalogu
 
-## 5. Integracje
+#### 3.9.2 Kontrola Limitów
+- Middleware sprawdzający limity przed akcjami
+- Alerty o przekroczeniu limitów
+- Propozycje upgrade'u pakietu
+- Smart Action Buttons z kontrolą dostępu
 
-### 5.1 Baza Danych (Supabase)
-- Przechowywanie danych użytkowników
-- Przechowywanie danych klientów i zwierząt
-- Przechowywanie danych wizyt i planów opieki
+### 3.10 Katalog Specjalistów
 
-### 5.2 Uwierzytelnianie (Supabase Auth)
-- Rejestracja i logowanie użytkowników
-- Zarządzanie sesją użytkownika
-- Resetowanie hasła
+#### 3.10.1 Przeglądanie
+- Responsywna siatka kart specjalistów
+- Filtrowanie po specjalizacjach i lokalizacji
+- Paginacja z kontrolą ilości elementów na stronę
+- Wyszukiwanie tekstowe
 
-### 5.3 Przechowywanie Plików (Supabase Storage)
-- Przechowywanie zdjęć profilowych specjalistów
-- Przechowywanie dokumentów związanych z klientami i zwierzętami
+#### 3.10.2 Karty Specjalistów
+- Zdjęcie, imię, tytuł
+- Lista specjalizacji
+- Lokalizacja i ocena
+- Badge weryfikacji
+- Wyróżnienie featured specialists
 
-## 6. Technologie
+### 3.11 Panel Administratora
 
-### 6.1 Frontend
-- React.js + TypeScript
-- React Router (nawigacja)
-- Tanstack Query (zarządzanie stanem)
-- Tailwind CSS (stylowanie)
-- shadcn/ui (komponenty UI)
-- React Hook Form + Zod (walidacja formularzy)
-- Lucide (ikony)
-- Recharts (wykresy i wizualizacje)
+#### 3.11.1 Zarządzanie Systemem
+- Dashboard z ogólnymi statystykami
+- Zarządzanie użytkownikami z rolami
+- Moderacja klientów, zwierząt, wizyt
+- Zarządzanie programami opieki
 
-### 6.2 Backend
-- Supabase (baza danych, autentykacja, storage)
+#### 3.11.2 Audyt Systemu
+- Sprawdzanie integralności bazy danych
+- Wykrywanie problemów z relacjami
+- Automatyczne naprawy prostych błędów
+- Rekomendacje bezpieczeństwa
 
-## 7. Responsywność
+## 4. Technologie i Architektura
 
-Aplikacja jest w pełni responsywna i dostosowana do urządzeń:
-- Desktopowych (komputer stacjonarny, laptop)
-- Tabletów
-- Telefonów komórkowych
+### 4.1 Frontend Stack
+- **React 18** + TypeScript - nowoczesny framework
+- **Tailwind CSS** - utility-first styling
+- **shadcn/ui** - komponenty UI z Radix
+- **React Router Dom** - routing SPA
+- **React Hook Form + Zod** - formularze z walidacją
+- **TanStack Query** - zarządzanie stanem serwera
+- **i18next** - internacjonalizacja (PL, EN, DE, UK)
 
-Dla urządzeń mobilnych stosowane są specjalne komponenty (Drawer zamiast Dialog).
+### 4.2 Backend i Baza Danych
+- **Supabase** - BaaS z PostgreSQL
+- **Row Level Security** - bezpieczeństwo na poziomie wierszy
+- **Real-time subscriptions** - aktualizacje w czasie rzeczywistym
+- **File Storage** - przechowywanie załączników
 
-## 8. Bezpieczeństwo
+### 4.3 Wzorce Architektoniczne
 
-- Uwierzytelnianie użytkowników
-- Zabezpieczenie endpointów API
-- Autoryzacja na poziomie bazy danych (Row Level Security)
-- Szyfrowanie danych wrażliwych
-- Kontrola dostępu do danych (tylko właściwi użytkownicy mają dostęp do swoich danych)
+#### 4.3.1 Responsive Design
+- Mobile-first approach
+- useIsMobile hook do wykrywania urządzeń
+- Dialog/Drawer pattern dla formularzy
+- Responsywne komponenty UI
+
+#### 4.3.2 State Management
+- React Query do cache'owania danych serwera
+- Context API do stanu globalnego (auth)
+- Lokalne hooks do logiki biznesowej
+- Optimistic updates
+
+#### 4.3.3 Type Safety
+- Kompletne typowanie TypeScript
+- Generowane typy z Supabase
+- Zod schemas dla walidacji
+- Mapowanie typów DB ↔ Frontend
+
+#### 4.3.4 Performance
+- Lazy loading komponentów
+- Image optimization
+- Query caching i invalidation
+- Virtualizacja długich list
+
+## 5. Internationalization (i18n)
+
+### 5.1 Obsługiwane Języki
+- **Polski** (domyślny) - pełne tłumaczenie
+- **Angielski** - kompletne tłumaczenie
+- **Niemiecki** - podstawowe tłumaczenie
+- **Ukraiński** - podstawowe tłumaczenie
+
+### 5.2 Implementacja
+- react-i18next z automatyczną detekcją języka
+- Pliki JSON z tłumaczeniami w public/locales/
+- Language switcher w headerze
+- localStorage do zapamiętywania preferencji
+
+### 5.3 Zakres Tłumaczeń
+- Elementy interfejsu (przyciski, etykiety, komunikaty)
+- Komunikaty błędów i powiadomienia
+- Teksty statyczne (strona główna, o nas, cennik)
+- Dynamiczne dane (typy wizyt, specjalizacje) - przez bazę danych
+
+## 6. Bezpieczeństwo i Kontrola Dostępu
+
+### 6.1 Autoryzacja
+- JWT tokens przez Supabase Auth
+- Context-based auth state management
+- Protected routes z ProtectedRoute component
+- Role-based access control
+
+### 6.2 Bezpieczeństwo Bazy Danych
+- Row Level Security (RLS) policies
+- Encrypted storage dla wrażliwych danych
+- Audyt bezpieczeństwa w panelu admin
+- SQL injection protection
+
+### 6.3 Kontrola Limitów
+- Package-based feature gating
+- Real-time limit checking
+- Graceful degradation przy przekroczeniu
+- Clear upgrade paths
+
+## 7. User Experience (UX)
+
+### 7.1 Responsywność
+- Mobile-first design approach
+- Breakpoints: mobile (< 768px), tablet (768-1024px), desktop (> 1024px)
+- Touch-friendly interfaces na mobile
+- Optimized navigation dla każdego urządzenia
+
+### 7.2 Loading States
+- Skeleton loaders dla danych
+- Spinner indicators dla akcji
+- Progressive loading dla dużych list
+- Error boundaries z fallback UI
+
+### 7.3 Feedback i Notyfikacje
+- Toast notifications dla akcji użytkownika
+- Success/error states w formularzach
+- Confirmation dialogi dla destructive actions
+- Loading indicators dla długich operacji
+
+### 7.4 Accessibility
+- Semantic HTML struktura
+- ARIA labels i roles
+- Keyboard navigation support
+- High contrast mode compatibility
+
+## 8. Deployment i DevOps
+
+### 8.1 Hosting
+- Lovable platform dla development
+- GitHub integration dla version control
+- Custom domain support
+- SSL certificates
+
+### 8.2 Environment Management
+- Development/staging/production environments
+- Environment variables przez Supabase
+- Feature flags dla nowych funkcji
+- Database migrations
+
+### 8.3 Monitoring
+- Error tracking i logging
+- Performance monitoring
+- User analytics
+- Database performance metrics
 
 ## 9. Przyszłe Rozszerzenia
 
-### 9.1 Planowane Funkcjonalności
-- System rezerwacji online dla klientów
-- Integracja z systemami płatności
-- Powiadomienia SMS/email dla klientów
-- Generowanie raportów i analiz
-- Integracja z apteką weterynaryjną
-- System wystawiania recept
-- Eksport karty pacjenta do PDF
-- Obsługa wielu walut dla cennika (PLN, USD, EUR)
+### 9.1 Planowane Funkcjonalności V2
+- **System rezerwacji online** dla klientów końcowych
+- **Integracja płatnicza** (Stripe/PayU) dla rozliczeń
+- **SMS/Email notifications** dla przypomnień
+- **Mobile app** (React Native)
+- **API dla zewnętrznych integracji**
 
-## 10. Internationalization (i18n) / Wielojęzyczność
+### 9.2 Ulepszenia UX
+- **Dark mode** support
+- **Offline functionality** z service workers
+- **Advanced search** z AI-powered suggestions
+- **Bulk operations** dla administracji
+- **Export/Import** danych w różnych formatach
 
-### 10.1 Podejścia do Tłumaczenia
+### 9.3 Integracje Zewnętrzne
+- **Systemy weterynaryjne** (VetPartner, eWet)
+- **Apteki weterynaryjne** dla recept
+- **Laboratoria** dla wyników badań
+- **Systemy płatności** dla klientów końcowych
+- **Mapy i nawigacja** do gabinetów
 
-#### 10.1.1 Tłumaczenie Elementów Interfejsu (UI)
-- Stałe teksty (etykiety, przyciski, nagłówki, komunikaty) są tłumaczone za pomocą biblioteki i18n frontendu (react-i18next)
-- Wykorzystywane są pliki tłumaczeń w formacie JSON dla każdego wspieranego języka
-- Teksty interfejsu są przyporządkowane do kluczy tłumaczeń, co umożliwia łatwe przełączanie między językami bez przeładowania aplikacji
+### 9.4 Analytics i Business Intelligence
+- **Dashboard analytics** dla specjalistów
+- **Revenue tracking** dla pakietów
+- **User behavior analysis**
+- **Performance KPIs** monitoring
+- **A/B testing** framework
 
-#### 10.1.2 Tłumaczenie Danych z Bazy Danych
-- Dynamiczne dane wymagające tłumaczenia (nazwy specjalizacji, typy wizyt) są przechowywane w bazie danych
-- Tłumaczenia mogą być przechowywane w osobnych tabelach tłumaczeń lub w kolumnach JSONB
-- Warstwa danych odpowiada za pobieranie odpowiedniej wersji językowej w zależności od preferencji użytkownika
+## 10. Maintenance i Support
 
-### 10.2 Wspierane Języki
-- Polski (domyślny)
-- Angielski
-- Niemiecki
-- Ukraiński
+### 10.1 Updates i Patching
+- Regularne security updates
+- Feature updates z backward compatibility
+- Database schema migrations
+- Breaking changes communication
 
-### 10.3 Przełączanie Języków
-- Komponent przełącznika języków dostępny w nagłówku aplikacji
-- Zapamiętywanie wybranego języka w localStorage przeglądarki
-- Automatyczne wykrywanie preferencji językowych użytkownika przy pierwszej wizycie
+### 10.2 User Support
+- In-app help system
+- Knowledge base i FAQ
+- Ticket support system
+- Video tutorials dla nowych funkcji
 
-## 11. Wersjonowanie i Aktualizacje
-
-Aplikacja jest rozwijana w modelu przyrostowym, z regularnymi aktualizacjami wprowadzającymi nowe funkcjonalności i poprawiającymi istniejące.
+### 10.3 Backup i Recovery
+- Automated daily backups
+- Point-in-time recovery
+- Disaster recovery procedures
+- Data retention policies
 
 ---
 
-Dokument przygotowany przez zespół PetsFlow
-Data: 7 maja 2025
-
+**Dokument przygotowany przez zespół PetsFlow**  
+**Data aktualizacji: 15 czerwca 2025**  
+**Wersja: 2.0**
