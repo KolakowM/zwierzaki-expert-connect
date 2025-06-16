@@ -9,11 +9,27 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-4">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" 
+                alt="Pets Flow Logo" 
+                className="w-6 h-6"
+              />
+              <span className="text-lg font-bold text-primary">PetsFlow</span>
               <img src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" alt="Pets Flow Logo" className="w-6 h-6" />
               <span className="text-lg font-bold text-primary">PetsFlow</span>
             </div>
+<<<<<<< HEAD
+            <p className="text-sm text-muted-foreground">
+              Platforma CRM dla specjalistów opiekujących się zwierzętami, z publicznym katalogiem usług.
+            </p>
+<<<<<<< HEAD
+            <p className="text-sm text-muted-foreground">© 2025 PetsFlow. Wszelkie prawa zastrzeżone.</p>
+=======
+=======
             <p className="text-sm text-muted-foreground">Platforma dla specjalistów opiekujących się zwierzętami, z publicznym katalogiem usług.</p>
+>>>>>>> a9c767143c47ed518f909a2a47084801a418bf64
             <p className="text-sm text-muted-foreground">{t('footer.copyright')}</p>
+>>>>>>> 1aa4145556a90194899172ff2eb202389c5fa92b
           </div>
           <div>
             <h3 className="mb-4 text-sm font-medium">{t('footer.platform')}</h3>
@@ -66,7 +82,11 @@ export default function Footer() {
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                   <polyline points="22,6 12,13 2,6" />
                 </svg>
+<<<<<<< HEAD
+                <span>kontakt@PetsFlow.pl</span>
+=======
                 <span>{t('footer.email')}</span>
+>>>>>>> 1aa4145556a90194899172ff2eb202389c5fa92b
               </li>
               <li className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">

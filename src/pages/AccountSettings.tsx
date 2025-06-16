@@ -34,6 +34,29 @@ export default function AccountSettings() {
   // Get password settings hook
   const { isSubmitting: isPasswordSubmitting, onPasswordSubmit } = usePasswordSettings();
 
+// Available specializations
+const availableSpecializations = [{
+  id: "dietetyk zwierzęcya",
+  label: "Dietetyka zwierzęca"
+}, {
+  id: "behawiorysta",
+  label: "Behawiorysta"
+}, {
+  id: "trener",
+  label: "Trener"
+}, {
+  id: "groomer",
+  label: "Groomer"
+}, {
+  id: "wet",
+  label: "Weterynarz"
+}, {
+  id: "physio",
+  label: "Fizjoterapeuta"
+}, {
+  id: "alternative",
+  label: "Medycyna alternatywna"
+}];
   // Get profile form hooks
   const {
     services,
