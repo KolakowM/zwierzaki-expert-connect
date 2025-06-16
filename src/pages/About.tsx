@@ -9,7 +9,9 @@ export default function About() {
             <h1 className="text-3xl font-bold tracking-tight">O Platformie</h1>
           </div>
           
-          <p className="text-lg text-muted-foreground">PetsFlow to kompleksowa platforma dla specjalistów zajmujących się dbaniem o dobrostan zwierząt, w każdym aspekcie od opiekunów po dietetyków aż do trenerów.</p>
+          <p className="text-lg text-muted-foreground">
+            PetsFlow to kompleksowa platforma CRM dla specjalistów zajmujących się opieką nad zwierzętami.
+          </p>
 
           <div className="space-y-8 pt-6">
             <div className="space-y-3">
@@ -22,7 +24,9 @@ export default function About() {
 
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">Dla Kogo?</h2>
-              <p>Platforma PetsFlow została stworzona z myślą o:</p>
+              <p>
+                Platforma PetsFlow została stworzona z myślą o:
+              </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Lekarzach weterynarii</li>
                 <li>Zoodietetykach</li>
@@ -49,7 +53,11 @@ export default function About() {
 
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">Nasza Historia</h2>
-              <p>PetsFlow powstało z pasji do zwierząt i zrozumienia potrzeb specjalistów pracujących w branży. Platforma jest stale rozwijana w oparciu o feedback użytkowników, aby dostarczać najbardziej użytecznych funkcji dla nowoczesnej praktyki około-weterynaryjnej.</p>
+              <p>
+                PetsFlow powstało z pasji do zwierząt i zrozumienia potrzeb specjalistów pracujących w branży.
+                Platforma jest stale rozwijana w oparciu o feedback użytkowników, aby dostarczać najbardziej użytecznych
+                funkcji dla nowoczesnej praktyki weterynaryjnej i około-weterynaryjnej.
+              </p>
             </div>
           </div>
         </div>

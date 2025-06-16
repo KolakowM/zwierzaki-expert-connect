@@ -7,7 +7,7 @@ export default function FAQ() {
   const faqItems = [
     {
       question: "Czym jest PetsFlow?",
-      answer: "PetsFlow to platforma zaprojektowana specjalnie dla specjalistów zajmujących się opieką nad zwierzętami, takich jak weterynarze, behawioryści, groomerzy i inni. Platforma umożliwia zarządzanie klientami, pacjentami, terminarzem wizyt oraz dokumentacją medyczną w jednym miejscu."
+      answer: "PetsFlow to platforma CRM zaprojektowana specjalnie dla specjalistów zajmujących się opieką nad zwierzętami, takich jak weterynarze, behawioryści, groomerzy i inni. Platforma umożliwia zarządzanie klientami, pacjentami, terminarzem wizyt oraz dokumentacją medyczną w jednym miejscu."
     },
     {
       question: "Czy mogę korzystać z PetsFlow na urządzeniach mobilnych?",

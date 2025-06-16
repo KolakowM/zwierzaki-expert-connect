@@ -18,7 +18,7 @@ export default function Terms2() {
               <h2 className="text-2xl font-semibold">§1. Postanowienia ogólne</h2>
               <p>
                 1. Niniejszy regulamin określa zasady świadczenia usług drogą elektroniczną w ramach 
-                serwisu internetowego PetsFlow, dostępnego pod adresem www.petsflow.pl.
+                serwisu internetowego PetsFlow, dostępnego pod adresem www.PetsFlow.pl.
               </p>
               <p>
                 2. Właścicielem i operatorem serwisu PetsFlow jest PetsFlow Sp. z o.o. 
@@ -34,7 +34,7 @@ export default function Terms2() {
                 Na potrzeby niniejszego regulaminu przyjmuje się następujące znaczenie pojęć:
               </p>
               <ol className="list-decimal pl-6 space-y-2">
-                <li><strong>Serwis</strong> – platforma internetowa PetsFlow dostępna pod adresem www.petsflow.pl;</li>
+                <li><strong>Serwis</strong> – platforma internetowa PetsFlow dostępna pod adresem www.PetsFlow.pl;</li>
                 <li><strong>Usługodawca</strong> – PetsFlow Sp. z o.o. z siedzibą w Warszawie;</li>
                 <li><strong>Użytkownik</strong> – osoba fizyczna, osoba prawna lub jednostka organizacyjna nieposiadająca osobowości prawnej, korzystająca z Serwisu;</li>
                 <li><strong>Specjalista</strong> – Użytkownik świadczący usługi w zakresie opieki nad zwierzętami;</li>
@@ -135,7 +135,7 @@ export default function Terms2() {
                 1. Użytkownik ma prawo składać reklamacje dotyczące funkcjonowania Serwisu.
               </p>
               <p>
-                2. Reklamacje należy kierować na adres e-mail: reklamacje@expertzwierzaki.pl 
+                2. Reklamacje należy kierować na adres e-mail: reklamacje@PetsFlow.pl 
                 lub listownie na adres siedziby Usługodawcy.
               </p>
               <p>
