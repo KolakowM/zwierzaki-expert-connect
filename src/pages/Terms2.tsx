@@ -135,7 +135,7 @@ export default function Terms2() {
                 1. Użytkownik ma prawo składać reklamacje dotyczące funkcjonowania Serwisu.
               </p>
               <p>
-                2. Reklamacje należy kierować na adres e-mail: reklamacje@expertzwierzaki.pl 
+                2. Reklamacje należy kierować na adres e-mail: kontakt@petsflow.pl 
                 lub listownie na adres siedziby Usługodawcy.
               </p>
               <p>
