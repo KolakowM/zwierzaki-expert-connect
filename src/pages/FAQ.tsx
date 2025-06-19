@@ -40,10 +40,6 @@ export default function FAQ() {
     {
       question: "Jakie wsparcie oferujecie użytkownikom?",
       answer: "Oferujemy wsparcie techniczne poprzez email w godzinach pracy. Dodatkowo, na naszej stronie znajduje się baza wiedzy z poradnikami i instrukcjami obsługi platformy."
-    },
-    {
-      question: "",
-      answer: ""
     }
   ];
 
