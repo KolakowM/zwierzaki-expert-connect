@@ -47,20 +47,25 @@ export default function FAQ() {
     <MainLayout>
       <div className="container py-12 md:py-20">
         <div className="mx-auto max-w-3xl space-y-8">
-          <div className="text-center">
+          <header className="text-center">
             <div className="flex justify-center">
-              <HelpCircle className="h-10 w-10 text-primary" />
+              <HelpCircle className="h-10 w-10 text-primary" aria-hidden="true" />
             </div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">Często Zadawane Pytania</h1>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
+              Często Zadawane Pytania
+            </h1>
             <p className="mt-4 text-lg text-muted-foreground">
               Znajdź odpowiedzi na najczęściej zadawane pytania dotyczące platformy PetsFlow.
             </p>
-          </div>
+          </header>
 
           <Accordion type="single" collapsible className="w-full">
             {faqItems.map((item, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left text-lg font-medium">
+                <AccordionTrigger 
+                  className="text-left text-lg font-medium"
+                  aria-expanded="false"
+                >
                   {item.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">

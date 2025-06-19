@@ -8,6 +8,9 @@ import { CTASection } from "@/components/home/CTASection";
 const Index = () => {
   return (
     <MainLayout>
+      <h1 className="sr-only">
+        PetsFlow - Platforma dla specjalistów ds. zwierząt. Znajdź najlepszego specjalistę dla swojego zwierzaka.
+      </h1>
       <HeroSection />
       <FeaturedSpecialistsSection />
       <BenefitsSection />
