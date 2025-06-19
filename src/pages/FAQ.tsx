@@ -31,7 +31,7 @@ export default function FAQ() {
     },
     {
       question: "Czy mogę importować istniejące dane klientów?",
-      answer: "Tak, oferujemy możliwość importu danych z plików CSV oraz z popularnych systemów CRM. Nasz zespół wsparcia może pomóc w procesie migracji danych."
+      answer: "Tak, oferujemy możliwość importu danych do naszej bazy. W tym celu należy się z nami skontaktować aby omówić szczegóły."
     },
     {
       question: "Jak mogę anulować subskrypcję?",
@@ -39,11 +39,11 @@ export default function FAQ() {
     },
     {
       question: "Jakie wsparcie oferujecie użytkownikom?",
-      answer: "Oferujemy wsparcie techniczne poprzez email, czat online oraz telefonicznie w godzinach pracy. Dodatkowo, na naszej stronie znajduje się baza wiedzy z poradnikami i instrukcjami obsługi platformy."
+      answer: "Oferujemy wsparcie techniczne poprzez email w godzinach pracy. Dodatkowo, na naszej stronie znajduje się baza wiedzy z poradnikami i instrukcjami obsługi platformy."
     },
     {
-      question: "Czy możliwe jest dodawanie wielu pracowników do jednego konta?",
-      answer: "Tak, w planie 'Klinika' oferujemy możliwość dodawania wielu użytkowników z różnymi poziomami dostępu. To idealne rozwiązanie dla większych praktyk i klinik, gdzie z systemu korzysta wielu specjalistów."
+      question: "",
+      answer: ""
     }
   ];
 
