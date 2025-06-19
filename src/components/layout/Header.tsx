@@ -47,7 +47,7 @@ export default function Header() {
   ];
 
   const renderDesktopNavigation = () => (
-    <nav id="navigation" className="hidden gap-6 md:flex" role="navigation" aria-label="Nawigacja główna">
+    <nav id="navigation" className="hidden gap-6 lg:flex" role="navigation" aria-label="Nawigacja główna">
       {navigationLinks.map(link => (
         <Link key={link.to} to={link.to} className="text-sm font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1">
           {link.label}
@@ -62,7 +62,7 @@ export default function Header() {
         <Button 
           variant="outline" 
           size="icon" 
-          className="md:hidden"
+          className="lg:hidden"
           aria-label="Otwórz menu nawigacji"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
@@ -129,7 +129,7 @@ export default function Header() {
         {renderDesktopNavigation()}
         
         <div className="flex items-center gap-2">
-          {isMobile ? (
+          {window.innerWidth < 1024 ? (
             renderMobileNavigation()
           ) : (
             <>
