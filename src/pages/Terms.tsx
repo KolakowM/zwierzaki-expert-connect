@@ -18,7 +18,7 @@ export default function Terms() {
               <h2 className="text-2xl font-semibold">1. Wstęp</h2>
               <p>
                 Niniejsze Warunki Korzystania określają zasady użytkowania platformy internetowej PetsFlow, 
-                dostępnej pod adresem www.petsflow.pl. Korzystając z platformy, użytkownik akceptuje poniższe 
+                dostępnej pod adresem www.PetsFlow.pl. Korzystając z platformy, użytkownik akceptuje poniższe 
                 warunki i zobowiązuje się do ich przestrzegania.
               </p>
             </div>
@@ -94,7 +94,7 @@ export default function Terms() {
               <h2 className="text-2xl font-semibold">8. Prawa własności intelektualnej</h2>
               <p>
                 Wszelkie prawa własności intelektualnej do Platformy, w tym do jej elementów graficznych, logotypów, 
-                układu, treści oraz kodu źródłowego przysługują ExpertZwierzaki Sp. z o.o. lub podmiotom, z którymi 
+                układu, treści oraz kodu źródłowego przysługują PetsFlow Sp. z o.o. lub podmiotom, z którymi 
                 zawarła stosowne umowy. Korzystanie z Platformy nie oznacza nabycia jakichkolwiek praw do tych elementów.
               </p>
             </div>

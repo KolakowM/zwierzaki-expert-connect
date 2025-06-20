@@ -46,7 +46,9 @@ export default function Contact() {
               <Mail className="h-10 w-10 text-primary" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Kontakt</h1>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">Masz pytania dotyczące platformy PetsFlow? Skontaktuj się z nami, a nasz zespół z przyjemnością odpowie na wszystkie Twoje pytania.</p>
+            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              Masz pytania dotyczące platformy PetsFlow? Skontaktuj się z nami, a nasz zespół z przyjemnością odpowie na wszystkie Twoje pytania.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -69,7 +71,7 @@ export default function Contact() {
                 </div>
                 <h3 className="text-xl font-medium">Email</h3>
                 <p className="text-muted-foreground">Wyślij nam wiadomość email</p>
-                <p>kontakt@petsflow.pl</p>
+                <p>kontakt@PetsFlow.pl</p>
                 <p className="text-sm text-muted-foreground">Odpowiadamy w ciągu 24h</p>
               </div>
             </Card>
