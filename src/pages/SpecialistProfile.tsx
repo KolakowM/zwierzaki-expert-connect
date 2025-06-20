@@ -62,13 +62,13 @@ const SpecialistProfile = () => {
             experience: data.experience || "Brak informacji o doświadczeniu",
             location: data.location || "Brak lokalizacji",
             phoneNumber: data.phone_number || "Brak numeru telefonu",
-            email: data.email || "Brak adresu email", // Changed to use data.email
+            email: data.email || "Brak adresu email",
             website: data.website || "",
             socialMedia: data.social_media || {},
             image: data.photo_url || null,
-            rating: 4.9, // Sample rating for UI display
-            reviewCount: 5, // Sample review count for UI display
-            verified: true, // Sample verified status for UI display
+            rating: 4.9,
+            reviewCount: 5,
+            verified: true,
           });
         } else {
           // Fallback to sample data for demo
@@ -105,7 +105,13 @@ const SpecialistProfile = () => {
     return (
       <MainLayout>
         <div className="container py-8 flex justify-center items-center min-h-[50vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <div 
+            className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
+            role="status"
+            aria-label="Ładowanie profilu specjalisty"
+          >
+            <span className="sr-only">Ładowanie...</span>
+          </div>
         </div>
       </MainLayout>
     );
@@ -129,9 +135,13 @@ const SpecialistProfile = () => {
   return (
     <MainLayout>
       <div className="container py-8">
+        <h1 className="sr-only">
+          Profil specjalisty: {specialist.name} - {specialist.title}
+        </h1>
+        
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Left column - Profile info */}
-          <div className="md:col-span-1">
+          <aside className="md:col-span-1" aria-label="Informacje o specjaliście">
             <Card>
               <CardContent className="p-0">
                 <ProfileHeader specialist={specialist} />
@@ -146,12 +156,12 @@ const SpecialistProfile = () => {
             
             {/* Specializations */}
             <SpecializationsList specialistId={specialist.id} />
-          </div>
+          </aside>
           
           {/* Right column - Tabs with detailed info */}
-          <div className="md:col-span-2">
+          <main className="md:col-span-2" aria-label="Szczegółowe informacje o specjaliście">
             <ProfileTabs specialist={specialist} />
-          </div>
+          </main>
         </div>
       </div>
     </MainLayout>

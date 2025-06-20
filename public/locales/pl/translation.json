@@ -1,3 +1,4 @@
+
 {
   "common": {
     "save": "Zapisz",
@@ -13,6 +14,22 @@
     "submit": "Wyślij",
     "close": "Zamknij",
     "language": "Język"
+  },
+  "accessibility": {
+    "skip_to_content": "Przejdź do głównej treści",
+    "skip_to_navigation": "Przejdź do nawigacji",
+    "open_menu": "Otwórz menu",
+    "close_menu": "Zamknij menu",
+    "loading": "Ładowanie",
+    "search_results": "Wyniki wyszukiwania",
+    "main_navigation": "Nawigacja główna",
+    "mobile_navigation": "Nawigacja mobilna",
+    "platform_navigation": "Nawigacja platformy",
+    "support_navigation": "Wsparcie i pomoc",
+    "page_description": "Opis strony",
+    "form_errors": "Błędy formularza",
+    "required_field": "Pole wymagane",
+    "optional_field": "Pole opcjonalne"
   },
   "catalog": {
     "results_count": "Znaleziono {{count}} użytkowników",
@@ -67,7 +84,7 @@
     "terms": "Warunki Korzystania",
     "regulations": "Regulamin",
     "contact_info": "Kontakt",
-    "phone": "+48 123 456 789",
+    "phone": "",
     "email": "kontakt@petsflow.pl",
     "location": "Warszawa, Polska",
     "copyright": "© 2025 PetsFlow. Wszelkie prawa zastrzeżone."

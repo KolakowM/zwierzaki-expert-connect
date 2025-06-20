@@ -1,103 +1,148 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { AccessibleImage } from "@/components/ui/accessible-image";
+
 export default function Footer() {
-  const {
-    t
-  } = useTranslation();
-  return <footer className="border-t bg-muted/40">
+  const { t } = useTranslation();
+
+  return (
+    <footer className="border-t bg-muted/40" role="contentinfo">
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-4">
+          {/* Logo i opis platformy */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <img 
-                src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" 
-                alt="Pets Flow Logo" 
+              <AccessibleImage
+                src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png"
+                alt="PetsFlow - logo platformy"
                 className="w-6 h-6"
               />
               <span className="text-lg font-bold text-primary">PetsFlow</span>
-              <img src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" alt="Pets Flow Logo" className="w-6 h-6" />
-              <span className="text-lg font-bold text-primary">PetsFlow</span>
             </div>
-<<<<<<< HEAD
             <p className="text-sm text-muted-foreground">
-              Platforma CRM dla specjalistów opiekujących się zwierzętami, z publicznym katalogiem usług.
+              {t("footer.description")}
             </p>
-<<<<<<< HEAD
-            <p className="text-sm text-muted-foreground">© 2025 PetsFlow. Wszelkie prawa zastrzeżone.</p>
-=======
-=======
-            <p className="text-sm text-muted-foreground">Platforma dla specjalistów opiekujących się zwierzętami, z publicznym katalogiem usług.</p>
->>>>>>> a9c767143c47ed518f909a2a47084801a418bf64
-            <p className="text-sm text-muted-foreground">{t('footer.copyright')}</p>
->>>>>>> 1aa4145556a90194899172ff2eb202389c5fa92b
+            <p className="text-sm text-muted-foreground">
+              {t("footer.copyright")}
+            </p>
           </div>
-          <div>
-            <h3 className="mb-4 text-sm font-medium">{t('footer.platform')}</h3>
+
+          {/* Nawigacja platformy */}
+          <nav aria-label="Nawigacja platformy">
+            <h3 className="mb-4 text-sm font-medium">{t("footer.platform")}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/about" className="hover:text-primary">{t('footer.about')}</Link>
+                <Link
+                  to="/about"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.about")}
+                </Link>
               </li>
               <li>
-                <Link to="/pricing" className="hover:text-primary">{t('footer.pricing')}</Link>
+                <Link
+                  to="/pricing"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.pricing")}
+                </Link>
               </li>
               <li>
-                <Link to="/catalog" className="hover:text-primary">{t('footer.catalog')}</Link>
+                <Link
+                  to="/catalog"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.catalog")}
+                </Link>
               </li>
               <li>
-                <Link to="/become-specialist" className="hover:text-primary">{t('footer.become_specialist')}</Link>
+                <Link
+                  to="/become-specialist"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.become_specialist")}
+                </Link>
               </li>
             </ul>
-          </div>
-          <div>
-            <h3 className="mb-4 text-sm font-medium">{t('footer.support')}</h3>
+          </nav>
+
+          {/* Pomoc i wsparcie */}
+          <nav aria-label="Wsparcie i pomoc">
+            <h3 className="mb-4 text-sm font-medium">{t("footer.support")}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/faq" className="hover:text-primary">{t('footer.faq')}</Link>
+                <Link
+                  to="/faq"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.faq")}
+                </Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-primary">{t('footer.contact')}</Link>
+                <Link
+                  to="/contact"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.contact")}
+                </Link>
               </li>
               <li>
-                <Link to="/privacy" className="hover:text-primary">{t('footer.privacy')}</Link>
+                <Link
+                  to="/privacy"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.privacy")}
+                </Link>
               </li>
               <li>
-                <Link to="/terms" className="hover:text-primary">{t('footer.terms')}</Link>
+                <Link
+                  to="/terms"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.terms")}
+                </Link>
               </li>
               <li>
-                <Link to="/terms2" className="hover:text-primary">{t('footer.regulations')}</Link>
+                <Link
+                  to="/terms2"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.regulations")}
+                </Link>
               </li>
             </ul>
-          </div>
+          </nav>
+
+          {/* Dane kontaktowe */}
           <div>
-            <h3 className="mb-4 text-sm font-medium">{t('footer.contact_info')}</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
-                <span>{t('footer.phone')}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-<<<<<<< HEAD
-                <span>kontakt@PetsFlow.pl</span>
-=======
-                <span>{t('footer.email')}</span>
->>>>>>> 1aa4145556a90194899172ff2eb202389c5fa92b
-              </li>
-              <li className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span>{t('footer.location')}</span>
-              </li>
-            </ul>
+            <h3 className="mb-4 text-sm font-medium">{t("footer.contact_info")}</h3>
+            <address className="not-italic">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    className="text-primary" aria-hidden="true">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                  <span>{t("footer.email")}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    className="text-primary" aria-hidden="true">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span>{t("footer.location")}</span>
+                </li>
+              </ul>
+            </address>
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 }

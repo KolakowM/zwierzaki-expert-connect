@@ -135,8 +135,9 @@ export default function Terms2() {
                 1. Użytkownik ma prawo składać reklamacje dotyczące funkcjonowania Serwisu.
               </p>
               <p>
-                2. Reklamacje należy kierować na adres e-mail: reklamacje@PetsFlow.pl 
-                lub listownie na adres siedziby Usługodawcy.
+
+                2. Reklamacje należy kierować na adres e-mail: kontakt@petsflow.pl 
+ lub listownie na adres siedziby Usługodawcy.
               </p>
               <p>
                 3. Reklamacja powinna zawierać: dane Użytkownika, opis problemu oraz oczekiwania 

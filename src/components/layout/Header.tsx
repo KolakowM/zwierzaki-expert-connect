@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { AccessibleImage } from "@/components/ui/accessible-image";
 
 export default function Header() {
   const { isAuthenticated, logout } = useAuth();
@@ -46,9 +47,9 @@ export default function Header() {
   ];
 
   const renderDesktopNavigation = () => (
-    <nav className="hidden gap-6 md:flex">
+    <nav id="navigation" className="hidden gap-6 lg:flex" role="navigation" aria-label="Nawigacja główna">
       {navigationLinks.map(link => (
-        <Link key={link.to} to={link.to} className="text-sm font-medium hover:text-primary">
+        <Link key={link.to} to={link.to} className="text-sm font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1">
           {link.label}
         </Link>
       ))}
@@ -58,36 +59,45 @@ export default function Header() {
   const renderMobileNavigation = () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Menu</span>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="lg:hidden"
+          aria-label="Otwórz menu nawigacji"
+        >
+          <Menu className="h-5 w-5" aria-hidden="true" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right">
-        <nav className="flex flex-col gap-4 mt-8">
+      <SheetContent side="right" aria-label="Menu nawigacji mobilnej">
+        <nav className="flex flex-col gap-4 mt-8" role="navigation" aria-label="Nawigacja mobilna">
           {navigationLinks.map(link => (
-            <Link key={link.to} to={link.to} className="text-base font-medium hover:text-primary py-2">
+            <Link key={link.to} to={link.to} className="text-base font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm py-2">
               {link.label}
             </Link>
           ))}
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard" className="text-base font-medium hover:text-primary py-2">
+              <Link to="/dashboard" className="text-base font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm py-2">
                 {t("header.dashboard")}
               </Link>
-              <Link to="/settings" className="text-base font-medium hover:text-primary py-2">
+              <Link to="/settings" className="text-base font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm py-2">
                 {t("header.settings")}
               </Link>
-              <Button variant="ghost" onClick={handleLogout} className="justify-start px-0">
+              <Button 
+                variant="ghost" 
+                onClick={handleLogout} 
+                className="justify-start px-0"
+                aria-label="Wyloguj się z konta"
+              >
                 {t("header.logout")}
               </Button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-base font-medium hover:text-primary py-2">
+              <Link to="/login" className="text-base font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm py-2">
                 {t("header.login")}
               </Link>
-              <Link to="/register" className="text-base font-medium hover:text-primary py-2">
+              <Link to="/register" className="text-base font-medium hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm py-2">
                 {t("header.register")}
               </Link>
             </>
@@ -101,23 +111,25 @@ export default function Header() {
   );
 
   return (
-    <header className="w-full border-b">
+    <header className="w-full border-b" role="banner">
       <div className="container flex items-center justify-between py-4">
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center">
-            <img src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" alt="Pets Flow Logo" className="w-8 h-8" />
-            {/* <span className="ml-2 font-bold text-primary text-2xl"> PetsFlow </span> - stara nazwa */}
+          <Link to="/" className="flex items-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm">
+            <AccessibleImage 
+              src="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" 
+              alt="PetsFlow - logo platformy dla specjalistów zwierząt" 
+              className="w-8 h-8" 
+            />
             <span className="font-bold text-xl md:text-2xl">
               <span className="text-primary">Pets</span>Flow
             </span>
-
           </Link>
         </div>
         
         {renderDesktopNavigation()}
         
         <div className="flex items-center gap-2">
-          {isMobile ? (
+          {window.innerWidth < 1024 ? (
             renderMobileNavigation()
           ) : (
             <>
@@ -129,11 +141,15 @@ export default function Header() {
                   </Link>
                   <Link to="/settings">
                     <Button variant="outline">
-                      <UserCircle className="mr-2 h-4 w-4" />
+                      <UserCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                       {t("header.settings")}
                     </Button>
                   </Link>
-                  <Button variant="ghost" onClick={handleLogout}>
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleLogout}
+                    aria-label="Wyloguj się z konta"
+                  >
                     {t("header.logout")}
                   </Button>
                 </>
