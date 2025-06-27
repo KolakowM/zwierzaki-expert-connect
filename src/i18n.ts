@@ -32,12 +32,18 @@ i18n
     },
     
     react: {
-      useSuspense: true,
+      useSuspense: false, // Disable suspense to prevent build issues
     },
     
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
+    
+    // Add debug mode for development
+    debug: process.env.NODE_ENV === 'development',
+    
+    // Add load callback to handle initialization
+    initImmediate: false,
   });
 
 export default i18n;
