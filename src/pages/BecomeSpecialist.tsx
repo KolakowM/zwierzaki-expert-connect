@@ -21,16 +21,6 @@ export default function BecomeSpecialist() {
       icon: <CheckCircle className="h-10 w-10 text-primary" />,
       title: "Pozyskiwanie klientów",
       description: "Twój profil w katalogu specjalistów, widoczny dla potencjalnych klientów szukających usług."
-    },
-    {
-      icon: <Clock className="h-10 w-10 text-primary" />,
-      title: "Oszczędność czasu",
-      description: "Automatyzacja rutynowych zadań administracyjnych, więcej czasu na pracę z pacjentami."
-    },
-    {
-      icon: <PieChart className="h-10 w-10 text-primary" />,
-      title: "Analityka biznesowa",
-      description: "Raporty i statystyki pomagające zrozumieć trendy w Twojej praktyce i podejmować lepsze decyzje."
     }
   ];
 
