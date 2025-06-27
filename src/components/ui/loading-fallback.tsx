@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LoadingSpinner } from './loading-spinner';
+import LoadingSpinner from './loading-spinner';
 
 export const LoadingFallback = () => {
   return (
