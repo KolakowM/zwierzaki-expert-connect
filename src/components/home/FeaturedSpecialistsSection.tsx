@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import { SpecialistCard } from "@/components/specialists/SpecialistCard";
 import { useTranslation } from "react-i18next";
 import { useFeaturedSpecialists } from "@/hooks/useFeaturedSpecialists";
-import { fallbackSpecialists } from "@/data/fallbackSpecialists";
 import { Loader2 } from "lucide-react";
+import { EmptySpecialistsState } from "./EmptySpecialistsState";
 import { 
   Carousel,
   CarouselContent,
@@ -18,11 +18,8 @@ export function FeaturedSpecialistsSection() {
   const { t } = useTranslation();
   const { specialists, loading, error } = useFeaturedSpecialists(12);
 
-  // Use fallback data if no specialists are loaded and not loading
-  const displaySpecialists = specialists.length > 0 ? specialists : (!loading ? fallbackSpecialists : []);
-  
-  console.log("Index page - specialists count:", specialists.length, "loading:", loading, "displaySpecialists:", displaySpecialists.length);
-  console.log("Featured specialists in display list:", displaySpecialists.filter(s => s.is_featured).length);
+  console.log("Index page - specialists count:", specialists.length, "loading:", loading);
+  console.log("Featured specialists in display list:", specialists.filter(s => s.is_featured).length);
 
   return (
     <section className="py-16">
@@ -50,42 +47,41 @@ export function FeaturedSpecialistsSection() {
               Odśwież stronę
             </Button>
           </div>
-        ) : displaySpecialists.length > 0 ? (
-          <div className="relative">
-            <Carousel 
-              className="w-full"
-              randomStart={true}
-              autoplay={true}
-              autoplayDelay={3500}
-            >
-              <CarouselContent className="-ml-2 md:-ml-4">
-                {displaySpecialists.map(specialist => (
-                  <CarouselItem key={specialist.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/4">
-                    <div className="h-full">
-                      <SpecialistCard specialist={specialist} />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="hidden md:block">
-                <CarouselPrevious className="left-0 -translate-x-1/2" />
-                <CarouselNext className="right-0 translate-x-1/2" />
-              </div>
-            </Carousel>
-          </div>
+        ) : specialists.length > 0 ? (
+          <>
+            <div className="relative">
+              <Carousel 
+                className="w-full"
+                randomStart={true}
+                autoplay={true}
+                autoplayDelay={3500}
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {specialists.map(specialist => (
+                    <CarouselItem key={specialist.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/4">
+                      <div className="h-full">
+                        <SpecialistCard specialist={specialist} />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="hidden md:block">
+                  <CarouselPrevious className="left-0 -translate-x-1/2" />
+                  <CarouselNext className="right-0 translate-x-1/2" />
+                </div>
+              </Carousel>
+            </div>
+            <div className="mt-10 text-center">
+              <Link to="/catalog">
+                <Button variant="outline" size="lg">
+                  {t('home.view_all_specialists')}
+                </Button>
+              </Link>
+            </div>
+          </>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Brak dostępnych specjalistów w tym momencie.</p>
-          </div>
+          <EmptySpecialistsState />
         )}
-        
-        <div className="mt-10 text-center">
-          <Link to="/catalog">
-            <Button variant="outline" size="lg">
-              {t('home.view_all_specialists')}
-            </Button>
-          </Link>
-        </div>
       </div>
     </section>
   );
