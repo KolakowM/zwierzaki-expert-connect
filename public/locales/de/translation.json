@@ -110,5 +110,16 @@
     "recommended": "Empfohlen",
     "start_free": "Kostenlos starten",
     "choose_plan": "Diesen Plan wählen"
+  },
+  "not_found": {
+    "title": "Seite nicht gefunden",
+    "description": "Entschuldigung, die Seite, die Sie suchen, existiert nicht oder wurde verschoben.",
+    "back_home": "Zurück zur Startseite",
+    "go_back": "Zurück gehen",
+    "helpful_links": "Nützliche Links",
+    "browse_specialists": "Spezialisten durchsuchen",
+    "about_platform": "Über die Plattform",
+    "contact_us": "Kontaktieren Sie uns",
+    "pricing": "Preise"
   }
 }

@@ -110,5 +110,16 @@
     "recommended": "Recommended",
     "start_free": "Start for free",
     "choose_plan": "Choose this plan"
+  },
+  "not_found": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you're looking for doesn't exist or has been moved.",
+    "back_home": "Back to Home",
+    "go_back": "Go Back",
+    "helpful_links": "Helpful Links",
+    "browse_specialists": "Browse Specialists",
+    "about_platform": "About Platform",
+    "contact_us": "Contact Us",
+    "pricing": "Pricing"
   }
 }

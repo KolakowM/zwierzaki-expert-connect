@@ -82,7 +82,6 @@
     "contact": "Kontakt",
     "privacy": "Polityka Prywatności",
     "terms": "Warunki Korzystania",
-    "regulations": "Regulamin",
     "contact_info": "Kontakt",
     "phone": "",
     "email": "kontakt@petsflow.pl",
@@ -127,5 +126,16 @@
     "recommended": "Polecany",
     "start_free": "Rozpocznij za darmo",
     "choose_plan": "Wybierz plan"
+  },
+  "not_found": {
+    "title": "Strona nie została znaleziona",
+    "description": "Przepraszamy, ale strona, której szukasz, nie istnieje lub została przeniesiona.",
+    "back_home": "Powrót do strony głównej",
+    "go_back": "Wróć",
+    "helpful_links": "Przydatne linki",
+    "browse_specialists": "Przeglądaj specjalistów",
+    "about_platform": "O platformie",
+    "contact_us": "Skontaktuj się z nami",
+    "pricing": "Cennik"
   }
 }
