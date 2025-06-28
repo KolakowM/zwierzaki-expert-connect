@@ -19,7 +19,6 @@ import ClientDetails from './pages/ClientDetails';
 import Pets from './pages/Pets';
 import PetProfile from './pages/PetProfile';
 import Terms from './pages/Terms';
-import Terms2 from './pages/Terms2';
 import Privacy from './pages/Privacy';
 import FAQ from './pages/FAQ';
 import ProfileEditor from './pages/ProfileEditor';
@@ -69,7 +68,6 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/terms" element={<Terms />} />
-                <Route path="/terms2" element={<Terms2 />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/catalog" element={<Catalog />} />

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AccessibleImage } from "@/components/ui/accessible-image";
@@ -100,14 +101,6 @@ export default function Footer() {
                   className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
                 >
                   {t("footer.terms")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms2"
-                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
-                >
-                  {t("footer.regulations")}
                 </Link>
               </li>
             </ul>
