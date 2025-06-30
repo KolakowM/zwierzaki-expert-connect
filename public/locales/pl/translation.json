@@ -13,7 +13,8 @@
     "no": "Nie",
     "submit": "Wyślij",
     "close": "Zamknij",
-    "language": "Język"
+    "language": "Język",
+    "and": "i"
   },
   "accessibility": {
     "skip_to_content": "Przejdź do głównej treści",
@@ -83,10 +84,11 @@
     "privacy": "Polityka Prywatności",
     "terms": "Warunki Korzystania",
     "contact_info": "Kontakt",
-    "phone": "",
+    "phone": "+48 123 456 789",
     "email": "kontakt@petsflow.pl",
     "location": "Warszawa, Polska",
-    "copyright": "© 2025 PetsFlow. Wszelkie prawa zastrzeżone."
+    "copyright": "© 2025 PetsFlow. Wszelkie prawa zastrzeżone.",
+    "description": "Platforma łącząca właścicieli zwierząt z najlepszymi specjalistami."
   },
   "home": {
     "hero_title": "Znajdź najlepszego specjalistę dla Twojego zwierzaka",
@@ -137,5 +139,12 @@
     "about_platform": "O platformie",
     "contact_us": "Skontaktuj się z nami",
     "pricing": "Cennik"
+  },
+  "contact": {
+    "form_success": "Wiadomość została wysłana pomyślnie",
+    "form_success_description": "Dziękujemy za kontakt! Odpowiemy najszybciej jak to możliwe.",
+    "form_error": "Błąd wysyłania",
+    "form_error_description": "Wystąpił błąd podczas wysyłania wiadomości. Spróbuj ponownie.",
+    "sending": "Wysyłanie..."
   }
 }
