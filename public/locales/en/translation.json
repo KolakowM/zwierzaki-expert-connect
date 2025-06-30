@@ -13,7 +13,8 @@
     "no": "No",
     "submit": "Submit",
     "close": "Close",
-    "language": "Language"
+    "language": "Language",
+    "and": "and"
   },
   "catalog": {
     "results_count": "Found {{count}} users",
@@ -53,7 +54,34 @@
     "logout_success": "Logout successful",
     "logout_goodbye": "Thank you for using the system.",
     "register_success": "Registration successful",
-    "register_welcome": "Your account has been created!"
+    "register_welcome": "Your account has been created!",
+    "password_requirements": "Password requirements",
+    "password_min_length": "At least 8 characters",
+    "password_uppercase": "At least one uppercase letter",
+    "password_lowercase": "At least one lowercase letter",
+    "password_number": "At least one number",
+    "password_special_char": "At least one special character",
+    "registration_success_title": "Registration completed successfully!",
+    "registration_success_description": "Your account has been created. Check your email to activate your account.",
+    "check_email_title": "Check your email",
+    "check_email_description": "We sent an activation link to {{email}}. Click the link to activate your account.",
+    "resend_email": "Resend email",
+    "back_to_login": "Back to login",
+    "email_not_received": "Didn't receive the email? Check your spam folder or contact us.",
+    "errors": {
+      "invalid_credentials": "Invalid email or password. Check your credentials and try again.",
+      "email_not_confirmed": "Your account has not been activated yet. Check your email and click the activation link.",
+      "user_already_exists": "A user with this email already exists. Try logging in.",
+      "password_too_short": "Password must be at least 8 characters long.",
+      "invalid_email": "Please enter a valid email address.",
+      "rate_limit_exceeded": "Too many attempts. Please try again in a few minutes.",
+      "signup_disabled": "Registration is currently disabled.",
+      "password_too_weak": "Password is too weak. Meet all requirements.",
+      "password_requirements_not_met": "Password does not meet all requirements.",
+      "passwords_not_match": "Passwords do not match.",
+      "terms_not_accepted": "You must accept the terms of service and privacy policy.",
+      "generic_error": "An error occurred. Please try again later."
+    }
   },
   "footer": {
     "platform": "Platform",

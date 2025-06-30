@@ -12,6 +12,7 @@ import AuthFormWrapper from "@/components/auth/AuthFormWrapper";
 import AuthFormError from "@/components/auth/AuthFormError";
 import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
 import { useToast } from "@/hooks/use-toast";
+import { getAuthErrorMessage } from "@/utils/authErrorHandler";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,15 +34,13 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Fix: Call login with email and password directly instead of credentials object
       const result = await login(email, password);
       
       if (result !== true && result?.error) {
-        setError(result.error);
+        setError(getAuthErrorMessage(result.error, t));
       }
-      // No need to redirect here - onAuthStateChange handles that
     } catch (err: any) {
-      setError(err.message || "Błąd logowania. Sprawdź dane i spróbuj ponownie.");
+      setError(getAuthErrorMessage(err, t));
       console.error("Login error:", err);
     } finally {
       setIsLoading(false);

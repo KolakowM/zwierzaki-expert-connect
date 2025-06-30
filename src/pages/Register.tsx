@@ -12,6 +12,9 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import AuthFormWrapper from "@/components/auth/AuthFormWrapper";
 import AuthFormError from "@/components/auth/AuthFormError";
 import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
+import PasswordRequirements, { validatePassword } from "@/components/auth/PasswordRequirements";
+import RegistrationSuccess from "@/components/auth/RegistrationSuccess";
+import { getAuthErrorMessage } from "@/utils/authErrorHandler";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,10 +27,14 @@ const Register = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  
+  const passwordValidation = validatePassword(formData.password);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,20 +45,25 @@ const Register = () => {
     e.preventDefault();
     setError("");
     
+    // Validate password requirements
+    if (!passwordValidation.isValid) {
+      setError(t('auth.errors.password_requirements_not_met'));
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
-      setError("Hasła nie są identyczne");
+      setError(t('auth.errors.passwords_not_match'));
       return;
     }
     
     if (!acceptedTerms) {
-      setError("Musisz zaakceptować regulamin");
+      setError(t('auth.errors.terms_not_accepted'));
       return;
     }
     
     setIsLoading(true);
     
     try {
-      // Fix: Pass all required parameters to register function
       const result = await register(
         formData.email, 
         formData.password,
@@ -60,18 +72,18 @@ const Register = () => {
       );
       
       if (result === true) {
+        setRegisteredEmail(formData.email);
+        setShowSuccess(true);
         toast({
           title: t("auth.register_success"),
           description: t("auth.register_welcome"),
         });
       } else if (result?.error) {
-        setError(result.error);
+        setError(getAuthErrorMessage(result.error, t));
       }
-      
-      // No need to navigate here - onAuthStateChange handles that
     } catch (err: any) {
       console.error("Registration error:", err);
-      setError(err.message || "Błąd rejestracji. Spróbuj ponownie później.");
+      setError(getAuthErrorMessage(err, t));
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +97,18 @@ const Register = () => {
   // Redirect to dashboard if user is already authenticated
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // Show success screen after registration
+  if (showSuccess) {
+    return (
+      <div className="container mx-auto flex items-center justify-center min-h-screen p-4">
+        <RegistrationSuccess
+          email={registeredEmail}
+          onBackToLogin={() => setShowSuccess(false)}
+        />
+      </div>
+    );
   }
 
   return (
@@ -144,6 +168,10 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            <PasswordRequirements 
+              password={formData.password} 
+              showRequirements={formData.password.length > 0}
+            />
           </div>
           
           <div className="space-y-2">
@@ -170,7 +198,7 @@ const Register = () => {
               <Link to="/terms" className="text-primary hover:underline">
                 {t('auth.terms')}
               </Link>{" "}
-              {t('common.and')}{" "}
+              i{" "}
               <Link to="/privacy" className="text-primary hover:underline">
                 {t('auth.privacy_policy')}
               </Link>
@@ -179,7 +207,11 @@ const Register = () => {
         </CardContent>
         
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading || !passwordValidation.isValid}
+          >
             {isLoading ? t('common.loading') : t('auth.register_title')}
           </Button>
           
