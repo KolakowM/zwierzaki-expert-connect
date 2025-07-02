@@ -14,6 +14,9 @@ interface AuthContextType {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<any>;
   updatePassword: (password: string) => Promise<any>;
+  verifySession: () => Promise<boolean>;
+  refreshUserData: () => Promise<any>;
+  isAdmin: () => boolean;
   subscriptionStatus: any;
   refreshSubscriptionStatus: () => Promise<void>;
 }
@@ -21,11 +24,37 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAuthenticated, isLoading, setUser, setIsLoading } = useAuthState();
-  const { login, register, logout, resetPassword, updatePassword } = useAuthMethods(setUser, setIsLoading);
+  const { user, isAuthenticated, isLoading, setUser, setIsLoading, sessionChecked, setSessionChecked } = useAuthState();
+  const { login, register, logout, verifySession, refreshUserData, isAdmin } = useAuthMethods({ user, setUser, setIsLoading });
   const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null);
 
-  useAuthListeners(setUser, setIsLoading);
+  useAuthListeners({ user, setUser, setSessionChecked, setIsLoading });
+
+  // Reset password function
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      return true;
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      return { error: error.message || "Failed to send reset email" };
+    }
+  };
+
+  // Update password function
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      return true;
+    } catch (error: any) {
+      console.error("Update password error:", error);
+      return { error: error.message || "Failed to update password" };
+    }
+  };
 
   // Function to check subscription status
   const refreshSubscriptionStatus = async () => {
@@ -69,6 +98,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     },
     resetPassword,
     updatePassword,
+    verifySession,
+    refreshUserData,
+    isAdmin,
     subscriptionStatus,
     refreshSubscriptionStatus,
   };
