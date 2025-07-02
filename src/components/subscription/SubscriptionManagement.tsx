@@ -1,21 +1,25 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useStripeSubscription } from "@/hooks/useStripeSubscription";
 import PackageUpgradeDialog from "./PackageUpgradeDialog";
 import CancelSubscriptionDialog from "./CancelSubscriptionDialog";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
 import UsageStatsCard from "./UsageStatsCard";
 import PackageFeaturesCard from "./PackageFeaturesCard";
+import StripeSubscriptionCard from "./StripeSubscriptionCard";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 const SubscriptionManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkSubscriptionStatus } = useStripeSubscription();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   
   const { 
     activeSubscription: subscription, 
@@ -39,6 +43,33 @@ const SubscriptionManagement = () => {
       return data || [];
     },
   });
+
+  // Check Stripe subscription status on component mount
+  useEffect(() => {
+    const checkStripeStatus = async () => {
+      if (user) {
+        const status = await checkSubscriptionStatus();
+        setStripeSubscription(status);
+      }
+    };
+    checkStripeStatus();
+  }, [user, checkSubscriptionStatus]);
+
+  // Check for successful checkout session
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    if (sessionId) {
+      toast({
+        title: "Płatność zakończona",
+        description: "Twoja subskrypcja została aktywowana!",
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Refresh subscription status
+      handleSubscriptionChange();
+    }
+  }, []);
 
   const handleManageSubscription = () => {
     setShowUpgradeDialog(true);
@@ -64,6 +95,12 @@ const SubscriptionManagement = () => {
     });
   };
 
+  const handleSubscriptionChange = async () => {
+    const status = await checkSubscriptionStatus();
+    setStripeSubscription(status);
+    refetch();
+  };
+
   const isLoading = subscriptionLoading || usageLoading;
 
   if (isLoading) {
@@ -87,6 +124,13 @@ const SubscriptionManagement = () => {
         subscription={subscription}
         onManageSubscription={handleManageSubscription}
         onCancelSubscription={handleCancelSubscription}
+      />
+
+      {/* Stripe Subscription Management */}
+      <StripeSubscriptionCard
+        packages={packages}
+        currentPackage={subscription}
+        onSubscriptionChange={handleSubscriptionChange}
       />
 
       {/* Usage Statistics */}
