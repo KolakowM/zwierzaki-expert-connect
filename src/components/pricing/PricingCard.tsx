@@ -56,11 +56,11 @@ export default function PricingCard({
       return;
     }
 
-    // Map Polish names to database package names
     const packageNameMap: Record<string, string> = {
-      "Zaawansowany": "Advanced",
-      "Zawodowiec": "Professional"
+      "Zaawansowany": "Zaawansowany",
+      "Zawodowiec": "Zawodowiec"
     };
+
 
     const databasePackageName = packageNameMap[name] || name;
     const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
