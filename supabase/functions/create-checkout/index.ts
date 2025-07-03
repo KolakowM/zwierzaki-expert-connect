@@ -36,7 +36,23 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { packageId, billingPeriod, stripePriceId } = await req.json();
+    const { packageId, billingPeriod } = await req.json();
+
+    // Get the Stripe price ID for this package and billing period
+    const { data: priceData, error: priceError } = await supabaseClient
+      .from('package_stripe_prices')
+      .select('stripe_price_id')
+      .eq('package_id', packageId)
+      .eq('billing_period', billingPeriod)
+      .eq('is_active', true)
+      .single();
+
+    if (priceError || !priceData) {
+      console.error('Error fetching price:', priceError);
+      throw new Error('No Stripe price found for this package');
+    }
+
+    const stripePriceId = priceData.stripe_price_id;
 
     // Check if customer exists
     const customers = await stripe.customers.list({

@@ -40,7 +40,7 @@ export default function PricingCard({
   const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
   const { user, isAuthenticated } = useAuth();
   
-  const { data: packages } = useQuery({
+  const { data: packages, isLoading: packagesLoading } = useQuery({
     queryKey: ['packages'],
     queryFn: getActivePackages,
   });
@@ -67,10 +67,13 @@ export default function PricingCard({
 
     if (selectedPackage) {
       await createCheckoutSession(selectedPackage.id, billingPeriod);
+    } else {
+      console.error('Package not found:', databasePackageName);
     }
   };
 
   const isFreePlan = name === "Testowy";
+  const isLoading = stripeLoading || packagesLoading;
   
   return (
     <Card className={popular ? "border-primary shadow-lg relative" : ""}>
@@ -121,9 +124,9 @@ export default function PricingCard({
             className="w-full"
             variant={popular ? "default" : "outline"}
             onClick={handleSubscribe}
-            disabled={stripeLoading}
+            disabled={isLoading}
           >
-            {stripeLoading ? "Loading..." : cta}
+            {isLoading ? "Loading..." : cta}
           </Button>
         )}
       </CardFooter>
