@@ -88,28 +88,35 @@ serve(async (req) => {
       const price = await stripe.prices.retrieve(priceId);
       const amount = price.unit_amount || 0;
       
-      // Map price amounts to tiers based on your pricing
-      if (amount <= 2999) {
+      // Map price amounts to tiers based on PLN pricing (amounts in cents)
+      if (amount <= 4900) { // 49 PLN or less
         subscriptionTier = "Advanced";
-      } else if (amount <= 5999) {
+      } else if (amount <= 9900) { // 99 PLN or less
         subscriptionTier = "Professional";
       } else {
         subscriptionTier = "Enterprise";
       }
       logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
 
-      // Update user_subscriptions table
-      await supabaseClient.from("user_subscriptions").upsert({
-        user_id: user.id,
-        package_id: (await supabaseClient.from('packages').select('id').eq('name', subscriptionTier).single()).data?.id,
-        status: 'active',
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscription.id,
-        stripe_price_id: priceId,
-        start_date: new Date(subscription.created * 1000).toISOString(),
-        end_date: subscriptionEnd,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+      // Get package ID for the subscription tier
+      const { data: packageData } = await supabaseClient
+        .from('packages')
+        .select('id')
+        .eq('name', subscriptionTier)
+        .single();
+
+      if (packageData) {
+        // Update user_subscriptions table
+        await supabaseClient.from("user_subscriptions").upsert({
+          user_id: user.id,
+          package_id: packageData.id,
+          status: 'active',
+          start_date: new Date(subscription.created * 1000).toISOString(),
+          end_date: subscriptionEnd,
+          payment_id: subscription.id,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+      }
     } else {
       logStep("No active subscription found");
     }

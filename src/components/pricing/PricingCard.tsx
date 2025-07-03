@@ -56,9 +56,14 @@ export default function PricingCard({
       return;
     }
 
-    // Find the matching package in the database
-    const packageName = name === "Zaawansowany" ? "Advanced" : name === "Zawodowiec" ? "Professional" : name;
-    const selectedPackage = packages?.find(pkg => pkg.name === packageName);
+    // Map Polish names to database package names
+    const packageNameMap: Record<string, string> = {
+      "Zaawansowany": "Advanced",
+      "Zawodowiec": "Professional"
+    };
+
+    const databasePackageName = packageNameMap[name] || name;
+    const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
 
     if (selectedPackage) {
       await createCheckoutSession(selectedPackage.id, billingPeriod);

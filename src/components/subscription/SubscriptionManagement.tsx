@@ -65,8 +65,10 @@ const SubscriptionManagement = () => {
       });
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      // Refresh subscription status
-      handleSubscriptionChange();
+      // Refresh subscription status after delay to allow Stripe webhook processing
+      setTimeout(() => {
+        handleSubscriptionChange();
+      }, 3000);
     }
   }, []);
 

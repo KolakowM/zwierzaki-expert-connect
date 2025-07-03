@@ -95,11 +95,15 @@ const PackageUpgradeDialog = ({
     
     try {
       await createCheckoutSession(selectedPackage.id, billingPeriod);
-      // Optionally refresh subscription status after some delay
+      onOpenChange(false);
+      toast({
+        title: "Przekierowanie do płatności",
+        description: "Zostałeś przekierowany do Stripe w celu dokonania płatności",
+      });
+      // Refresh subscription status after some delay
       setTimeout(() => {
         onUpgradeSuccess();
       }, 2000);
-      onOpenChange(false);
     } catch (error) {
       console.error('Error creating checkout session:', error);
       toast({

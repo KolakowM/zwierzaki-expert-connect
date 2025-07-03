@@ -53,6 +53,17 @@ serve(async (req) => {
       throw new Error("Missing packageId or billingPeriod");
     }
 
+    // Get package information and Stripe price ID
+    const { data: packageData, error: packageError } = await supabaseClient
+      .from('packages')
+      .select('name, price_pln')
+      .eq('id', packageId)
+      .single();
+
+    if (packageError || !packageData) {
+      throw new Error(`Package not found: ${packageId}`);
+    }
+
     // Get Stripe price ID for the package
     const { data: priceData, error: priceError } = await supabaseClient
       .from('package_stripe_prices')
