@@ -87,48 +87,52 @@ const CalendarTab = () => {
   const isLoading = isLoadingClients || isLoadingPets;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Calendar Sidebar */}
-      <CalendarSidebar 
-        date={date}
-        onSelectDate={setDate}
-        onAddAppointment={() => setShowNewAppointment(true)}
-        isLoading={isLoading}
-        visits={visits}
-      />
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* Calendar Sidebar - wider on large screens */}
+      <div className="lg:col-span-2">
+        <CalendarSidebar 
+          date={date}
+          onSelectDate={setDate}
+          onAddAppointment={() => setShowNewAppointment(true)}
+          isLoading={isLoading}
+          visits={visits}
+        />
+      </div>
 
       {/* Appointments List */}
-      <Card className="md:col-span-2">
-        <CardHeader>
-          <CardTitle>
-            Wizyty na {date ? format(date, "dd.MM.yyyy") : "wybrany dzień"}
-          </CardTitle>
-          <CardDescription>
-            {isLoadingVisits ? (
-              <div className="flex items-center">
-                <Loader2 size={14} className="mr-2 animate-spin" />
-                Ładowanie wizyt...
-              </div>
-            ) : (
-              visitsForSelectedDate.length > 0
-                ? `${visitsForSelectedDate.length} ${
-                    visitsForSelectedDate.length === 1 ? "wizyta" : "wizyty"
-                  } zaplanowane`
-                : "Brak wizyt na ten dzień"
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AppointmentList 
-            isLoading={isLoadingVisits}
-            appointments={visitsForSelectedDate}
-            onAppointmentClick={handleVisitClick}
-            onAddAppointment={() => setShowNewAppointment(true)}
-            clients={clients}
-            pets={allPets}
-          />
-        </CardContent>
-      </Card>
+      <div className="lg:col-span-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Wizyty na {date ? format(date, "dd.MM.yyyy") : "wybrany dzień"}
+            </CardTitle>
+            <CardDescription>
+              {isLoadingVisits ? (
+                <div className="flex items-center">
+                  <Loader2 size={14} className="mr-2 animate-spin" />
+                  Ładowanie wizyt...
+                </div>
+              ) : (
+                visitsForSelectedDate.length > 0
+                  ? `${visitsForSelectedDate.length} ${
+                      visitsForSelectedDate.length === 1 ? "wizyta" : "wizyty"
+                    } zaplanowane`
+                  : "Brak wizyt na ten dzień"
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AppointmentList 
+              isLoading={isLoadingVisits}
+              appointments={visitsForSelectedDate}
+              onAppointmentClick={handleVisitClick}
+              onAddAppointment={() => setShowNewAppointment(true)}
+              clients={clients}
+              pets={allPets}
+            />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* New Appointment Dialog */}
       <AppointmentForm 
