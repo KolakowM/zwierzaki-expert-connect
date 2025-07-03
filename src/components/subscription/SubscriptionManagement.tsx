@@ -10,7 +10,6 @@ import CancelSubscriptionDialog from "./CancelSubscriptionDialog";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
 import UsageStatsCard from "./UsageStatsCard";
 import PackageFeaturesCard from "./PackageFeaturesCard";
-import StripeSubscriptionCard from "./StripeSubscriptionCard";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 const SubscriptionManagement = () => {
@@ -126,12 +125,6 @@ const SubscriptionManagement = () => {
         onCancelSubscription={handleCancelSubscription}
       />
 
-      {/* Stripe Subscription Management */}
-      <StripeSubscriptionCard
-        packages={packages}
-        currentPackage={subscription}
-        onSubscriptionChange={handleSubscriptionChange}
-      />
 
       {/* Usage Statistics */}
       <UsageStatsCard

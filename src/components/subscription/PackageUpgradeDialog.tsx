@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useStripeSubscription } from "@/hooks/useStripeSubscription";
 import { upgradeSubscription, validatePackageUpgrade } from "@/services/subscriptionService";
-import { CheckCircle, XCircle, Crown } from "lucide-react";
+import { CheckCircle, XCircle, Crown, CreditCard, Settings, Check } from "lucide-react";
 
 interface Package {
   id: string;
   name: string;
+  description?: string;
   price_pln?: number;
   max_clients: number;
   max_pets: number;
@@ -50,6 +52,7 @@ const PackageUpgradeDialog = ({
   onUpgradeSuccess
 }: PackageUpgradeDialogProps) => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [isValidating, setIsValidating] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [validationResult, setValidationResult] = useState<{
@@ -57,6 +60,7 @@ const PackageUpgradeDialog = ({
     issues: string[];
   } | null>(null);
   const { toast } = useToast();
+  const { createCheckoutSession, openCustomerPortal, isLoading: stripeLoading } = useStripeSubscription();
 
   const handleSelectPackage = (pkg: Package) => {
     setSelectedPackage(pkg);
@@ -84,6 +88,30 @@ const PackageUpgradeDialog = ({
     } finally {
       setIsValidating(false);
     }
+  };
+
+  const handleStripeCheckout = async () => {
+    if (!selectedPackage) return;
+    
+    try {
+      await createCheckoutSession(selectedPackage.id, billingPeriod);
+      // Optionally refresh subscription status after some delay
+      setTimeout(() => {
+        onUpgradeSuccess();
+      }, 2000);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Błąd płatności",
+        description: "Nie udało się uruchomić procesu płatności",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    await openCustomerPortal();
   };
 
   const handleUpgrade = async () => {
@@ -115,6 +143,7 @@ const PackageUpgradeDialog = ({
   const handleClose = () => {
     onOpenChange(false);
     setSelectedPackage(null);
+    setBillingPeriod('monthly');
     setValidationResult(null);
   };
 
@@ -129,6 +158,48 @@ const PackageUpgradeDialog = ({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Current Subscription Status */}
+          {currentPackage && (
+            <div className="p-4 border rounded-lg bg-muted/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  <Check className="h-3 w-3 mr-1" />
+                  Active Subscription
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {currentPackage.package_name}
+                </span>
+              </div>
+              <Button 
+                onClick={handleManageSubscription}
+                disabled={stripeLoading}
+                variant="outline"
+                size="sm"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Manage Subscription
+              </Button>
+            </div>
+          )}
+
+          {/* Billing Period Toggle */}
+          <div className="flex items-center justify-center gap-2 p-1 bg-muted rounded-lg w-fit mx-auto">
+            <Button
+              variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setBillingPeriod('monthly')}
+            >
+              Monthly
+            </Button>
+            <Button
+              variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setBillingPeriod('yearly')}
+            >
+              Yearly
+            </Button>
+          </div>
+
           {/* Available Packages */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {packages.map((pkg) => (
@@ -142,9 +213,12 @@ const PackageUpgradeDialog = ({
                 onClick={() => handleSelectPackage(pkg)}
               >
                 <h4 className="font-semibold">{pkg.name}</h4>
+                {pkg.description && (
+                  <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                )}
                 {pkg.price_pln && (
                   <Badge className="mt-2">
-                    {pkg.price_pln} PLN/miesiąc
+                    {pkg.price_pln} PLN/{billingPeriod === 'monthly' ? 'miesiąc' : 'rok'}
                   </Badge>
                 )}
                 <div className="text-sm text-muted-foreground space-y-1 mt-2">
@@ -214,7 +288,27 @@ const PackageUpgradeDialog = ({
                 )}
                 <AlertDescription>
                   {validationResult.canUpgrade ? (
-                    "Możesz bezpiecznie przejść na ten pakiet"
+                    <div>
+                      <p className="font-medium mb-2">Możesz przejść na ten pakiet</p>
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          onClick={handleStripeCheckout} 
+                          disabled={stripeLoading}
+                          className="flex-1"
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          {stripeLoading ? "Przekierowywanie..." : `Zapłać ${selectedPackage?.price_pln} PLN`}
+                        </Button>
+                        <Button 
+                          onClick={handleUpgrade} 
+                          disabled={isUpgrading}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          {isUpgrading ? "Aktualizowanie..." : "Upgrade bez płatności"}
+                        </Button>
+                      </div>
+                    </div>
                   ) : (
                     <div>
                       <p className="font-medium mb-2">Nie można przejść na ten pakiet:</p>
@@ -235,14 +329,6 @@ const PackageUpgradeDialog = ({
             <Button variant="outline" onClick={handleClose}>
               Anuluj
             </Button>
-            {validationResult?.canUpgrade && (
-              <Button 
-                onClick={handleUpgrade} 
-                disabled={isUpgrading}
-              >
-                {isUpgrading ? "Aktualizowanie..." : "Potwierdź upgrade"}
-              </Button>
-            )}
           </div>
         </div>
       </DialogContent>
