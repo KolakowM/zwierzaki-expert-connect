@@ -41,26 +41,7 @@ const CalendarSidebar = ({ date, onSelectDate, onAddAppointment, isLoading, visi
             mode="single"
             selected={date}
             onSelect={onSelectDate}
-            className="rounded-md border-0 w-full max-w-none"
-            classNames={{
-              months: "flex flex-col space-y-4 w-full",
-              month: "space-y-4 w-full",
-              caption: "flex justify-center pt-1 relative items-center",
-              caption_label: "text-sm font-medium",
-              table: "w-full border-collapse space-y-1",
-              head_row: "flex w-full",
-              head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] text-center",
-              row: "flex w-full mt-2",
-              cell: "flex-1 h-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-              day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-              day_range_end: "day-range-end",
-              day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-              day_today: "bg-accent text-accent-foreground font-semibold",
-              day_outside: "day-outside text-muted-foreground opacity-50",
-              day_disabled: "text-muted-foreground opacity-50",
-              day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-              day_hidden: "invisible",
-            }}
+            className="rounded-md border-0"
             modifiers={{
               hasVisit: (day) => isDayWithVisit(day),
               today: (day) => isToday(day)
