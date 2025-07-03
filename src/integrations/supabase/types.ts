@@ -101,6 +101,44 @@ export type Database = {
         }
         Relationships: []
       }
+      package_stripe_prices: {
+        Row: {
+          billing_period: string
+          created_at: string
+          id: string
+          is_active: boolean
+          package_id: string
+          stripe_price_id: string
+          updated_at: string
+        }
+        Insert: {
+          billing_period: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          package_id: string
+          stripe_price_id: string
+          updated_at?: string
+        }
+        Update: {
+          billing_period?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          package_id?: string
+          stripe_price_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_stripe_prices_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       packages: {
         Row: {
           can_access_carousel: boolean
@@ -154,6 +192,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      payment_logs: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          metadata: Json | null
+          package_id: string | null
+          status: string
+          stripe_session_id: string | null
+          stripe_subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          metadata?: Json | null
+          package_id?: string | null
+          status: string
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          metadata?: Json | null
+          package_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_logs_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pet_note_attachments: {
         Row: {
@@ -416,6 +501,45 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
