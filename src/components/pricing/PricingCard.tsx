@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import PricingFeatureItem from "./PricingFeatureItem";
 import { useTranslation } from "react-i18next";
-import { useStripeSubscription } from "@/hooks/useStripeSubscription";
+import { useStripePayment } from "@/hooks/useStripePayment";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { getActivePackages } from "@/services/subscriptionService";
@@ -37,7 +37,7 @@ export default function PricingCard({
   billingPeriod
 }: PricingTierProps) {
   const { t } = useTranslation();
-  const { createCheckoutSession, isLoading: stripeLoading } = useStripeSubscription();
+  const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
   const { user, isAuthenticated } = useAuth();
   
   const { data: packages } = useQuery({
