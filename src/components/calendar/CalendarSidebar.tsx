@@ -46,13 +46,6 @@ const CalendarSidebar = ({ date, onSelectDate, onAddAppointment, isLoading, visi
               hasVisit: (day) => isDayWithVisit(day),
               today: (day) => isToday(day)
             }}
-            modifiersStyles={{
-              hasVisit: { 
-                fontWeight: "bold", 
-                textDecoration: "underline",
-                color: "hsl(var(--primary))"
-              },
-            }}
           />
         </div>
         <Button 
