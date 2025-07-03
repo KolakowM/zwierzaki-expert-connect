@@ -48,7 +48,7 @@ const PackageUpgradeDialog = ({
     try {
       const result = await validatePackageUpgrade(
         '', // Will be handled by the service
-        currentPackage?.package_id || '',
+        currentPackage?.id || '',
         selectedPackage.id
       );
       setValidationResult(result);

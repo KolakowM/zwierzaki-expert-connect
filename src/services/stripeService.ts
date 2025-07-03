@@ -17,7 +17,12 @@ export const getStripePrices = async (): Promise<StripePrice[]> => {
     .order('billing_period');
 
   if (error) throw error;
-  return data || [];
+  
+  // Type cast the billing_period to ensure it matches our union type
+  return (data || []).map(item => ({
+    ...item,
+    billing_period: item.billing_period as 'monthly' | 'yearly'
+  }));
 };
 
 export const getStripePriceForPackage = async (
