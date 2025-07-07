@@ -3,15 +3,15 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useStripeSubscription } from "@/hooks/useStripeSubscription";
+import { useStripePayment } from "@/hooks/useStripePayment";
 import { upgradeSubscription, validatePackageUpgrade } from "@/services/subscriptionService";
 import { Crown } from "lucide-react";
-import { Package, ActiveSubscription, ValidationResult } from "./upgrade/types";
-import BillingPeriodToggle from "./upgrade/BillingPeriodToggle";
-import PackageCard from "./upgrade/PackageCard";
-import PackageComparison from "./upgrade/PackageComparison";
-import ValidationResults from "./upgrade/ValidationResults";
-import CurrentSubscriptionStatus from "./upgrade/CurrentSubscriptionStatus";
+import { Package, ActiveSubscription, ValidationResult } from "./types";
+import BillingPeriodToggle from "./BillingPeriodToggle";
+import PackageCard from "./PackageCard";
+import PackageComparison from "./PackageComparison";
+import ValidationResults from "./ValidationResults";
+import CurrentSubscriptionStatus from "./CurrentSubscriptionStatus";
 
 interface PackageUpgradeDialogProps {
   open: boolean;
@@ -34,7 +34,7 @@ const PackageUpgradeDialog = ({
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const { toast } = useToast();
-  const { createCheckoutSession, openCustomerPortal, isLoading: stripeLoading } = useStripeSubscription();
+  const { createCheckoutSession, openCustomerPortal, isLoading: stripeLoading } = useStripePayment();
 
   const handleSelectPackage = (pkg: Package) => {
     setSelectedPackage(pkg);

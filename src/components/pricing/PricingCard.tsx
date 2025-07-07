@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import PricingFeatureItem from "./PricingFeatureItem";
 import { useTranslation } from "react-i18next";
+import { useStripePayment } from "@/hooks/useStripePayment";
+import { useAuth } from "@/contexts/AuthProvider";
+import { useQuery } from "@tanstack/react-query";
+import { getActivePackages } from "@/services/subscriptionService";
 
 export interface PricingFeature {
   id: string;
@@ -33,11 +37,48 @@ export default function PricingCard({
   billingPeriod
 }: PricingTierProps) {
   const { t } = useTranslation();
+  const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
+  const { user, isAuthenticated } = useAuth();
+  
+  const { data: packages, isLoading: packagesLoading } = useQuery({
+    queryKey: ['packages'],
+    queryFn: getActivePackages,
+  });
+
+  const handleSubscribe = async () => {
+    if (!isAuthenticated) {
+      // Redirect to register if not authenticated
+      return;
+    }
+
+    if (name === "Testowy") {
+      // Free plan, no Stripe checkout needed
+      return;
+    }
+
+    const packageNameMap: Record<string, string> = {
+      "Zaawansowany": "Zaawansowany",
+      "Zawodowiec": "Zawodowiec"
+    };
+
+
+    const databasePackageName = packageNameMap[name] || name;
+    const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
+
+    if (selectedPackage) {
+      await createCheckoutSession(selectedPackage.id, billingPeriod);
+    } else {
+      console.error('Package not found:', databasePackageName);
+    }
+  };
+
+  const isFreePlan = name === "Testowy";
+  const isLoading = stripeLoading || packagesLoading;
   
   return (
-    <Card className={popular ? "border-primary shadow-lg" : ""}>
+    <Card className={popular ? "border-primary shadow-lg relative" : ""}>
       {popular && (
-        <div className="absolute -top-15 left-0 right-0 mx-auto w-fit border-radius: 25% bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+        <div className="absolute -top-3 left-0 right-0 mx-auto w-fit bg-primary px-3 py-1 text-xs font-medium text-primary-foreground rounded-full">
           {t('pricing.recommended')}
         </div>
       )}
@@ -61,14 +102,33 @@ export default function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        <Link to="/register" className="w-full">
+        {!isAuthenticated ? (
+          <Link to="/register" className="w-full">
+            <Button
+              className="w-full"
+              variant={popular ? "default" : "outline"}
+            >
+              {cta}
+            </Button>
+          </Link>
+        ) : isFreePlan ? (
+          <Button
+            className="w-full"
+            variant="outline"
+            disabled
+          >
+            Current Plan
+          </Button>
+        ) : (
           <Button
             className="w-full"
             variant={popular ? "default" : "outline"}
+            onClick={handleSubscribe}
+            disabled={isLoading}
           >
-            {cta}
+            {isLoading ? "Loading..." : cta}
           </Button>
-        </Link>
+        )}
       </CardFooter>
     </Card>
   );

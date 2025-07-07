@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useStripeSubscription } from "@/hooks/useStripeSubscription";
 import PackageUpgradeDialog from "./PackageUpgradeDialog";
 import CancelSubscriptionDialog from "./CancelSubscriptionDialog";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
@@ -14,8 +15,10 @@ import { useUserSubscription } from "@/hooks/useUserSubscription";
 const SubscriptionManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkSubscriptionStatus } = useStripeSubscription();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [stripeSubscription, setStripeSubscription] = useState<any>(null);
   
   const { 
     activeSubscription: subscription, 
@@ -40,6 +43,35 @@ const SubscriptionManagement = () => {
     },
   });
 
+  // Check Stripe subscription status on component mount
+  useEffect(() => {
+    const checkStripeStatus = async () => {
+      if (user) {
+        const status = await checkSubscriptionStatus();
+        setStripeSubscription(status);
+      }
+    };
+    checkStripeStatus();
+  }, [user, checkSubscriptionStatus]);
+
+  // Check for successful checkout session
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    if (sessionId) {
+      toast({
+        title: "Płatność zakończona",
+        description: "Twoja subskrypcja została aktywowana!",
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Refresh subscription status after delay to allow Stripe webhook processing
+      setTimeout(() => {
+        handleSubscriptionChange();
+      }, 3000);
+    }
+  }, []);
+
   const handleManageSubscription = () => {
     setShowUpgradeDialog(true);
   };
@@ -62,6 +94,12 @@ const SubscriptionManagement = () => {
       title: "Pakiet anulowany",
       description: "Twój pakiet zostanie anulowany na koniec okresu rozliczeniowego.",
     });
+  };
+
+  const handleSubscriptionChange = async () => {
+    const status = await checkSubscriptionStatus();
+    setStripeSubscription(status);
+    refetch();
   };
 
   const isLoading = subscriptionLoading || usageLoading;
@@ -88,6 +126,7 @@ const SubscriptionManagement = () => {
         onManageSubscription={handleManageSubscription}
         onCancelSubscription={handleCancelSubscription}
       />
+
 
       {/* Usage Statistics */}
       <UsageStatsCard
