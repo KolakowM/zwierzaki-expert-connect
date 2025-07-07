@@ -49,6 +49,8 @@ const VisitDateField = ({ form, name, label, required = false, minDate }: VisitD
                 mode="single"
                 selected={field.value}
                 onSelect={field.onChange}
+                locale={pl}
+                weekStartsOn={1}
                 disabled={(date) =>
                   minDate ? date < minDate : date < new Date("1900-01-01")
                 }
