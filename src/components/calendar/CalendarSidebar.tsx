@@ -64,17 +64,13 @@ const CalendarSidebar = ({ date, onSelectDate, onAddAppointment, isLoading, visi
             locale={pl}
             weekStartsOn={1}
             className="rounded-md border-0 pointer-events-auto"
-            classNames={{
-              day_has_visit: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800 font-medium relative after:content-['•'] after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:text-blue-600 after:text-xs",
-              day_today: "bg-accent text-accent-foreground font-bold",
-            }}
             modifiers={{
               hasVisit: (day) => isDayWithVisit(day),
               today: (day) => isToday(day)
             }}
             modifiersClassNames={{
-              hasVisit: "day_has_visit",
-              today: "day_today"
+              hasVisit: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800 font-medium relative after:content-['•'] after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:text-blue-600 after:text-xs",
+              today: "bg-accent text-accent-foreground font-bold"
             }}
           />
         </div>
