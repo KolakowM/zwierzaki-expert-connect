@@ -55,7 +55,6 @@ const VisitDateField = ({ form, name, label, required = false, minDate }: VisitD
                   minDate ? date < minDate : date < new Date("1900-01-01")
                 }
                 initialFocus
-                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>

@@ -3,7 +3,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus } from "lucide-react";
-import { isToday, isSameDay } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Visit } from "@/types";
 
@@ -15,38 +14,7 @@ interface CalendarSidebarProps {
   visits: Visit[];
 }
 
-const CalendarSidebar = ({ date, onSelectDate, onAddAppointment, isLoading, visits }: CalendarSidebarProps) => {
-  // Improved date conversion logic with better error handling
-  const isDayWithVisit = (day: Date) => {
-    try {
-      return visits.some(visit => {
-        // Handle both Date objects and string dates safely
-        let visitDate: Date;
-        
-        if (visit.date instanceof Date) {
-          visitDate = visit.date;
-        } else if (typeof visit.date === 'string') {
-          visitDate = new Date(visit.date);
-        } else {
-          console.warn('Invalid visit date format:', visit.date);
-          return false;
-        }
-
-        // Check if visitDate is valid
-        if (isNaN(visitDate.getTime())) {
-          console.warn('Invalid visit date:', visit.date);
-          return false;
-        }
-
-        // Use date-fns isSameDay for more reliable comparison
-        return isSameDay(visitDate, day);
-      });
-    } catch (error) {
-      console.error('Error checking visit date:', error);
-      return false;
-    }
-  };
-
+const CalendarSidebar = ({ date, onSelectDate, onAddAppointment, isLoading }: CalendarSidebarProps) => {
   return (
     <Card className="h-fit">
       <CardHeader>
@@ -63,15 +31,7 @@ const CalendarSidebar = ({ date, onSelectDate, onAddAppointment, isLoading, visi
             onSelect={onSelectDate}
             locale={pl}
             weekStartsOn={1}
-            className="rounded-md border-0 pointer-events-auto"
-            modifiers={{
-              hasVisit: (day) => isDayWithVisit(day),
-              today: (day) => isToday(day)
-            }}
-            modifiersClassNames={{
-              hasVisit: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800 font-medium relative after:content-['•'] after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:text-blue-600 after:text-xs",
-              today: "bg-accent text-accent-foreground font-bold"
-            }}
+            className="rounded-md border"
           />
         </div>
         <Button 
