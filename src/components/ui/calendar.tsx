@@ -27,7 +27,7 @@ function Calendar({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse",
         head_row: "grid grid-cols-7 gap-1 mb-1",
-        head_cell: "text-muted-foreground rounded-md w-8 h-8 font-normal text-[0.8rem] flex items-center justify-center",
+        head_cell: "text-muted-foreground rounded-md w-8 h-8 font-normal text-[0.8rem] items-center justify-center",
         row: "grid grid-cols-7 gap-1 mb-1",
         cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
         day: "h-8 w-8 p-0 font-normal hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm",
