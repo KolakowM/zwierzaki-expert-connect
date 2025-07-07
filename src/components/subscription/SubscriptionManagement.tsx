@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
-import { getUserSubscription } from "@/services/subscriptionService";
+import { getUserActiveSubscription } from "@/services/subscriptionService";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, CreditCard, Package } from "lucide-react";
@@ -19,7 +19,7 @@ const SubscriptionManagement = () => {
 
   const { data: subscription, isLoading } = useQuery({
     queryKey: ['user-subscription', user?.id],
-    queryFn: () => user?.id ? getUserSubscription(user.id) : Promise.resolve(null),
+    queryFn: () => user?.id ? getUserActiveSubscription(user.id) : Promise.resolve(null),
     enabled: !!user?.id,
   });
 
@@ -57,7 +57,7 @@ const SubscriptionManagement = () => {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            <CurrentPackageCard subscription={subscription} />
+            <CurrentPackageCard />
             <UsageStatsCard />
           </div>
         </TabsContent>
@@ -67,7 +67,7 @@ const SubscriptionManagement = () => {
         </TabsContent>
 
         <TabsContent value="packages" className="space-y-6">
-          <AvailablePackagesCard currentSubscription={subscription} />
+          <AvailablePackagesCard />
         </TabsContent>
       </Tabs>
     </div>
