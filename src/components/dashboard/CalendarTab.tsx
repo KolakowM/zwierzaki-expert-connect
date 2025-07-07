@@ -3,63 +3,41 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { format, isSameDay } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Visit, Client, Pet } from "@/types";
-import { useToast } from "@/hooks/use-toast";
+import { Visit } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { getVisits } from "@/services/visitService";
 import { getClients } from "@/services/clientService"; 
 import { getPets } from "@/services/petService";
-import { Loader2, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Import our newly created components
+// Import components
 import CalendarSidebar from "../calendar/CalendarSidebar";
 import AppointmentList from "../calendar/AppointmentList";
 import AppointmentForm from "../calendar/AppointmentForm";
 import VisitDetailsDialog from "../calendar/VisitDetailsDialog";
 
 const CalendarTab = () => {
-  const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showVisitDetails, setShowVisitDetails] = useState(false);
   
-  // Fetch data using React Query with better error handling
-  const { 
-    data: visits = [], 
-    isLoading: isLoadingVisits,
-    error: visitsError
-  } = useQuery({
+  // Fetch data
+  const { data: visits = [], isLoading: isLoadingVisits } = useQuery({
     queryKey: ['visits'],
     queryFn: getVisits,
-    retry: 2,
-    retryDelay: 1000,
   });
 
-  const { 
-    data: clients = [], 
-    isLoading: isLoadingClients,
-    error: clientsError
-  } = useQuery({
+  const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: getClients,
-    retry: 2,
-    retryDelay: 1000,
   });
 
-  const { 
-    data: allPets = [], 
-    isLoading: isLoadingPets,
-    error: petsError
-  } = useQuery({
+  const { data: allPets = [] } = useQuery({
     queryKey: ['pets'],
     queryFn: getPets,
-    retry: 2,
-    retryDelay: 1000,
   });
 
-  // Improved date filtering with better error handling
+  // Filter visits for selected date
   const visitsForSelectedDate = date 
     ? visits.filter(visit => {
         try {
@@ -70,92 +48,56 @@ const CalendarTab = () => {
           } else if (typeof visit.date === 'string') {
             visitDate = new Date(visit.date);
           } else {
-            console.warn('Invalid visit date format:', visit.date);
             return false;
           }
 
-          // Check if visitDate is valid
           if (isNaN(visitDate.getTime())) {
-            console.warn('Invalid visit date:', visit.date);
             return false;
           }
 
           return isSameDay(visitDate, date);
         } catch (error) {
-          console.error('Error filtering visit:', error);
           return false;
         }
       })
     : visits;
 
-  // Handle opening the visit details dialog
   const handleVisitClick = (visit: Visit) => {
     setSelectedVisit(visit);
     setShowVisitDetails(true);
   };
 
-  // Show error alerts if any queries failed
-  const hasErrors = visitsError || clientsError || petsError;
-  
-  if (hasErrors) {
-    console.error("Errors fetching data:", { visitsError, clientsError, petsError });
-  }
-
-  // Determine if we're still loading data
-  const isLoading = isLoadingClients || isLoadingPets;
-
   return (
     <div className="space-y-6">
-      {/* Error handling */}
-      {hasErrors && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Wystąpił problem z pobieraniem danych. Spróbuj odświeżyć stronę.
-            {visitsError && " Błąd pobierania wizyt."}
-            {clientsError && " Błąd pobierania klientów."}
-            {petsError && " Błąd pobierania zwierząt."}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Responsive grid layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Calendar Sidebar - responsive width */}
-        <div className="lg:col-span-2">
+      {/* 50/50 Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[600px]">
+        {/* Calendar Section - 50% */}
+        <div className="flex flex-col">
           <CalendarSidebar 
             date={date}
             onSelectDate={setDate}
             onAddAppointment={() => setShowNewAppointment(true)}
-            isLoading={isLoading}
-            visits={visits}
           />
         </div>
 
-        {/* Appointments List - responsive width */}
-        <div className="lg:col-span-3">
-          <Card>
+        {/* Appointments Section - 50% */}
+        <div className="flex flex-col">
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>
                 Wizyty na {date ? format(date, "dd MMMM yyyy", { locale: pl }) : "wybrany dzień"}
               </CardTitle>
               <CardDescription>
-                {isLoadingVisits ? (
-                  <div className="flex items-center">
-                    <Loader2 size={14} className="mr-2 animate-spin" />
-                    Ładowanie wizyt...
-                  </div>
-                ) : (
-                  visitsForSelectedDate.length > 0
-                    ? `${visitsForSelectedDate.length} ${
-                        visitsForSelectedDate.length === 1 ? "wizyta zaplanowana" : 
-                        visitsForSelectedDate.length < 5 ? "wizyty zaplanowane" : "wizyt zaplanowanych"
-                      }`
-                    : "Brak wizyt na ten dzień"
-                )}
+                {visitsForSelectedDate.length > 0
+                  ? `${visitsForSelectedDate.length} ${
+                      visitsForSelectedDate.length === 1 ? "wizyta zaplanowana" : 
+                      visitsForSelectedDate.length < 5 ? "wizyty zaplanowane" : "wizyt zaplanowanych"
+                    }`
+                  : "Brak wizyt na ten dzień"
+                }
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 overflow-auto">
               <AppointmentList 
                 isLoading={isLoadingVisits}
                 appointments={visitsForSelectedDate}
@@ -169,7 +111,7 @@ const CalendarTab = () => {
         </div>
       </div>
 
-      {/* New Appointment Dialog */}
+      {/* Dialogs */}
       <AppointmentForm 
         isOpen={showNewAppointment}
         onClose={() => setShowNewAppointment(false)}
@@ -177,7 +119,6 @@ const CalendarTab = () => {
         clients={clients}
       />
 
-      {/* Visit Details Dialog */}
       {selectedVisit && (
         <VisitDetailsDialog 
           isOpen={showVisitDetails}
