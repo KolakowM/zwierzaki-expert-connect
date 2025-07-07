@@ -1,10 +1,10 @@
+
 // Export all types from separate files
 export * from './client';
 export * from './pet';
 export * from './visit';
 export * from './care-program';
 export * from './tables';
-export * from './addon';
 
 // Define social media types for consistency
 export interface SocialMediaLinks {
@@ -33,3 +33,4 @@ export interface SpecialistProfile {
   social_media?: SocialMediaLinks;
   updated_at?: string;
 }
+
