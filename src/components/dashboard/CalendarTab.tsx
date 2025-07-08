@@ -68,11 +68,11 @@ const CalendarTab = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 50/50 Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[600px]">
-        {/* Calendar Section - 50% */}
-        <div className="flex flex-col">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Responsive Layout - Stack on mobile, side-by-side on larger screens */}
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Calendar Section - Full width on mobile, 50% on desktop */}
+        <div className="order-1 lg:order-1">
           <CalendarSidebar 
             date={date}
             onSelectDate={setDate}
@@ -80,14 +80,14 @@ const CalendarTab = () => {
           />
         </div>
 
-        {/* Appointments Section - 50% */}
-        <div className="flex flex-col">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle>
+        {/* Appointments Section - Full width on mobile, 50% on desktop */}
+        <div className="order-2 lg:order-2">
+          <Card className="h-full min-h-[400px] lg:min-h-[600px]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg sm:text-xl">
                 Wizyty na {date ? format(date, "dd MMMM yyyy", { locale: pl }) : "wybrany dzień"}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm">
                 {visitsForSelectedDate.length > 0
                   ? `${visitsForSelectedDate.length} ${
                       visitsForSelectedDate.length === 1 ? "wizyta zaplanowana" : 
@@ -97,7 +97,7 @@ const CalendarTab = () => {
                 }
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 overflow-auto">
+            <CardContent className="flex-1 overflow-auto p-3 sm:p-6">
               <AppointmentList 
                 isLoading={isLoadingVisits}
                 appointments={visitsForSelectedDate}
@@ -133,3 +133,4 @@ const CalendarTab = () => {
 };
 
 export default CalendarTab;
+
