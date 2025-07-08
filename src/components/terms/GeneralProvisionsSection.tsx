@@ -8,13 +8,13 @@ export default function GeneralProvisionsSection() {
         serwisu internetowego PetsFlow, dostępnego pod adresem www.petsflow.pl oraz aplikacji mobilnej PetsFlow.
       </p>
       <p>
-        2. Właścicielem i operatorem serwisu PetsFlow jest PetsFlow Sp. z o.o. 
-        z siedzibą w Warszawie, ul. Główna 123, 00-001 Warszawa, wpisana do rejestru 
+        2. Właścicielem i operatorem serwisu PetsFlow jest Mateusz Kołakowski prowadzący nie zarejestrowaną działalność gosporadczą
+        z siedzibą w Warszawie, {/*ul. Główna 123, 00-001 Warszawa, wpisana do rejestru 
         przedsiębiorców Krajowego Rejestru Sądowego pod numerem KRS: 0000123456, 
-        NIP: 1234567890, REGON: 123456789, kapitał zakładowy: 50.000 zł.
+        NIP: 1234567890, REGON: 123456789, kapitał zakładowy: 50.000 zł.*/}
       </p>
       <p>
-        3. Kontakt z Usługodawcą: email: kontakt@petsflow.pl, tel: +48 22 123 45 67.
+        3. Kontakt z Usługodawcą: email: kontakt@petsflow.pl
       </p>
       <p>
         4. Serwis działa 24 godziny na dobę, 7 dni w tygodniu, z zastrzeżeniem przerw technicznych.
