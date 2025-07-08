@@ -93,17 +93,17 @@
   /* Mobile responsive adjustments */
   @media (max-width: 640px) {
     :root {
-      --rdp-cell-size: 2.5rem;
+      --rdp-cell-size: 2.75rem;
       --rdp-caption-font-size: 1rem;
-      --rdp-nav-button-size: 2rem;
+      --rdp-nav-button-size: 2.5rem;
     }
   }
 
   @media (max-width: 480px) {
     :root {
-      --rdp-cell-size: 2.25rem;
+      --rdp-cell-size: 2.5rem;
       --rdp-caption-font-size: 0.9rem;
-      --rdp-nav-button-size: 1.75rem;
+      --rdp-nav-button-size: 2.25rem;
     }
   }
 }
@@ -123,7 +123,7 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23e5f6ef' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* React Day Picker customizations */
+/* React Day Picker responsive overrides */
 .rdp {
   --rdp-accent-color: hsl(var(--primary));
   --rdp-background-color: hsl(var(--background));
@@ -131,37 +131,26 @@
   --rdp-background-color-dark: hsl(var(--background));
 }
 
-/* Calendar header improvements */
-.rdp-caption {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 0.5rem;
+/* Responsive calendar cells */
+.rdp-day {
+  width: var(--rdp-cell-size);
+  height: var(--rdp-cell-size);
+  font-size: 0.875rem;
 }
 
-.rdp-nav {
-  position: static !important;
-}
-
-.rdp-month_grid {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Mobile optimizations */
 @media (max-width: 640px) {
   .rdp-day {
     font-size: 0.8rem;
-    width: var(--rdp-cell-size);
-    height: var(--rdp-cell-size);
-  }
-  
-  .rdp-caption_label {
-    font-size: var(--rdp-caption-font-size);
-  }
-  
-  .rdp-nav_button {
-    width: var(--rdp-nav-button-size);
-    height: var(--rdp-nav-button-size);
   }
 }
+
+/* Touch-friendly navigation buttons */
+.rdp-nav_button {
+  width: var(--rdp-nav-button-size);
+  height: var(--rdp-nav-button-size);
+}
+
+.rdp-caption_label {
+  font-size: var(--rdp-caption-font-size);
+}
+
