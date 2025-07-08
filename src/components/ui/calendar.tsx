@@ -49,7 +49,56 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
+
       components={{
+        // Tutaj musimy zmodyfikować komponent Caption, aby przeniósł label do nav
+        Caption: ({ displayMonth, locale, ...props }) => (
+          <div className={classNames?.caption} {...props}>
+            <div className={classNames?.nav}>
+              {/* Lewy przycisk */}
+              <button
+                type="button"
+                className={cn(classNames?.nav_button, classNames?.nav_button_previous)}
+                aria-label="Go to the Previous Month"
+              >
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+
+              {/* Napis miesiąca wyśrodkowany */}
+              <span className={classNames?.caption_label} role="status" aria-live="polite">
+                {displayMonth?.toLocaleDateString(locale, {
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </span>
+
+              {/* Prawy przycisk */}
+              <button
+                type="button"
+                className={cn(classNames?.nav_button, classNames?.nav_button_next)}
+                aria-label="Go to the Next Month"
+              >
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+            </div>
+          </div>
+        ),
+        // Oryginalny komponent Chevron nie będzie już potrzebny w tej formie,
+        // ponieważ przyciski są renderowane bezpośrednio w Caption.
+        // Możesz go usunąć, jeśli nie jest używany nigdzie indziej.
+        // Chevron: ({ orientation }) => {
+        //   if (orientation === "left") {
+        //     return <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />;
+        //   }
+        //   return <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />;
+        // },
+      }}
+      {...props}
+    />
+  );
+}
+Calendar.displayName = "Calendar";
+      {/* components={{
         Chevron: ({ orientation }) => {
           if (orientation === "left") {
             return <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />;
@@ -61,7 +110,7 @@ function Calendar({
     />
   );
 }
-Calendar.displayName = "Calendar";
+Calendar.displayName = "Calendar";*/}
 
 export { Calendar };
 
