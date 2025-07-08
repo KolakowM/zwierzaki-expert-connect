@@ -19,7 +19,7 @@ function Calendar({
       className={cn("p-2 sm:p-3 pointer-events-auto w-full", className)}
       classNames={{
         months: "flex flex-col space-y-3 sm:space-y-4",
-        month: "space-y-3 sm:space-y-4",
+        month: "text-2xl space-y-3 sm:space-y-4",
         caption: "flex justify-between items-center pt-1 relative",
         caption_label: "text-2xl font-semibold flex-1 text-center px-1",
         nav: "flex items-center",
