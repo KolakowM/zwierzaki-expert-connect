@@ -117,7 +117,7 @@ export default function PricingCard({
             variant="outline"
             disabled
           >
-            {'Aktualny Plan'}
+            {''}
             {/*{t('pricing.current_plan')*/}
           </Button>
         ) : (
