@@ -19,13 +19,13 @@ function Calendar({
       classNames={{
         months: "flex flex-col space-y-3 sm:space-y-4",
         month: "space-y-3 sm:space-y-4",
-        caption: "relative flex justify-center items-center py-2",
-        caption_label: "text-sm sm:text-base font-medium px-1",
-        nav: "absolute inset-y-0 w-full flex items-center justify-between",
+        caption: "flex justify-center items-center py-2 px-2",
+        caption_label: "text-base sm:text-lg font-semibold mx-4",
+        nav: "flex items-center space-x-2",
         nav_button: "h-8 w-8 sm:h-9 sm:w-9 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground touch-manipulation",
-        nav_button_previous: "left-1",
-        nav_button_next: "right-1",
-        table: "w-full border-collapse space-y-1",
+        nav_button_previous: "",
+        nav_button_next: "",
+        table: "w-full border-collapse space-y-1 mt-2",
         head_row: "grid grid-cols-7 gap-1 mb-2",
         head_cell: "text-muted-foreground rounded-md w-9 h-8 sm:w-10 sm:h-9 font-normal text-xs sm:text-sm flex items-center justify-center",
         row: "grid grid-cols-7 gap-1 mb-1",
@@ -40,8 +40,10 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />,
+        Chevron: ({ orientation, ...props }) => {
+          const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
+          return <Icon className="h-4 w-4 sm:h-5 sm:w-5" {...props} />;
+        },
       }}
       {...props}
     />
