@@ -6,7 +6,7 @@ export default function DefinitionsSection() {
       <p>Na potrzeby niniejszego regulaminu przyjmuje się następujące znaczenie pojęć:</p>
       <ol className="list-decimal pl-6 space-y-2">
         <li><strong>Serwis</strong> – platforma internetowa PetsFlow dostępna pod adresem www.petsflow.pl oraz aplikacja mobilna;</li>
-        <li><strong>Usługodawca</strong> – PetsFlow Sp. z o.o. z siedzibą w Warszawie;</li>
+        <li><strong>Usługodawca</strong> – osoba fizyczna z siedzibą w Warszawie;</li>
         <li><strong>Użytkownik</strong> – osoba fizyczna, osoba prawna lub jednostka organizacyjna nieposiadająca osobowości prawnej, korzystająca z Serwisu;</li>
         <li><strong>Specjalista</strong> – Użytkownik świadczący usługi w zakresie opieki nad zwierzętami, posiadający odpowiednie kwalifikacje;</li>
         <li><strong>Klient</strong> – Użytkownik korzystający z usług Specjalisty za pośrednictwem Serwisu;</li>
