@@ -154,3 +154,30 @@
   font-size: var(--rdp-caption-font-size);
 }
 
+/* Calendar header grid layout */
+.rdp-caption {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rdp-caption_label {
+  grid-column: 2;
+  text-align: center;
+  font-weight: 600;
+}
+
+.rdp-nav {
+  display: contents;
+}
+
+.rdp-nav_button_previous {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.rdp-nav_button_next {
+  grid-column: 3;
+  justify-self: end;
+}

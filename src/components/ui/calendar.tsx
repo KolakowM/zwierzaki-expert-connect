@@ -19,12 +19,12 @@ function Calendar({
       classNames={{
         months: "flex flex-col space-y-3 sm:space-y-4",
         month: "space-y-3 sm:space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm sm:text-base font-medium px-1",
-        nav: "space-x-1 flex items-center",
+        caption: "grid grid-cols-3 items-center py-2 relative",
+        caption_label: "text-base sm:text-lg lg:text-xl font-semibold text-center col-start-2",
+        nav: "contents",
         nav_button: "h-8 w-8 sm:h-9 sm:w-9 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground touch-manipulation",
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        nav_button_previous: "col-start-1 justify-self-start",
+        nav_button_next: "col-start-3 justify-self-end",
         table: "w-full border-collapse space-y-1",
         head_row: "grid grid-cols-7 gap-1 mb-2",
         head_cell: "text-muted-foreground rounded-md w-9 h-8 sm:w-10 sm:h-9 font-normal text-xs sm:text-sm flex items-center justify-center",
@@ -54,4 +54,3 @@ function Calendar({
 Calendar.displayName = "Calendar";
 
 export { Calendar };
-
