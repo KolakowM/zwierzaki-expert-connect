@@ -19,12 +19,22 @@ function Calendar({
       classNames={{
         months: "flex flex-col space-y-3 sm:space-y-4",
         month: "space-y-3 sm:space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
+        // Zmodyfikowana sekcja caption i nav
+        caption: "relative flex justify-center items-center py-2", // Dodane relative, dostosowany padding
         caption_label: "text-sm sm:text-base font-medium px-1",
-        nav: "space-x-1 flex items-center",
+        nav: "absolute inset-y-0 w-full flex items-center justify-between", // Zmienione na absolute, inset-y-0, justify-between
         nav_button: "h-8 w-8 sm:h-9 sm:w-9 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground touch-manipulation",
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        nav_button_previous: "left-1", // Usunięto absolute, bo jest już na nav
+        nav_button_next: "right-1", // Usunięto absolute, bo jest już na nav
+        // Koniec zmodyfikowanej sekcji
+        
+        
+        //caption: "flex justify-center pt-1 relative items-center",
+        //caption_label: "text-sm sm:text-base font-medium px-1",
+        //nav: "space-x-1 flex items-center",
+        //nav_button: "h-8 w-8 sm:h-9 sm:w-9 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground touch-manipulation",
+        //nav_button_previous: " left-1",
+        //nav_button_next: "right-1",
         table: "w-full border-collapse space-y-1",
         head_row: "grid grid-cols-7 gap-1 mb-2",
         head_cell: "text-muted-foreground rounded-md w-9 h-8 sm:w-10 sm:h-9 font-normal text-xs sm:text-sm flex items-center justify-center",
