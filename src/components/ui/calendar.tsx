@@ -15,44 +15,47 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-2 sm:p-3 pointer-events-auto w-full", className)}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        months: "flex flex-col space-y-3 sm:space-y-4",
+        month: "space-y-3 sm:space-y-4",
+        // Zmodyfikowana sekcja caption i nav
+        caption: "relative flex justify-center items-center py-2", // Dodane relative, dostosowany padding
+        caption_label: "text-xl sm:text-base font-bold text-center px-1",
+        nav: "absolute inset-y-0 w-full flex items-center justify-between", // Zmienione na absolute, inset-y-0, justify-between
+        nav_button: "h-8 w-8 sm:h-9 sm:w-9 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground touch-manipulation",
+        nav_button_previous: "left-1", // Usunięto absolute, bo jest już na nav
+        nav_button_next: "right-1", // Usunięto absolute, bo jest już na nav
+        // Koniec zmodyfikowanej sekcji
+        
+        
+        //caption: "flex justify-center pt-1 relative items-center",
+        //caption_label: "text-sm sm:text-base font-medium px-1",
+        //nav: "space-x-1 flex items-center",
+        //nav_button: "h-8 w-8 sm:h-9 sm:w-9 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground touch-manipulation",
+        //nav_button_previous: " left-1",
+        //nav_button_next: "right-1",
         table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+        head_row: "grid grid-cols-7 gap-1 mb-2",
+        head_cell: "text-muted-foreground rounded-md w-9 h-8 sm:w-10 sm:h-9 font-normal text-xs sm:text-sm flex items-center justify-center",
+        row: "grid grid-cols-7 gap-1 mb-1",
+        cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:rounded-md",
+        day: "h-9 w-9 sm:h-10 sm:w-10 p-0 font-normal hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm sm:text-base transition-colors touch-manipulation",
+        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_today: "bg-accent text-accent-foreground font-semibold",
+        day_outside: "text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
+        Chevron: ({ orientation }) => {
+          if (orientation === "left") {
+            return <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />;
+          }
+          return <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />;
+        },
       }}
       {...props}
     />
