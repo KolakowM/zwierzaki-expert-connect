@@ -1,73 +1,137 @@
-# Welcome to your Lovable project
 
-## Project info
+# PetsFlow - Platforma CRM dla Specjalistów ds. Zwierząt
 
 **URL**: https://lovable.dev/projects/cfd3f4d1-d336-4d85-9e01-cd949eae4bc0
 
-## How can I edit this code?
+## O Projekcie
 
-There are several ways of editing your application.
+PetsFlow to nowoczesna platforma SaaS łącząca właścicieli zwierząt z wykwalifikowanymi specjalistami oraz oferująca zaawansowany system CRM dla specjalistów do zarządzania swoją praktyką. Aplikacja umożliwia specjalistom efektywne zarządzanie klientami, zwierzętami, wizytami i programami opieki, a właścicielom zwierząt łatwe znajdowanie odpowiednich specjalistów.
 
-**Use Lovable**
+## Kluczowe Funkcjonalności
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cfd3f4d1-d336-4d85-9e01-cd949eae4bc0) and start prompting.
+### 🐾 **Katalog Specjalistów**
+- Publiczny katalog z filtrowaniem po specjalizacji i lokalizacji
+- Profile specjalistów z opisem doświadczenia i kontaktami
+- System weryfikacji i statusów specjalistów
+- Karuzela polecanych specjalistów
 
-Changes made via Lovable will be committed automatically to this repo.
+### 👥 **System CRM**
+- Zarządzanie klientami z pełnymi danymi kontaktowymi
+- Profile zwierząt z historią medyczną, szczepieniami i pomiarami
+- Kalendarz wizyt z notatkami i zaleceniami
+- Programy opieki długoterminowej
+- System notatek z załącznikami
 
-**Use your preferred IDE**
+### 💳 **Model Subskrypcji**
+- **Pakiet Trial** (darmowy) - podstawowe funkcje do testowania
+- **Pakiet Zaawansowany** (49 zł/mies) - dla rozwijających się praktyk
+- **Pakiet Zawodowiec** (99 zł/mies) - dla profesjonalnych praktyk
+- Kontrola limitów użycia według wykupionego pakietu
+- Integracja z systemem płatności Stripe
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🔧 **Panel Administratora**
+- Zarządzanie wszystkimi danymi w systemie
+- Audyt bezpieczeństwa bazy danych
+- Zarządzanie użytkownikami i rolami
+- Statystyki i raporty systemowe
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Technologie
 
-Follow these steps:
+### Frontend
+- **React 18** z TypeScript
+- **Tailwind CSS** + shadcn/ui
+- **React Router Dom** - routing
+- **React Hook Form** + Zod - formularze z walidacją
+- **TanStack Query** - zarządzanie stanem i cache
+- **i18next** - internacjonalizacja (PL, EN, DE, UK)
+- **React Quill** - edytor tekstu sformatowanego
+- **Embla Carousel** - karuzele z autoodtwarzaniem
+
+### Backend & Usługi
+- **Supabase** - baza danych PostgreSQL, autoryzacja, storage
+- **Edge Functions** - logika biznesowa po stronie serwera
+- **Stripe** - system płatności
+- **Row Level Security** - bezpieczeństwo danych na poziomie bazy
+
+## Jak Uruchomić Projekt Lokalnie
+
+### Wymagania
+- Node.js & npm - [zainstaluj z nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+### Kroki Instalacji
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# 1. Klonowanie repozytorium
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# 2. Przejście do katalogu projektu
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# 3. Instalacja zależności
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Uruchomienie serwera deweloperskiego
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Sposoby Edycji Kodu
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 🚀 **Lovable (Zalecane)**
+Odwiedź [Projekt Lovable](https://lovable.dev/projects/cfd3f4d1-d336-4d85-9e01-cd949eae4bc0) i zacznij wprowadzać zmiany poprzez chat z AI.
 
-**Use GitHub Codespaces**
+### 💻 **Lokalne IDE**
+Sklonuj repozytorium i wprowadzaj zmiany lokalnie. Zmiany będą automatycznie synchronizowane z Lovable.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 🌐 **GitHub**
+- Przejdź do żądanego pliku
+- Kliknij "Edit" (ikona ołówka)
+- Wprowadź zmiany i zatwierdź
 
-## What technologies are used for this project?
+### ☁️ **GitHub Codespaces**
+- Kliknij "Code" > "Codespaces" > "New codespace"
+- Edytuj pliki bezpośrednio w przeglądarce
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Publikacja przez Lovable
+Otwórz [Lovable](https://lovable.dev/projects/cfd3f4d1-d336-4d85-9e01-cd949eae4bc0) i kliknij Share → Publish.
 
-## How can I deploy this project?
+### Własna Domena
+Aby podłączyć własną domenę:
+1. Przejdź do Project > Settings > Domains
+2. Kliknij Connect Domain
+3. Postępuj zgodnie z instrukcjami
 
-Simply open [Lovable](https://lovable.dev/projects/cfd3f4d1-d336-4d85-9e01-cd949eae4bc0) and click on Share -> Publish.
+Więcej informacji: [Konfiguracja domeny](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
-## Can I connect a custom domain to my Lovable project?
+## Struktura Aplikacji
 
-Yes it is!
+### Główne Strony
+- **/** - Strona główna z karuzelą specjalistów
+- **/catalog** - Katalog specjalistów z filtrowaniem
+- **/pricing** - Cennik pakietów subskrypcji
+- **/dashboard** - Panel CRM specjalisty
+- **/clients** - Zarządzanie klientami
+- **/pets** - Zarządzanie zwierzętami
+- **/admin** - Panel administratora
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Kluczowe Komponenty
+- **Responsive Design** - pełne wsparcie urządzeń mobilnych
+- **Wielojęzyczność** - interfejs w 4 językach
+- **System Ról** - użytkownicy, specjaliści, administratorzy
+- **Bezpieczeństwo** - RLS, autoryzacja, walidacja
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Wsparcie i Dokumentacja
+
+- 📖 [Dokumentacja Lovable](https://docs.lovable.dev/)
+- 💬 [Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
+- 🎥 [Tutorial YouTube](https://www.youtube.com/watch?v=9KHLTZaJcR8&list=PLbVHz4urQBZkJiAWdG8HWoJTdgEysigIO)
+- 🚀 [Przewodnik Quickstart](https://docs.lovable.dev/user-guides/quickstart)
+
+## Licencja
+
+© 2025 PetsFlow. Wszelkie prawa zastrzeżone.
+
+---
+
+**Kontakt**: kontakt@petsflow.pl | Warszawa, Polska

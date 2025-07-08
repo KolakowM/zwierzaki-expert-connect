@@ -1,180 +1,194 @@
 
-# MAPA STRONY I STRUKTURA APLIKACJI PETSFLOW
+# PETSFLOW - APLIKACJA CRM DLA SPECJALISTÓW DS. ZWIERZĄT
 
-## MAPA STRONY (Publiczne i chronione strony):
+## OPIS APLIKACJI
 
-### STRONY PUBLICZNE:
-- / (Index) - Strona główna z karuzelą specjalistów, sekcja hero, korzyści, CTA
-- /about - O nas
-- /contact - Kontakt
-- /pricing - Cennik pakietów
-- /login - Logowanie
-- /register - Rejestracja
+PetsFlow to platforma SaaS łącząca właścicieli zwierząt z wykwalifikowanymi specjalistami oraz system CRM dla specjalistów do zarządzania praktyką. Aplikacja oferuje katalog specjalistów, system zarządzania klientami i zwierzętami, wizyty, programy opieki oraz system subskrypcji z różnymi pakietami funkcjonalności.
+
+## STRUKTURA STRON I ROUTING
+
+### STRONY PUBLICZNE (Dostępne bez logowania):
+- / - Strona główna z karuzelą polecanych specjalistów
+- /about - O platformie PetsFlow
+- /contact - Formularz kontaktowy
+- /pricing - Cennik pakietów subskrypcji
+- /login - Logowanie do systemu
+- /register - Rejestracja nowego użytkownika
 - /forgot-password - Resetowanie hasła
-- /reset-password - Nowe hasło
-- /terms - Regulamin
-- /terms2 - Dodatkowy regulamin
+- /reset-password - Formularz nowego hasła
+- /terms - Regulamin użytkowania
 - /privacy - Polityka prywatności
 - /faq - Często zadawane pytania
-- /catalog - Katalog specjalistów (przeglądanie z filtrowaniem)
-- /specialist/:id - Profil specjalisty (widok publiczny)
-- /become-specialist - Zostań specjalistą
+- /catalog - Katalog specjalistów z filtrowaniem
+- /specialist/:id - Publiczny profil specjalisty
+- /become-specialist - Strona zachęcająca do dołączenia
 
-### STRONY CHRONIONE (wymagają logowania):
-- /dashboard - Panel główny użytkownika
-- /clients - Lista klientów z wyszukiwaniem i filtrowaniem
-- /clients/:id - Szczegóły klienta z zakładkami (przegląd, zwierzęta, wizyty, notatki)
-- /pets - Lista zwierząt z wyszukiwaniem i filtrowaniem
-- /pets/:id - Profil zwierzęcia z zakładkami (przegląd, wizyty, programy opieki, notatki)
+### STRONY CHRONIONE (Wymagają logowania):
+- /dashboard - Panel główny z przeglądem praktyki
+- /clients - Lista klientów z wyszukiwaniem
+- /clients/:id - Szczegóły klienta z zakładkami
+- /pets - Lista zwierząt z filtrowaniem
+- /pets/:id - Profil zwierzęcia z historią medyczną
 - /profile - Edycja profilu specjalisty
-- /settings - Ustawienia konta
+- /settings - Ustawienia konta użytkownika
 
-### STRONY ADMINISTRATORA:
-- /admin - Panel administratora
-- /admin/clients - Zarządzanie klientami
-- /admin/pets - Zarządzanie zwierzętami
-- /admin/visits - Zarządzanie wizytami
+### PANEL ADMINISTRATORA:
+- /admin - Dashboard administratora
+- /admin/clients - Zarządzanie wszystkimi klientami
+- /admin/pets - Zarządzanie zwierzętami w systemie
+- /admin/visits - Przegląd wszystkich wizyt
 - /admin/users - Zarządzanie użytkownikami
-- /admin/care-programs - Programy opieki
+- /admin/care-programs - Zarządzanie programami opieki
 - /admin/settings - Ustawienia systemu z audytem bazy danych
 
-## GŁÓWNE FOLDERY I ICH ZAWARTOŚĆ:
+## GŁÓWNE FUNKCJONALNOŚCI
 
-### /src/components/ - Komponenty UI i funkcjonalne:
-- /account/ - Komponenty ustawień konta (hasło, profil, usuwanie konta)
-- /admin/ - Komponenty panelu administratora z audytem systemu
-- /auth/ - Komponenty autoryzacji (logowanie, rejestracja)
-- /calendar/ - Komponenty kalendarza i wizyt
-- /care-programs/ - Programy opieki dla zwierząt z formularzami responsive
-- /catalog/ - Katalog specjalistów z filtrowaniem i paginacją
-- /clients/ - Zarządzanie klientami z zakładkami i formularzami responsive
-- /dashboard/ - Dashboard użytkownika z zakładkami i statystykami
-- /home/ - Komponenty strony głównej (Hero, Featured Specialists, Benefits, CTA)
-- /layout/ - Layout strony (header, footer, sidebar, main layout)
-- /pets/ - Zarządzanie zwierzętami z formularzami responsive i notatkami
-- /pricing/ - Komponenty cennika z przełącznikiem płatności
-- /profile/ - Edycja profilu specjalisty z wieloma zakładkami
-- /specialists/ - Komponenty profili specjalistów z edytorem
-- /subscription/ - Zarządzanie subskrypcjami i limitami pakietów
-- /ui/ - Podstawowe komponenty UI (shadcn/ui) z karuzelą
-- /visits/ - Komponenty wizyt z formularzami responsive
+### 1. SYSTEM SPECJALISTÓW
+- Publiczny katalog z filtrowaniem po specjalizacji i lokalizacji
+- Profile specjalistów z opisem, doświadczeniem i kontaktami
+- System weryfikacji i statusów specjalistów
+- Karuzela polecanych specjalistów na stronie głównej
 
-### /src/hooks/ - Custom React hooks:
-- useAuth* - Hooks autoryzacji i stanu użytkownika
-- useFeaturedSpecialists - Hook do pobierania priorytetowych specjalistów
-- useSpecializations - Hook specjalizacji
-- useUserSubscription - Hook subskrypcji i limitów pakietów
-- usePackageLimits - Hook zarządzania limitami pakietów
-- usePetNotes - Hook do zarządzania notatkami zwierząt
-- use-toast - Hook powiadomień
-- use-mobile - Hook responsywności
+### 2. SYSTEM CRM
+- Zarządzanie klientami z pełnymi danymi kontaktowymi
+- Profile zwierząt z historią medyczną i szczepień
+- System wizyt z kalendarzem i notatkami
+- Programy opieki długoterminowej
+- Notatki z załącznikami dla każdego zwierzęcia
 
-### /src/pages/ - Komponenty stron:
-- Index.tsx - Strona główna z sekcjami
-- About.tsx, Contact.tsx, Pricing.tsx - Strony informacyjne
-- Login.tsx, Register.tsx - Autoryzacja
-- Dashboard.tsx - Panel użytkownika z zakładkami
-- Clients.tsx, ClientDetails.tsx - Zarządzanie klientami
-- Pets.tsx, PetProfile.tsx - Zarządzanie zwierzętami
-- SpecialistProfile.tsx - Profil specjalisty
+### 3. SYSTEM SUBSKRYPCJI
+- Pakiet Trial (darmowy) - podstawowe funkcje
+- Pakiet Zaawansowany - dla rozwijających się praktyk
+- Pakiet Zawodowiec - dla dużych praktyk
+- Kontrola limitów użycia według pakietu
+- Integracja z systemem płatności Stripe
+
+### 4. PANEL ADMINISTRATORA
+- Zarządzanie wszystkimi danymi w systemie
+- Audyt bezpieczeństwa bazy danych
+- Zarządzanie użytkownikami i rolami
+- Statystyki i raporty systemu
+
+## STRUKTURA FOLDERÓW
+
+### /src/components/
+- /account/ - Ustawienia konta i zarządzanie profilem
+- /admin/ - Komponenty panelu administratora
+- /auth/ - Komponenty autoryzacji (login, rejestracja)
+- /calendar/ - Kalendarz i zarządzanie wizytami
+- /care-programs/ - Programy opieki dla zwierząt
+- /catalog/ - Katalog specjalistów z filtrowaniem
+- /clients/ - Zarządzanie klientami
+- /dashboard/ - Panel główny użytkownika
+- /home/ - Komponenty strony głównej
+- /layout/ - Layout aplikacji (header, footer, sidebar)
+- /pets/ - Zarządzanie zwierzętami
+- /pricing/ - Komponenty cennika
+- /profile/ - Edycja profilu specjalisty
+- /specialists/ - Komponenty profili specjalistów
+- /subscription/ - Zarządzanie subskrypcjami
+- /ui/ - Komponenty UI (shadcn/ui)
+- /visits/ - Komponenty wizyt
+
+### /src/pages/
+- Strony główne aplikacji (Index.tsx, Dashboard.tsx, etc.)
 - /admin/ - Strony panelu administratora
+- 404.tsx - Strona błędu 404
 
-### /src/services/ - Usługi i API:
-- authService.ts - Autoryzacja
-- clientService.ts - Obsługa klientów
-- petService.ts - Obsługa zwierząt z transformacją danych
-- visitService.ts - Obsługa wizyt
-- careProgramService.ts - Programy opieki
-- subscriptionService.ts - Subskrypcje
-- petNotesService.ts - Notatki zwierząt z załącznikami
-- packageLimitsService.ts - Limity pakietów
-- /user/ - Zarządzanie użytkownikami
+### /src/hooks/
+- Niestandardowe hooki React dla logiki biznesowej
+- useAuth*, useSpecializations, useUserSubscription, etc.
 
-### /src/integrations/supabase/ - Integracja z bazą danych:
-- client.ts - Klient Supabase
-- types.ts - Typy bazy danych
+### /src/services/
+- Usługi komunikacji z API Supabase
+- clientService, petService, visitService, subscriptionService, etc.
 
-### /src/contexts/ - React Context:
-- AuthContext.tsx - Kontekst autoryzacji
-- AuthProvider.tsx - Provider autoryzacji
+### /src/types/
+- Definicje typów TypeScript
+- Mapowanie typów z bazy danych na typy aplikacji
 
-### /src/types/ - Definicje typów TypeScript:
-- index.ts - Główne typy
-- client.ts, pet.ts, visit.ts - Typy danych z mapowaniem
-- subscription.ts - Typy subskrypcji
-- care-program.ts - Typy programów opieki
+### /src/contexts/
+- React Context dla stanu globalnego (AuthProvider)
 
-### /src/data/ - Dane statyczne:
-- fallbackSpecialists.ts - Dane zastępcze specjalistów
-- specializations.ts - Lista specjalizacji
-- mockData.ts - Dane testowe
-
-## GŁÓWNE FUNKCJONALNOŚCI:
-
-1. **SYSTEM AUTORYZACJI** - Logowanie, rejestracja, role użytkowników z kontekstem
-2. **ZARZĄDZANIE KLIENTAMI** - CRUD klientów z formularzami responsive i zakładkami
-3. **ZARZĄDZANIE ZWIERZĘTAMI** - Profile zwierząt z notatkami, załącznikami i historią
-4. **SYSTEM WIZYT** - Planowanie i zarządzanie wizytami z edytorem tekstu
-5. **PROFILE SPECJALISTÓW** - Prezentacja z karuzelą, priorytet dla featured
-6. **SYSTEM SUBSKRYPCJI** - Pakiety płatności z limitami i kontrolą dostępu
-7. **PANEL ADMINISTRATORA** - Zarządzanie systemem z audytem bazy danych
-8. **KARUZELA SPECJALISTÓW** - Prezentacja z autoodtwarzaniem i randomowym startem
-9. **KATALOG** - Przeglądanie z filtrowaniem i paginacją
-10. **NOTATKI ZWIERZĄT** - System notatek z załącznikami i edytorem
-11. **PROGRAMY OPIEKI** - Tworzenie i zarządzanie planami opieki
-12. **RESPONSYWNOŚĆ** - Drawery na mobile, dialogi na desktop
-13. **LIMITY PAKIETÓW** - Kontrola dostępu do funkcji na podstawie subskrypcji
-
-## BAZA DANYCH (Supabase):
+## BAZA DANYCH (SUPABASE)
 
 ### GŁÓWNE TABELE:
-- user_profiles - Profile użytkowników
-- user_roles - Role i statusy użytkowników  
-- specialist_profiles - Profile specjalistów
-- specialist_specializations - Specjalizacje specjalistów
-- specializations - Lista dostępnych specjalizacji
-- clients - Klienci
-- pets - Zwierzęta z mapowaniem typów
-- visits - Wizyty
-- packages - Pakiety subskrypcji
-- user_subscriptions - Aktywne subskrypcje
-- care_programs - Programy opieki
-- pet_notes - Notatki zwierząt z załącznikami
+- **user_profiles** - Profile użytkowników
+- **user_roles** - Role i statusy użytkowników
+- **specialist_profiles** - Profile specjalistów z opisami
+- **clients** - Dane klientów
+- **pets** - Profile zwierząt z historią medyczną
+- **visits** - Wizyty z notatkami i zaleceniami
+- **packages** - Pakiety subskrypcji
+- **user_subscriptions** - Aktywne subskrypcje użytkowników
+- **care_programs** - Programy opieki długoterminowej
+- **pet_notes** - Notatki do zwierząt z załącznikami
+- **specializations** - Lista dostępnych specjalizacji
 
-## TECHNOLOGIE:
-- React 18 + TypeScript
-- Tailwind CSS + shadcn/ui
-- React Router Dom - routing
-- Supabase - backend i baza danych
-- React Query (TanStack Query) - zarządzanie stanem
-- React Hook Form + Zod - formularze z walidacją
-- i18next - internacjonalizacja (PL, EN, DE, UK)
-- Embla Carousel - karuzele z autoodtwarzaniem
-- Lucide React - ikony
-- React Quill - edytor tekstu
-- Date-fns - obsługa dat
-- Recharts - wykresy i wizualizacje
+### BEZPIECZEŃSTWO:
+- Row Level Security (RLS) na wszystkich tabelach
+- Autoryzacja na poziomie bazy danych
+- Funkcje i triggery do audytu i kontroli
 
-## WZORCE ARCHITEKTONICZNE:
+## TECHNOLOGIE
+
+### FRONTEND:
+- **React 18** z TypeScript
+- **Tailwind CSS** + shadcn/ui dla stylowania
+- **React Router Dom** do routingu
+- **React Hook Form** + Zod do formularzy
+- **TanStack Query** do zarządzania stanem i cache
+- **i18next** do internacjonalizacji (PL, EN, DE, UK)
+
+### BACKEND:
+- **Supabase** - baza danych PostgreSQL, autoryzacja, storage
+- **Edge Functions** do logiki biznesowej
+- **Stripe** do płatności
+- **Row Level Security** dla bezpieczeństwa danych
+
+### DODATKOWE:
+- **Embla Carousel** - karuzele z autoodtwarzaniem
+- **React Quill** - edytor tekstu sformatowanego
+- **Lucide React** - ikony
+- **Date-fns** - obsługa dat
+- **Recharts** - wykresy i wizualizacje
+
+## WZORCE ARCHITEKTONICZNE
 
 ### RESPONSIVE DESIGN:
-- useIsMobile hook do wykrywania urządzeń
-- Komponenty responsive (Dialog/Drawer pattern)
+- Hook useIsMobile do wykrywania urządzeń
+- Dialog/Drawer pattern (desktop/mobile)
 - Responsywne formularze i interfejsy
 
 ### ZARZĄDZANIE STANEM:
-- React Query do cache'owania i synchronizacji danych
-- Context API do stanu globalnego (autoryzacja)
-- Lokalne hooks do logiki biznesowej
+- React Query do cache'owania danych
+- Context API do stanu globalnego
+- Lokalne hooki do logiki biznesowej
 
-### WZORCE KOMPONENTÓW:
-- Atomic Design - komponenty ui/, layout/, features/
-- Kompozycja komponentów z children
-- Controlled/Uncontrolled pattern w formularzach
+### KOMPONENTY:
+- Atomic Design - ui/, layout/, features/
+- Kompozycja z children props
+- Controlled/Uncontrolled pattern
 - Error boundaries i loading states
 
 ### BEZPIECZEŃSTWO:
-- Row Level Security (RLS) w Supabase
+- RLS w Supabase
 - Autoryzacja na poziomie komponentów
-- Walidacja danych z Zod
-- Limity pakietów i kontrola dostępu
+- Walidacja z Zod
+- Kontrola limitów pakietów
+
+## DEPLOYMENT I HOSTING
+
+- **Lovable** - development i hosting
+- **Supabase** - backend services
+- **Stripe** - płatności
+- **Custom Domain** - możliwość podłączenia własnej domeny
+
+## KLUCZOWE CECHY APLIKACJI
+
+1. **Skalowalna architektura** - gotowa na rozwój i więcej funkcji
+2. **Bezpieczna** - RLS, autoryzacja, walidacja danych
+3. **Responsywna** - działająca na wszystkich urządzeniach
+4. **Wielojęzyczna** - wsparcie dla 4 języków
+5. **Subscription-based** - model biznesowy SaaS
+6. **User-friendly** - intuicyjny interfejs i UX

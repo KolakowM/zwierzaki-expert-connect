@@ -153,7 +153,8 @@
     "year_suffix": "/ rok",
     "recommended": "Polecany",
     "start_free": "Rozpocznij za darmo",
-    "choose_plan": "Wybierz plan"
+    "choose_plan": "Wybierz plan",
+    "current_plan": "Aktualny plan"
   },
   "not_found": {
     "title": "Strona nie została znaleziona",
