@@ -4,9 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStripePayment } from "@/hooks/useStripePayment";
-import { upgradeSubscription, validatePackageUpgrade } from "@/services/subscriptionService";
+import { upgradeSubscription } from "@/services/subscriptionService";
 import { Crown } from "lucide-react";
-import { Package, ActiveSubscription, ValidationResult } from "./types";
+import { Package, ActiveSubscription } from "./types";
 import BillingPeriodToggle from "./BillingPeriodToggle";
 import PackageCard from "./PackageCard";
 import PackageComparison from "./PackageComparison";
@@ -30,49 +30,12 @@ const PackageUpgradeDialog = ({
 }: PackageUpgradeDialogProps) => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
-  const [isValidating, setIsValidating] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [showDirectPurchase, setShowDirectPurchase] = useState(false);
   const { toast } = useToast();
   const { createCheckoutSession, openCustomerPortal, isLoading: stripeLoading } = useStripePayment();
 
   const handleSelectPackage = (pkg: Package) => {
     setSelectedPackage(pkg);
-    setValidationResult(null);
-    // Auto-validate when package is selected for smoother UX
-    setTimeout(() => {
-      handleValidateUpgrade(pkg);
-    }, 100);
-  };
-
-  const handleValidateUpgrade = async (packageToValidate?: Package) => {
-    const pkgToValidate = packageToValidate || selectedPackage;
-    if (!pkgToValidate) return;
-    
-    setIsValidating(true);
-    try {
-      const result = await validatePackageUpgrade(
-        '', // Will be handled by the service
-        currentPackage?.id || '',
-        pkgToValidate.id
-      );
-      setValidationResult(result);
-      
-      // If validation passes and it's a free package, show direct purchase option
-      if (result.canUpgrade && !pkgToValidate.price_pln) {
-        setShowDirectPurchase(true);
-      }
-    } catch (error) {
-      console.error('Error validating upgrade:', error);
-      toast({
-        title: "Błąd walidacji",
-        description: "Nie udało się sprawdzić możliwości upgrade'u",
-        variant: "destructive",
-      });
-    } finally {
-      setIsValidating(false);
-    }
   };
 
   const handleStripeCheckout = async () => {
@@ -116,7 +79,6 @@ const PackageUpgradeDialog = ({
       onUpgradeSuccess();
       onOpenChange(false);
       setSelectedPackage(null);
-      setValidationResult(null);
     } catch (error) {
       console.error('Error upgrading subscription:', error);
       toast({
@@ -133,8 +95,6 @@ const PackageUpgradeDialog = ({
     onOpenChange(false);
     setSelectedPackage(null);
     setBillingPeriod('monthly');
-    setValidationResult(null);
-    setShowDirectPurchase(false);
   };
 
   return (
@@ -182,15 +142,13 @@ const PackageUpgradeDialog = ({
             />
           )}
 
-          {/* Validation */}
+          {/* Payment Options */}
           <ValidationResults
-            validationResult={validationResult}
             selectedPackage={selectedPackage}
-            isValidating={isValidating}
+            currentPackage={currentPackage}
             isUpgrading={isUpgrading}
             stripeLoading={stripeLoading}
             billingPeriod={billingPeriod}
-            onValidateUpgrade={() => handleValidateUpgrade()}
             onStripeCheckout={handleStripeCheckout}
             onUpgrade={handleUpgrade}
           />
