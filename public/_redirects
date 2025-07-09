@@ -1,0 +1,10 @@
+
+# Handle client-side routing for SPA
+# This ensures that all routes are handled by React Router
+/*    /index.html   200
+
+# Optional: Handle API routes if you have any backend endpoints
+# /api/*  https://your-api-domain.com/api/:splat  200
+
+# Optional: Handle static assets directly
+# /static/*  /static/:splat  200
