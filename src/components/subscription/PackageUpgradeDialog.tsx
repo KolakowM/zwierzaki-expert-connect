@@ -39,17 +39,22 @@ const PackageUpgradeDialog = ({
   const handleSelectPackage = (pkg: Package) => {
     setSelectedPackage(pkg);
     setValidationResult(null);
+    // Auto-validate when package is selected for smoother UX
+    setTimeout(() => {
+      handleValidateUpgrade(pkg);
+    }, 100);
   };
 
-  const handleValidateUpgrade = async () => {
-    if (!selectedPackage) return;
+  const handleValidateUpgrade = async (packageToValidate?: Package) => {
+    const pkgToValidate = packageToValidate || selectedPackage;
+    if (!pkgToValidate) return;
     
     setIsValidating(true);
     try {
       const result = await validatePackageUpgrade(
         '', // Will be handled by the service
         currentPackage?.id || '',
-        selectedPackage.id
+        pkgToValidate.id
       );
       setValidationResult(result);
     } catch (error) {
@@ -177,7 +182,8 @@ const PackageUpgradeDialog = ({
             isValidating={isValidating}
             isUpgrading={isUpgrading}
             stripeLoading={stripeLoading}
-            onValidateUpgrade={handleValidateUpgrade}
+            billingPeriod={billingPeriod}
+            onValidateUpgrade={() => handleValidateUpgrade()}
             onStripeCheckout={handleStripeCheckout}
             onUpgrade={handleUpgrade}
           />

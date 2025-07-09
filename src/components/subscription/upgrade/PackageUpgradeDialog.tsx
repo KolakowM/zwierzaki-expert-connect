@@ -33,25 +33,36 @@ const PackageUpgradeDialog = ({
   const [isValidating, setIsValidating] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [showDirectPurchase, setShowDirectPurchase] = useState(false);
   const { toast } = useToast();
   const { createCheckoutSession, openCustomerPortal, isLoading: stripeLoading } = useStripePayment();
 
   const handleSelectPackage = (pkg: Package) => {
     setSelectedPackage(pkg);
     setValidationResult(null);
+    // Auto-validate when package is selected for smoother UX
+    setTimeout(() => {
+      handleValidateUpgrade(pkg);
+    }, 100);
   };
 
-  const handleValidateUpgrade = async () => {
-    if (!selectedPackage) return;
+  const handleValidateUpgrade = async (packageToValidate?: Package) => {
+    const pkgToValidate = packageToValidate || selectedPackage;
+    if (!pkgToValidate) return;
     
     setIsValidating(true);
     try {
       const result = await validatePackageUpgrade(
         '', // Will be handled by the service
         currentPackage?.id || '',
-        selectedPackage.id
+        pkgToValidate.id
       );
       setValidationResult(result);
+      
+      // If validation passes and it's a free package, show direct purchase option
+      if (result.canUpgrade && !pkgToValidate.price_pln) {
+        setShowDirectPurchase(true);
+      }
     } catch (error) {
       console.error('Error validating upgrade:', error);
       toast({
@@ -123,6 +134,7 @@ const PackageUpgradeDialog = ({
     setSelectedPackage(null);
     setBillingPeriod('monthly');
     setValidationResult(null);
+    setShowDirectPurchase(false);
   };
 
   return (
@@ -177,7 +189,8 @@ const PackageUpgradeDialog = ({
             isValidating={isValidating}
             isUpgrading={isUpgrading}
             stripeLoading={stripeLoading}
-            onValidateUpgrade={handleValidateUpgrade}
+            billingPeriod={billingPeriod}
+            onValidateUpgrade={() => handleValidateUpgrade()}
             onStripeCheckout={handleStripeCheckout}
             onUpgrade={handleUpgrade}
           />

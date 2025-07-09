@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, XCircle, CreditCard } from "lucide-react";
@@ -9,6 +10,7 @@ interface ValidationResultsProps {
   isValidating: boolean;
   isUpgrading: boolean;
   stripeLoading: boolean;
+  billingPeriod: 'monthly' | 'yearly';
   onValidateUpgrade: () => void;
   onStripeCheckout: () => void;
   onUpgrade: () => void;
@@ -20,11 +22,24 @@ const ValidationResults = ({
   isValidating,
   isUpgrading,
   stripeLoading,
+  billingPeriod,
   onValidateUpgrade,
   onStripeCheckout,
   onUpgrade
 }: ValidationResultsProps) => {
   if (!selectedPackage) return null;
+
+  // Calculate price based on billing period
+  const getPrice = () => {
+    if (!selectedPackage.price_pln) return 0;
+    return billingPeriod === 'yearly' ? selectedPackage.price_pln * 10 : selectedPackage.price_pln;
+  };
+
+  const getPriceLabel = () => {
+    const price = getPrice();
+    const period = billingPeriod === 'yearly' ? 'rok' : 'miesiąc';
+    return `${price} PLN/${period}`;
+  };
 
   if (!validationResult) {
     return (
@@ -57,7 +72,7 @@ const ValidationResults = ({
                   className="flex-1"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  {stripeLoading ? "Przekierowywanie..." : `Zapłać ${selectedPackage?.price_pln} PLN`}
+                  {stripeLoading ? "Przekierowywanie..." : `Zapłać ${getPriceLabel()}`}
                 </Button>
                 <Button 
                   onClick={onUpgrade} 

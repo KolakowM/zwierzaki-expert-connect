@@ -61,7 +61,6 @@ export default function PricingCard({
       "Zawodowiec": "Zawodowiec"
     };
 
-
     const databasePackageName = packageNameMap[name] || name;
     const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
 
@@ -74,6 +73,30 @@ export default function PricingCard({
 
   const isFreePlan = name === "Testowy";
   const isLoading = stripeLoading || packagesLoading;
+
+  // Calculate displayed price and savings
+  const getDisplayPrice = () => {
+    if (billingPeriod === 'monthly') {
+      return monthlyPrice;
+    } else {
+      return yearlyPrice;
+    }
+  };
+
+  const getSavingsInfo = () => {
+    if (billingPeriod === 'yearly' && !isFreePlan) {
+      // Extract numeric value from price strings
+      const monthlyNum = parseInt(monthlyPrice.replace(/[^0-9]/g, ''));
+      const yearlyNum = parseInt(yearlyPrice.replace(/[^0-9]/g, ''));
+      
+      if (monthlyNum && yearlyNum) {
+        const monthlyYearlyEquivalent = monthlyNum * 12;
+        const savings = monthlyYearlyEquivalent - yearlyNum;
+        return savings > 0 ? `Oszczędzasz ${savings} zł rocznie` : null;
+      }
+    }
+    return null;
+  };
   
   return (
     <Card className={popular ? "border-primary shadow-lg relative" : ""}>
@@ -86,11 +109,16 @@ export default function PricingCard({
         <CardTitle>{name}</CardTitle>
         <div className="mt-4">
           <span className="text-3xl font-bold">
-            {billingPeriod === 'monthly' ? monthlyPrice : yearlyPrice}
+            {getDisplayPrice()}
           </span>
           <span className="text-sm text-muted-foreground ml-1">
             {billingPeriod === 'monthly' ? t('pricing.month_suffix') : t('pricing.year_suffix')}
           </span>
+          {getSavingsInfo() && (
+            <div className="text-xs text-green-600 font-medium mt-1">
+              {getSavingsInfo()}
+            </div>
+          )}
         </div>
         <CardDescription className="mt-2">{description}</CardDescription>
       </CardHeader>
@@ -117,8 +145,7 @@ export default function PricingCard({
             variant="outline"
             disabled
           >
-            {'default'}
-            {/*{t('pricing.current_plan')*/}
+            Plan aktualny
           </Button>
         ) : (
           <Button
@@ -127,7 +154,7 @@ export default function PricingCard({
             onClick={handleSubscribe}
             disabled={isLoading}
           >
-            {isLoading ? "Loading..." : cta}
+            {isLoading ? "Ładowanie..." : cta}
           </Button>
         )}
       </CardFooter>

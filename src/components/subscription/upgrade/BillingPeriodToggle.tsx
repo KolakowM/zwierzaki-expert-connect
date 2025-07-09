@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 
 interface BillingPeriodToggleProps {
@@ -13,14 +14,17 @@ const BillingPeriodToggle = ({ billingPeriod, onBillingPeriodChange }: BillingPe
         size="sm"
         onClick={() => onBillingPeriodChange('monthly')}
       >
-        Monthly
+        Miesięcznie
       </Button>
       <Button
         variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onBillingPeriodChange('yearly')}
       >
-        Yearly
+        Rocznie
+        <span className="ml-1 text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
+          -17%
+        </span>
       </Button>
     </div>
   );
