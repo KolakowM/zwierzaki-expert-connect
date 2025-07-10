@@ -42,7 +42,7 @@ export default function PricingFAQ() {
         <AccordionItem value="faq-5">
           <AccordionTrigger>Na czym polega rabat dla nowych użytkowników?</AccordionTrigger>
           <AccordionContent>
-            Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 10 zł przy płatności miesięcznej lub 100 zł przy płatności rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
+            Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 15% przy płatności miesięcznej lub rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
           </AccordionContent>
         </AccordionItem>
 
