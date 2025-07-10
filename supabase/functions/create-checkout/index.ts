@@ -74,7 +74,7 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Create checkout session
+    // Create checkout session with promotion codes enabled
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -85,6 +85,7 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
+      allow_promotion_codes: true, // Enable coupon code field
       success_url: `${req.headers.get("origin")}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
       metadata: {
