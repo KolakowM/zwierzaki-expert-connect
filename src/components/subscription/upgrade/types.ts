@@ -1,3 +1,4 @@
+
 export interface Package {
   id: string;
   name: string;
@@ -15,6 +16,7 @@ export interface ActiveSubscription {
   id?: string;
   package_name?: string;
   subscription_id?: string;
+  package_id?: string;
   status?: string;
   end_date?: string;
   max_clients?: number;

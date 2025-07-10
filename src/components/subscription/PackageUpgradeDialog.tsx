@@ -4,9 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStripeSubscription } from "@/hooks/useStripeSubscription";
-import { upgradeSubscription, validatePackageUpgrade } from "@/services/subscriptionService";
+import { upgradeSubscription } from "@/services/subscriptionService";
 import { Crown } from "lucide-react";
-import { Package, ActiveSubscription, ValidationResult } from "./upgrade/types";
+import { Package, ActiveSubscription } from "./upgrade/types";
 import BillingPeriodToggle from "./upgrade/BillingPeriodToggle";
 import PackageCard from "./upgrade/PackageCard";
 import PackageComparison from "./upgrade/PackageComparison";
@@ -30,43 +30,12 @@ const PackageUpgradeDialog = ({
 }: PackageUpgradeDialogProps) => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
-  const [isValidating, setIsValidating] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const { toast } = useToast();
   const { createCheckoutSession, openCustomerPortal, isLoading: stripeLoading } = useStripeSubscription();
 
   const handleSelectPackage = (pkg: Package) => {
     setSelectedPackage(pkg);
-    setValidationResult(null);
-    // Auto-validate when package is selected for smoother UX
-    setTimeout(() => {
-      handleValidateUpgrade(pkg);
-    }, 100);
-  };
-
-  const handleValidateUpgrade = async (packageToValidate?: Package) => {
-    const pkgToValidate = packageToValidate || selectedPackage;
-    if (!pkgToValidate) return;
-    
-    setIsValidating(true);
-    try {
-      const result = await validatePackageUpgrade(
-        '', // Will be handled by the service
-        currentPackage?.id || '',
-        pkgToValidate.id
-      );
-      setValidationResult(result);
-    } catch (error) {
-      console.error('Error validating upgrade:', error);
-      toast({
-        title: "Błąd walidacji",
-        description: "Nie udało się sprawdzić możliwości upgrade'u",
-        variant: "destructive",
-      });
-    } finally {
-      setIsValidating(false);
-    }
   };
 
   const handleStripeCheckout = async () => {
@@ -110,7 +79,6 @@ const PackageUpgradeDialog = ({
       onUpgradeSuccess();
       onOpenChange(false);
       setSelectedPackage(null);
-      setValidationResult(null);
     } catch (error) {
       console.error('Error upgrading subscription:', error);
       toast({
@@ -127,7 +95,6 @@ const PackageUpgradeDialog = ({
     onOpenChange(false);
     setSelectedPackage(null);
     setBillingPeriod('monthly');
-    setValidationResult(null);
   };
 
   return (
@@ -175,15 +142,13 @@ const PackageUpgradeDialog = ({
             />
           )}
 
-          {/* Validation */}
+          {/* Payment Options - Show directly when package is selected */}
           <ValidationResults
-            validationResult={validationResult}
             selectedPackage={selectedPackage}
-            isValidating={isValidating}
+            currentPackage={currentPackage}
             isUpgrading={isUpgrading}
             stripeLoading={stripeLoading}
             billingPeriod={billingPeriod}
-            onValidateUpgrade={() => handleValidateUpgrade()}
             onStripeCheckout={handleStripeCheckout}
             onUpgrade={handleUpgrade}
           />
