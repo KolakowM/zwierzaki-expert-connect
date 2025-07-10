@@ -32,12 +32,12 @@ export default function PricingFAQ() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="faq-4">
+        {/*} <AccordionItem value="faq-4">
           <AccordionTrigger>Czy mogę rozszerzyć limit klientów i zwierząt?</AccordionTrigger>
           <AccordionContent>
             Tak, oferujemy dodatek (+15 zł miesięcznie), który zwiększa limit o dodatkowych 10 klientów i 10 zwierząt. Możesz dokupić tyle dodatków, ile potrzebujesz.
           </AccordionContent>
-        </AccordionItem>
+        </AccordionItem>*/}
 
         <AccordionItem value="faq-5">
           <AccordionTrigger>Na czym polega rabat dla nowych użytkowników?</AccordionTrigger>
