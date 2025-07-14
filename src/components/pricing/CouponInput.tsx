@@ -4,19 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CouponInputProps {
   onCouponApplied: (couponCode: string) => void;
   onCouponRemoved: () => void;
   appliedCoupon?: string;
   disabled?: boolean;
+  priceId?: string;
 }
 
 export default function CouponInput({ 
   onCouponApplied, 
   onCouponRemoved, 
   appliedCoupon,
-  disabled = false 
+  disabled = false,
+  priceId
 }: CouponInputProps) {
   const [couponCode, setCouponCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -32,18 +35,47 @@ export default function CouponInput({
       return;
     }
 
-    setIsValidating(true);
-    try {
-      // Walidacja zostanie wykonana w create-checkout
-      onCouponApplied(couponCode.trim().toUpperCase());
-      toast({
-        title: "Kod promocyjny",
-        description: "Kod zostanie zastosowany podczas płatności",
-      });
-    } catch (error) {
+    if (!priceId) {
       toast({
         title: "Błąd",
-        description: "Wystąpił błąd podczas dodawania kodu promocyjnego",
+        description: "Nie można zwalidować kuponu - brak informacji o cenie",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-coupon', {
+        body: { 
+          couponCode: couponCode.trim().toUpperCase(),
+          priceId: priceId
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error('Błąd podczas walidacji kuponu');
+      }
+
+      if (data.valid) {
+        onCouponApplied(couponCode.trim().toUpperCase());
+        toast({
+          title: "Kod promocyjny zastosowany",
+          description: `Kupon ${couponCode.toUpperCase()} został pomyślnie zastosowany`,
+        });
+      } else {
+        toast({
+          title: "Nieprawidłowy kod promocyjny",
+          description: data.error || "Kod promocyjny nie jest ważny",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Coupon validation error:', error);
+      toast({
+        title: "Błąd",
+        description: "Wystąpił błąd podczas sprawdzania kodu promocyjnego",
         variant: "destructive",
       });
     } finally {

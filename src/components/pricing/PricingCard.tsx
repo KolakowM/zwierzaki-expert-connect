@@ -47,6 +47,26 @@ export default function PricingCard({
     queryFn: getActivePackages,
   });
 
+  // Get the Stripe price ID for this package
+  const { data: stripePriceId } = useQuery({
+    queryKey: ['stripePriceId', name, billingPeriod],
+    queryFn: async () => {
+      const packageNameMap: Record<string, string> = {
+        "Zaawansowany": "Advanced",
+        "Zawodowiec": "Professional"
+      };
+
+      const databasePackageName = packageNameMap[name] || name;
+      const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
+      
+      if (!selectedPackage) return null;
+
+      const { getStripePriceForPackage } = await import("@/services/stripeService");
+      return getStripePriceForPackage(selectedPackage.id, billingPeriod);
+    },
+    enabled: !!packages && !isFreePlan,
+  });
+
   const handleSubscribe = async () => {
     if (!isAuthenticated) {
       // Redirect to register if not authenticated
@@ -59,8 +79,8 @@ export default function PricingCard({
     }
 
     const packageNameMap: Record<string, string> = {
-      "Zaawansowany": "Zaawansowany",
-      "Zawodowiec": "Zawodowiec"
+      "Zaawansowany": "Advanced",
+      "Zawodowiec": "Professional"
     };
 
     const databasePackageName = packageNameMap[name] || name;
@@ -143,6 +163,7 @@ export default function PricingCard({
               onCouponRemoved={() => setAppliedCoupon("")}
               appliedCoupon={appliedCoupon}
               disabled={isLoading}
+              priceId={stripePriceId}
             />
           </div>
         )}

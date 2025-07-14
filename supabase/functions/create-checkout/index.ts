@@ -60,31 +60,31 @@ serve(async (req) => {
     const stripePriceId = priceData.stripe_price_id;
     console.log('Found Stripe price ID:', stripePriceId);
 
-    // Walidacja kuponu jeśli został podany
+    // Validate coupon if provided
     let validatedCoupon = null;
     if (couponCode) {
       console.log('Validating coupon code:', couponCode);
       
       try {
-        const validationResponse = await fetch(`${req.headers.get("origin")}/api/validate-coupon`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        // Call our validate-coupon function
+        const { data: validationData, error: validationError } = await supabaseClient.functions.invoke('validate-coupon', {
+          body: {
             couponCode: couponCode,
             priceId: stripePriceId
-          })
+          }
         });
 
-        const validationResult = await validationResponse.json();
-        
-        if (!validationResult.valid) {
-          console.log('Coupon validation failed:', validationResult.error);
-          throw new Error(validationResult.error || 'Nieprawidłowy kod promocyjny');
+        if (validationError) {
+          console.error('Coupon validation function error:', validationError);
+          throw new Error('Błąd walidacji kuponu');
         }
         
-        validatedCoupon = validationResult.coupon;
+        if (!validationData?.valid) {
+          console.log('Coupon validation failed:', validationData?.error);
+          throw new Error(validationData?.error || 'Nieprawidłowy kod promocyjny');
+        }
+        
+        validatedCoupon = validationData.coupon;
         console.log('Coupon validation successful:', validatedCoupon);
       } catch (error) {
         console.error('Coupon validation error:', error);
@@ -128,7 +128,7 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      allow_promotion_codes: true, // Nadal pozwalamy na kody promocyjne
+      allow_promotion_codes: true, // Still allow promotion codes on checkout page
       success_url: `${req.headers.get("origin")}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
       metadata: {
@@ -138,10 +138,10 @@ serve(async (req) => {
       },
     };
 
-    // Jeśli kupon został zwalidowany, dodaj go do sesji
+    // If coupon was validated, add it to the session
     if (validatedCoupon) {
       console.log('Adding validated coupon to session');
-      // Znajdź promotion code w Stripe
+      // Find the promotion code in Stripe
       const promotionCodes = await stripe.promotionCodes.list({
         coupon: validatedCoupon.id,
         active: true,

@@ -26,7 +26,7 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    // Pobierz informacje o kuponie
+    // Get coupon information from Stripe
     const promotionCodes = await stripe.promotionCodes.list({
       code: couponCode,
       active: true,
@@ -53,7 +53,7 @@ serve(async (req) => {
       amount_off: coupon.amount_off 
     });
 
-    // Sprawdź ograniczenia kuponu na podstawie nazwy/kodu
+    // Check coupon restrictions based on name/code
     const isValidForPrice = validateCouponForPrice(couponCode, priceId);
     
     if (!isValidForPrice) {
@@ -95,25 +95,25 @@ serve(async (req) => {
 });
 
 function validateCouponForPrice(couponCode: string, priceId: string): boolean {
-  // Mapowanie kuponów do konkretnych cen/planów
+  // Map coupons to specific prices/plans
   const couponRestrictions: Record<string, string[]> = {
-    // Kupony dla planu Zaawansowany (miesięczny i roczny)
+    // Coupons for Advanced plan (monthly and yearly)
     'ADVANCED_15': [
-      'price_1Rfkh7H74CzZDu9dxLQgdsmk', // miesięczny
-      // Dodaj tutaj price_id dla rocznego planu Zaawansowany
+      'price_1Rfkh7H74CzZDu9dxLQgdsmk', // monthly
+      // Add yearly price_id for Advanced plan here when available
     ],
     'ZAAWANSOWANY15': [
       'price_1Rfkh7H74CzZDu9dxLQgdsmk',
-      // Dodaj tutaj price_id dla rocznego planu Zaawansowany
+      // Add yearly price_id for Advanced plan here when available
     ],
-    // Kupony dla planu Zawodowiec
+    // Coupons for Professional plan
     'PRO_15': [
-      // Dodaj tutaj price_id dla miesięcznego planu Zawodowiec
-      // Dodaj tutaj price_id dla rocznego planu Zawodowiec
+      // Add price_id for monthly Professional plan here when available
+      // Add price_id for yearly Professional plan here when available
     ],
     'ZAWODOWIEC15': [
-      // Dodaj tutaj price_id dla miesięcznego planu Zawodowiec
-      // Dodaj tutaj price_id dla rocznego planu Zawodowiec
+      // Add price_id for monthly Professional plan here when available
+      // Add price_id for yearly Professional plan here when available
     ]
   };
 
