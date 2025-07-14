@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
@@ -11,8 +12,7 @@ export const useStripePayment = () => {
 
   const createCheckoutSession = async (
     packageId: string, 
-    billingPeriod: 'monthly' | 'yearly',
-    couponCode?: string
+    billingPeriod: 'monthly' | 'yearly'
   ) => {
     if (!user) {
       toast({
@@ -24,7 +24,7 @@ export const useStripePayment = () => {
     }
 
     console.log('=== FRONTEND CHECKOUT DEBUG START ===');
-    console.log('Request parameters:', { packageId, billingPeriod, couponCode });
+    console.log('Request parameters:', { packageId, billingPeriod });
 
     setIsLoading(true);
     try {
@@ -39,8 +39,7 @@ export const useStripePayment = () => {
       const requestBody = { 
         packageId, 
         billingPeriod,
-        stripePriceId,
-        ...(couponCode && { couponCode: couponCode.trim() })
+        stripePriceId
       };
       
       console.log('Sending request to create-checkout with body:', requestBody);
@@ -67,8 +66,7 @@ export const useStripePayment = () => {
           package_id: packageId,
           status: 'pending',
           metadata: { 
-            billing_period: billingPeriod,
-            ...(couponCode && { coupon_code: couponCode })
+            billing_period: billingPeriod
           }
         });
 
@@ -77,7 +75,7 @@ export const useStripePayment = () => {
         
         toast({
           title: "Redirecting to Payment",
-          description: "You've been redirected to Stripe checkout in a new tab",
+          description: "You've been redirected to Stripe checkout in a new tab. You can enter coupon codes directly on the checkout page.",
         });
       }
     } catch (error) {

@@ -3,8 +3,6 @@ import { ReactNode, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import PricingFeatureItem from "./PricingFeatureItem";
 import { useTranslation } from "react-i18next";
 import { useStripePayment } from "@/hooks/useStripePayment";
@@ -41,8 +39,6 @@ export default function PricingCard({
   const { t } = useTranslation();
   const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
   const { user, isAuthenticated } = useAuth();
-  const [couponCode, setCouponCode] = useState('');
-  const [showCouponField, setShowCouponField] = useState(false);
   
   const { data: packages, isLoading: packagesLoading } = useQuery({
     queryKey: ['packages'],
@@ -71,8 +67,7 @@ export default function PricingCard({
     if (selectedPackage) {
       await createCheckoutSession(
         selectedPackage.id, 
-        billingPeriod,
-        couponCode || undefined
+        billingPeriod
       );
     } else {
       console.error('Package not found:', databasePackageName);
@@ -137,50 +132,12 @@ export default function PricingCard({
           ))}
         </ul>
 
-        {/* Coupon Code Section */}
+        {/* Information about coupon codes */}
         {isAuthenticated && !isFreePlan && (
           <div className="mt-6 pt-4 border-t">
-            {!showCouponField ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowCouponField(true)}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                Mam kod rabatowy
-              </Button>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="coupon-code" className="text-sm">
-                  Kod rabatowy
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="coupon-code"
-                    type="text"
-                    placeholder="Wprowadź kod"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="text-sm"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowCouponField(false);
-                      setCouponCode('');
-                    }}
-                  >
-                    ×
-                  </Button>
-                </div>
-                {couponCode && (
-                  <p className="text-xs text-muted-foreground">
-                    Kod zostanie zastosowany podczas płatności
-                  </p>
-                )}
-              </div>
-            )}
+            <div className="text-sm text-muted-foreground">
+              💡 Kody rabatowe można wprowadzić bezpośrednio na stronie płatności Stripe
+            </div>
           </div>
         )}
       </CardContent>
