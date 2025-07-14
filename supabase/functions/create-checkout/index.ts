@@ -60,6 +60,34 @@ serve(async (req) => {
     const stripePriceId = priceData.stripe_price_id;
     console.log('Found Stripe price ID:', stripePriceId);
 
+    // If a coupon is provided, validate it against the price ID
+    if (stripeCouponId) {
+      console.log('=== VALIDATING COUPON AGAINST PRICE ID ===');
+      
+      // Find the coupon by stripe_coupon_id
+      const { data: couponData, error: couponError } = await supabaseClient
+        .from('coupons')
+        .select('*')
+        .eq('stripe_coupon_id', stripeCouponId)
+        .eq('is_active', true)
+        .single();
+
+      if (couponError || !couponData) {
+        console.error('Coupon not found:', couponError);
+        throw new Error('Invalid coupon provided');
+      }
+
+      // Check if coupon is restricted to specific price IDs
+      if (couponData.applicable_stripe_price_ids && couponData.applicable_stripe_price_ids.length > 0) {
+        if (!couponData.applicable_stripe_price_ids.includes(stripePriceId)) {
+          console.log('Coupon not applicable to this price ID:', { couponPriceIds: couponData.applicable_stripe_price_ids, requestedPriceId: stripePriceId });
+          throw new Error('This coupon is not applicable to the selected package variant');
+        }
+      }
+      
+      console.log('Coupon validation passed');
+    }
+
     // Check if customer exists
     console.log('=== CUSTOMER CHECK ===');
     const customers = await stripe.customers.list({

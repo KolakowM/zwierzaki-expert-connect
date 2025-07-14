@@ -18,9 +18,10 @@ interface CouponData {
 interface CouponInputProps {
   onCouponValidated: (coupon: CouponData | null) => void;
   disabled?: boolean;
+  stripePriceId?: string;
 }
 
-export default function CouponInput({ onCouponValidated, disabled = false }: CouponInputProps) {
+export default function CouponInput({ onCouponValidated, disabled = false, stripePriceId }: CouponInputProps) {
   const [couponCode, setCouponCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'valid' | 'invalid'>('idle');
@@ -40,10 +41,13 @@ export default function CouponInput({ onCouponValidated, disabled = false }: Cou
     setIsValidating(true);
     
     try {
-      console.log('Validating coupon:', couponCode);
+      console.log('Validating coupon:', couponCode, 'for price ID:', stripePriceId);
       
       const { data, error } = await supabase.functions.invoke('validate-coupon', {
-        body: { code: couponCode.trim().toUpperCase() }
+        body: { 
+          code: couponCode.trim().toUpperCase(),
+          stripePriceId 
+        }
       });
 
       console.log('Coupon validation response:', { data, error });

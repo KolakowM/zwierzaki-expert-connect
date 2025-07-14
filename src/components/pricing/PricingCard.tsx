@@ -10,6 +10,7 @@ import { useStripePayment } from "@/hooks/useStripePayment";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { getActivePackages } from "@/services/subscriptionService";
+import { getStripePriceForPackage } from "@/services/stripeService";
 
 export interface PricingFeature {
   id: string;
@@ -56,6 +57,21 @@ export default function PricingCard({
     queryFn: getActivePackages,
   });
 
+  // Get the stripe price ID for this package
+  const packageNameMap: Record<string, string> = {
+    "Zaawansowany": "Zaawansowany",
+    "Zawodowiec": "Zawodowiec"
+  };
+  
+  const databasePackageName = packageNameMap[name] || name;
+  const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
+
+  const { data: stripePriceId } = useQuery({
+    queryKey: ['stripe-price', selectedPackage?.id, billingPeriod],
+    queryFn: () => selectedPackage ? getStripePriceForPackage(selectedPackage.id, billingPeriod) : null,
+    enabled: !!selectedPackage && !isFreePlan,
+  });
+
   const handleSubscribe = async () => {
     if (!isAuthenticated) {
       // Redirect to register if not authenticated
@@ -66,14 +82,6 @@ export default function PricingCard({
       // Free plan, no Stripe checkout needed
       return;
     }
-
-    const packageNameMap: Record<string, string> = {
-      "Zaawansowany": "Zaawansowany",
-      "Zawodowiec": "Zawodowiec"
-    };
-
-    const databasePackageName = packageNameMap[name] || name;
-    const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
 
     if (selectedPackage) {
       await createCheckoutSession(
@@ -155,6 +163,7 @@ export default function PricingCard({
             <CouponInput 
               onCouponValidated={handleCouponValidated}
               disabled={isLoading}
+              stripePriceId={stripePriceId || undefined}
             />
           </div>
         )}

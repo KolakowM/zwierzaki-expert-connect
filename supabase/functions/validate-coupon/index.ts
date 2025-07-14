@@ -38,8 +38,8 @@ serve(async (req) => {
 
     console.log('User authenticated:', { userId: user.id, email: user.email });
 
-    const { code } = await req.json();
-    console.log('Validating coupon code:', code);
+    const { code, stripePriceId } = await req.json();
+    console.log('Validating coupon code:', code, 'for price ID:', stripePriceId);
 
     if (!code) {
       throw new Error("Coupon code is required");
@@ -88,6 +88,20 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
+    }
+
+    // Check if coupon is restricted to specific price IDs
+    if (stripePriceId && coupon.applicable_stripe_price_ids && coupon.applicable_stripe_price_ids.length > 0) {
+      if (!coupon.applicable_stripe_price_ids.includes(stripePriceId)) {
+        console.log('Coupon not applicable to this price ID:', { couponPriceIds: coupon.applicable_stripe_price_ids, requestedPriceId: stripePriceId });
+        return new Response(JSON.stringify({ 
+          valid: false, 
+          message: "Ten kod promocyjny nie dotyczy wybranego pakietu" 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
     }
 
     // Check if user has already used this coupon
