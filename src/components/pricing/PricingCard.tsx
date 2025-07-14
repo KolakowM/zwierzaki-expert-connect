@@ -132,14 +132,7 @@ export default function PricingCard({
           ))}
         </ul>
 
-        {/* Information about coupon codes */}
-        {isAuthenticated && !isFreePlan && (
-          <div className="mt-6 pt-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              💡 Kody rabatowe można wprowadzić bezpośrednio na stronie płatności Stripe
-            </div>
-          </div>
-        )}
+        
       </CardContent>
       <CardFooter>
         {!isAuthenticated ? (
