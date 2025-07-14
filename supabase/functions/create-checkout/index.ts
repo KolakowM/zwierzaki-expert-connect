@@ -36,7 +36,7 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { packageId, billingPeriod } = await req.json();
+    const { packageId, billingPeriod, couponCode } = await req.json();
 
     // Get the Stripe price ID for this package and billing period
     const { data: priceData, error: priceError } = await supabaseClient
@@ -53,6 +53,58 @@ serve(async (req) => {
     }
 
     const stripePriceId = priceData.stripe_price_id;
+
+    // Validate coupon if provided
+    let validatedCoupon = null;
+    if (couponCode) {
+      console.log('Validating coupon:', couponCode);
+      
+      try {
+        // 1. Validate coupon with Stripe
+        const coupon = await stripe.coupons.retrieve(couponCode);
+        
+        if (!coupon.valid) {
+          throw new Error('Coupon is not valid or has expired');
+        }
+
+        // 2. Check billing period restrictions (using coupon metadata)
+        if (coupon.metadata && coupon.metadata.allowed_billing_periods) {
+          const allowedPeriods = coupon.metadata.allowed_billing_periods.split(',');
+          if (!allowedPeriods.includes(billingPeriod)) {
+            throw new Error(`This coupon is not valid for ${billingPeriod} billing. Allowed periods: ${allowedPeriods.join(', ')}`);
+          }
+        }
+
+        // 3. Check if user has already used this coupon
+        const supabaseService = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+        );
+
+        const { data: existingUsage, error: usageError } = await supabaseService
+          .from('payment_logs')
+          .select('id')
+          .eq('user_id', user.id)
+          .contains('metadata', { coupon_code: couponCode })
+          .limit(1);
+
+        if (usageError) {
+          console.error('Error checking coupon usage:', usageError);
+          throw new Error('Failed to validate coupon usage');
+        }
+
+        if (existingUsage && existingUsage.length > 0) {
+          throw new Error('You have already used this coupon code');
+        }
+
+        validatedCoupon = coupon;
+        console.log('Coupon validated successfully:', couponCode);
+        
+      } catch (error) {
+        console.error('Coupon validation failed:', error);
+        throw new Error(`Coupon validation failed: ${error.message}`);
+      }
+    }
 
     // Check if customer exists
     const customers = await stripe.customers.list({
@@ -74,8 +126,8 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Create checkout session with promotion codes enabled
-    const session = await stripe.checkout.sessions.create({
+    // Create checkout session configuration
+    const sessionConfig = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
@@ -85,15 +137,26 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      allow_promotion_codes: true, // Enable coupon code field
+      allow_promotion_codes: !couponCode, // Disable promotion code field if coupon is pre-applied
       success_url: `${req.headers.get("origin")}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
       metadata: {
         package_id: packageId,
         user_id: user.id,
         billing_period: billingPeriod,
+        ...(couponCode && { coupon_code: couponCode }),
       },
-    });
+    };
+
+    // Apply coupon if validated
+    if (validatedCoupon) {
+      sessionConfig.discounts = [{
+        coupon: couponCode,
+      }];
+    }
+
+    // Create checkout session
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     // Update or create subscriber record
     const supabaseService = createClient(
@@ -108,6 +171,27 @@ serve(async (req) => {
       subscribed: false, // Will be updated via webhook
       subscription_tier: packageId,
     });
+
+    // Log payment attempt with coupon information
+    const paymentLogMetadata = {
+      billing_period: billingPeriod,
+      ...(couponCode && { 
+        coupon_code: couponCode,
+        coupon_applied: true,
+        coupon_type: validatedCoupon?.percent_off ? 'percent' : 'amount',
+        coupon_value: validatedCoupon?.percent_off || validatedCoupon?.amount_off,
+      }),
+    };
+
+    await supabaseService.from("payment_logs").insert({
+      user_id: user.id,
+      stripe_session_id: session.id,
+      package_id: packageId,
+      status: 'pending',
+      metadata: paymentLogMetadata,
+    });
+
+    console.log('Checkout session created successfully:', session.id);
 
     return new Response(JSON.stringify({ 
       url: session.url,

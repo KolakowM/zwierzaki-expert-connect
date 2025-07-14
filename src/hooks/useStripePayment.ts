@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +11,8 @@ export const useStripePayment = () => {
 
   const createCheckoutSession = async (
     packageId: string, 
-    billingPeriod: 'monthly' | 'yearly'
+    billingPeriod: 'monthly' | 'yearly',
+    couponCode?: string
   ) => {
     if (!user) {
       toast({
@@ -37,7 +37,8 @@ export const useStripePayment = () => {
         body: { 
           packageId, 
           billingPeriod,
-          stripePriceId 
+          stripePriceId,
+          ...(couponCode && { couponCode: couponCode.trim() })
         }
       });
 
@@ -53,7 +54,10 @@ export const useStripePayment = () => {
           stripe_session_id: data.sessionId,
           package_id: packageId,
           status: 'pending',
-          metadata: { billing_period: billingPeriod }
+          metadata: { 
+            billing_period: billingPeriod,
+            ...(couponCode && { coupon_code: couponCode })
+          }
         });
 
         // Open Stripe checkout in a new tab
@@ -66,9 +70,10 @@ export const useStripePayment = () => {
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
+      const errorMessage = error?.message || 'Failed to initiate payment process';
       toast({
         title: "Payment Error",
-        description: "Failed to initiate payment process",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
