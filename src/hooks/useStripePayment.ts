@@ -23,24 +23,34 @@ export const useStripePayment = () => {
       return;
     }
 
+    console.log('=== FRONTEND CHECKOUT DEBUG START ===');
+    console.log('Request parameters:', { packageId, billingPeriod, couponCode });
+
     setIsLoading(true);
     try {
       // Get the Stripe price ID for this package and billing period
       const stripePriceId = await getStripePriceForPackage(packageId, billingPeriod);
+      console.log('Retrieved Stripe price ID:', stripePriceId);
       
       if (!stripePriceId) {
         throw new Error('No Stripe price found for this package');
       }
 
+      const requestBody = { 
+        packageId, 
+        billingPeriod,
+        stripePriceId,
+        ...(couponCode && { couponCode: couponCode.trim() })
+      };
+      
+      console.log('Sending request to create-checkout with body:', requestBody);
+
       // Call the edge function to create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { 
-          packageId, 
-          billingPeriod,
-          stripePriceId,
-          ...(couponCode && { couponCode: couponCode.trim() })
-        }
+        body: requestBody
       });
+
+      console.log('Edge function response:', { data, error });
 
       if (error) {
         console.error('Edge function error:', error);
@@ -48,6 +58,8 @@ export const useStripePayment = () => {
       }
 
       if (data?.url) {
+        console.log('Checkout session URL received, opening in new tab');
+        
         // Log the payment attempt
         await logPayment({
           user_id: user.id,
@@ -69,8 +81,10 @@ export const useStripePayment = () => {
         });
       }
     } catch (error) {
+      console.error('=== FRONTEND CHECKOUT ERROR ===');
       console.error('Error creating checkout session:', error);
       const errorMessage = error?.message || 'Failed to initiate payment process';
+      console.error('Error message to display:', errorMessage);
       toast({
         title: "Payment Error",
         description: errorMessage,
@@ -78,6 +92,7 @@ export const useStripePayment = () => {
       });
     } finally {
       setIsLoading(false);
+      console.log('=== FRONTEND CHECKOUT DEBUG END ===');
     }
   };
 
