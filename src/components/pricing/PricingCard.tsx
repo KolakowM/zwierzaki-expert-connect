@@ -52,6 +52,9 @@ export default function PricingCard({
   const { user, isAuthenticated } = useAuth();
   const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
   
+  // Define isFreePlan early so it can be used in useQuery
+  const isFreePlan = name === "Testowy";
+  
   const { data: packages, isLoading: packagesLoading } = useQuery({
     queryKey: ['packages'],
     queryFn: getActivePackages,
@@ -94,7 +97,6 @@ export default function PricingCard({
     }
   };
 
-  const isFreePlan = name === "Testowy";
   const isLoading = stripeLoading || packagesLoading;
 
   // Calculate displayed price and savings
