@@ -12,8 +12,7 @@ export const useStripePayment = () => {
 
   const createCheckoutSession = async (
     packageId: string, 
-    billingPeriod: 'monthly' | 'yearly',
-    couponCode?: string
+    billingPeriod: 'monthly' | 'yearly'
   ) => {
     if (!user) {
       toast({
@@ -24,34 +23,23 @@ export const useStripePayment = () => {
       return;
     }
 
-    console.log('=== FRONTEND CHECKOUT DEBUG START ===');
-    console.log('Request parameters:', { packageId, billingPeriod, couponCode });
-
     setIsLoading(true);
     try {
       // Get the Stripe price ID for this package and billing period
       const stripePriceId = await getStripePriceForPackage(packageId, billingPeriod);
-      console.log('Retrieved Stripe price ID:', stripePriceId);
       
       if (!stripePriceId) {
         throw new Error('No Stripe price found for this package');
       }
 
-      const requestBody = { 
-        packageId, 
-        billingPeriod,
-        stripePriceId,
-        couponCode: couponCode || undefined
-      };
-      
-      console.log('Sending request to create-checkout with body:', requestBody);
-
       // Call the edge function to create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: requestBody
+        body: { 
+          packageId, 
+          billingPeriod,
+          stripePriceId 
+        }
       });
-
-      console.log('Edge function response:', { data, error });
 
       if (error) {
         console.error('Edge function error:', error);
@@ -59,45 +47,32 @@ export const useStripePayment = () => {
       }
 
       if (data?.url) {
-        console.log('Checkout session URL received, opening in new tab');
-        
         // Log the payment attempt
         await logPayment({
           user_id: user.id,
           stripe_session_id: data.sessionId,
           package_id: packageId,
           status: 'pending',
-          metadata: { 
-            billing_period: billingPeriod,
-            coupon_used: couponCode || null
-          }
+          metadata: { billing_period: billingPeriod }
         });
 
         // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
         
-        const toastMessage = couponCode 
-          ? `Przekierowano do płatności z kodem promocyjnym ${couponCode}. Możesz wprowadzać dodatkowe kody bezpośrednio na stronie płatności.`
-          : "Przekierowano do płatności. Możesz wprowadzać kody promocyjne bezpośrednio na stronie płatności.";
-
         toast({
-          title: "Przekierowywanie do płatności",
-          description: toastMessage,
+          title: "Redirecting to Payment",
+          description: "You've been redirected to Stripe checkout in a new tab",
         });
       }
     } catch (error) {
-      console.error('=== FRONTEND CHECKOUT ERROR ===');
       console.error('Error creating checkout session:', error);
-      const errorMessage = error?.message || 'Failed to initiate payment process';
-      console.error('Error message to display:', errorMessage);
       toast({
-        title: "Błąd płatności",
-        description: errorMessage,
+        title: "Payment Error",
+        description: "Failed to initiate payment process",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-      console.log('=== FRONTEND CHECKOUT DEBUG END ===');
     }
   };
 

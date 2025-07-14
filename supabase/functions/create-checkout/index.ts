@@ -15,8 +15,6 @@ serve(async (req) => {
   }
 
   try {
-    console.log('=== CREATE CHECKOUT SESSION DEBUG START ===');
-    
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -33,15 +31,12 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    console.log('User authenticated:', { userId: user.id, email: user.email });
-
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
     });
 
-    const { packageId, billingPeriod, couponCode } = await req.json();
-    console.log('Request parameters:', { packageId, billingPeriod, couponCode });
+    const { packageId, billingPeriod } = await req.json();
 
     // Get the Stripe price ID for this package and billing period
     const { data: priceData, error: priceError } = await supabaseClient
@@ -58,42 +53,8 @@ serve(async (req) => {
     }
 
     const stripePriceId = priceData.stripe_price_id;
-    console.log('Found Stripe price ID:', stripePriceId);
-
-    // Validate coupon if provided
-    let validatedCoupon = null;
-    if (couponCode) {
-      console.log('Validating coupon code:', couponCode);
-      
-      try {
-        // Call our validate-coupon function
-        const { data: validationData, error: validationError } = await supabaseClient.functions.invoke('validate-coupon', {
-          body: {
-            couponCode: couponCode,
-            priceId: stripePriceId
-          }
-        });
-
-        if (validationError) {
-          console.error('Coupon validation function error:', validationError);
-          throw new Error('Błąd walidacji kuponu');
-        }
-        
-        if (!validationData?.valid) {
-          console.log('Coupon validation failed:', validationData?.error);
-          throw new Error(validationData?.error || 'Nieprawidłowy kod promocyjny');
-        }
-        
-        validatedCoupon = validationData.coupon;
-        console.log('Coupon validation successful:', validatedCoupon);
-      } catch (error) {
-        console.error('Coupon validation error:', error);
-        throw new Error(`Błąd walidacji kuponu: ${error.message}`);
-      }
-    }
 
     // Check if customer exists
-    console.log('=== CUSTOMER CHECK ===');
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1,
@@ -102,10 +63,8 @@ serve(async (req) => {
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log('Found existing customer:', customerId);
     } else {
       // Create new customer
-      console.log('Creating new customer for email:', user.email);
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
@@ -113,12 +72,10 @@ serve(async (req) => {
         },
       });
       customerId = customer.id;
-      console.log('Created new customer:', customerId);
     }
 
-    // Create checkout session configuration
-    console.log('=== CHECKOUT SESSION CONFIG ===');
-    const sessionConfig: any = {
+    // Create checkout session with promotion codes enabled
+    const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
@@ -128,7 +85,7 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      allow_promotion_codes: true, // Still allow promotion codes on checkout page
+      allow_promotion_codes: true, // Enable coupon code field
       success_url: `${req.headers.get("origin")}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
       metadata: {
@@ -136,41 +93,9 @@ serve(async (req) => {
         user_id: user.id,
         billing_period: billingPeriod,
       },
-    };
-
-    // If coupon was validated, add it to the session
-    if (validatedCoupon) {
-      console.log('Adding validated coupon to session');
-      // Find the promotion code in Stripe
-      const promotionCodes = await stripe.promotionCodes.list({
-        coupon: validatedCoupon.id,
-        active: true,
-        limit: 1,
-      });
-
-      if (promotionCodes.data.length > 0) {
-        sessionConfig.discounts = [{
-          promotion_code: promotionCodes.data[0].id
-        }];
-        console.log('Added promotion code to session:', promotionCodes.data[0].id);
-      }
-    }
-
-    console.log('Session config:', {
-      ...sessionConfig,
-      line_items: sessionConfig.line_items.map((item: any) => ({ price: item.price, quantity: item.quantity }))
-    });
-
-    // Create checkout session
-    console.log('=== CREATING STRIPE CHECKOUT SESSION ===');
-    const session = await stripe.checkout.sessions.create(sessionConfig);
-    console.log('Checkout session created:', {
-      id: session.id,
-      url: session.url ? 'present' : 'missing'
     });
 
     // Update or create subscriber record
-    console.log('=== UPDATING SUBSCRIBER RECORD ===');
     const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -184,22 +109,6 @@ serve(async (req) => {
       subscription_tier: packageId,
     });
 
-    // Log payment attempt
-    console.log('=== LOGGING PAYMENT ATTEMPT ===');
-    await supabaseService.from("payment_logs").insert({
-      user_id: user.id,
-      stripe_session_id: session.id,
-      package_id: packageId,
-      status: 'pending',
-      metadata: {
-        billing_period: billingPeriod,
-        coupon_used: couponCode || null,
-      },
-    });
-
-    console.log('Checkout session created successfully:', session.id);
-    console.log('=== CREATE CHECKOUT SESSION DEBUG END ===');
-
     return new Response(JSON.stringify({ 
       url: session.url,
       sessionId: session.id 
@@ -209,11 +118,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("=== ERROR IN CREATE CHECKOUT ===");
     console.error("Error creating checkout session:", error);
-    console.error("Error stack:", error.stack);
-    console.error("=== ERROR END ===");
-    
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

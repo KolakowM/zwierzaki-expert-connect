@@ -1,10 +1,9 @@
 
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import PricingFeatureItem from "./PricingFeatureItem";
-import CouponInput from "./CouponInput";
 import { useTranslation } from "react-i18next";
 import { useStripePayment } from "@/hooks/useStripePayment";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -40,31 +39,10 @@ export default function PricingCard({
   const { t } = useTranslation();
   const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
   const { user, isAuthenticated } = useAuth();
-  const [appliedCoupon, setAppliedCoupon] = useState<string>("");
   
   const { data: packages, isLoading: packagesLoading } = useQuery({
     queryKey: ['packages'],
     queryFn: getActivePackages,
-  });
-
-  // Get the Stripe price ID for this package
-  const { data: stripePriceId } = useQuery({
-    queryKey: ['stripePriceId', name, billingPeriod],
-    queryFn: async () => {
-      const packageNameMap: Record<string, string> = {
-        "Zaawansowany": "Advanced",
-        "Zawodowiec": "Professional"
-      };
-
-      const databasePackageName = packageNameMap[name] || name;
-      const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
-      
-      if (!selectedPackage) return null;
-
-      const { getStripePriceForPackage } = await import("@/services/stripeService");
-      return getStripePriceForPackage(selectedPackage.id, billingPeriod);
-    },
-    enabled: !!packages && !isFreePlan,
   });
 
   const handleSubscribe = async () => {
@@ -79,19 +57,15 @@ export default function PricingCard({
     }
 
     const packageNameMap: Record<string, string> = {
-      "Zaawansowany": "Advanced",
-      "Zawodowiec": "Professional"
+      "Zaawansowany": "Zaawansowany",
+      "Zawodowiec": "Zawodowiec"
     };
 
     const databasePackageName = packageNameMap[name] || name;
     const selectedPackage = packages?.find(pkg => pkg.name === databasePackageName);
 
     if (selectedPackage) {
-      await createCheckoutSession(
-        selectedPackage.id, 
-        billingPeriod,
-        appliedCoupon || undefined
-      );
+      await createCheckoutSession(selectedPackage.id, billingPeriod);
     } else {
       console.error('Package not found:', databasePackageName);
     }
@@ -154,19 +128,6 @@ export default function PricingCard({
             <PricingFeatureItem key={feature.id} {...feature} />
           ))}
         </ul>
-
-        {/* Coupon Input - only show for paid plans and authenticated users */}
-        {!isFreePlan && isAuthenticated && (
-          <div className="mt-6 pt-4 border-t">
-            <CouponInput
-              onCouponApplied={setAppliedCoupon}
-              onCouponRemoved={() => setAppliedCoupon("")}
-              appliedCoupon={appliedCoupon}
-              disabled={isLoading}
-              priceId={stripePriceId}
-            />
-          </div>
-        )}
       </CardContent>
       <CardFooter>
         {!isAuthenticated ? (
