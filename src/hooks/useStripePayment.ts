@@ -12,7 +12,8 @@ export const useStripePayment = () => {
 
   const createCheckoutSession = async (
     packageId: string, 
-    billingPeriod: 'monthly' | 'yearly'
+    billingPeriod: 'monthly' | 'yearly',
+    couponCode?: string
   ) => {
     if (!user) {
       toast({
@@ -24,7 +25,7 @@ export const useStripePayment = () => {
     }
 
     console.log('=== FRONTEND CHECKOUT DEBUG START ===');
-    console.log('Request parameters:', { packageId, billingPeriod });
+    console.log('Request parameters:', { packageId, billingPeriod, couponCode });
 
     setIsLoading(true);
     try {
@@ -39,7 +40,8 @@ export const useStripePayment = () => {
       const requestBody = { 
         packageId, 
         billingPeriod,
-        stripePriceId
+        stripePriceId,
+        couponCode: couponCode || undefined
       };
       
       console.log('Sending request to create-checkout with body:', requestBody);
@@ -66,16 +68,21 @@ export const useStripePayment = () => {
           package_id: packageId,
           status: 'pending',
           metadata: { 
-            billing_period: billingPeriod
+            billing_period: billingPeriod,
+            coupon_used: couponCode || null
           }
         });
 
         // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
         
+        const toastMessage = couponCode 
+          ? `Przekierowano do płatności z kodem promocyjnym ${couponCode}. Możesz wprowadzać dodatkowe kody bezpośrednio na stronie płatności.`
+          : "Przekierowano do płatności. Możesz wprowadzać kody promocyjne bezpośrednio na stronie płatności.";
+
         toast({
-          title: "Redirecting to Payment",
-          description: "You've been redirected to Stripe checkout in a new tab. You can enter coupon codes directly on the checkout page.",
+          title: "Przekierowywanie do płatności",
+          description: toastMessage,
         });
       }
     } catch (error) {
@@ -84,7 +91,7 @@ export const useStripePayment = () => {
       const errorMessage = error?.message || 'Failed to initiate payment process';
       console.error('Error message to display:', errorMessage);
       toast({
-        title: "Payment Error",
+        title: "Błąd płatności",
         description: errorMessage,
         variant: "destructive",
       });

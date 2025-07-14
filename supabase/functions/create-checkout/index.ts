@@ -40,8 +40,8 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { packageId, billingPeriod } = await req.json();
-    console.log('Request parameters:', { packageId, billingPeriod });
+    const { packageId, billingPeriod, couponCode } = await req.json();
+    console.log('Request parameters:', { packageId, billingPeriod, couponCode });
 
     // Get the Stripe price ID for this package and billing period
     const { data: priceData, error: priceError } = await supabaseClient
@@ -59,6 +59,38 @@ serve(async (req) => {
 
     const stripePriceId = priceData.stripe_price_id;
     console.log('Found Stripe price ID:', stripePriceId);
+
+    // Walidacja kuponu jeśli został podany
+    let validatedCoupon = null;
+    if (couponCode) {
+      console.log('Validating coupon code:', couponCode);
+      
+      try {
+        const validationResponse = await fetch(`${req.headers.get("origin")}/api/validate-coupon`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            couponCode: couponCode,
+            priceId: stripePriceId
+          })
+        });
+
+        const validationResult = await validationResponse.json();
+        
+        if (!validationResult.valid) {
+          console.log('Coupon validation failed:', validationResult.error);
+          throw new Error(validationResult.error || 'Nieprawidłowy kod promocyjny');
+        }
+        
+        validatedCoupon = validationResult.coupon;
+        console.log('Coupon validation successful:', validatedCoupon);
+      } catch (error) {
+        console.error('Coupon validation error:', error);
+        throw new Error(`Błąd walidacji kuponu: ${error.message}`);
+      }
+    }
 
     // Check if customer exists
     console.log('=== CUSTOMER CHECK ===');
@@ -86,7 +118,7 @@ serve(async (req) => {
 
     // Create checkout session configuration
     console.log('=== CHECKOUT SESSION CONFIG ===');
-    const sessionConfig = {
+    const sessionConfig: any = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
@@ -96,7 +128,7 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      allow_promotion_codes: true, // Enable promotion codes on Stripe checkout page
+      allow_promotion_codes: true, // Nadal pozwalamy na kody promocyjne
       success_url: `${req.headers.get("origin")}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
       metadata: {
@@ -106,9 +138,27 @@ serve(async (req) => {
       },
     };
 
+    // Jeśli kupon został zwalidowany, dodaj go do sesji
+    if (validatedCoupon) {
+      console.log('Adding validated coupon to session');
+      // Znajdź promotion code w Stripe
+      const promotionCodes = await stripe.promotionCodes.list({
+        coupon: validatedCoupon.id,
+        active: true,
+        limit: 1,
+      });
+
+      if (promotionCodes.data.length > 0) {
+        sessionConfig.discounts = [{
+          promotion_code: promotionCodes.data[0].id
+        }];
+        console.log('Added promotion code to session:', promotionCodes.data[0].id);
+      }
+    }
+
     console.log('Session config:', {
       ...sessionConfig,
-      line_items: sessionConfig.line_items.map(item => ({ price: item.price, quantity: item.quantity }))
+      line_items: sessionConfig.line_items.map((item: any) => ({ price: item.price, quantity: item.quantity }))
     });
 
     // Create checkout session
@@ -143,6 +193,7 @@ serve(async (req) => {
       status: 'pending',
       metadata: {
         billing_period: billingPeriod,
+        coupon_used: couponCode || null,
       },
     });
 

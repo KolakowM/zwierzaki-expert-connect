@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import PricingFeatureItem from "./PricingFeatureItem";
+import CouponInput from "./CouponInput";
 import { useTranslation } from "react-i18next";
 import { useStripePayment } from "@/hooks/useStripePayment";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -39,6 +40,7 @@ export default function PricingCard({
   const { t } = useTranslation();
   const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
   const { user, isAuthenticated } = useAuth();
+  const [appliedCoupon, setAppliedCoupon] = useState<string>("");
   
   const { data: packages, isLoading: packagesLoading } = useQuery({
     queryKey: ['packages'],
@@ -67,7 +69,8 @@ export default function PricingCard({
     if (selectedPackage) {
       await createCheckoutSession(
         selectedPackage.id, 
-        billingPeriod
+        billingPeriod,
+        appliedCoupon || undefined
       );
     } else {
       console.error('Package not found:', databasePackageName);
@@ -132,7 +135,17 @@ export default function PricingCard({
           ))}
         </ul>
 
-        
+        {/* Coupon Input - only show for paid plans and authenticated users */}
+        {!isFreePlan && isAuthenticated && (
+          <div className="mt-6 pt-4 border-t">
+            <CouponInput
+              onCouponApplied={setAppliedCoupon}
+              onCouponRemoved={() => setAppliedCoupon("")}
+              appliedCoupon={appliedCoupon}
+              disabled={isLoading}
+            />
+          </div>
+        )}
       </CardContent>
       <CardFooter>
         {!isAuthenticated ? (
