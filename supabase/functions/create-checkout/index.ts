@@ -40,8 +40,8 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { packageId, billingPeriod } = await req.json();
-    console.log('Request parameters:', { packageId, billingPeriod });
+    const { packageId, billingPeriod, stripeCouponId } = await req.json();
+    console.log('Request parameters:', { packageId, billingPeriod, stripeCouponId });
 
     // Get the Stripe price ID for this package and billing period
     const { data: priceData, error: priceError } = await supabaseClient
@@ -86,7 +86,7 @@ serve(async (req) => {
 
     // Create checkout session configuration
     console.log('=== CHECKOUT SESSION CONFIG ===');
-    const sessionConfig = {
+    const sessionConfig: any = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [
@@ -106,9 +106,19 @@ serve(async (req) => {
       },
     };
 
+    // Add coupon if provided
+    if (stripeCouponId) {
+      console.log('Adding Stripe coupon to session:', stripeCouponId);
+      sessionConfig.discounts = [{
+        coupon: stripeCouponId
+      }];
+      sessionConfig.metadata.coupon_applied = stripeCouponId;
+    }
+
     console.log('Session config:', {
       ...sessionConfig,
-      line_items: sessionConfig.line_items.map(item => ({ price: item.price, quantity: item.quantity }))
+      line_items: sessionConfig.line_items.map((item: any) => ({ price: item.price, quantity: item.quantity })),
+      discounts: sessionConfig.discounts || 'none'
     });
 
     // Create checkout session
@@ -143,8 +153,32 @@ serve(async (req) => {
       status: 'pending',
       metadata: {
         billing_period: billingPeriod,
+        coupon_applied: !!stripeCouponId,
+        stripe_coupon_id: stripeCouponId || null
       },
     });
+
+    // If a coupon was applied, record the usage attempt
+    if (stripeCouponId) {
+      console.log('=== RECORDING COUPON USAGE ATTEMPT ===');
+      
+      // Find the coupon by stripe_coupon_id
+      const { data: couponData, error: couponError } = await supabaseService
+        .from('coupons')
+        .select('id')
+        .eq('stripe_coupon_id', stripeCouponId)
+        .single();
+
+      if (couponData && !couponError) {
+        // Record the coupon usage (pending until payment confirms)
+        await supabaseService.from('coupon_usage').insert({
+          coupon_id: couponData.id,
+          user_id: user.id,
+          stripe_session_id: session.id,
+        });
+        console.log('Recorded coupon usage attempt');
+      }
+    }
 
     console.log('Checkout session created successfully:', session.id);
     console.log('=== CREATE CHECKOUT SESSION DEBUG END ===');
