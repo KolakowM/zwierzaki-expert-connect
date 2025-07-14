@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import PricingFeatureItem from "./PricingFeatureItem";
-import CouponInput from "./CouponInput";
 import { useTranslation } from "react-i18next";
 import { useStripePayment } from "@/hooks/useStripePayment";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -28,15 +27,6 @@ export interface PricingTierProps {
   billingPeriod: 'monthly' | 'yearly';
 }
 
-interface CouponData {
-  id: string;
-  code: string;
-  discount_type: 'percentage' | 'fixed';
-  discount_value: number;
-  description?: string;
-  stripe_coupon_id?: string;
-}
-
 export default function PricingCard({
   name,
   monthlyPrice,
@@ -50,7 +40,6 @@ export default function PricingCard({
   const { t } = useTranslation();
   const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
   const { user, isAuthenticated } = useAuth();
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
   
   // Define isFreePlan early so it can be used in useQuery
   const isFreePlan = name === "Testowy";
@@ -87,11 +76,7 @@ export default function PricingCard({
     }
 
     if (selectedPackage) {
-      await createCheckoutSession(
-        selectedPackage.id, 
-        billingPeriod,
-        appliedCoupon?.stripe_coupon_id
-      );
+      await createCheckoutSession(selectedPackage.id, billingPeriod);
     } else {
       console.error('Package not found:', databasePackageName);
     }
@@ -121,10 +106,6 @@ export default function PricingCard({
       }
     }
     return null;
-  };
-
-  const handleCouponValidated = (coupon: CouponData | null) => {
-    setAppliedCoupon(coupon);
   };
   
   return (
@@ -157,18 +138,6 @@ export default function PricingCard({
             <PricingFeatureItem key={feature.id} {...feature} />
           ))}
         </ul>
-
-        {/* Coupon Input - only show for paid plans and authenticated users */}
-        {!isFreePlan && isAuthenticated && (
-          <div className="mt-6 pt-4 border-t">
-            <h4 className="text-sm font-medium mb-3">Kod promocyjny</h4>
-            <CouponInput 
-              onCouponValidated={handleCouponValidated}
-              disabled={isLoading}
-              stripePriceId={stripePriceId || undefined}
-            />
-          </div>
-        )}
       </CardContent>
       <CardFooter>
         {!isAuthenticated ? (
