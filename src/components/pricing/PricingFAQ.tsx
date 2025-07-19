@@ -42,21 +42,21 @@ export default function PricingFAQ() {
         <AccordionItem value="faq-5">
           <AccordionTrigger>Na czym polega rabat dla nowych użytkowników?</AccordionTrigger>
           <AccordionContent>
-            Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 15% przy płatności miesięcznej lub rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
+            Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 10% przy płatności miesięcznej lub rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
           </AccordionContent>
         </AccordionItem>
 
         <AccordionItem value="faq-6">
           <AccordionTrigger>Czy mogę zmienić plan w dowolnym momencie?</AccordionTrigger>
           <AccordionContent>
-            Tak, możesz zmienić plan w każdej chwili. Jeśli przejdziesz na plan wyższy, różnica zostanie obliczona proporcjonalnie. Jeśli przejdziesz na plan niższy, zmiana nastąpi po zakończeniu bieżącego okresu rozliczeniowego.
+            Tak, możesz zmienić plan w każdej chwili. Jeśli przejdziesz na plan wyższy, zmiana nastąpi po zakończeniu bieżącego okresu rozliczeniowego. Jeśli przejdziesz na plan niższy, zmiana nastąpi po zakończeniu bieżącego okresu rozliczeniowego.
           </AccordionContent>
         </AccordionItem>
 
         <AccordionItem value="faq-7">
           <AccordionTrigger>Jakie formy płatności akceptujecie?</AccordionTrigger>
           <AccordionContent>
-            Akceptujemy płatności kartami kredytowymi, Blik, przelewem bankowym oraz poprzez popularne bramki płatności.
+            Akceptujemy płatności kartami kredytowymi. Nasze płatności obsługujemy przez system Stripe. W celu skorzystania z innych form płatności prosimy o kontakt na adres: kontakt@petsflow.pl.
           </AccordionContent>
         </AccordionItem>
       </Accordion>
