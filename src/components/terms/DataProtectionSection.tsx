@@ -5,7 +5,7 @@ export default function DataProtectionSection() {
       <div className="space-y-3">
         <h2 className="text-2xl font-semibold">§8. Ochrona danych osobowych (RODO)</h2>
         <p>
-          1. Administratorem danych osobowych jest PetsFlow Sp. z o.o.
+          1. Administratorem danych osobowych jest administrator PetsFlow.
         </p>
         <p>
           2. Dane osobowe przetwarzane są na podstawie:

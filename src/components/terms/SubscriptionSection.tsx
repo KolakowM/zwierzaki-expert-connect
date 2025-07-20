@@ -19,14 +19,12 @@ export default function SubscriptionSection() {
           3. Płatności realizowane są przez Stripe Inc., zgodnie z międzynarodowymi standardami bezpieczeństwa.
         </p>
         <p>
-          4. Faktury VAT wystawiane są automatycznie i przesyłane na adres e-mail Użytkownika.
+          4. Faktury VAT wystawiane są na prośbę użytkownika i przesyłane na adres e-mail podany przy rejestracji.
         </p>
         <p>
           5. W przypadku opłat cyklicznych, środki pobierane są automatycznie w dniu odnowienia subskrypcji.
         </p>
-        <p>
-          6. Pierwsza płatność za pakiet płatny uprawnia do rabatu 10 zł/mies lub 100 zł/rok.
-        </p>
+        
       </div>
 
       <div className="space-y-3">

@@ -26,9 +26,9 @@ export default function Privacy() {
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold">2. Administrator danych osobowych</h2>
               <p>
-                Administratorem danych osobowych jest PetsFlow Sp. z o.o. z siedzibą w Warszawie,
+                Administratorem danych osobowych jest właścicel PetsFlow {/*Sp. z o.o. z siedzibą w Warszawie,
                 ul. Zwierzęca 123, 00-001 Warszawa, wpisana do rejestru przedsiębiorców Krajowego Rejestru
-                Sądowego pod numerem KRS: 0000000000, NIP: 0000000000, REGON: 000000000.
+                Sądowego pod numerem KRS: 0000000000, NIP: 0000000000, REGON: 000000000.*/}
               </p>
             </div>
 

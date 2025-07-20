@@ -5,7 +5,7 @@ export default function DisputeResolutionSection() {
       <div className="space-y-3">
         <h2 className="text-2xl font-semibold">§13. Reklamacje i rozwiązywanie sporów</h2>
         <p>
-          1. Reklamacje należy składać na adres: kontakt@petsflow.pl lub pocztą na adres siedziby.
+          1. Reklamacje należy składać na adres: kontakt@petsflow.pl.
         </p>
         <p>
           2. Reklamacja powinna zawierać:

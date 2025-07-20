@@ -50,7 +50,7 @@ export default function FinalProvisionsSection() {
         <h2 className="text-2xl font-semibold">Załącznik: Informacje dodatkowe</h2>
         <p>
           <strong>Formularz odstąpienia od umowy:</strong><br />
-          Adresat: PetsFlow Sp. z o.o., ul. Główna 123, 00-001 Warszawa<br />
+          {/*} Adresat: PetsFlow Sp. z o.o., ul. Główna 123, 00-001 Warszawa<br /> */}
           Email: kontakt@petsflow.pl<br />
           <br />
           Niniejszym informuję/informujemy o moim/naszym odstąpieniu od umowy o świadczenie usługi:<br />
