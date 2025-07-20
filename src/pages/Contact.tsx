@@ -113,7 +113,7 @@ export default function Contact() {
               <AlertDescription>
                 {errorMessage}
                 <br />
-                <span className="text-sm">Spróbuj ponownie lub skontaktuj się z nami bezpośrednio na adres: kontakt@PetsFlow.pl</span>
+                <span className="text-sm">Psia krew coś poszło nie tak... Spróbuj ponownie lub skontaktuj się z nami bezpośrednio na adres: kontakt@PetsFlow.pl</span>
               </AlertDescription>
             </Alert>
           )}
