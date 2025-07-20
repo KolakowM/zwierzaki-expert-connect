@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { SuccessAlert } from "@/components/ui/success-alert";
 import MainLayout from "@/components/layout/MainLayout";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, AlertCircle } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +27,8 @@ type ContactFormValues = z.infer<typeof formSchema>;
 export default function Contact() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(formSchema),
@@ -38,6 +42,8 @@ export default function Contact() {
 
   async function onSubmit(values: ContactFormValues) {
     setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
     
     try {
       console.log("Submitting contact form:", values);
@@ -53,6 +59,8 @@ export default function Contact() {
 
       console.log("Email sent successfully:", data);
 
+      setSubmitStatus('success');
+      
       toast({
         title: "Wiadomość wysłana",
         description: "Dziękujemy za kontakt! Odpowiemy najszybciej jak to możliwe."
@@ -61,6 +69,9 @@ export default function Contact() {
       form.reset();
     } catch (error: any) {
       console.error("Error sending contact form:", error);
+      
+      setSubmitStatus('error');
+      setErrorMessage(error.message || "Wystąpił nieoczekiwany błąd podczas wysyłania wiadomości.");
       
       toast({
         title: "Błąd",
@@ -85,6 +96,27 @@ export default function Contact() {
               Masz pytania dotyczące platformy PetsFlow? Skontaktuj się z nami, a nasz zespół z przyjemnością odpowie na wszystkie Twoje pytania.
             </p>
           </div>
+
+          {/* Status Alerts */}
+          {submitStatus === 'success' && (
+            <SuccessAlert
+              title="Wiadomość została wysłana!"
+              description="Dziękujemy za kontakt! Otrzymaliśmy Twoją wiadomość i odpowiemy najszybciej jak to możliwe, zazwyczaj w ciągu 24 godzin."
+              className="animate-fade-in"
+            />
+          )}
+
+          {submitStatus === 'error' && (
+            <Alert variant="destructive" className="animate-fade-in">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Błąd podczas wysyłania wiadomości</AlertTitle>
+              <AlertDescription>
+                {errorMessage}
+                <br />
+                <span className="text-sm">Spróbuj ponownie lub skontaktuj się z nami bezpośrednio na adres: kontakt@PetsFlow.pl</span>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <Card className="p-6">
