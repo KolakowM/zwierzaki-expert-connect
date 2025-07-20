@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email to your team
     const notificationResponse = await resend.emails.send({
-      from: "PetsFlow Kontakt <onboarding@resend.dev>",
+      from: "PetsFlow Kontakt <admin@petsflow.pl>",
       to: ["kontakt@PetsFlow.pl"], // Your contact email
       subject: `Nowa wiadomość: ${subject}`,
       html: `
@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the user
     const confirmationResponse = await resend.emails.send({
-      from: "PetsFlow <onboarding@resend.dev>",
+      from: "PetsFlow <admin@petsflow.pl>",
       to: [email],
       subject: "Potwierdzenie - otrzymaliśmy Twoją wiadomość",
       html: `
