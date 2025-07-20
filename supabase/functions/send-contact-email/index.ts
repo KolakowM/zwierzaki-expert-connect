@@ -56,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: `
         <h1>Dziękujemy za kontakt, ${name}!</h1>
         <p>Otrzymaliśmy Twoją wiadomość dotyczącą: <strong>${subject}</strong></p>
-        <p>Odpowiemy najszybciej jak to możliwe, zazwyczaj w ciągu 24 godzin.</p>
+        <p>Odpowiemy najszybciej jak to możliwe, zazwyczaj w ciągu 24 godzin w dni robocze.</p>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3>Twoja wiadomość:</h3>
