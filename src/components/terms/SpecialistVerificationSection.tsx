@@ -35,7 +35,7 @@ export default function SpecialistVerificationSection() {
         <li>prowadzenia dokumentacji zgodnie z przepisami;</li>
         <li>aktualizowania swoich kwalifikacji.</li>
       </ul>
-      <p>5. Administrator w celu weryfikacji specjalisty ma prawo prosić o wgląd w jego dokumentację potwierzające kwalifikacje zawodowe. Odmowa lub brak infromacji z strony specjalisty może skutkować blokada konta a w skrajnych przypadkach jego trawałym usunięciem.
+      <p>5. Administrator w celu weryfikacji specjalisty ma prawo prosić o wgląd w jego dokumentację potwierzające kwalifikacje zawodowe. Odmowa lub brak infromacji z strony specjalisty może skutkować blokadą konta a w skrajnych przypadkach jego trawałym usunięciem.
       </p>
     </div>
   );
