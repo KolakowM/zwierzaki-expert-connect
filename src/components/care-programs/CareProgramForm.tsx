@@ -1,4 +1,5 @@
 
+import { forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -52,6 +53,7 @@ interface CareProgramFormProps {
   defaultValues?: Partial<CareProgramFormValues>;
   onSubmit: (data: CareProgramFormValues) => void;
   isSubmitting?: boolean;
+  showSubmitButton?: boolean;
 }
 
 const statusOptions = [
@@ -61,7 +63,13 @@ const statusOptions = [
   "wstrzymany",
 ];
 
-const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false }: CareProgramFormProps) => {
+const CareProgramForm = forwardRef<HTMLFormElement, CareProgramFormProps>(({ 
+  petId, 
+  defaultValues, 
+  onSubmit, 
+  isSubmitting = false, 
+  showSubmitButton = true 
+}, ref) => {
   const form = useForm<CareProgramFormValues>({
     resolver: zodResolver(careProgramSchema),
     defaultValues: {
@@ -79,7 +87,7 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form ref={ref} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -278,14 +286,18 @@ const CareProgramForm = ({ petId, defaultValues, onSubmit, isSubmitting = false 
           )}
         />
 
-        <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Zapisywanie..." : "Zapisz program opieki"}
-          </Button>
-        </div>
+        {showSubmitButton && (
+          <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Zapisywanie..." : "Zapisz program opieki"}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );
-};
+});
+
+CareProgramForm.displayName = "CareProgramForm";
 
 export default CareProgramForm;
