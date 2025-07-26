@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { petFormSchema, PetFormValues } from "./PetFormSchema";
@@ -15,6 +14,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { useCanPerformAction } from "@/hooks/usePackageLimits";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { forwardRef } from "react";
 
 // Import field components
 import PetBasicInfoFields from "./form-fields/PetBasicInfoFields";
@@ -29,9 +29,17 @@ interface PetFormProps {
   onSubmit: (data: any) => void; // Accept the transformed data from zodResolver
   isSubmitting?: boolean;
   isEditing?: boolean;
+  showSubmitButton?: boolean;
 }
 
-const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEditing = false }: PetFormProps) => {
+const PetForm = forwardRef<HTMLFormElement, PetFormProps>(({ 
+  clientId, 
+  defaultValues, 
+  onSubmit, 
+  isSubmitting = false, 
+  isEditing = false,
+  showSubmitButton = true 
+}, ref) => {
   const { user } = useAuth();
   
   // Check package limits for pets
@@ -78,7 +86,7 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form ref={ref} onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         {limitReached && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -104,17 +112,21 @@ const PetForm = ({ clientId, defaultValues, onSubmit, isSubmitting = false, isEd
         {/* Vaccination and Microchip */}
         <VaccinationAndChipFields control={form.control} />
 
-        <div className="flex justify-end pt-4">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || limitsLoading || (!isEditing && limitReached)}
-          >
-            {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj dane zwierzaka" : "Zapisz dane zwierzaka")}
-          </Button>
-        </div>
+        {showSubmitButton && (
+          <div className="flex justify-end pt-4">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || limitsLoading || (!isEditing && limitReached)}
+            >
+              {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj dane zwierzaka" : "Zapisz dane zwierzaka")}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );
-};
+});
+
+PetForm.displayName = "PetForm";
 
 export default PetForm;

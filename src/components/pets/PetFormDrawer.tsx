@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Drawer, 
@@ -45,6 +45,7 @@ const PetFormDrawer = ({
 }: PetFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -148,12 +149,22 @@ const PetFormDrawer = ({
     }
   };
 
+  const handleSaveClick = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant={buttonVariant} size={buttonSize} className={className}>
-          {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Dog className="mr-2 h-4 w-4" />}
-          {buttonText}
+          {children || (
+            <>
+              {isEditing ? <Edit className="mr-2 h-4 w-4" /> : <Dog className="mr-2 h-4 w-4" />}
+              {buttonText}
+            </>
+          )}
         </Button>
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
@@ -162,14 +173,30 @@ const PetFormDrawer = ({
         </DrawerHeader>
         <div className="px-4 pb-4 overflow-y-auto">
           <PetForm 
+            ref={formRef}
             clientId={clientId}
             defaultValues={formDefaultValues} 
             onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting} 
+            isSubmitting={isSubmitting}
+            showSubmitButton={false}
+            isEditing={isEditing}
           />
         </div>
-        <DrawerFooter className="pt-2 border-t">
-          <Button variant="outline" onClick={() => setOpen(false)}>Anuluj</Button>
+        <DrawerFooter className="pt-2 border-t flex-row gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setOpen(false)}
+            className="flex-1"
+          >
+            Anuluj
+          </Button>
+          <Button 
+            onClick={handleSaveClick}
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj" : "Zapisz")}
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

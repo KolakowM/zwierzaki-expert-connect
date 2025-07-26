@@ -1,5 +1,6 @@
+
 import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Visit } from "@/types";
@@ -37,9 +38,17 @@ interface VisitFormProps {
   defaultValues?: Partial<VisitFormValues>;
   onSubmit: (data: VisitFormValues) => void;
   isSubmitting?: boolean;
+  showSubmitButton?: boolean;
 }
 
-const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = false }: VisitFormProps) => {
+const VisitForm = forwardRef<HTMLFormElement, VisitFormProps>(({ 
+  petId, 
+  clientId, 
+  defaultValues, 
+  onSubmit, 
+  isSubmitting = false,
+  showSubmitButton = true 
+}, ref) => {
   const [existingVisits, setExistingVisits] = useState<Visit[]>([]);
   const [isLoadingVisits, setIsLoadingVisits] = useState(false);
 
@@ -123,7 +132,7 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form ref={ref} onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <VisitDateField 
             form={form} 
@@ -156,14 +165,18 @@ const VisitForm = ({ petId, clientId, defaultValues, onSubmit, isSubmitting = fa
           watchFollowUpNeeded={watchFollowUpNeeded} 
         />
 
-        <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={isSubmitting || isLoadingVisits}>
-            {isSubmitting ? "Zapisywanie..." : "Zapisz wizytę"}
-          </Button>
-        </div>
+        {showSubmitButton && (
+          <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={isSubmitting || isLoadingVisits}>
+              {isSubmitting ? "Zapisywanie..." : "Zapisz wizytę"}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );
-};
+});
+
+VisitForm.displayName = "VisitForm";
 
 export default VisitForm;

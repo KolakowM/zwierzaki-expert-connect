@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Drawer, 
@@ -46,6 +46,7 @@ const CareProgramFormDrawer = ({
 }: CareProgramFormDrawerProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -114,6 +115,12 @@ const CareProgramFormDrawer = ({
     }
   };
 
+  const handleSaveClick = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
@@ -130,14 +137,29 @@ const CareProgramFormDrawer = ({
         </DrawerHeader>
         <div className="px-4 pb-4 overflow-y-auto">
           <CareProgramForm 
+            ref={formRef}
             petId={petId}
             defaultValues={formDefaultValues} 
             onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting} 
+            isSubmitting={isSubmitting}
+            showSubmitButton={false}
           />
         </div>
-        <DrawerFooter className="pt-2 border-t">
-          <Button variant="outline" onClick={() => setOpen(false)}>Anuluj</Button>
+        <DrawerFooter className="pt-2 border-t flex-row gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setOpen(false)}
+            className="flex-1"
+          >
+            Anuluj
+          </Button>
+          <Button 
+            onClick={handleSaveClick}
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj" : "Zapisz")}
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

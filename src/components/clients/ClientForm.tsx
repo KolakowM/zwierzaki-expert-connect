@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCanPerformAction } from "@/hooks/usePackageLimits";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { forwardRef } from "react";
 
 // Define the schema for client validation
 const clientFormSchema = z.object({
@@ -37,9 +37,16 @@ interface ClientFormProps {
   onSubmit: (data: ClientFormValues) => void;
   isSubmitting?: boolean;
   isEditing?: boolean;
+  showSubmitButton?: boolean;
 }
 
-const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false, isEditing = false }: ClientFormProps) => {
+const ClientForm = forwardRef<HTMLFormElement, ClientFormProps>(({ 
+  defaultValues, 
+  onSubmit, 
+  isSubmitting = false, 
+  isEditing = false,
+  showSubmitButton = true 
+}, ref) => {
   // Check package limits for clients
   const { 
     canPerform, 
@@ -70,7 +77,7 @@ const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false, isEditing =
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form ref={ref} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {limitReached && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -196,17 +203,21 @@ const ClientForm = ({ defaultValues, onSubmit, isSubmitting = false, isEditing =
           )}
         />
 
-        <div className="flex justify-end pt-4">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || limitsLoading || (!isEditing && limitReached)}
-          >
-            {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj dane klienta" : "Zapisz dane klienta")}
-          </Button>
-        </div>
+        {showSubmitButton && (
+          <div className="flex justify-end pt-4">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || limitsLoading || (!isEditing && limitReached)}
+            >
+              {isSubmitting ? "Zapisywanie..." : (isEditing ? "Aktualizuj dane klienta" : "Zapisz dane klienta")}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );
-};
+});
+
+ClientForm.displayName = "ClientForm";
 
 export default ClientForm;
