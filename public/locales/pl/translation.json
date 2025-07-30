@@ -1,8 +1,7 @@
-
 {
   "common": {
     "save": "Zapisz",
-    "cancel": "Anuluj",
+    "cancel": "Anuluj", 
     "edit": "Edytuj",
     "delete": "Usuń",
     "loading": "Ładowanie...",
@@ -137,6 +136,11 @@
     "experienced_professionals_desc": "Znajdź specjalistę, który zna się na zdrowiu i dobrostanie zwierząt różnych gatunków.",
     "easy_appointments_title": "Łatwe umawianie spotkań",
     "easy_appointments_desc": "Kontaktuj się bezpośrednio ze specjalistami i umawiaj wizyty bez pośredników."
+  },
+  "partners": {
+    "section_title": "Nasi partnerzy i współpracownicy",
+    "section_description": "Współpracujemy z wiodącymi firmami i ekspertami w branży weterynaryjnej, aby zapewnić najlepszą możliwą obsługę właścicielom zwierząt i specjalistom.",
+    "contributors": "Eksperci-współpracownicy"
   },
   "languages": {
     "pl": "Polski",

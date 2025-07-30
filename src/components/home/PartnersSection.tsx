@@ -20,11 +20,8 @@ export function PartnersSection() {
           </p>
         </div>
 
-        {/* Company Partners */}
+        {/* Company Partners - without heading */}
         <div className="mb-16">
-          <h3 className="mb-8 text-center text-2xl font-semibold">
-            {t('partners.company_partners')}
-          </h3>
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {partners.map((partner) => (
               <Card
