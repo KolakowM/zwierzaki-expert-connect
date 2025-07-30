@@ -4,7 +4,6 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturedSpecialistsSection } from "@/components/home/FeaturedSpecialistsSection";
 import { BenefitsSection } from "@/components/home/BenefitsSection";
 import { CTASection } from "@/components/home/CTASection";
-import { PartnersSection } from "@/components/home/PartnersSection";
 
 const Index = () => {
   return (
@@ -16,7 +15,6 @@ const Index = () => {
       <FeaturedSpecialistsSection />
       <BenefitsSection />
       <CTASection />
-      <PartnersSection />
     </MainLayout>
   );
 };
