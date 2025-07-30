@@ -121,6 +121,12 @@
     "easy_appointments_title": "Easy appointment scheduling",
     "easy_appointments_desc": "Contact specialists directly and make appointments without intermediaries."
   },
+  "partners": {
+    "section_title": "Our Partners & Contributors",
+    "section_description": "We work with leading companies and experts in the veterinary field to provide the best possible service for pet owners and specialists.",
+    "company_partners": "Company Partners",
+    "contributors": "Expert Contributors"
+  },
   "languages": {
     "pl": "Polish",
     "en": "English",
