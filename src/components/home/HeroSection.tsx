@@ -42,8 +42,8 @@ export function HeroSection() {
             </div>
             <div className="absolute -bottom-6 -left-6 aspect-square w-1/2 overflow-hidden rounded-xl border-4 border-white shadow-lg">
               <img
-                src="https://wrftbhmnqrdogomhvomr.supabase.co/storage/v1/object/public/profiles/profile-photos/ChatGPT%20Image%2031%20lip%202025,%2018_51_51.png"
-                alt="wzór postaci z łapką"
+                src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?q=80&w=2369&auto=format&fit=crop"
+                alt="Kot u weterynarza"
                 className="h-full w-full object-cover object-center"
               />
             </div>
