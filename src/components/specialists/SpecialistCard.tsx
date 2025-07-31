@@ -15,7 +15,7 @@ export interface Specialist {
   title: string;
   specializations: string[];
   location: string;
-  image: null;
+  image: string;
   email?: string;
   rating?: number;
   verified: boolean;
@@ -76,7 +76,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         <div className="relative h-48 w-full overflow-hidden">
           {specialist.image && !specialist.image.includes('placeholder.svg') ? (
             <img
-              src={specialist.image}
+              //src={specialist.image}
               alt={specialist.name}
               className="h-full w-full object-cover object-center"
               onError={(e) => {
