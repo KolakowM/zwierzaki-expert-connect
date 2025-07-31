@@ -141,7 +141,7 @@ export function useFeaturedSpecialists(limit = 12) {
               title: specialistProfile?.title || "Specjalista",
               specializations: userSpecializations,
               location: specialistProfile?.location || userProfile.city || "Polska",
-              image: specialistProfile?.photo_url || "https://wrftbhmnqrdogomhvomr.supabase.co/storage/v1/object/public/profiles/profile-photos/ChatGPT%20Image%2031%20lip%202025,%2018_51_51.png",
+              image: specialistProfile?.photo_url || null,
               email: specialistProfile?.email || userProfile.email,
               rating: 5.0, // Default rating
               verified: true, // All these specialists are verified
