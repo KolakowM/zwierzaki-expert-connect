@@ -48,7 +48,7 @@ BEGIN
             COALESCE(up.first_name || ' ' || up.last_name, 'Specjalista') as specialist_name,
             COALESCE(sp.title, 'Specjalista') as specialist_title,
             COALESCE(sp.location, up.city, 'Polska') as specialist_location,
-            COALESCE(sp.photo_url, 'https://images.unsplash.com/photo-1570018144715-43110363d70a?q=80&w=2576&auto=format&fit=crop') as specialist_image,
+            COALESCE(sp.photo_url, 'https://wrftbhmnqrdogomhvomr.supabase.co/storage/v1/object/public/profiles/profile-photos/ChatGPT%20Image%2031%20lip%202025,%2018_51_51.png') as specialist_image,
             COALESCE(sp.email, up.email) as specialist_email,
             -- Get active specializations as array
             COALESCE(
