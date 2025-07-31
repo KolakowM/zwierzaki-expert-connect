@@ -15,7 +15,7 @@ export interface Specialist {
   title: string;
   specializations: string[];
   location: string;
-  image: string;
+  image: null;
   email?: string;
   rating?: number;
   verified: boolean;
