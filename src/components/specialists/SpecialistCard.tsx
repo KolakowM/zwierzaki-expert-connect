@@ -76,7 +76,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
         <div className="relative h-48 w-full overflow-hidden">
           {specialist.image ? (
             <img
-              
+              src={specialist.image}
               alt={specialist.name}
               className="h-full w-full object-cover object-center"
               onError={(e) => {
