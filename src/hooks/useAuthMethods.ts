@@ -17,9 +17,11 @@ type AuthMethodsParams = {
 };
 
 export function useAuthMethods({ user, setUser, setIsLoading }: AuthMethodsParams) {
-  // Cache verification timestamp to prevent excessive checks
+  // Enhanced session verification with better throttling and error handling
   let lastVerifiedTimestamp = 0;
-  const VERIFICATION_THROTTLE = 10000; // 10 seconds
+  let verificationInProgress = false;
+  const VERIFICATION_THROTTLE = 15000; // Increased to 15 seconds for better stability
+  const MAX_RETRY_ATTEMPTS = 3;
   
   const login = useCallback(async (email: string, password: string) => {
     try {
@@ -65,44 +67,80 @@ export function useAuthMethods({ user, setUser, setIsLoading }: AuthMethodsParam
   const verifySession = useCallback(async (): Promise<boolean> => {
     const now = Date.now();
     
-    // Don't verify too frequently to reduce database calls
-    if (now - lastVerifiedTimestamp < VERIFICATION_THROTTLE) {
-      console.log("Session verification throttled");
-      // If we already have a user, trust it for the throttle period
+    // Enhanced throttling with progress tracking
+    if (verificationInProgress) {
+      console.log("Session verification already in progress, skipping");
       return !!user;
     }
+    
+    if (now - lastVerifiedTimestamp < VERIFICATION_THROTTLE) {
+      console.log("Session verification throttled - returning cached result");
+      return !!user;
+    }
+    
+    verificationInProgress = true;
+    let retryCount = 0;
     
     try {
       setIsLoading(true);
       lastVerifiedTimestamp = now;
       
-      // First check if we already have the user in state
+      // If we already have a valid user, just verify the session is still active
       if (user) {
-        return true;
-      }
-      
-      // If no user in state, try to get from current session
-      const currentUser = await getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
-        return true;
-      }
-      
-      // If no current session, try to refresh the session
-      const refreshed = await refreshSession();
-      if (refreshed) {
-        const refreshedUser = await getCurrentUser();
-        if (refreshedUser) {
-          setUser(refreshedUser);
-          return true;
+        try {
+          const sessionValid = await getCurrentUser();
+          if (sessionValid?.id === user.id) {
+            return true;
+          }
+        } catch (error) {
+          console.log("Current user check failed, proceeding with full verification");
         }
       }
       
+      // Retry logic for better reliability
+      while (retryCount < MAX_RETRY_ATTEMPTS) {
+        try {
+          // Try to get current user from session
+          const currentUser = await getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            return true;
+          }
+          
+          // If no current session, try to refresh
+          console.log(`Session refresh attempt ${retryCount + 1}`);
+          const refreshed = await refreshSession();
+          if (refreshed) {
+            const refreshedUser = await getCurrentUser();
+            if (refreshedUser) {
+              setUser(refreshedUser);
+              return true;
+            }
+          }
+          
+          retryCount++;
+          if (retryCount < MAX_RETRY_ATTEMPTS) {
+            // Exponential backoff between retries
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+          }
+        } catch (error) {
+          console.error(`Session verification attempt ${retryCount + 1} failed:`, error);
+          retryCount++;
+          if (retryCount < MAX_RETRY_ATTEMPTS) {
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+          }
+        }
+      }
+      
+      // All attempts failed
+      console.warn("Session verification failed after all retry attempts");
+      setUser(null);
       return false;
     } catch (error) {
-      console.error("Session verification error:", error);
+      console.error("Critical session verification error:", error);
       return false;
     } finally {
+      verificationInProgress = false;
       setIsLoading(false);
     }
   }, [user, setUser, setIsLoading]);

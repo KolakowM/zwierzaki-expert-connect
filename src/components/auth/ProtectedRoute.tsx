@@ -25,13 +25,16 @@ const ProtectedRoute = ({
     });
   }, [isAuthenticated, isLoading, location.pathname]);
   
-  // Verify session only once when component mounts, not on every render
+  // Enhanced session verification with better error handling
   useEffect(() => {
-    // Only verify if we're not already loading
-    if (!isLoading) {
-      verifySession();
+    // Only verify if we're not already loading and don't have a user
+    if (!isLoading && !isAuthenticated) {
+      verifySession().catch((error) => {
+        console.error("Protected route session verification failed:", error);
+        // Don't block the user, let the auth context handle the redirect
+      });
     }
-  }, []);
+  }, [isLoading, isAuthenticated, verifySession]);
   
   if (isLoading) {
     return <AuthLoadingScreen />;

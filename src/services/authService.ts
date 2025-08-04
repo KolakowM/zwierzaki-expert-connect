@@ -26,10 +26,11 @@ export interface UserProfileUpdate {
   city?: string;
 }
 
-// Caching mechanism for getCurrentUser to reduce redundant calls
+// Enhanced caching mechanism with better validation and error handling
 let cachedUser: AuthUser | null = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 30000; // 30 seconds
+const CACHE_TTL = 20000; // Reduced to 20 seconds for better responsiveness
+let pendingUserFetch: Promise<AuthUser | null> | null = null;
 
 export const signIn = async ({ email, password }: SignInCredentials) => {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -99,50 +100,88 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return cachedUser;
   }
 
-  try {
-    // Get the current session
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError) {
-      console.error('Session error:', sessionError);
-      clearUserCache();
-      return null;
-    }
-    
-    if (!sessionData?.session) {
-      clearUserCache();
-      return null;
-    }
-    
-    // Verify the session is valid by checking the user
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !userData?.user) {
-      console.error('User verification error:', userError);
-      clearUserCache();
-      return null;
-    }
-    
-    const user = userData.user;
-    
-    const authUser = {
-      id: user.id,
-      email: user.email || '',
-      role: user.user_metadata?.role || 'specialist',
-      firstName: user.user_metadata?.firstName,
-      lastName: user.user_metadata?.lastName,
-    };
-    
-    // Update cache
-    cachedUser = authUser;
-    cacheTimestamp = now;
-    
-    return authUser;
-  } catch (error) {
-    console.error('Error getting current user:', error);
-    clearUserCache();
-    return null;
+  // Prevent multiple concurrent requests
+  if (pendingUserFetch) {
+    console.log("User fetch already pending, waiting for result");
+    return await pendingUserFetch;
   }
+
+  pendingUserFetch = (async (): Promise<AuthUser | null> => {
+    try {
+      // Enhanced session validation
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.warn('Session retrieval error:', sessionError.message);
+        clearUserCache();
+        return null;
+      }
+      
+      if (!sessionData?.session) {
+        console.log("No active session found");
+        clearUserCache();
+        return null;
+      }
+
+      // Check if session is expired
+      const session = sessionData.session;
+      if (session.expires_at && session.expires_at * 1000 < Date.now()) {
+        console.log("Session is expired, attempting refresh");
+        const refreshSuccess = await refreshSession();
+        if (!refreshSuccess) {
+          clearUserCache();
+          return null;
+        }
+        // Get the refreshed session
+        const { data: refreshedSessionData } = await supabase.auth.getSession();
+        if (!refreshedSessionData?.session) {
+          clearUserCache();
+          return null;
+        }
+      }
+      
+      // Verify the session is valid by checking the user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.warn('User verification error:', userError.message);
+        clearUserCache();
+        return null;
+      }
+
+      if (!userData?.user) {
+        console.log("No user data found in session");
+        clearUserCache();
+        return null;
+      }
+      
+      const user = userData.user;
+      
+      // Enhanced user object construction with validation
+      const authUser: AuthUser = {
+        id: user.id,
+        email: user.email || '',
+        role: user.user_metadata?.role || 'specialist',
+        firstName: user.user_metadata?.firstName || '',
+        lastName: user.user_metadata?.lastName || '',
+      };
+      
+      // Update cache
+      cachedUser = authUser;
+      cacheTimestamp = now;
+      
+      console.log("Successfully retrieved and cached user data");
+      return authUser;
+    } catch (error) {
+      console.error('Critical error getting current user:', error);
+      clearUserCache();
+      return null;
+    } finally {
+      pendingUserFetch = null;
+    }
+  })();
+
+  return await pendingUserFetch;
 };
 
 export const refreshSession = async (): Promise<boolean> => {
