@@ -43,7 +43,9 @@ export function SpecializationsTab({
   // Get current specializations from form
   const currentSpecializations = form.watch('specializations') || [];
   const specializationLimitReached = currentSpecializations.length >= maxSpecializations;
-  const serviceLimitReached = services.length >= maxServices;
+  // Only count non-empty services towards the limit
+  const nonEmptyServices = services.filter((s) => s && s.trim() !== "");
+  const serviceLimitReached = nonEmptyServices.length >= maxServices;
 
   return (
     <Card>
@@ -86,7 +88,7 @@ export function SpecializationsTab({
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">Usługi</h3>
             <span className="text-xs text-muted-foreground">
-              {services.length}/{maxServices}
+              {nonEmptyServices.length}/{maxServices}
             </span>
           </div>
           

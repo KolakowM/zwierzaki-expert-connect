@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { getStripePriceForPackage, logPayment } from '@/services/stripeService';
+import { logPayment } from '@/services/stripeService';
 
 export const useStripePayment = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,18 +28,10 @@ export const useStripePayment = () => {
 
     setIsLoading(true);
     try {
-      // Get the Stripe price ID for this package and billing period
-      const stripePriceId = await getStripePriceForPackage(packageId, billingPeriod);
-      console.log('Retrieved Stripe price ID:', stripePriceId);
-      
-      if (!stripePriceId) {
-        throw new Error('No Stripe price found for this package');
-      }
-
+      // Prepare request body and create checkout session via Edge Function
       const requestBody = { 
         packageId, 
         billingPeriod,
-        stripePriceId
       };
       
       console.log('Sending request to create-checkout with body:', requestBody);

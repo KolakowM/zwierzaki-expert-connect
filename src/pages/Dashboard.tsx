@@ -53,11 +53,12 @@ const Dashboard = () => {
     staleTime: 60000, // Cache for 1 minute
   });
 
-  // Handle Stripe checkout success globally on dashboard
+  // Handle Stripe checkout result globally on dashboard
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const checkout = params.get('checkout');
     const sessionId = params.get('session_id');
+
     if (checkout === 'success' && sessionId) {
       (async () => {
         try {
@@ -73,6 +74,13 @@ const Dashboard = () => {
           window.history.replaceState({}, document.title, cleanUrl);
         }
       })();
+    } else if (checkout === 'canceled') {
+      toast({
+        title: 'Płatność anulowana',
+        description: 'Możesz spróbować ponownie w dowolnym momencie.',
+      });
+      const cleanUrl = location.pathname + (params.get('tab') ? `?tab=${params.get('tab')}` : '');
+      window.history.replaceState({}, document.title, cleanUrl);
     }
   }, [location.search, toast]);
 
