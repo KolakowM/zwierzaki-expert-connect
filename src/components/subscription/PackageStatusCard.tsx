@@ -53,7 +53,7 @@ const PackageStatusCard = () => {
     max_clients: 5,
     max_pets: 10,
     max_services: 3,
-    max_specializations: 2,
+    max_specializations: 1,
     package_name: 'Trial'
   };
 
