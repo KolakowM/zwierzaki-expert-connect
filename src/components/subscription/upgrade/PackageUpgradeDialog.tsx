@@ -67,28 +67,12 @@ const PackageUpgradeDialog = ({
   };
 
   const handleUpgrade = async () => {
-    if (!selectedPackage) return;
-    
-    setIsUpgrading(true);
-    try {
-      await upgradeSubscription('', selectedPackage.id); // User ID will be handled by the service
-      toast({
-        title: "Pakiet zaktualizowany",
-        description: `Pomyślnie przeszedłeś na pakiet ${selectedPackage.name}`,
-      });
-      onUpgradeSuccess();
-      onOpenChange(false);
-      setSelectedPackage(null);
-    } catch (error) {
-      console.error('Error upgrading subscription:', error);
-      toast({
-        title: "Błąd upgrade'u",
-        description: "Nie udało się zaktualizować pakietu",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpgrading(false);
-    }
+    // Temporarily disabled direct upgrade without payment to avoid inconsistent state
+    toast({
+      title: "Opcja niedostępna",
+      description: "Bezpośrednia zmiana pakietu jest tymczasowo wyłączona. Skorzystaj z płatności Stripe.",
+    });
+    return;
   };
 
   const handleClose = () => {

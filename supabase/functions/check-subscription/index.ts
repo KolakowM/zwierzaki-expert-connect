@@ -83,33 +83,59 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       
-      // Determine subscription tier from price
+      // Map package using Stripe price_id via package_stripe_prices
       const priceId = subscription.items.data[0].price.id;
-      const price = await stripe.prices.retrieve(priceId);
-      const amount = price.unit_amount || 0;
-      
-      // Map price amounts to tiers based on PLN pricing (amounts in cents)
-      if (amount <= 4900) { // 49 PLN or less
-        subscriptionTier = "Advanced";
-      } else if (amount <= 9900) { // 99 PLN or less
-        subscriptionTier = "Professional";
+
+      // Try to map price_id -> package_id using database mapping
+      const { data: priceMap, error: priceMapError } = await supabaseClient
+        .from('package_stripe_prices')
+        .select('package_id')
+        .eq('stripe_price_id', priceId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      let mappedPackageId: string | null = priceMap?.package_id ?? null;
+      let mappedPackageName: string | null = null;
+
+      if (!mappedPackageId) {
+        // Fallback to legacy amount-based mapping (kept for resilience)
+        const price = await stripe.prices.retrieve(priceId);
+        const amount = price.unit_amount || 0;
+        if (amount <= 4900) {
+          subscriptionTier = "Advanced";
+        } else if (amount <= 9900) {
+          subscriptionTier = "Professional";
+        } else {
+          subscriptionTier = "Enterprise";
+        }
+        logStep("Fallback tier determined by amount", { priceId, amount, subscriptionTier });
+
+        const { data: fallbackPackage } = await supabaseClient
+          .from('packages')
+          .select('id,name')
+          .eq('name', subscriptionTier)
+          .maybeSingle();
+        if (fallbackPackage) {
+          mappedPackageId = fallbackPackage.id;
+          mappedPackageName = fallbackPackage.name;
+        }
       } else {
-        subscriptionTier = "Enterprise";
+        // Resolve package name for nicer display in subscribers.subscription_tier
+        const { data: pkg } = await supabaseClient
+          .from('packages')
+          .select('id,name')
+          .eq('id', mappedPackageId)
+          .maybeSingle();
+        mappedPackageName = pkg?.name ?? null;
+        subscriptionTier = mappedPackageName;
+        logStep("Mapped package via price_id", { priceId, packageId: mappedPackageId, packageName: mappedPackageName });
       }
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
 
-      // Get package ID for the subscription tier
-      const { data: packageData } = await supabaseClient
-        .from('packages')
-        .select('id')
-        .eq('name', subscriptionTier)
-        .single();
-
-      if (packageData) {
-        // Update user_subscriptions table
+      if (mappedPackageId) {
+        // Update user_subscriptions table using mapped package
         await supabaseClient.from("user_subscriptions").upsert({
           user_id: user.id,
-          package_id: packageData.id,
+          package_id: mappedPackageId,
           status: 'active',
           start_date: new Date(subscription.created * 1000).toISOString(),
           end_date: subscriptionEnd,
@@ -125,6 +151,7 @@ serve(async (req) => {
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
+      stripe_subscription_id: hasActiveSub ? subscriptions.data[0].id : null,
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,

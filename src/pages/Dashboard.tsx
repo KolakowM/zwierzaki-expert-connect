@@ -53,6 +53,29 @@ const Dashboard = () => {
     staleTime: 60000, // Cache for 1 minute
   });
 
+  // Handle Stripe checkout success globally on dashboard
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const checkout = params.get('checkout');
+    const sessionId = params.get('session_id');
+    if (checkout === 'success' && sessionId) {
+      (async () => {
+        try {
+          await supabase.functions.invoke('check-subscription');
+          toast({
+            title: 'Płatność zakończona',
+            description: 'Twoja subskrypcja została aktywowana!',
+          });
+        } catch (e) {
+          console.error('Error refreshing subscription after checkout:', e);
+        } finally {
+          const cleanUrl = location.pathname + (params.get('tab') ? `?tab=${params.get('tab')}` : '');
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+      })();
+    }
+  }, [location.search, toast]);
+
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
     setActiveTab(value);

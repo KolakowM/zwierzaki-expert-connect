@@ -94,9 +94,11 @@ serve(async (req) => {
             subscription_end: isCanceled ? new Date().toISOString() : null,
           }).eq("user_id", subscriber.user_id);
 
-          // Update user subscription status
+          // Update user subscription status with allowed values only
+          const mappedStatus = isCanceled ? 'cancelled' : (isActive ? 'active' : 'expired');
+
           await supabase.from("user_subscriptions").update({
-            status: isCanceled ? 'cancelled' : subscription.status,
+            status: mappedStatus,
             end_date: isCanceled ? new Date().toISOString() : null,
           }).eq("user_id", subscriber.user_id);
 
