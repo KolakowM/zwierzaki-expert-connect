@@ -82,11 +82,11 @@ const UsageStatsCard = ({ subscription, usageStats }: UsageStatsCardProps) => {
                 Specjalizacje
               </span>
               <span className="text-sm">
-                {usageStats?.specializations_count || 0} / {subscription?.max_specializations || 2}
+                {usageStats?.specializations_count || 0} / {subscription?.max_specializations || 1}
               </span>
             </div>
             <Progress 
-              value={((usageStats?.specializations_count || 0) / (subscription?.max_specializations || 2)) * 100} 
+              value={((usageStats?.specializations_count || 0) / (subscription?.max_specializations || 1)) * 100} 
               className="h-2"
             />
           </div>
