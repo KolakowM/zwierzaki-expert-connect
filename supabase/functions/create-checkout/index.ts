@@ -132,7 +132,7 @@ serve(async (req) => {
       email: user.email,
       stripe_customer_id: customerId,
       subscribed: false, // Will be updated via webhook/check-subscription
-      subscription_tier: packageId,
+      subscription_tier: null, // ustawiane prawidłowo przez webhook po zakończeniu checkoutu
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
     if (subErr) console.error('Subscribers upsert error:', subErr);

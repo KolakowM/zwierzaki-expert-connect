@@ -47,42 +47,71 @@ serve(async (req) => {
 
           // Ustal pewny e-mail klienta
           const email = session.customer_details?.email || session.customer_email || undefined;
-          
+
           if (userId && packageId) {
             if (!email) {
               console.warn('[WEBHOOK] Missing email in checkout.session.completed; proceeding without subscriber upsert based on email.');
             }
 
-            // Update subscriber status (z onConflict po email)
+            // Pobierz nazwę pakietu dla subscription_tier
+            let packageName: string | null = null;
+            const { data: pkg, error: pkgErr } = await supabase
+              .from('packages')
+              .select('name')
+              .eq('id', packageId)
+              .maybeSingle();
+            if (pkgErr) {
+              console.error('[WEBHOOK] Error fetching package name:', pkgErr);
+            } else {
+              packageName = pkg?.name ?? null;
+            }
+
+            // Pobierz szczegóły subskrypcji, aby ustawić end_date
+            let endDateIso: string | null = null;
+            const subscriptionId = session.subscription as string | null;
+            if (subscriptionId) {
+              try {
+                const sub = await stripe.subscriptions.retrieve(subscriptionId);
+                if (sub.current_period_end) {
+                  endDateIso = new Date(sub.current_period_end * 1000).toISOString();
+                }
+              } catch (e) {
+                console.warn('[WEBHOOK] Unable to retrieve subscription for end date:', e);
+              }
+            }
+
+            // Update subscribers (onConflict: email) – zapisuj nazwę pakietu jako tier
             if (email) {
-              const { error: subErr } = await supabase.from("subscribers").upsert({
+              const { error: subErr } = await supabase.from('subscribers').upsert({
                 user_id: userId,
                 email,
                 stripe_customer_id: session.customer as string,
-                stripe_subscription_id: session.subscription as string,
+                stripe_subscription_id: subscriptionId || undefined,
                 subscribed: true,
-                subscription_tier: packageId,
+                subscription_tier: packageName, // nazwa pakietu
+                subscription_end: endDateIso,
                 updated_at: new Date().toISOString(),
               }, { onConflict: 'email' });
               if (subErr) console.error('[WEBHOOK] subscribers upsert error:', subErr);
             }
 
-            // Create or update user subscription (z onConflict po user_id)
-            const { error: upsertErr } = await supabase.from("user_subscriptions").upsert({
+            // Create or update user subscription (onConflict: user_id)
+            const { error: upsertErr } = await supabase.from('user_subscriptions').upsert({
               user_id: userId,
               package_id: packageId,
               status: 'active',
               start_date: new Date().toISOString(),
-              payment_id: session.id,
+              end_date: endDateIso,
+              payment_id: subscriptionId || undefined, // używamy stripe_subscription_id
               updated_at: new Date().toISOString(),
             }, { onConflict: 'user_id' });
             if (upsertErr) console.error('[WEBHOOK] user_subscriptions upsert error:', upsertErr);
 
             // Log successful payment
-            const { error: logErr } = await supabase.from("payment_logs").insert({
+            const { error: logErr } = await supabase.from('payment_logs').insert({
               user_id: userId,
               stripe_session_id: session.id,
-              stripe_subscription_id: session.subscription as string,
+              stripe_subscription_id: subscriptionId || undefined,
               package_id: packageId,
               amount_cents: session.amount_total,
               currency: session.currency,
@@ -97,6 +126,7 @@ serve(async (req) => {
         break;
       }
 
+      case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
@@ -105,12 +135,38 @@ serve(async (req) => {
           subscription_id: subscription.id,
           status: subscription.status,
         });
-        
+
+        // Spróbuj wywnioskować package_id z price.id
+        let inferredPackageId: string | null = null;
+        let inferredPackageName: string | null = null;
+        try {
+          const priceId = subscription.items?.data?.[0]?.price?.id as string | undefined;
+          if (priceId) {
+            const { data: priceMap, error: priceErr } = await supabase
+              .from('package_stripe_prices')
+              .select('package_id')
+              .eq('stripe_price_id', priceId)
+              .eq('is_active', true)
+              .maybeSingle();
+            if (!priceErr && priceMap?.package_id) {
+              inferredPackageId = priceMap.package_id as string;
+              const { data: pkg, error: pkgErr } = await supabase
+                .from('packages')
+                .select('name')
+                .eq('id', inferredPackageId)
+                .maybeSingle();
+              if (!pkgErr) inferredPackageName = pkg?.name ?? null;
+            }
+          }
+        } catch (e) {
+          console.warn('[WEBHOOK] price->package mapping failed:', e);
+        }
+
         // Find user by stripe subscription ID
         const { data: subscriber, error: findErr } = await supabase
-          .from("subscribers")
-          .select("user_id, email")
-          .eq("stripe_subscription_id", subscription.id)
+          .from('subscribers')
+          .select('user_id, email')
+          .eq('stripe_subscription_id', subscription.id)
           .maybeSingle();
 
         if (findErr) {
@@ -118,35 +174,52 @@ serve(async (req) => {
         }
 
         if (subscriber) {
-          const isActive = subscription.status === 'active';
-          const isCanceled = subscription.status === 'canceled';
+          const status = subscription.status;
+          const isActive = status === 'active' || status === 'trialing';
+          const isCanceled = status === 'canceled' || status === 'unpaid';
+          const endDateIso = subscription.current_period_end
+            ? new Date(subscription.current_period_end * 1000).toISOString()
+            : null;
 
           // Update subscriber status
-          const { error: subUpdateErr } = await supabase.from("subscribers").update({
+          const subscriberUpdate: Record<string, unknown> = {
             subscribed: isActive,
-            subscription_end: isCanceled ? new Date().toISOString() : null,
+            subscription_end: isCanceled ? new Date().toISOString() : endDateIso,
             updated_at: new Date().toISOString(),
-          }).eq("user_id", subscriber.user_id);
+          };
+          if (inferredPackageName) subscriberUpdate.subscription_tier = inferredPackageName;
+
+          const { error: subUpdateErr } = await supabase
+            .from('subscribers')
+            .update(subscriberUpdate)
+            .eq('user_id', subscriber.user_id);
           if (subUpdateErr) console.error('[WEBHOOK] subscriber update error:', subUpdateErr);
 
-          // Update user subscription status
-          const mappedStatus = isCanceled ? 'cancelled' : (isActive ? 'active' : 'expired');
-          const { error: usUpdateErr } = await supabase.from("user_subscriptions").update({
+          // Update user subscription status (+ opcjonalnie package_id)
+          const mappedStatus = isCanceled ? 'cancelled' : isActive ? 'active' : 'expired';
+          const usUpdate: Record<string, unknown> = {
             status: mappedStatus,
-            end_date: isCanceled ? new Date().toISOString() : null,
+            end_date: isCanceled ? new Date().toISOString() : endDateIso,
             updated_at: new Date().toISOString(),
-          }).eq("user_id", subscriber.user_id);
+          };
+          if (inferredPackageId) usUpdate.package_id = inferredPackageId;
+
+          const { error: usUpdateErr } = await supabase
+            .from('user_subscriptions')
+            .update(usUpdate)
+            .eq('user_id', subscriber.user_id);
           if (usUpdateErr) console.error('[WEBHOOK] user_subscriptions update error:', usUpdateErr);
 
           // Log the event
-          const { error: logErr } = await supabase.from("payment_logs").insert({
+          const logStatus = event.type === 'customer.subscription.deleted' ? 'cancelled' : (isActive ? 'updated' : 'expired');
+          const { error: logErr } = await supabase.from('payment_logs').insert({
             user_id: subscriber.user_id,
             stripe_subscription_id: subscription.id,
-            status: event.type === 'customer.subscription.deleted' ? 'cancelled' : 'updated',
-            metadata: { 
+            status: logStatus,
+            metadata: {
               event_type: event.type,
-              subscription_status: subscription.status 
-            }
+              subscription_status: status,
+            },
           });
           if (logErr) console.error('[WEBHOOK] payment_logs insert error:', logErr);
         } else {
