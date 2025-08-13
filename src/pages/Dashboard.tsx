@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Import dashboard components
 import UserMenu from "@/components/dashboard/UserMenu";
@@ -22,6 +22,7 @@ const Dashboard = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const queryClient = useQueryClient();
   
   // Get the tab from URL query parameter or default to "overview"
   useEffect(() => {
@@ -63,6 +64,10 @@ const Dashboard = () => {
       (async () => {
         try {
           await supabase.functions.invoke('check-subscription');
+          // Odśwież dane subskrypcji i limitów
+          queryClient.invalidateQueries({ queryKey: ['activeSubscription'] });
+          queryClient.invalidateQueries({ queryKey: ['usageStats'] });
+
           toast({
             title: 'Płatność zakończona',
             description: 'Twoja subskrypcja została aktywowana!',
@@ -82,7 +87,7 @@ const Dashboard = () => {
       const cleanUrl = location.pathname + (params.get('tab') ? `?tab=${params.get('tab')}` : '');
       window.history.replaceState({}, document.title, cleanUrl);
     }
-  }, [location.search, toast]);
+  }, [location.search, toast, queryClient]);
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {

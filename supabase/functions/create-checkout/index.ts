@@ -86,6 +86,7 @@ serve(async (req) => {
 
     // Create checkout session configuration
     console.log('=== CHECKOUT SESSION CONFIG ===');
+    const origin = req.headers.get("origin") || "http://localhost:3000";
     const sessionConfig: any = {
       customer: customerId,
       payment_method_types: ['card'],
@@ -97,8 +98,8 @@ serve(async (req) => {
       ],
       mode: 'subscription',
       allow_promotion_codes: true, // Enable promotion codes on Stripe checkout page
-      success_url: `${req.headers.get("origin")}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?checkout=canceled`,
+      success_url: `${origin}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/dashboard?checkout=canceled`,
       metadata: {
         package_id: packageId,
         user_id: user.id,
@@ -126,17 +127,19 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    await supabaseService.from("subscribers").upsert({
+    const { error: subErr } = await supabaseService.from("subscribers").upsert({
       user_id: user.id,
       email: user.email,
       stripe_customer_id: customerId,
-      subscribed: false, // Will be updated via webhook
+      subscribed: false, // Will be updated via webhook/check-subscription
       subscription_tier: packageId,
-    });
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'email' });
+    if (subErr) console.error('Subscribers upsert error:', subErr);
 
     // Log payment attempt
     console.log('=== LOGGING PAYMENT ATTEMPT ===');
-    await supabaseService.from("payment_logs").insert({
+    const { error: logErr } = await supabaseService.from("payment_logs").insert({
       user_id: user.id,
       stripe_session_id: session.id,
       package_id: packageId,
@@ -145,6 +148,7 @@ serve(async (req) => {
         billing_period: billingPeriod
       },
     });
+    if (logErr) console.error('Payment log insert error:', logErr);
 
     console.log('Checkout session created successfully:', session.id);
     console.log('=== CREATE CHECKOUT SESSION DEBUG END ===');
@@ -160,10 +164,12 @@ serve(async (req) => {
   } catch (error) {
     console.error("=== ERROR IN CREATE CHECKOUT ===");
     console.error("Error creating checkout session:", error);
-    console.error("Error stack:", error.stack);
+    // deno-lint-ignore no-explicit-any
+    const stack = (error as any)?.stack;
+    if (stack) console.error("Error stack:", stack);
     console.error("=== ERROR END ===");
     
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
