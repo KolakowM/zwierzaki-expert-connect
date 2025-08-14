@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -895,105 +895,105 @@ export type Database = {
       }
       check_package_limits: {
         Args:
-          | { p_user_id: string; p_action_type: string }
-          | { p_user_id: string; p_action_type: string; p_soft_check?: boolean }
+          | { p_action_type: string; p_soft_check?: boolean; p_user_id: string }
+          | { p_action_type: string; p_user_id: string }
         Returns: {
           can_perform_action: boolean
           current_count: number
+          error_message: string
+          is_at_soft_limit: boolean
           max_allowed: number
           package_name: string
           usage_percentage: number
-          is_at_soft_limit: boolean
-          error_message: string
         }[]
       }
       get_catalog_data: {
         Args: {
-          p_search_term?: string
           p_location?: string
-          p_specializations?: string[]
-          p_roles?: Database["public"]["Enums"]["app_role"][]
           p_page?: number
           p_page_size?: number
+          p_roles?: Database["public"]["Enums"]["app_role"][]
+          p_search_term?: string
+          p_specializations?: string[]
         }
         Returns: {
-          id: string
-          name: string
-          title: string
-          specializations: string[]
-          location: string
-          image: string
           email: string
+          id: string
+          image: string
+          location: string
+          name: string
           rating: number
-          verified: boolean
           role: Database["public"]["Enums"]["app_role"]
+          specializations: string[]
+          title: string
           total_count: number
+          verified: boolean
         }[]
       }
       get_catalog_specialists: {
         Args: {
-          p_search_term?: string
           p_location?: string
-          p_specializations?: string[]
           p_page?: number
           p_page_size?: number
+          p_search_term?: string
+          p_specializations?: string[]
         }
         Returns: {
-          id: string
-          name: string
-          title: string
-          specializations: string[]
-          location: string
-          image: string
           email: string
-          rating: number
-          verified: boolean
-          role: Database["public"]["Enums"]["app_role"]
+          id: string
+          image: string
           is_featured: boolean
+          location: string
+          name: string
+          rating: number
+          role: Database["public"]["Enums"]["app_role"]
+          specializations: string[]
+          title: string
           total_count: number
+          verified: boolean
         }[]
       }
       get_user_active_subscription: {
         Args: { p_user_id: string }
         Returns: {
-          subscription_id: string
-          package_id: string
-          package_name: string
-          status: string
+          can_access_carousel: boolean
+          can_appear_in_catalog: boolean
+          end_date: string
           max_clients: number
           max_pets: number
           max_services: number
           max_specializations: number
-          can_access_carousel: boolean
-          can_appear_in_catalog: boolean
-          end_date: string
+          package_id: string
+          package_name: string
+          status: string
+          subscription_id: string
         }[]
       }
       get_user_effective_limits: {
         Args: { p_user_id: string }
         Returns: {
+          can_access_carousel: boolean
+          can_appear_in_catalog: boolean
           max_clients: number
           max_pets: number
           max_services: number
           max_specializations: number
-          can_access_carousel: boolean
-          can_appear_in_catalog: boolean
         }[]
       }
       get_user_usage_stats: {
         Args: { p_user_id: string }
         Returns: {
+          active_visits_count: number
           clients_count: number
           pets_count: number
           services_count: number
           specializations_count: number
-          active_visits_count: number
         }[]
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }

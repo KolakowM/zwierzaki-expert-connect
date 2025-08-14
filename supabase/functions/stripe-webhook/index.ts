@@ -103,17 +103,29 @@ serve(async (req) => {
               if (subErr) console.error('[WEBHOOK] subscribers upsert error:', subErr);
             }
 
-            // Create or update user subscription (onConflict: user_id)
-            const { error: upsertErr } = await supabase.from('user_subscriptions').upsert({
+            // Create or update user subscription - simplified with better logging
+            console.log(`[WEBHOOK] Creating/updating subscription for user: ${userId}, package: ${packageId}`);
+            const subscriptionData = {
               user_id: userId,
               package_id: packageId,
               status: 'active',
               start_date: new Date().toISOString(),
               end_date: endDateIso,
-              payment_id: subscriptionId || undefined, // używamy stripe_subscription_id
+              payment_id: subscriptionId || undefined,
               updated_at: new Date().toISOString(),
-            }, { onConflict: 'user_id' });
-            if (upsertErr) console.error('[WEBHOOK] user_subscriptions upsert error:', upsertErr);
+            };
+            console.log('[WEBHOOK] Subscription data:', JSON.stringify(subscriptionData, null, 2));
+            
+            const { error: upsertErr } = await supabase
+              .from('user_subscriptions')
+              .upsert(subscriptionData, { onConflict: 'user_id' });
+            
+            if (upsertErr) {
+              console.error('[WEBHOOK] user_subscriptions upsert error:', JSON.stringify(upsertErr, null, 2));
+              console.error('[WEBHOOK] Failed subscription data:', JSON.stringify(subscriptionData, null, 2));
+            } else {
+              console.log('[WEBHOOK] Subscription created/updated successfully');
+            }
 
             // Log successful payment
             const { error: logErr } = await supabase.from('payment_logs').insert({
