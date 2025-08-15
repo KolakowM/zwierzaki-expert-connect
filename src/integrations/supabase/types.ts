@@ -1005,6 +1005,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      process_subscription_update: {
+        Args: {
+          p_end_date: string
+          p_package_id: number
+          p_start_date: string
+          p_status: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "specialist"
