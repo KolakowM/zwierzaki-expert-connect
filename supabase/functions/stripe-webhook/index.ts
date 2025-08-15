@@ -4,7 +4,7 @@ import Stripe from "https://esm.sh/stripe@17.3.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2025-07-30",
+  apiVersion: "2023-10-16",
 });
 
 const supabase = createClient(
