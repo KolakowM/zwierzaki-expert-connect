@@ -4,7 +4,7 @@ import Stripe from "https://esm.sh/stripe@17.3.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-07-30",
 });
 
 const supabase = createClient(
@@ -103,8 +103,10 @@ serve(async (req) => {
               if (subErr) console.error('[WEBHOOK] subscribers upsert error:', subErr);
             }
 
-            // Create or update user subscription - simplified with better logging
+            // Create or update user subscription with enhanced debugging
             console.log(`[WEBHOOK] Creating/updating subscription for user: ${userId}, package: ${packageId}`);
+            console.log(`[WEBHOOK] Using Service Role Key: ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ? "YES" : "NO"}`);
+            
             const subscriptionData = {
               user_id: userId,
               package_id: packageId,
@@ -116,15 +118,61 @@ serve(async (req) => {
             };
             console.log('[WEBHOOK] Subscription data:', JSON.stringify(subscriptionData, null, 2));
             
-            const { error: upsertErr } = await supabase
+            // Check existing subscription first
+            const { data: existingSubscription, error: checkErr } = await supabase
               .from('user_subscriptions')
-              .upsert(subscriptionData, { onConflict: 'user_id' });
+              .select('*')
+              .eq('user_id', userId);
+            
+            if (checkErr) {
+              console.error('[WEBHOOK] Error checking existing subscription:', checkErr);
+            } else {
+              console.log('[WEBHOOK] Existing subscriptions:', existingSubscription);
+            }
+            
+            const { data: upsertResult, error: upsertErr } = await supabase
+              .from('user_subscriptions')
+              .upsert(subscriptionData, { onConflict: 'user_id' })
+              .select();
             
             if (upsertErr) {
               console.error('[WEBHOOK] user_subscriptions upsert error:', JSON.stringify(upsertErr, null, 2));
               console.error('[WEBHOOK] Failed subscription data:', JSON.stringify(subscriptionData, null, 2));
+              
+              // Try a different approach - update if exists, insert if not
+              console.log('[WEBHOOK] Trying alternative approach...');
+              if (existingSubscription && existingSubscription.length > 0) {
+                const { data: updateResult, error: updateErr } = await supabase
+                  .from('user_subscriptions')
+                  .update({
+                    package_id: packageId,
+                    status: 'active',
+                    end_date: endDateIso,
+                    payment_id: subscriptionId || undefined,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('user_id', userId)
+                  .select();
+                
+                if (updateErr) {
+                  console.error('[WEBHOOK] Update failed too:', updateErr);
+                } else {
+                  console.log('[WEBHOOK] Update successful:', updateResult);
+                }
+              } else {
+                const { data: insertResult, error: insertErr } = await supabase
+                  .from('user_subscriptions')
+                  .insert(subscriptionData)
+                  .select();
+                
+                if (insertErr) {
+                  console.error('[WEBHOOK] Insert failed too:', insertErr);
+                } else {
+                  console.log('[WEBHOOK] Insert successful:', insertResult);
+                }
+              }
             } else {
-              console.log('[WEBHOOK] Subscription created/updated successfully');
+              console.log('[WEBHOOK] Subscription upsert successful:', upsertResult);
             }
 
             // Log successful payment
