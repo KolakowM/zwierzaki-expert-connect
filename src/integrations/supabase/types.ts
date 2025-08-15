@@ -1005,6 +1005,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      process_subscription_payment: {
+        Args: {
+          payment_date: string
+          payment_status: string
+          subscription_id: string
+        }
+        Returns: undefined
+      }
       process_subscription_update: {
         Args: {
           p_end_date: string
