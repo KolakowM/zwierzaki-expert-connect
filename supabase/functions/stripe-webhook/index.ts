@@ -61,17 +61,59 @@ serve(async (req) => {
               console.warn('[WEBHOOK] Missing email in checkout.session.completed; proceeding without subscriber upsert based on email.');
             }
 
-            // Pobierz nazwę pakietu dla subscription_tier
+            // Pobierz dane pakietu
             let packageName: string | null = null;
+            let isPaidPackage = false;
             const { data: pkg, error: pkgErr } = await supabase
               .from('packages')
-              .select('name')
+              .select('name, price_pln')
               .eq('id', packageId)
               .maybeSingle();
             if (pkgErr) {
-              console.error('[WEBHOOK] Error fetching package name:', pkgErr);
+              console.error('[WEBHOOK] Error fetching package data:', pkgErr);
             } else {
               packageName = pkg?.name ?? null;
+              // Sprawdź czy to płatny pakiet (Zaawansowany lub Zawodowiec)
+              isPaidPackage = packageName === 'Zaawansowany' || packageName === 'Zawodowiec';
+            }
+
+            // AUTO-WERYFIKACJA: Sprawdź czy to pierwsza płatność i zweryfikuj użytkownika
+            if (isPaidPackage) {
+              console.log(`[WEBHOOK] Processing paid package (${packageName}) for user ${userId}`);
+              
+              // Sprawdź czy użytkownik ma już płatne subskrypcje
+              const { data: existingPaidSubs, error: checkErr } = await supabase
+                .from('user_subscriptions')
+                .select(`
+                  id,
+                  packages!inner(name, price_pln)
+                `)
+                .eq('user_id', userId)
+                .eq('status', 'active')
+                .neq('packages.name', 'Testowy');
+
+              if (checkErr) {
+                console.error('[WEBHOOK] Error checking existing paid subscriptions:', checkErr);
+              }
+
+              const isFirstPaidSubscription = !existingPaidSubs || existingPaidSubs.length === 0;
+              console.log(`[WEBHOOK] Is first paid subscription: ${isFirstPaidSubscription}`);
+
+              // Zaktualizuj status weryfikacji dla płatnych pakietów
+              const { error: roleUpdateErr } = await supabase
+                .from('user_roles')
+                .update({
+                  status: 'zweryfikowany',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId)
+                .eq('role', 'specialist');
+
+              if (roleUpdateErr) {
+                console.error('[WEBHOOK] Error updating user role status:', roleUpdateErr);
+              } else {
+                console.log(`[WEBHOOK] User ${userId} verified due to paid subscription (${packageName})`);
+              }
             }
 
             // Pobierz szczegóły subskrypcji, aby ustawić end_date
@@ -277,6 +319,47 @@ serve(async (req) => {
             .update(usUpdate)
             .eq('user_id', subscriber.user_id);
           if (usUpdateErr) console.error('[WEBHOOK] user_subscriptions update error:', usUpdateErr);
+
+          // AUTO-WERYFIKACJA: Sprawdź czy cofnąć weryfikację przy anulowaniu płatnych pakietów
+          if (isCanceled || !isActive) {
+            console.log(`[WEBHOOK] Checking if user ${subscriber.user_id} should lose verification due to subscription change`);
+            
+            // Sprawdź czy użytkownik ma jeszcze jakieś aktywne płatne pakiety
+            const { data: remainingPaidSubs, error: paidCheckErr } = await supabase
+              .from('user_subscriptions')
+              .select(`
+                id,
+                packages!inner(name, price_pln)
+              `)
+              .eq('user_id', subscriber.user_id)
+              .eq('status', 'active')
+              .in('packages.name', ['Zaawansowany', 'Zawodowiec']);
+
+            if (paidCheckErr) {
+              console.error('[WEBHOOK] Error checking remaining paid subscriptions:', paidCheckErr);
+            } else {
+              const hasActivePaidPackages = remainingPaidSubs && remainingPaidSubs.length > 0;
+              console.log(`[WEBHOOK] User ${subscriber.user_id} has active paid packages: ${hasActivePaidPackages}`);
+
+              // Jeśli nie ma aktywnych płatnych pakietów, cofnij weryfikację
+              if (!hasActivePaidPackages) {
+                const { error: roleRevertErr } = await supabase
+                  .from('user_roles')
+                  .update({
+                    status: 'niezweryfikowany',
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('user_id', subscriber.user_id)
+                  .eq('role', 'specialist');
+
+                if (roleRevertErr) {
+                  console.error('[WEBHOOK] Error reverting user role status:', roleRevertErr);
+                } else {
+                  console.log(`[WEBHOOK] User ${subscriber.user_id} verification reverted - no active paid packages`);
+                }
+              }
+            }
+          }
 
           // Log the event
           const logStatus = event.type === 'customer.subscription.deleted' ? 'cancelled' : (isActive ? 'updated' : 'expired');
