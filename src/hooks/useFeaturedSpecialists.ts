@@ -53,16 +53,14 @@ export function useFeaturedSpecialists(limit = 12) {
         // Extract user IDs
         const verifiedUserIds = verifiedSpecialists.map(role => role.user_id);
 
-        // Step 3: Create combined user list with featured users prioritized
+        // Step 3: Only use specialists with active "Zawodowiec" package
         const featuredVerifiedIds = verifiedUserIds.filter(id => featuredUserIds.has(id));
-        const nonFeaturedVerifiedIds = verifiedUserIds.filter(id => !featuredUserIds.has(id));
         
-        // Prioritize featured specialists, then add non-featured ones
-        const prioritizedUserIds = [...featuredVerifiedIds, ...nonFeaturedVerifiedIds].slice(0, limit);
+        // Only show specialists with active "Zawodowiec" subscription
+        const prioritizedUserIds = featuredVerifiedIds.slice(0, limit);
         
         console.log(`Featured verified specialists: ${featuredVerifiedIds.length}`);
-        console.log(`Non-featured verified specialists: ${nonFeaturedVerifiedIds.length}`);
-        console.log(`Total prioritized specialists to fetch: ${prioritizedUserIds.length}`);
+        console.log(`Total specialists to fetch: ${prioritizedUserIds.length}`);
 
         // Step 4: Get user profiles for these users
         const { data: userProfilesData, error: userProfilesError } = await supabase
