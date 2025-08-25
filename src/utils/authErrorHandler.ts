@@ -38,6 +38,16 @@ export const getAuthErrorMessage = (error: AuthError | Error, t: (key: string, o
     return t('auth.errors.password_too_weak');
   }
   
+  if (errorMessage.includes('same password') || 
+      errorMessage.includes('new password should be different')) {
+    return 'Nowe hasło musi być różne od poprzedniego hasła';
+  }
+  
+  if (errorMessage.includes('session not found') || 
+      errorMessage.includes('refresh_token_not_found')) {
+    return 'Sesja wygasła. Proszę ponownie zresetować hasło';
+  }
+  
   // Generic fallback
   return t('auth.errors.generic_error');
 };
