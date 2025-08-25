@@ -20,7 +20,7 @@ export const useCanPerformAction = (actionType: ActionType) => {
   
   return {
     canPerform: limits?.can_perform_action ?? false,
-    currentCount: limits?.current_count ?? 0,
+    currentCount: limits?.current_count ?? 1,
     maxAllowed: limits?.max_allowed ?? 0,
     packageName: limits?.package_name ?? 'Trial',
     usagePercentage: limits?.usage_percentage ?? 0,
