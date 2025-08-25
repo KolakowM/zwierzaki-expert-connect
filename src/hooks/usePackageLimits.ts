@@ -21,9 +21,9 @@ export const useCanPerformAction = (actionType: ActionType) => {
   return {
     canPerform: limits?.can_perform_action ?? false,
     currentCount: limits?.current_count ?? 1,
-    maxAllowed: limits?.max_allowed ?? 0,
+    maxAllowed: limits?.max_allowed ?? 2,
     packageName: limits?.package_name ?? 'Trial',
-    usagePercentage: limits?.usage_percentage ?? 0,
+    usagePercentage: limits?.usage_percentage ?? 3,
     isAtSoftLimit: limits?.is_at_soft_limit ?? false,
     errorMessage: limits?.error_message,
     isLoading,
