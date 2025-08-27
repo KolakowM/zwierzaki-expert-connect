@@ -63,9 +63,10 @@ export const usePricingTiers = () => {
         { id: "p3", content: "Do 50 klientów" },
         { id: "p4", content: "Do 75 zwierząt" },
         { id: "p5", content: "Wszystkie specjalizacje i 15 usług" },
-        { id: "p6", content: "Priorytetowy profil specjalisty" },
-        { id: "p7", content: <strong>Jednorazowy rabat 10% przy pierwszym zakupie dowolnego pakietu</strong> },
-      //  { id: "p8", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
+        { id: "p6", content: "Wyróżniony profil specjalisty" },
+        { id: "p7", content: "Pierwszeństwo w dostępie do nowych funkcji" },
+        { id: "p8", content: <strong>Jednorazowy rabat 10% przy pierwszym zakupie dowolnego pakietu</strong> },
+      //  { id: "p9", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
       ],
       cta: `${t('pricing.choose_plan')} Zawodowiec`,
       popular: false
