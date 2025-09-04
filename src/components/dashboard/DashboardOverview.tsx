@@ -49,9 +49,9 @@ const DashboardOverview = () => {
       link: "/dashboard?tab=calendar"
     },
     {
-      title: "Cześc",
-      value: "",
-      description: "miło Cię widzieć",
+      title: "Cześć",
+      value: "miło Cię widzieć,
+      description: "tutaj możesz zarządzaj swoimi płatnościami",
       icon: <Crown className="h-4 w-4 text-muted-foreground" />,
       link: "/dashboard?tab=subscription"
     }
