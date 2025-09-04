@@ -50,8 +50,8 @@ const DashboardOverview = () => {
     },
     {
       title: "Cześć",
-      value: "miło Cię widzieć,
-      description: "tutaj możesz zarządzaj swoimi płatnościami",
+      value: "",
+      description: "miło Cię widzieć",
       icon: <Crown className="h-4 w-4 text-muted-foreground" />,
       link: "/dashboard?tab=subscription"
     }
