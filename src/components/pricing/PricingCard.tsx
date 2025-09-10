@@ -25,6 +25,7 @@ export interface PricingTierProps {
   cta: string;
   popular: boolean;
   billingPeriod: 'monthly' | 'yearly';
+  lowestPrice30Days?: string;
 }
 
 export default function PricingCard({
@@ -35,7 +36,8 @@ export default function PricingCard({
   features,
   cta,
   popular,
-  billingPeriod
+  billingPeriod,
+  lowestPrice30Days
 }: PricingTierProps) {
   const { t } = useTranslation();
   const { createCheckoutSession, isLoading: stripeLoading } = useStripePayment();
@@ -168,6 +170,13 @@ export default function PricingCard({
           </Button>
         )}
       </CardFooter>
+      {lowestPrice30Days && (
+        <div className="px-6 pb-4">
+          <p className="text-xs text-muted-foreground text-center">
+            {lowestPrice30Days}
+          </p>
+        </div>
+      )}
     </Card>
   );
 }

@@ -11,6 +11,7 @@ export interface PricingTier {
   features: PricingFeature[];
   cta: string;
   popular: boolean;
+  lowestPrice30Days?: string;
 }
 
 export const usePricingTiers = () => {
@@ -32,7 +33,8 @@ export const usePricingTiers = () => {
        // { id: "t7", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
       ],
       cta: t('pricing.start_free'),
-      popular: false
+      popular: false,
+      lowestPrice30Days: "Najniższa cena z ostatnich 30 dni: 0 zł"
     },
     {
       name: "Zaawansowany",
@@ -50,7 +52,8 @@ export const usePricingTiers = () => {
         //{ id: "a8", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
       ],
       cta: `${t('pricing.choose_plan')} Zaawansowany`,
-      popular: true
+      popular: true,
+      lowestPrice30Days: "Najniższa cena z ostatnich 30 dni: 49 zł/mies (490 zł/rok)"
     },
     {
       name: "Zawodowiec",
@@ -69,7 +72,8 @@ export const usePricingTiers = () => {
       //{ id: "p9", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
       ],
       cta: `${t('pricing.choose_plan')} Zawodowiec`,
-      popular: false
+      popular: false,
+      lowestPrice30Days: "Najniższa cena z ostatnich 30 dni: 99 zł/mies (990 zł/rok)"
     }
   ];
   
