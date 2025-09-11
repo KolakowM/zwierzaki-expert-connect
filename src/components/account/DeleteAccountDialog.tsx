@@ -48,7 +48,7 @@ export function DeleteAccountDialog({}: DeleteAccountDialogProps) {
               Usuń konto
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-xl">
             <DialogHeader>
               <DialogTitle>Usunięcie konta</DialogTitle>
               <DialogDescription>
