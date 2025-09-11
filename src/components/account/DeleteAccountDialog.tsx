@@ -33,7 +33,7 @@ export function DeleteAccountDialog({}: DeleteAccountDialogProps) {
   };
   
   return (
-    <Card className="mt-6 border-red-200" w-full>
+    <Card className="mt-6 border-red-200" >
       <CardHeader>
         <CardTitle className="text-red-600 my-[5px]">Muszę zakończyć współpracę</CardTitle>
         <CardDescription>
@@ -48,7 +48,7 @@ export function DeleteAccountDialog({}: DeleteAccountDialogProps) {
               Usuń konto
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-full">
             <DialogHeader>
               <DialogTitle>Usunięcie konta</DialogTitle>
               <DialogDescription>
