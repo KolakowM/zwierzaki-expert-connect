@@ -27,12 +27,14 @@ export default function AccountSettings() {
     accountForm,
     passwordForm,
     onAccountSubmit,
+    onPasswordSubmit,
     handleLogout,
+    handleDeleteAccount,
     isLoadingUserProfile
   } = useAccountSettings();
 
   // Get password settings hook
-  const { isSubmitting: isPasswordSubmitting, onPasswordSubmit } = usePasswordSettings();
+  const { isSubmitting: isPasswordSubmitting } = usePasswordSettings();
 
 // Available specializations
 const availableSpecializations = [{
@@ -126,14 +128,17 @@ const availableSpecializations = [{
   );
 
   // Handle password form submission
-  const handlePasswordSubmit = (values: any) => {
-    onPasswordSubmit(values, () => {
+  const handlePasswordSubmit = async (values: any) => {
+    try {
+      await onPasswordSubmit(values);
       passwordForm.reset({
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
       });
-    });
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   };
 
   if (!isAuthenticated) {
@@ -165,6 +170,7 @@ const availableSpecializations = [{
             onAccountSubmit={onAccountSubmit}
             handlePasswordSubmit={handlePasswordSubmit}
             handleLogout={handleLogout}
+            handleDeleteAccount={handleDeleteAccount}
             isPasswordSubmitting={isPasswordSubmitting}
             specialistProfile={specialistProfile}
             isLoadingProfile={isLoadingProfile}

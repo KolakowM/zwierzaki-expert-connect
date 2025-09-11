@@ -30,7 +30,7 @@ export type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 export function useAccountSettings() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout, refreshUserData } = useAuth();
+  const { user, isAuthenticated, logout, refreshUserData, updatePassword } = useAuth();
   const [activeTab, setActiveTab] = useState("general");
   const [specialistProfile, setSpecialistProfile] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -193,15 +193,82 @@ export function useAccountSettings() {
     }
   }
   
-  function handleLogout() {
-    logout();
-    toast({
-      title: "Konto usunięte",
-      description: "Twoje konto zostało usunięte. Przekierowujemy Cię do strony głównej.",
-      variant: "destructive"
-    });
-    navigate("/");
+  async function onPasswordSubmit(values: PasswordFormValues) {
+    try {
+      setIsSubmitting(true);
+      
+      // Użyj funkcji updatePassword z kontekstu Auth
+      const result = await updatePassword(values.newPassword);
+      
+      if (result !== true) {
+        throw new Error(result.error || "Błąd aktualizacji hasła");
+      }
+      
+      // Wyczyść formularz po pomyślnej aktualizacji
+      passwordForm.reset();
+      
+      toast({
+        title: "Hasło zaktualizowane",
+        description: "Twoje hasło zostało pomyślnie zmienione."
+      });
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      toast({
+        title: "Błąd aktualizacji hasła",
+        description: error.message || "Wystąpił błąd podczas zmiany hasła.",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
   }
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Wylogowano pomyślnie",
+        description: "Do zobaczenia wkrótce!",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Błąd wylogowania",
+        description: "Wystąpił problem podczas wylogowania. Spróbuj ponownie.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteAccount = async (password: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('delete-account', {
+        body: { password }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Konto zostało usunięte",
+        description: "Twoje konto i wszystkie dane zostały trwale usunięte.",
+      });
+      
+      // Navigate to home page after successful deletion
+      navigate("/");
+    } catch (error: any) {
+      console.error("Delete account error:", error);
+      toast({
+        title: "Błąd usuwania konta",
+        description: error.message || "Wystąpił problem podczas usuwania konta. Spróbuj ponownie.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
 
   return {
     user,
@@ -217,7 +284,9 @@ export function useAccountSettings() {
     accountForm,
     passwordForm,
     onAccountSubmit,
+    onPasswordSubmit,
     handleLogout,
+    handleDeleteAccount,
     userProfile,
     isLoadingUserProfile
   };

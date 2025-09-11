@@ -1,5 +1,5 @@
 
-project_id = "cfd3f4d1-d336-4d85-9e01-cd949eae4bc0"
+project_id = "wrftbhmnqrdogomhvomr"
 
 [api]
 enabled = true
@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.send-contact-email]
 verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = true
