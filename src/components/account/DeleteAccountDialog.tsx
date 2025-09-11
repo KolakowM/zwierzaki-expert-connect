@@ -80,12 +80,9 @@ export function DeleteAccountDialog({}: DeleteAccountDialogProps) {
             <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-700 text-sm">
               <p className="font-semibold mb-2">Zostaną usunięte:</p>
               <ul className="list-disc list-inside space-y-1">
-                <li>Profil użytkownika i specjalisty</li>
-                <li>Wszyscy klienci i ich dane</li>
-                <li>Wszystkie zwierzęta i ich dokumentacja</li>
-                <li>Historia wizyt i programy opieki</li>
-                <li>Zdjęcia i załączniki</li>
-                <li>Subskrypcje i dodatki</li>
+                <li>Profil użytkownika i specjalisty; Wszyscy klienci i ich dane</li>
+                <li>Wszystkie zwierzęta i ich dokumentacja; Historia wizyt i programy opieki</li>
+                <li>Zdjęcia i załączniki; Subskrypcje i dodatki</li>
               </ul>
             </div>
 
