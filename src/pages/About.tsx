@@ -27,14 +27,14 @@ export default function About() {
               <p>
                 Platforma PetsFlow została stworzona z myślą o:
               </p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Lekarzach weterynarii</li>
+              <ul className="list-disc pl-6 space-y-2">                
                 <li>Zoodietetykach</li>
                 <li>Fizjoterapeutach zwierzęcych</li>
                 <li>Behawiorystach zwierzęcych</li>                
-                <li>Trenerach zwierząt</li>                
-                <li>Innych specjalistach opiekujących się zwierzętami</li>
+                <li>Trenerach zwierząt</li>  
                 <li>Opiekunach zwierząt domowych</li>
+                <li>Lekarzach i techników weterynarii</li>
+                <li>Innych specjalistach opiekujących się zwierzętami</li>
               </ul>
             </div>
 
