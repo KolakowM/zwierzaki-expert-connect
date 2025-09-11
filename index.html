@@ -32,7 +32,23 @@
     <script type="module" src="/src/main.tsx"></script>
 
   <!-- Google reCAPTCHA v3 -->
-        <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+  <script>
+    // Load reCAPTCHA dynamically with environment-specific site key
+    (function() {
+      const siteKey = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI' // Test key for development
+        : 'YOUR_PRODUCTION_SITE_KEY'; // Replace with your production key
+      
+      const script = document.createElement('script');
+      script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+      
+      // Store site key globally for components to use
+      window.RECAPTCHA_SITE_KEY = siteKey;
+    })();
+  </script>
         
         <!--- analiza użytkowników , skrypt clarity.microsoft -->
         <script type="text/javascript">

@@ -36,10 +36,8 @@ const Register = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   
-  // reCAPTCHA configuration - replace with your site key
-  const RECAPTCHA_SITE_KEY = "6LciKcYrAAAAAO9ABJ4NhXhKVfUzajQpZDPPcilU"; // Test key - replace with real one
+  // reCAPTCHA is now loaded dynamically and site key is available globally
   const { executeRecaptcha, isReady: isRecaptchaReady, error: recaptchaError } = useRecaptcha({
-    siteKey: RECAPTCHA_SITE_KEY,
     action: 'register'
   });
   

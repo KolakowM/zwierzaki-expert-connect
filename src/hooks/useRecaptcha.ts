@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 interface RecaptchaConfig {
-  siteKey: string;
+  siteKey?: string; // Made optional since we'll get it from window
   action: string;
 }
 
@@ -16,14 +16,19 @@ export const useRecaptcha = (config: RecaptchaConfig): UseRecaptchaReturn => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 50; // Max 5 seconds of retries
+    
     const loadRecaptcha = () => {
-      if (typeof window !== 'undefined' && window.grecaptcha) {
+      if (typeof window !== 'undefined' && window.grecaptcha && window.RECAPTCHA_SITE_KEY) {
         window.grecaptcha.ready(() => {
           setIsReady(true);
         });
-      } else {
-        // Retry after a short delay if grecaptcha is not available yet
+      } else if (retryCount < maxRetries) {
+        retryCount++;
         setTimeout(loadRecaptcha, 100);
+      } else {
+        setError('reCAPTCHA nie mogła zostać załadowana w wymaganym czasie');
       }
     };
 
@@ -31,12 +36,12 @@ export const useRecaptcha = (config: RecaptchaConfig): UseRecaptchaReturn => {
   }, []);
 
   const executeRecaptcha = useCallback(async (): Promise<string> => {
-    if (!isReady || !window.grecaptcha) {
+    if (!isReady || !window.grecaptcha || !window.RECAPTCHA_SITE_KEY) {
       throw new Error('reCAPTCHA nie jest gotowe');
     }
 
     try {
-      const token = await window.grecaptcha.execute(config.siteKey, { 
+      const token = await window.grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { 
         action: config.action 
       });
       
@@ -50,7 +55,7 @@ export const useRecaptcha = (config: RecaptchaConfig): UseRecaptchaReturn => {
       setError(errorMessage);
       throw new Error(errorMessage);
     }
-  }, [isReady, config.siteKey, config.action]);
+  }, [isReady, config.action]);
 
   return {
     executeRecaptcha,
@@ -66,5 +71,6 @@ declare global {
       ready: (callback: () => void) => void;
       execute: (siteKey: string, options: { action: string }) => Promise<string>;
     };
+    RECAPTCHA_SITE_KEY: string;
   }
 }

@@ -9,6 +9,7 @@ const corsHeaders = {
 interface RecaptchaVerificationRequest {
   token: string;
   action?: string;
+  expectedHostname?: string;
 }
 
 interface RecaptchaResponse {
@@ -27,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { token, action = 'register' }: RecaptchaVerificationRequest = await req.json();
+    const { token, action = 'register', expectedHostname }: RecaptchaVerificationRequest = await req.json();
     
     if (!token) {
       return new Response(
@@ -72,6 +73,8 @@ serve(async (req) => {
       success: recaptchaResult.success,
       score: recaptchaResult.score,
       action: recaptchaResult.action,
+      hostname: recaptchaResult.hostname,
+      challenge_ts: recaptchaResult.challenge_ts,
       errors: recaptchaResult['error-codes']
     });
 
@@ -90,10 +93,43 @@ serve(async (req) => {
       );
     }
 
+    // Validate hostname (domain verification)
+    const allowedHostnames = ['localhost', '127.0.0.1', 'your-domain.com']; // Add your production domain
+    if (expectedHostname && recaptchaResult.hostname !== expectedHostname) {
+      console.warn(`Hostname mismatch: expected ${expectedHostname}, got ${recaptchaResult.hostname}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Nieprawidłowa domena żądania'
+        }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate challenge timestamp (not older than 5 minutes)
+    const challengeTime = new Date(recaptchaResult.challenge_ts);
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    if (challengeTime < fiveMinutesAgo) {
+      console.warn(`Challenge too old: ${recaptchaResult.challenge_ts}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Token reCAPTCHA wygasł. Spróbuj ponownie.'
+        }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     // Check score (0.0 = bot, 1.0 = human)
     const minScore = 0.5;
     if (recaptchaResult.score < minScore) {
-      console.log(`reCAPTCHA score too low: ${recaptchaResult.score} < ${minScore}`);
+      console.warn(`reCAPTCHA score too low: ${recaptchaResult.score} < ${minScore} for hostname: ${recaptchaResult.hostname}`);
       return new Response(
         JSON.stringify({ 
           success: false, 
