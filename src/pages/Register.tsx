@@ -15,6 +15,8 @@ import AuthLoadingScreen from "@/components/auth/AuthLoadingScreen";
 import PasswordRequirements, { validatePassword } from "@/components/auth/PasswordRequirements";
 import RegistrationSuccess from "@/components/auth/RegistrationSuccess";
 import { getAuthErrorMessage } from "@/utils/authErrorHandler";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -33,6 +35,13 @@ const Register = () => {
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  
+  // reCAPTCHA configuration - replace with your site key
+  const RECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Test key - replace with real one
+  const { executeRecaptcha, isReady: isRecaptchaReady, error: recaptchaError } = useRecaptcha({
+    siteKey: RECAPTCHA_SITE_KEY,
+    action: 'register'
+  });
   
   const passwordValidation = validatePassword(formData.password);
   
@@ -64,6 +73,33 @@ const Register = () => {
     setIsLoading(true);
     
     try {
+      // Execute reCAPTCHA verification
+      let recaptchaToken = '';
+      try {
+        recaptchaToken = await executeRecaptcha();
+      } catch (recaptchaErr) {
+        console.error('reCAPTCHA error:', recaptchaErr);
+        setError('Weryfikacja bezpieczeństwa nie powiodła się. Spróbuj ponownie.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Verify reCAPTCHA token with server
+      const { data: verificationResult, error: verificationError } = await supabase.functions.invoke('verify-recaptcha', {
+        body: { 
+          token: recaptchaToken,
+          action: 'register'
+        }
+      });
+
+      if (verificationError || !verificationResult?.success) {
+        console.error('reCAPTCHA verification failed:', verificationError || verificationResult);
+        setError(verificationResult?.error || 'Weryfikacja bezpieczeństwa nie powiodła się. Spróbuj ponownie.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Proceed with registration
       const result = await register(
         formData.email, 
         formData.password,
@@ -119,6 +155,18 @@ const Register = () => {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <AuthFormError error={error} />
+          
+          {recaptchaError && (
+            <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
+              Błąd reCAPTCHA: {recaptchaError}
+            </div>
+          )}
+          
+          {!isRecaptchaReady && (
+            <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+              Ładowanie weryfikacji bezpieczeństwa...
+            </div>
+          )}
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -210,7 +258,7 @@ const Register = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={isLoading || !passwordValidation.isValid}
+            disabled={isLoading || !passwordValidation.isValid || !isRecaptchaReady}
           >
             {isLoading ? t('common.loading') : t('auth.register_title')}
           </Button>
