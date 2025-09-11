@@ -56,6 +56,27 @@ export function DeleteAccountDialog({}: DeleteAccountDialogProps) {
               </DialogDescription>
             </DialogHeader>
             
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4 text-blue-700 text-sm mb-4">
+              <div className="flex items-start gap-2">
+                <div className="mt-0.5">🛡️</div>
+                <div>
+                  <p className="font-semibold mb-2">Dlaczego proces jest manualny?</p>
+                  <p>Dla zachowania maksymalnego bezpieczeństwa i pewności procesu, usuwanie kont obsługujemy ręcznie. Chroni to Cię przed przypadkowym usunięciem wszystkich danych i pozwala nam upewnić się, że to rzeczywiście Twoja decyzja.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-md p-4 text-green-700 text-sm mb-4">
+              <div className="flex items-start gap-2">
+                <div className="mt-0.5">⏰</div>
+                <div>
+                  <p className="font-semibold mb-2">Czas odpowiedzi</p>
+                  <p><strong>Administrator skontaktuje się z Tobą w przeciągu 24-48 godzin</strong> aby poinformować o procesie usunięcia konta.</p>
+                  <p className="mt-2">W tym czasie możesz zrezygnować z usunięcia konta - wystarczy odpowiedzieć na maila administratora.</p>
+                </div>
+              </div>
+            </div>
+            
             <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-700 text-sm">
               <p className="font-semibold mb-2">Zostaną usunięte:</p>
               <ul className="list-disc list-inside space-y-1">
