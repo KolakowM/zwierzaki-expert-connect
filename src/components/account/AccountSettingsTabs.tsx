@@ -21,7 +21,6 @@ interface AccountSettingsTabsProps {
   onAccountSubmit: (values: any) => void;
   handlePasswordSubmit: (values: any) => void;
   handleLogout: () => void;
-  handleDeleteAccount: (password: string) => Promise<void>;
   isPasswordSubmitting: boolean;
   specialistProfile: any;
   isLoadingProfile: boolean;
@@ -52,7 +51,7 @@ export function AccountSettingsTabs({
   onAccountSubmit,
   handlePasswordSubmit,
   handleLogout,
-  handleDeleteAccount,
+  onPhotoChange,
   isPasswordSubmitting,
   specialistProfile,
   isLoadingProfile,
@@ -72,12 +71,9 @@ export function AccountSettingsTabs({
   updateEducation,
   removeEducation,
   addEducation,
-  onPhotoChange
 }: AccountSettingsTabsProps) {
   const { toast } = useToast();
   
-  // Debug logging
-  console.log("AccountSettingsTabs: Rendered with handleDeleteAccount:", !!handleDeleteAccount);
 
   const getTabErrors = (formName: string) => {
     switch (formName) {
@@ -177,7 +173,7 @@ export function AccountSettingsTabs({
         </Form>
         
         <div className="mt-6">
-          <DeleteAccountDialog onDeleteAccount={handleDeleteAccount} />
+          <DeleteAccountDialog />
         </div>
       </TabsContent>
       

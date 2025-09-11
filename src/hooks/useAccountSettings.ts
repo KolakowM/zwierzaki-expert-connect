@@ -293,7 +293,6 @@ export function useAccountSettings() {
     onAccountSubmit,
     onPasswordSubmit,
     handleLogout,
-    handleDeleteAccount,
     userProfile,
     isLoadingUserProfile
   };

@@ -29,7 +29,6 @@ export default function AccountSettings() {
     onAccountSubmit,
     onPasswordSubmit,
     handleLogout,
-    handleDeleteAccount,
     isLoadingUserProfile
   } = useAccountSettings();
 
@@ -170,7 +169,6 @@ const availableSpecializations = [{
             onAccountSubmit={onAccountSubmit}
             handlePasswordSubmit={handlePasswordSubmit}
             handleLogout={handleLogout}
-            handleDeleteAccount={handleDeleteAccount}
             isPasswordSubmitting={isPasswordSubmitting}
             specialistProfile={specialistProfile}
             isLoadingProfile={isLoadingProfile}
