@@ -33,7 +33,7 @@ export function DeleteAccountDialog({}: DeleteAccountDialogProps) {
   };
   
   return (
-    <Card className="mt-6 border-red-200">
+    <Card className="mt-6 border-red-200" w-full>
       <CardHeader>
         <CardTitle className="text-red-600 my-[5px]">Muszę zakończyć współpracę</CardTitle>
         <CardDescription>
