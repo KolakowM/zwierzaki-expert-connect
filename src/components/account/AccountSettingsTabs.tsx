@@ -75,6 +75,9 @@ export function AccountSettingsTabs({
   onPhotoChange
 }: AccountSettingsTabsProps) {
   const { toast } = useToast();
+  
+  // Debug logging
+  console.log("AccountSettingsTabs: Rendered with handleDeleteAccount:", !!handleDeleteAccount);
 
   const getTabErrors = (formName: string) => {
     switch (formName) {

@@ -13,20 +13,27 @@ interface DeleteAccountDialogProps {
 }
 
 export function DeleteAccountDialog({ onDeleteAccount }: DeleteAccountDialogProps) {
+  console.log("DeleteAccountDialog: Rendered with onDeleteAccount:", !!onDeleteAccount);
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  console.log("DeleteAccountDialog: Current state - open:", open, "password length:", password.length);
+
   const handleDelete = async () => {
+    console.log("DeleteAccountDialog: handleDelete called");
     if (!password.trim()) {
+      console.log("DeleteAccountDialog: No password provided");
       return;
     }
     
     try {
       setIsDeleting(true);
+      console.log("DeleteAccountDialog: Calling onDeleteAccount with password");
       await onDeleteAccount(password);
       setOpen(false);
     } catch (error) {
+      console.error("DeleteAccountDialog: Error during deletion:", error);
       // Error is handled by the parent component
     } finally {
       setIsDeleting(false);
@@ -48,9 +55,16 @@ export function DeleteAccountDialog({ onDeleteAccount }: DeleteAccountDialogProp
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Dialog open={open} onOpenChange={handleClose}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="destructive">
+            <Button 
+              variant="destructive"
+              onClick={() => {
+                console.log("DeleteAccountDialog: Button clicked, current open state:", open);
+                console.log("DeleteAccountDialog: Setting open to true");
+                setOpen(true);
+              }}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Usuń konto
             </Button>

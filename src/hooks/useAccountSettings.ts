@@ -243,24 +243,31 @@ export function useAccountSettings() {
   };
 
   const handleDeleteAccount = async (password: string) => {
+    console.log("useAccountSettings: handleDeleteAccount called with password length:", password.length);
     try {
+      console.log("useAccountSettings: Calling supabase function delete-account");
       const { error } = await supabase.functions.invoke('delete-account', {
         body: { password }
       });
+      
+      console.log("useAccountSettings: Function response - error:", error);
 
       if (error) {
+        console.error("useAccountSettings: Supabase function error:", error);
         throw error;
       }
 
+      console.log("useAccountSettings: Account deletion successful");
       toast({
         title: "Konto zostało usunięte",
         description: "Twoje konto i wszystkie dane zostały trwale usunięte.",
       });
       
+      console.log("useAccountSettings: Navigating to home page");
       // Navigate to home page after successful deletion
       navigate("/");
     } catch (error: any) {
-      console.error("Delete account error:", error);
+      console.error("useAccountSettings: Delete account error:", error);
       toast({
         title: "Błąd usuwania konta",
         description: error.message || "Wystąpił problem podczas usuwania konta. Spróbuj ponownie.",
