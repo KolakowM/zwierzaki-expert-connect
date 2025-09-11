@@ -37,7 +37,7 @@ const Register = () => {
   const { t } = useTranslation();
   
   // reCAPTCHA configuration - replace with your site key
-  const RECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Test key - replace with real one
+  const RECAPTCHA_SITE_KEY = "6LciKcYrAAAAAO9ABJ4NhXhKVfUzajQpZDPPcilU"; // Test key - replace with real one
   const { executeRecaptcha, isReady: isRecaptchaReady, error: recaptchaError } = useRecaptcha({
     siteKey: RECAPTCHA_SITE_KEY,
     action: 'register'
