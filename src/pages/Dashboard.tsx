@@ -112,7 +112,7 @@ const Dashboard = () => {
     <MainLayout>
       <div className="container py-8">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Panel Specjalisty</h1>
+          <h1 className="text-3xl font-bold">Pulpit</h1>
           <div className="flex items-center gap-4">
             <UserMenu 
               firstName={user?.firstName} 

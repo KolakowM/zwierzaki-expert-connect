@@ -66,7 +66,7 @@ src/
 - **Rejestracja** (`/register`) - Formularz rejestracji
 - **Resetowanie hasła** (`/forgot-password`, `/reset-password`)
 
-#### Panel Specjalisty (chronione):
+#### Pulpit Specjalisty (chronione):
 - **Dashboard** (`/dashboard`) - Panel główny z zakładkami i statystykami
 - **Klienci** (`/clients`) - Zarządzanie klientami z wyszukiwaniem
 - **Szczegóły Klienta** (`/clients/:id`) - Profil klienta z zakładkami
@@ -140,7 +140,7 @@ src/
 - Featured specialists - priorytetowe wyświetlanie
 - Weryfikacja profili przez administratorów
 
-### 3.4 Panel Specjalisty (Dashboard)
+### 3.4 Pulpit Specjalisty (Dashboard)
 
 #### 3.4.1 Przegląd
 - Statystyki: liczba klientów, zwierząt, wizyt

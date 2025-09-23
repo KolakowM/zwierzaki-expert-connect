@@ -114,7 +114,7 @@ const UserMenu = ({ firstName, lastName, onLogout, photoUrl }: UserMenuProps) =>
                   >
                     <div className="flex items-center gap-2">
                       <Settings className="h-4 w-4" />
-                      <div className="text-sm font-medium leading-none">Panel specjalisty</div>
+                      <div className="text-sm font-medium leading-none">Pulpit</div>
                     </div>
                   </NavigationMenuLink>
                 </Link>

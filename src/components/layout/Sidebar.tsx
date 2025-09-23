@@ -29,7 +29,7 @@ const Sidebar = ({ className }: SidebarProps) => {
       <div className="space-y-4 py-4 flex-1">
         <div className="px-4 py-2">
           <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
-            Panel Specjalisty
+            Pulpit
           </h2>
           <div className="space-y-1">
             <Button 
