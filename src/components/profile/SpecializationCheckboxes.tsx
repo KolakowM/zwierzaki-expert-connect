@@ -56,7 +56,7 @@ export function SpecializationCheckboxes({ form, maxAllowed, currentCount }: Spe
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {specializations.map((specialization) => {
               const currentSpecializations = form.getValues('specializations') || [];
-              const isSelected = currentSpecializations.includes(specialization.code);
+              const isSelected = currentSpecializations.includes(specialization.id);
               const wouldExceedLimit = !isSelected && currentCount >= maxAllowed;
               
               return (
@@ -72,15 +72,15 @@ export function SpecializationCheckboxes({ form, maxAllowed, currentCount }: Spe
                       >
                         <FormControl>
                           <Checkbox
-                            checked={field.value?.includes(specialization.code)}
+                            checked={field.value?.includes(specialization.id)}
                             disabled={wouldExceedLimit}
                             onCheckedChange={(checked) => {
                               const currentValue = field.value || [];
                               return checked
-                                ? field.onChange([...currentValue, specialization.code])
+                                ? field.onChange([...currentValue, specialization.id])
                                 : field.onChange(
                                     currentValue?.filter(
-                                      (value: string) => value !== specialization.code
+                                      (value: string) => value !== specialization.id
                                     )
                                   )
                             }}
