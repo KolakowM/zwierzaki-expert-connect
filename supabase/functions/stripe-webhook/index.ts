@@ -103,8 +103,7 @@ serve(async (req) => {
               const { error: roleUpdateErr } = await supabase
                 .from('user_roles')
                 .update({
-                  status: 'zweryfikowany',
-                  updated_at: new Date().toISOString()
+                  status: 'zweryfikowany'
                 })
                 .eq('user_id', userId)
                 .eq('role', 'specialist');
@@ -346,8 +345,7 @@ serve(async (req) => {
                 const { error: roleRevertErr } = await supabase
                   .from('user_roles')
                   .update({
-                    status: 'niezweryfikowany',
-                    updated_at: new Date().toISOString()
+                    status: 'niezweryfikowany'
                   })
                   .eq('user_id', subscriber.user_id)
                   .eq('role', 'specialist');
