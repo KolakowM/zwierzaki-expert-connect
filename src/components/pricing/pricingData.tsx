@@ -47,7 +47,7 @@ export const usePricingTiers = () => {
         { id: "a3", content: "Do 25 klientów" },
         { id: "a4", content: "Do 40 zwierząt" },
         { id: "a5", content: "Do 3 specjalizacji i 6 usług" },
-        //{ id: "a6", content: "Pełny profil specjalisty" },
+        { id: "a6", content: "Pomoc w przeniesieniu obecnej bazy klientów na platformę" },
         { id: "a7", content: <strong>Jednorazowy rabat 10% przy pierwszym zakupie dowolnego pakietu</strong> },
         //{ id: "a8", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
       ],
@@ -66,7 +66,7 @@ export const usePricingTiers = () => {
         { id: "p3", content: "Do 50 klientów" },
         { id: "p4", content: "Do 75 zwierząt" },
         { id: "p5", content: "Wszystkie specjalizacje i 15 usług" },
-        //{ id: "p6", content: "Wyróżniony profil specjalisty" },
+        { id: "p6", content: "Pomoc w przeniesieniu obecnej bazy klientów na platformę" },
         { id: "p7", content: "Pierwszeństwo w dostępie do nowych funkcji" },
         { id: "p8", content: <strong>Jednorazowy rabat 10% przy pierwszym zakupie dowolnego pakietu</strong> },
       //{ id: "p9", content: "Możliwość rozbudowy limitu CRM (+15 zł/mies za dodatkowe 10 klientów i 10 zwierząt) - dostępne wkrótce" }
