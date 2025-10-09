@@ -86,6 +86,72 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          meta_description: string | null
+          published_at: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          meta_description?: string | null
+          published_at?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          meta_description?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
+      blog_settings: {
+        Row: {
+          id: string
+          posts_per_page: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          posts_per_page?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          posts_per_page?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       care_programs: {
         Row: {
           createdat: string
@@ -900,11 +966,8 @@ export type Database = {
         Returns: {
           can_perform_action: boolean
           current_count: number
-          error_message: string
-          is_at_soft_limit: boolean
           max_allowed: number
           package_name: string
-          usage_percentage: number
         }[]
       }
       get_catalog_data: {

@@ -38,6 +38,9 @@ import AdminVisits from './pages/admin/AdminVisits';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCarePrograms from './pages/admin/AdminCarePrograms';
+import AdminBlog from './pages/admin/AdminBlog';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 
 // Create a client with better error handling
 const queryClient = new QueryClient({
@@ -73,6 +76,8 @@ function App() {
                 <Route path="/catalog" element={<Catalog />} />
                 <Route path="/specialist/:id" element={<SpecialistProfile />} />
                 <Route path="/become-specialist" element={<BecomeSpecialist />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
                 
                 {/* Protected routes */}
                 <Route path="/dashboard" element={
@@ -121,6 +126,7 @@ function App() {
                   <Route path="clients" element={<AdminClients />} />
                   <Route path="pets" element={<AdminPets />} />
                   <Route path="visits" element={<AdminVisits />} />
+                  <Route path="blog" element={<AdminBlog />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="care-programs" element={<AdminCarePrograms />} />

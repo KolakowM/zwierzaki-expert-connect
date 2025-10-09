@@ -64,6 +64,14 @@ export default function Footer() {
                   {t("footer.become_specialist")}
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/blog"
+                  className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+                >
+                  {t("footer.blog")}
+                </Link>
+              </li>
             </ul>
           </nav>
 
