@@ -41,7 +41,12 @@ export const checkPackageLimits = async (userId: string, actionType: ActionType,
     throw error;
   }
   
-  return data && data.length > 0 ? data[0] : null;
+  if (data && data.length > 0) {
+    const result = data[0] as PackageLimits;
+    return result;
+  }
+  
+  return null;
 };
 
 export const getUserUsageStats = async (userId: string): Promise<UsageStats | null> => {

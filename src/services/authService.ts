@@ -92,6 +92,23 @@ const clearUserCache = () => {
   cacheTimestamp = 0;
 };
 
+export const refreshSession = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    
+    // Clear cache on refresh
+    clearUserCache();
+    
+    if (error || !data?.session) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error refreshing session:', error);
+    return false;
+  }
+};
+
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
   // Check cache first
   const now = Date.now();
@@ -182,23 +199,6 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
   })();
 
   return await pendingUserFetch;
-};
-
-export const refreshSession = async (): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase.auth.refreshSession();
-    
-    // Clear cache on refresh
-    clearUserCache();
-    
-    if (error || !data?.session) {
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Error refreshing session:', error);
-    return false;
-  }
 };
 
 export const resetPassword = async (email: string) => {
