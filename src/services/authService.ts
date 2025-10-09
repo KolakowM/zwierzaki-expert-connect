@@ -33,6 +33,9 @@ const CACHE_TTL = 20000; // Reduced to 20 seconds for better responsiveness
 let pendingUserFetch: Promise<AuthUser | null> | null = null;
 
 export const signIn = async ({ email, password }: SignInCredentials) => {
+  // Clear cache BEFORE signing in to ensure fresh data
+  clearUserCache();
+  
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -42,8 +45,6 @@ export const signIn = async ({ email, password }: SignInCredentials) => {
     throw error;
   }
 
-  // Update cache when signing in
-  clearUserCache();
   return data.user;
 };
 

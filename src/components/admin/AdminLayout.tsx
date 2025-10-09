@@ -10,7 +10,7 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const { isAuthenticated, isLoading, verifySession, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, verifySession, isAdmin, refreshUserData, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [authChecked, setAuthChecked] = useState(false);
@@ -30,6 +30,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           return;
         }
         
+        // Force refresh user data to get latest role from database
+        await refreshUserData();
+        
+        console.log('Admin check:', { 
+          userEmail: user?.email, 
+          userRole: user?.role, 
+          isAdminResult: isAdmin() 
+        });
+        
         // Additional check for admin access
         if (!isAdmin()) {
           toast({
@@ -46,7 +55,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     };
     
     checkAuth();
-  }, [verifySession, navigate, toast, isAdmin]);
+  }, [verifySession, navigate, toast, isAdmin, refreshUserData, user]);
 
   if (isLoading || !authChecked) {
     return <div className="flex h-screen items-center justify-center">
