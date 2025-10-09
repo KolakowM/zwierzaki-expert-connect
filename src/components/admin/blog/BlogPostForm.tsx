@@ -60,6 +60,12 @@ export function BlogPostForm({ post, onSubmit, onCancel, isLoading }: BlogPostFo
     },
   });
 
+  // Watch fields for character counter
+  const titleValue = form.watch("title");
+  const slugValue = form.watch("slug");
+  const excerptValue = form.watch("excerpt");
+  const metaDescriptionValue = form.watch("meta_description");
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -98,6 +104,11 @@ export function BlogPostForm({ post, onSubmit, onCancel, isLoading }: BlogPostFo
                   onChange={(e) => handleTitleChange(e.target.value)}
                 />
               </FormControl>
+              <FormDescription>
+                <span className={titleValue?.length > 200 ? "text-destructive" : ""}>
+                  {titleValue?.length || 0} / 200 znaków
+                </span>
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -113,7 +124,10 @@ export function BlogPostForm({ post, onSubmit, onCancel, isLoading }: BlogPostFo
                 <Input placeholder="slug-artykulu" {...field} />
               </FormControl>
               <FormDescription>
-                Używany w adresie URL artykułu. Tylko małe litery, cyfry i myślniki.
+                <div>Używany w adresie URL artykułu. Tylko małe litery, cyfry i myślniki.</div>
+                <span className={slugValue?.length > 200 ? "text-destructive" : ""}>
+                  {slugValue?.length || 0} / 200 znaków
+                </span>
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -133,7 +147,11 @@ export function BlogPostForm({ post, onSubmit, onCancel, isLoading }: BlogPostFo
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Maksymalnie 500 znaków</FormDescription>
+              <FormDescription>
+                <span className={excerptValue?.length > 500 ? "text-destructive" : ""}>
+                  {excerptValue?.length || 0} / 500 znaków
+                </span>
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -187,7 +205,11 @@ export function BlogPostForm({ post, onSubmit, onCancel, isLoading }: BlogPostFo
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Maksymalnie 160 znaków</FormDescription>
+              <FormDescription>
+                <span className={metaDescriptionValue?.length > 160 ? "text-destructive" : ""}>
+                  {metaDescriptionValue?.length || 0} / 160 znaków
+                </span>
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

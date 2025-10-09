@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthProvider";
+import { useNavigate } from "react-router-dom";
 import { BlogPostTable } from "@/components/admin/blog/BlogPostTable";
 import { BlogPostFormDialog } from "@/components/admin/blog/BlogPostFormDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import { BlogPost, BlogPostFormData } from "@/types/blog";
-import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,10 +23,31 @@ import {
 export default function AdminBlog() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isAdmin, verifySession } = useAuth();
+  const [authChecked, setAuthChecked] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BlogPost | undefined>();
   const [postToDelete, setPostToDelete] = useState<BlogPost | undefined>();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifySession();
+      if (!isValid) {
+        navigate("/login");
+        return;
+      }
+      
+      const adminStatus = await isAdmin();
+      if (!adminStatus) {
+        navigate("/dashboard");
+        return;
+      }
+      
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, [verifySession, isAdmin, navigate]);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["admin-blog-posts"],
@@ -143,59 +164,79 @@ export default function AdminBlog() {
     setFormOpen(true);
   };
 
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">Sprawdzanie uprawnień...</div>
+      </div>
+    );
+  }
+
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Blog</h1>
-            <p className="text-muted-foreground">Zarządzaj artykułami na blogu</p>
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/admin/dashboard")}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">Blog</h1>
+            <p className="text-sm text-muted-foreground">Zarządzaj artykułami na blogu</p>
           </div>
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
             Nowy artykuł
           </Button>
         </div>
+      </header>
 
-        {isLoading ? (
-          <div className="text-center py-12">Ładowanie...</div>
-        ) : (
-          <BlogPostTable
-            posts={posts}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onView={handleView}
+      <main className="container mx-auto px-4 py-6">
+        <div className="space-y-6">
+
+          {isLoading ? (
+            <div className="text-center py-12">Ładowanie...</div>
+          ) : (
+            <BlogPostTable
+              posts={posts}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+            />
+          )}
+
+          <BlogPostFormDialog
+            open={formOpen}
+            onOpenChange={setFormOpen}
+            post={selectedPost}
+            onSubmit={handleSubmit}
+            isLoading={createMutation.isPending || updateMutation.isPending}
           />
-        )}
 
-        <BlogPostFormDialog
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          post={selectedPost}
-          onSubmit={handleSubmit}
-          isLoading={createMutation.isPending || updateMutation.isPending}
-        />
-
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Czy na pewno chcesz usunąć ten artykuł?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Ta operacja jest nieodwracalna. Artykuł "{postToDelete?.title}" zostanie trwale usunięty.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Anuluj</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => postToDelete && deleteMutation.mutate(postToDelete.id)}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                Usuń
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </AdminLayout>
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Czy na pewno chcesz usunąć ten artykuł?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Ta operacja jest nieodwracalna. Artykuł "{postToDelete?.title}" zostanie trwale usunięty.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => postToDelete && deleteMutation.mutate(postToDelete.id)}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  Usuń
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </main>
+    </div>
   );
 }
