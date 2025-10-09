@@ -30,17 +30,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           return;
         }
         
-        // Force refresh user data to get latest role from database
-        await refreshUserData();
+        // Bezpośrednie sprawdzenie roli w bazie danych
+        const adminStatus = await isAdmin();
         
         console.log('Admin check:', { 
           userEmail: user?.email, 
           userRole: user?.role, 
-          isAdminResult: isAdmin() 
+          isAdminFromDB: adminStatus 
         });
         
         // Additional check for admin access
-        if (!isAdmin()) {
+        if (!adminStatus) {
           toast({
             title: "Brak uprawnień",
             description: "Tylko administratorzy mają dostęp do tego obszaru",

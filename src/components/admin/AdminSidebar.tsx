@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthProvider";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,15 @@ interface SidebarItemProps {
 
 const AdminSidebar = () => {
   const { isAdmin } = useAuth();
+  const [isAdminUser, setIsAdminUser] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const adminStatus = await isAdmin();
+      setIsAdminUser(adminStatus);
+    };
+    checkAdminStatus();
+  }, [isAdmin]);
 
   const sidebarItems: SidebarItemProps[] = [
     {
@@ -86,7 +95,7 @@ const AdminSidebar = () => {
       </div>
       <nav className="flex-1 px-2 space-y-1">
         {sidebarItems.map((item) => {
-          if (item.admin && !isAdmin()) {
+          if (item.admin && !isAdminUser) {
             return null;
           }
 

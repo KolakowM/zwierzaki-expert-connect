@@ -159,8 +159,17 @@ export function useAuthMethods({ user, setUser, setIsLoading }: AuthMethodsParam
     }
   }, [setUser, setIsLoading]);
 
-  const isAdmin = useCallback(() => {
-    return user?.role === 'admin';
+  const isAdmin = useCallback(async () => {
+    if (!user?.id) return false;
+    
+    // Bezpośrednie sprawdzenie w bazie danych zamiast polegania na cache
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+    
+    return data?.role === 'admin';
   }, [user]);
 
   return {

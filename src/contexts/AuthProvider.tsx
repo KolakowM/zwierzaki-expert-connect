@@ -16,7 +16,7 @@ interface AuthContextType {
   updatePassword: (password: string) => Promise<any>;
   verifySession: () => Promise<boolean>;
   refreshUserData: () => Promise<any>;
-  isAdmin: () => boolean;
+  isAdmin: () => Promise<boolean>;
   subscriptionStatus: any;
   refreshSubscriptionStatus: () => Promise<void>;
 }
