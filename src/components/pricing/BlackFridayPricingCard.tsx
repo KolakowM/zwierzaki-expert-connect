@@ -26,9 +26,9 @@ const BlackFridayPricingCard = () => {
   return (
     <div className="relative">
       {/* Glow effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary rounded-lg blur-lg opacity-30 animate-pulse" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary rounded-lg blur-lg opacity-20 animate-pulse" />
       
-      <Card className="relative border-2 border-primary shadow-2xl overflow-hidden">
+      <Card className="relative border-2 border-primary shadow-lg overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5" />
         
@@ -41,89 +41,76 @@ const BlackFridayPricingCard = () => {
           </div>
         </div>
 
-        <CardHeader className="relative space-y-4 pb-8">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <CardTitle className="text-3xl font-bold">
+        <div className="relative grid md:grid-cols-[2fr,3fr] gap-4 md:gap-6 p-4 md:p-6">
+          {/* Left column - Main info and CTA */}
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <h3 className="text-xl md:text-2xl font-bold tracking-tight">
                 Pakiet Zaawansowany
-              </CardTitle>
-              <CardDescription className="text-base">
+              </h3>
+              <p className="text-sm text-muted-foreground">
                 Oferta specjalna Black Friday
-              </CardDescription>
+              </p>
             </div>
-          </div>
 
-          {/* Price section */}
-          <div className="space-y-2">
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold text-primary">0 PLN</span>
-              <span className="text-muted-foreground line-through text-xl">99 PLN/mies</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-sm">
+            {/* Price section */}
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl md:text-4xl font-bold text-primary">0 PLN</span>
+                <span className="text-muted-foreground line-through text-base">99 PLN/mies</span>
+              </div>
+              <Badge variant="secondary" className="text-xs">
                 <Zap className="h-3 w-3 mr-1" />
                 Oszczędzasz 297 PLN
               </Badge>
             </div>
-          </div>
 
-          {/* Countdown */}
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium">Oferta kończy się za:</span>
-              </div>
-              <span className="text-lg font-mono font-bold text-primary tabular-nums">
-                {days}d {String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-              </span>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="relative space-y-6">
-          <div className="space-y-3">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                  <Check className="h-3 w-3 text-primary" />
+            {/* Countdown */}
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-medium">Kończy się za:</span>
                 </div>
-                <span className="text-sm">{feature}</span>
+                <span className="text-base font-mono font-bold text-primary tabular-nums">
+                  {days}d {String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <Button 
+              asChild
+              size="lg" 
+              className="w-full font-bold shadow-lg hover:scale-105 transition-transform"
+            >
+              <a 
+                href="https://buy.stripe.com/eVqfZh2Vubp62ex6gg77O02" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Aktywuj ofertę Black Friday
+              </a>
+            </Button>
+            
+            <p className="text-xs text-center text-muted-foreground">
+              Bez zobowiązań • Bez karty płatniczej • Anuluj w każdej chwili
+            </p>
+          </div>
+
+          {/* Right column - Features in 2 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 content-start">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <div className="flex-shrink-0 w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                  <Check className="h-2.5 w-2.5 text-primary" />
+                </div>
+                <span className="text-xs md:text-sm leading-tight">{feature}</span>
               </div>
             ))}
           </div>
-
-          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
-            <p className="text-sm font-medium">🎁 Co dostajesz:</p>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Natychmiastowy dostęp po rejestracji</li>
-              <li>• Pełna funkcjonalność przez 3 miesiące</li>
-              <li>• Automatyczne przypomnienie przed końcem</li>
-              <li>• Możliwość kontynuacji lub anulowania</li>
-            </ul>
-          </div>
-        </CardContent>
-
-        <CardFooter className="relative flex flex-col gap-3">
-          <Button 
-            asChild
-            size="lg" 
-            className="w-full text-lg font-bold shadow-lg hover:scale-105 transition-transform"
-          >
-            <a 
-              href="https://buy.stripe.com/eVqfZh2Vubp62ex6gg77O02" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Aktywuj ofertę Black Friday
-            </a>
-          </Button>
-          
-          <p className="text-xs text-center text-muted-foreground">
-            Bez zobowiązań • Bez karty płatniczej • Anuluj w każdej chwili
-          </p>
-        </CardFooter>
+        </div>
       </Card>
     </div>
   );

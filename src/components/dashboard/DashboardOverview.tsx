@@ -75,9 +75,6 @@ const DashboardOverview = () => {
       {/* Admin tab for data fixes */}
       <AdminTab />
       
-      {/* Black Friday Alert for Trial users */}
-      {isTrialUser && <BlackFridayAlert />}
-      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <StatsCard 
@@ -95,6 +92,9 @@ const DashboardOverview = () => {
         <UpcomingVisits visits={recentVisits} pets={pets} clients={clients} />
         <PackageStatusCard />
       </div>
+      
+      {/* Black Friday Alert for Trial users */}
+      {isTrialUser && <BlackFridayAlert />}
     </div>
   );
 };

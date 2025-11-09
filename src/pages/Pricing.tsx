@@ -27,7 +27,7 @@ export default function Pricing() {
             />
 
             {/* Black Friday Special Card */}
-            <div className="mb-16">
+            <div className="mb-8">
               <BlackFridayPricingCard />
             </div>
 
