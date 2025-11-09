@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 
 const BlackFridayPricingCard = () => {
   const { t } = useTranslation();
-  const promoEndDate = new Date('2025-11-30T23:59:59');
+  const promoEndDate = new Date("2025-11-30T23:59:59");
   const { days, hours, minutes, seconds, isExpired } = useCountdown(promoEndDate);
 
   if (isExpired) return null;
@@ -15,23 +15,23 @@ const BlackFridayPricingCard = () => {
   const features = [
     "90 dni pełnego dostępu za darmo",
     "Bez karty kredytowej",
-    "Do 100 klientów i zwierząt",
+    "Do 25 klientów i 40 zwierząt",
     "Widoczność w katalogu",
     "Status: Zweryfikowany",
     "Dostęp do karuzeli na stronie głównej",
     "Pełna funkcjonalność CRM",
-    "Anuluj w każdej chwili"
+    "Anuluj w każdej chwili",
   ];
 
   return (
     <div className="relative">
       {/* Glow effect */}
       <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary rounded-lg blur-lg opacity-20 animate-pulse" />
-      
+
       <Card className="relative border-2 border-primary shadow-lg overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5" />
-        
+
         {/* Popular badge with sparkle */}
         <div className="absolute -right-12 top-6 rotate-45 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold py-1 px-12 shadow-lg">
           <div className="flex items-center gap-1">
@@ -45,12 +45,8 @@ const BlackFridayPricingCard = () => {
           {/* Left column - Main info and CTA */}
           <div className="space-y-3">
             <div className="space-y-1">
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight">
-                Pakiet Zaawansowany
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Oferta specjalna Black Friday
-              </p>
+              <h3 className="text-xl md:text-2xl font-bold tracking-tight">Pakiet Zaawansowany</h3>
+              <p className="text-sm text-muted-foreground">Oferta specjalna Black Friday</p>
             </div>
 
             {/* Price section */}
@@ -73,27 +69,20 @@ const BlackFridayPricingCard = () => {
                   <span className="text-xs font-medium">Kończy się za:</span>
                 </div>
                 <span className="text-base font-mono font-bold text-primary tabular-nums">
-                  {days}d {String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                  {days}d {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:
+                  {String(seconds).padStart(2, "0")}
                 </span>
               </div>
             </div>
 
             {/* CTA Button */}
-            <Button 
-              asChild
-              size="lg" 
-              className="w-full font-bold shadow-lg hover:scale-105 transition-transform"
-            >
-              <a 
-                href="https://buy.stripe.com/eVqfZh2Vubp62ex6gg77O02" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
+            <Button asChild size="lg" className="w-full font-bold shadow-lg hover:scale-105 transition-transform">
+              <a href="https://buy.stripe.com/eVqfZh2Vubp62ex6gg77O02" target="_blank" rel="noopener noreferrer">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Aktywuj ofertę Black Friday
               </a>
             </Button>
-            
+
             <p className="text-xs text-center text-muted-foreground">
               Bez zobowiązań • Bez karty płatniczej • Anuluj w każdej chwili
             </p>
