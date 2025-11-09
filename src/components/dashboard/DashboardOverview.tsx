@@ -3,13 +3,17 @@ import { Users, PawPrint, CalendarIcon, Crown } from "lucide-react";
 import StatsCard from "./StatsCard";
 import UpcomingVisits from "./UpcomingVisits";
 import AdminTab from "./AdminTab";
+import BlackFridayAlert from "./BlackFridayAlert";
 import PackageStatusCard from "../subscription/PackageStatusCard";
 import { useQuery } from "@tanstack/react-query";
 import { getClients } from "@/services/clientService";
 import { getPets } from "@/services/petService";
 import { getVisits } from "@/services/visitService";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 const DashboardOverview = () => {
+  const { activeSubscription } = useUserSubscription();
+  
   // Fetch data using React Query
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -25,6 +29,10 @@ const DashboardOverview = () => {
     queryKey: ['visits'],
     queryFn: getVisits,
   });
+
+  // Check if user is on Trial package (Testowy)
+  const isTrialUser = activeSubscription?.package_name === 'Testowy' || 
+                      activeSubscription?.status === 'trial';
 
   const stats = [
     {
@@ -66,6 +74,9 @@ const DashboardOverview = () => {
     <div className="space-y-4">
       {/* Admin tab for data fixes */}
       <AdminTab />
+      
+      {/* Black Friday Alert for Trial users */}
+      {isTrialUser && <BlackFridayAlert />}
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
