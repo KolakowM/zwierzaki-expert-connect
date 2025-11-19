@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -82,6 +82,72 @@ export type Database = {
           name?: string
           price_pln?: number
           stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blog_posts: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          meta_description: string | null
+          published_at: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          meta_description?: string | null
+          published_at?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          meta_description?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
+      blog_settings: {
+        Row: {
+          id: string
+          posts_per_page: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          posts_per_page?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          posts_per_page?: number
           updated_at?: string
         }
         Relationships: []
@@ -893,20 +959,32 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: undefined
       }
-      check_package_limits: {
-        Args:
-          | { p_action_type: string; p_soft_check?: boolean; p_user_id: string }
-          | { p_action_type: string; p_user_id: string }
-        Returns: {
-          can_perform_action: boolean
-          current_count: number
-          error_message: string
-          is_at_soft_limit: boolean
-          max_allowed: number
-          package_name: string
-          usage_percentage: number
-        }[]
-      }
+      check_package_limits:
+        | {
+            Args: { p_action_type: string; p_user_id: string }
+            Returns: {
+              can_perform_action: boolean
+              current_count: number
+              max_allowed: number
+              package_name: string
+            }[]
+          }
+        | {
+            Args: {
+              p_action_type: string
+              p_soft_check?: boolean
+              p_user_id: string
+            }
+            Returns: {
+              can_perform_action: boolean
+              current_count: number
+              error_message: string
+              is_at_soft_limit: boolean
+              max_allowed: number
+              package_name: string
+              usage_percentage: number
+            }[]
+          }
       get_catalog_data: {
         Args: {
           p_location?: string
@@ -998,13 +1076,10 @@ export type Database = {
         Returns: boolean
       }
       initialize_missing_specialist_profiles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: undefined
       }
-      initialize_specialist_specializations: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      initialize_specialist_specializations: { Args: never; Returns: undefined }
       process_subscription_payment: {
         Args: {
           payment_date: string
