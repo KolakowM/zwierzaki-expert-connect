@@ -38,8 +38,8 @@ export const usePricingTiers = () => {
     },
     {
       name: "Zaawansowany",
-      monthlyPrice: "49 zł",
-      yearlyPrice: "490 zł",
+      monthlyPrice: "9,99 zł",
+      yearlyPrice: "99,90 zł",
       description: "Idealny dla rozwijających się praktyk",
       features: [
         { id: "a1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },
@@ -57,8 +57,8 @@ export const usePricingTiers = () => {
     },
     {
       name: "Zawodowiec",
-      monthlyPrice: "99 zł",
-      yearlyPrice: "990 zł",
+      monthlyPrice: "19,99 zł",
+      yearlyPrice: "199,90 zł",
       description: "Dla profesjonalnych praktyk",
       features: [
         { id: "p1", content: "Status: Zweryfikowany (po pierwszym zakupie)" },

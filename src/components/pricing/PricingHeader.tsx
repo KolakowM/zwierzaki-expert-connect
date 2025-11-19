@@ -20,7 +20,6 @@ export default function PricingHeader({ billingPeriod, setBillingPeriod }: Prici
       <p className="mt-4 text-lg text-muted-foreground">
         {t('pricing.subtitle')}
       </p>
-      <BillingToggle billingPeriod={billingPeriod} setBillingPeriod={setBillingPeriod} />
     </div>
   );
 }

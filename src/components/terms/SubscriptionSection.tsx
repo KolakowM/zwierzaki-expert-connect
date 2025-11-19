@@ -9,8 +9,8 @@ export default function SubscriptionSection() {
         </p>
         <ul className="list-disc pl-6 space-y-1">
           <li><strong>Testowy (0 zł)</strong> – ograniczona funkcjonalność, brak widoczności w katalogu;</li>
-          <li><strong>Zaawansowany (49 zł/mies lub 490 zł/rok)</strong> – rozszerzona funkcjonalność, standardowa widoczność;</li>
-          <li><strong>Zawodowiec (99 zł/mies lub 990 zł/rok)</strong> – pełna funkcjonalność, wyróżniona widoczność.</li>
+          <li><strong>Zaawansowany (9,99 zł/mies)</strong> – rozszerzona funkcjonalność, standardowa widoczność;</li>
+          <li><strong>Zawodowiec (19,99 zł/mies)</strong> – pełna funkcjonalność, wyróżniona widoczność.</li>
         </ul>
         <p>
           2. Ceny zawierają podatek VAT zgodnie z obowiązującymi przepisami.
