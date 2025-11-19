@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 
 export default function Pricing() {
   const { t } = useTranslation();
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const billingPeriod = 'monthly'; // Locked to monthly only
   const pricingTiers = usePricingTiers();
 
   return (
@@ -23,7 +23,7 @@ export default function Pricing() {
           <div className="mx-auto max-w-6xl space-y-12">
             <PricingHeader 
               billingPeriod={billingPeriod} 
-              setBillingPeriod={setBillingPeriod} 
+              setBillingPeriod={() => {}} 
             />
 
             {/* Black Friday Special Card */}
