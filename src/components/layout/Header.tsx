@@ -33,6 +33,10 @@ export default function Header() {
       label: t("header.catalog")
     },
     {
+      to: "/blog",
+      label: "Blog"
+    },
+    {
       to: "/about",
       label: t("header.about")
     },
