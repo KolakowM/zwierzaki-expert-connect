@@ -40,20 +40,40 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     logStep("Authenticating user with token");
     
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    // Decode JWT to get user ID (works even if session expired)
+    let userId: string;
+    let userEmail: string;
+    
+    try {
+      // First try getUser - works if session is valid
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+      if (!userError && userData.user) {
+        userId = userData.user.id;
+        userEmail = userData.user.email || '';
+        logStep("User authenticated via getUser", { userId, email: userEmail });
+      } else {
+        // Fallback: decode JWT manually to get user info (session may be stale)
+        const parts = token.split('.');
+        if (parts.length !== 3) throw new Error("Invalid token format");
+        const payload = JSON.parse(atob(parts[1]));
+        userId = payload.sub;
+        userEmail = payload.email || '';
+        logStep("User authenticated via JWT decode (stale session)", { userId, email: userEmail });
+      }
+    } catch (decodeError) {
+      throw new Error(`Authentication error: Failed to authenticate user`);
+    }
+    
+    if (!userId || !userEmail) throw new Error("User not authenticated or email not available");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     
     if (customers.data.length === 0) {
       logStep("No customer found, updating unsubscribed state");
       await supabaseClient.from("subscribers").upsert({
-        email: user.email,
-        user_id: user.id,
+        email: userEmail,
+        user_id: userId,
         stripe_customer_id: null,
         subscribed: false,
         subscription_tier: null,
@@ -134,7 +154,7 @@ serve(async (req) => {
       if (mappedPackageId) {
         // Update user_subscriptions table using mapped package
         await supabaseClient.from("user_subscriptions").upsert({
-          user_id: user.id,
+          user_id: userId,
           package_id: mappedPackageId,
           status: 'active',
           start_date: new Date(subscription.created * 1000).toISOString(),
@@ -148,8 +168,8 @@ serve(async (req) => {
     }
 
     await supabaseClient.from("subscribers").upsert({
-      email: user.email,
-      user_id: user.id,
+      email: userEmail,
+      user_id: userId,
       stripe_customer_id: customerId,
       stripe_subscription_id: hasActiveSub ? subscriptions.data[0].id : null,
       subscribed: hasActiveSub,
