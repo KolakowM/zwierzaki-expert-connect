@@ -157,11 +157,18 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
       
       const user = userData.user;
       
+      // Fetch role from user_roles table (source of truth)
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
       // Enhanced user object construction with validation
       const authUser: AuthUser = {
         id: user.id,
         email: user.email || '',
-        role: user.user_metadata?.role || 'specialist',
+        role: roleData?.role || 'specialist',
         firstName: user.user_metadata?.firstName || '',
         lastName: user.user_metadata?.lastName || '',
       };
