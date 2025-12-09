@@ -26,6 +26,7 @@ import AccountSettings from './pages/AccountSettings';
 import BecomeSpecialist from './pages/BecomeSpecialist';
 import Catalog from './pages/Catalog';
 import SpecialistProfile from './pages/SpecialistProfile';
+import Start from './pages/Start';
 import { AuthProvider } from './contexts/AuthProvider';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -79,6 +80,7 @@ function App() {
                 <Route path="/catalog" element={<Catalog />} />
                 <Route path="/specialist/:id" element={<SpecialistProfile />} />
                 <Route path="/become-specialist" element={<BecomeSpecialist />} />
+                <Route path="/start" element={<Start />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 
