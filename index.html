@@ -1,19 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PetsFlow tu masz wszystko</title>
-    <meta name="description" content="PetsFlow - kompleksowa platforma dla specjalistów ds. zwierząt i właścicieli pupili. Znajdź najlepszego weterynarza, behawiorystę czy groomera dla swojego zwierzaka. Zarządzaj wizytami, dokumentacją medyczną i programami opieki w jednym miejscu." />
+    <meta
+      name="description"
+      content="PetsFlow - kompleksowa platforma dla specjalistów ds. zwierząt i właścicieli pupili. Znajdź najlepszego weterynarza, behawiorystę czy groomera dla swojego zwierzaka. Zarządzaj wizytami, dokumentacją medyczną i programami opieki w jednym miejscu."
+    />
     <meta name="author" content="PetsFlow" />
-    
+
     <!-- Favicon -->
-    <link rel="icon" href="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" type="image/png">
+    <link rel="icon" href="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" type="image/png" />
 
     <!-- Open Graph -->
     <meta property="og:title" content="PetsFlow - Platforma dla specjalistów ds. zwierząt" />
-    <meta property="og:description" content="Kompleksowa platforma łącząca specjalistów ds. zwierząt z właścicielami pupili. Znajdź najlepszego weterynarza, behawiorystę czy groomera dla swojego zwierzaka." />
+    <meta
+      property="og:description"
+      content="Kompleksowa platforma łącząca specjalistów ds. zwierząt z właścicielami pupili. Znajdź najlepszego weterynarza, behawiorystę czy groomera dla swojego zwierzaka."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" />
     <meta property="og:url" content="https://petsflow.pl" />
@@ -22,7 +27,10 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="PetsFlow - Platforma dla specjalistów ds. zwierząt" />
-    <meta name="twitter:description" content="Kompleksowa platforma łącząca specjalistów ds. zwierząt z właścicielami pupili. Znajdź najlepszego weterynarza, behawiorystę czy groomera dla swojego zwierzaka." />
+    <meta
+      name="twitter:description"
+      content="Kompleksowa platforma łącząca specjalistów ds. zwierząt z właścicielami pupili. Znajdź najlepszego weterynarza, behawiorystę czy groomera dla swojego zwierzaka."
+    />
     <meta name="twitter:image" content="/lovable-uploads/5bdd954f-63dd-4a66-8c3f-96d62e366662.png" />
   </head>
 
@@ -31,32 +39,55 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script type="module" src="/src/main.tsx"></script>
 
-  <!-- Google reCAPTCHA v3 -->
-  <script>
-    // Load reCAPTCHA dynamically with environment-specific site key
-    (function() {
-      const siteKey = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI' // Test key for development
-        : '6LciKcYrAAAAAO9ABJ4NhXhKVfUzajQpZDPPcilU'; // Your production key
-      
-      const script = document.createElement('script');
-      script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-      
-      // Store site key globally for components to use
-      window.RECAPTCHA_SITE_KEY = siteKey;
-    })();
-  </script>
-        
-        <!--- analiza użytkowników , skrypt clarity.microsoft -->
-        <script type="text/javascript">
-          (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "sdx68uch72");
-        </script>
+    <!-- Google reCAPTCHA v3 -->
+    <script>
+      // Load reCAPTCHA dynamically with environment-specific site key
+      (function() {
+        const siteKey = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI' // Test key for development
+          : '6LciKcYrAAAAAO9ABJ4NhXhKVfUzajQpZDPPcilU'; // Your production key
+
+        const script = document.createElement('script');
+        script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        // Store site key globally for components to use
+        window.RECAPTCHA_SITE_KEY = siteKey;
+      })();
+    </script>
+
+    <!--- analiza użytkowników , skrypt clarity.microsoft -->
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "sdx68uch72");
+    </script>
+
+    <!-- piksel facebook -->
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1561098605091395');
+      fbq('track', 'PageView');
+    </script>
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display:none"
+        src="https://www.facebook.com/tr?id=1561098605091395&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
   </body>
 </html>
