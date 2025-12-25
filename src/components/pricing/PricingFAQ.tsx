@@ -32,6 +32,7 @@ export default function PricingFAQ() {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Temporarily hidden FAQ items
         <AccordionItem value="faq-4">
           <AccordionTrigger>Czy mogę rozszerzyć limit klientów i zwierząt?</AccordionTrigger>
           <AccordionContent>
@@ -45,6 +46,7 @@ export default function PricingFAQ() {
             Przy pierwszym zakupie planu płatnego otrzymujesz jednorazowy rabat w wysokości 10% przy płatności miesięcznej lub rocznej. Rabat obowiązuje tylko przy pierwszym zakupie danego planu.
           </AccordionContent>
         </AccordionItem>
+        */}
 
         <AccordionItem value="faq-6">
           <AccordionTrigger>Czy mogę zmienić plan w dowolnym momencie?</AccordionTrigger>
