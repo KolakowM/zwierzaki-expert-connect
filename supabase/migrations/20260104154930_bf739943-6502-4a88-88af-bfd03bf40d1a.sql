@@ -18,7 +18,7 @@ UPDATE specialist_profiles SET
   description = 'Certyfikowany behawiorysta z 8-letnim doświadczeniem w pracy z psami problematycznymi. Specjalizuję się w korygowaniu zachowań lękowych i agresywnych. Absolwent Akademii Kynologicznej w Warszawie.',
   experience = '8 lat praktyki w behawiorystyce i treningu psów',
   phone_number = '+48 500 123 456',
-  email = 'kontakt@petsflow.pl',
+  email = 'kontaktpetsflow@gmail.com',
   website = 'https://petsflow.pl',
   services = ARRAY['Konsultacja behawioralna', 'Trening indywidualny', 'Socjalizacja szczeniąt', 'Praca z reaktywnymi psami'],
   education = ARRAY['Akademia Kynologiczna Warszawa 2016', 'Certyfikat COAPE 2018'],
